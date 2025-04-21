@@ -1,0 +1,5 @@
+namespace example
+
+define ping() {
+    minecraft:tellraw(@s, "Pong!")
+}
