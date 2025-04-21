@@ -1,68 +1,237 @@
 #pragma once
 
+#include <map>
 #include <memory>
 #include <vector>
 
 namespace mcc
 {
-    using statement_ptr_t = std::unique_ptr<struct statement_t>;
-    using expression_ptr_t = std::unique_ptr<struct expression_t>;
+    using StatementPtr = std::unique_ptr<class Statement>;
+    using ExpressionPtr = std::unique_ptr<class Expression>;
+    using FormatNodePtr = std::unique_ptr<class FormatNode>;
 
-    struct statement_t
+    struct ResourceLocation
     {
-        virtual ~statement_t() = default;
+        std::ostream &Print(std::ostream &stream) const;
 
-        virtual std::ostream &print(std::ostream &stream) const = 0;
+        std::string NS;
+        std::string ID;
     };
 
-    struct namespace_statement_t final : statement_t
+    class Statement
     {
-        explicit namespace_statement_t(std::string id)
-            : id(std::move(id))
-        {
-        }
+    public:
+        virtual ~Statement() = default;
 
-        std::ostream &print(std::ostream &stream) const override
-        {
-            return stream << "namespace " << id;
-        }
-
-        std::string id;
+        virtual std::ostream &Print(std::ostream &stream) const = 0;
     };
 
-    struct define_statement_t final : statement_t
+    class Expression
     {
-        define_statement_t(
-            std::string id,
+    public:
+        virtual ~Expression() = default;
+
+        virtual std::ostream &Print(std::ostream &stream) const = 0;
+    };
+
+    class NamespaceStatement final : public Statement
+    {
+    public:
+        explicit NamespaceStatement(std::string id);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+        std::string GetID() const;
+
+    private:
+        std::string m_ID;
+    };
+
+    class DefineStatement final : public Statement
+    {
+    public:
+        DefineStatement(
+            ResourceLocation location,
             std::vector<std::string> parameters,
-            std::vector<statement_ptr_t> statements)
-            : id(std::move(id)),
-              parameters(std::move(parameters)),
-              statements(std::move(statements))
-        {
-        }
+            std::vector<ResourceLocation> tags,
+            std::vector<ExpressionPtr> expressions);
 
-        std::ostream &print(std::ostream &stream) const override
-        {
-            stream << "define " << id << "(";
-            for (unsigned i = 0; i < parameters.size(); ++i)
-            {
-                if (i > 0)
-                    stream << ", ";
-                stream << parameters[i];
-            }
-            stream << ") {" << std::endl;
-            for (auto &statement: statements)
-                statement->print(stream) << std::endl;
-            return stream << "}";
-        }
+        std::ostream &Print(std::ostream &stream) const override;
 
-        std::string id;
-        std::vector<std::string> parameters;
-        std::vector<statement_ptr_t> statements;
+    private:
+        ResourceLocation m_Location;
+        std::vector<std::string> m_Parameters;
+        std::vector<ResourceLocation> m_Tags;
+        std::vector<ExpressionPtr> m_Expressions;
     };
 
-    struct expression_t : statement_t
+    class BoolExpression final : public Expression
     {
+    public:
+        explicit BoolExpression(bool value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        bool m_Value;
+    };
+
+    class IntegerExpression final : public Expression
+    {
+    public:
+        explicit IntegerExpression(int64_t value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        int64_t m_Value;
+    };
+
+    class FloatExpression final : public Expression
+    {
+    public:
+        explicit FloatExpression(double value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        double m_Value;
+    };
+
+    class StringExpression final : public Expression
+    {
+    public:
+        explicit StringExpression(std::string value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        std::string m_Value;
+    };
+
+    class SymbolExpression final : public Expression
+    {
+    public:
+        explicit SymbolExpression(std::string id);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        std::string m_ID;
+    };
+
+    class TargetExpression final : public Expression
+    {
+    public:
+        explicit TargetExpression(std::string id);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        std::string m_ID;
+    };
+
+    class ArrayExpression final : public Expression
+    {
+    public:
+        explicit ArrayExpression(std::vector<ExpressionPtr> elements);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        std::vector<ExpressionPtr> m_Elements;
+    };
+
+    class ObjectExpression final : public Expression
+    {
+    public:
+        explicit ObjectExpression(std::map<std::string, ExpressionPtr> elements);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        std::map<std::string, ExpressionPtr> m_Elements;
+    };
+
+    class RelativeOffsetExpression final : public Expression
+    {
+    public:
+        RelativeOffsetExpression();
+
+        std::ostream &Print(std::ostream &stream) const override;
+    };
+
+    class LocalOffsetExpression final : public Expression
+    {
+    public:
+        LocalOffsetExpression();
+
+        std::ostream &Print(std::ostream &stream) const override;
+    };
+
+    class BinaryExpression final : public Expression
+    {
+    public:
+        BinaryExpression(std::string operator_, ExpressionPtr left, ExpressionPtr right);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        std::string m_Operator;
+        ExpressionPtr m_Left;
+        ExpressionPtr m_Right;
+    };
+
+    class CallExpression final : public Expression
+    {
+    public:
+        CallExpression(ExpressionPtr callee, std::vector<ExpressionPtr> arguments);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        ExpressionPtr m_Callee;
+        std::vector<ExpressionPtr> m_Arguments;
+    };
+
+    class FormatNode
+    {
+    public:
+        virtual ~FormatNode() = default;
+
+        virtual std::ostream &Print(std::ostream &stream) const = 0;
+    };
+
+    class StringNode final : public FormatNode
+    {
+    public:
+        explicit StringNode(std::string value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        std::string m_Value;
+    };
+
+    class ExpressionNode final : public FormatNode
+    {
+    public:
+        explicit ExpressionNode(ExpressionPtr expression);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        ExpressionPtr m_Expression;
+    };
+
+    class FormatExpression final : public Expression
+    {
+    public:
+        explicit FormatExpression(std::vector<FormatNodePtr> nodes);
+
+        std::ostream &Print(std::ostream &stream) const override;
+
+    private:
+        std::vector<FormatNodePtr> m_Nodes;
     };
 }

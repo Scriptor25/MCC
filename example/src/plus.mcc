@@ -1,6 +1,0 @@
-namespace example
-
-define plus(x, y) {
-    result = x + y
-    minecraft:tellraw(@s, `${x} + ${y} = ${result}`)
-}

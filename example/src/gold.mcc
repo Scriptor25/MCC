@@ -1,7 +1,7 @@
 namespace example
 
-define gold() {
-    minecraft:give(@s, minecraft:gold_ingot, 1)
-    minecraft:setblock(^, ^, ^ + 2, minecraft:gold_block)
-    minecraft:tellraw(@s, "GOLD")
+define :gold() {
+    give(@s, gold_ingot, 1);
+    setblock(^, ^, ^ + 2, gold_block);
+    tellraw(@s, "GOLD");
 }

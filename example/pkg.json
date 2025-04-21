@@ -1,0 +1,12 @@
+{
+  "name": "example",
+  "version": 71,
+  "description": [
+    "this is the ",
+    {
+      "text": "example",
+      "color": "gold"
+    },
+    " mcc project"
+  ]
+}

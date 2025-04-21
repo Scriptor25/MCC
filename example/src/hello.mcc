@@ -1,8 +1,8 @@
 namespace example
 
-define hello() {
-    minecraft:tellraw(@s, [ "Hello ", {
+define :hello() {
+    tellraw(@s, [ "Hello ", {
         selector: "@s",
         color: "gold"
-    }, "!" ])
+    }, "!" ]);
 }

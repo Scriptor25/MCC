@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 #include <mcc/lex.hpp>
+#include <mcc/actions.hpp>
 #include <mcc/parse.hpp>
 
 enum operand_type
@@ -490,23 +491,77 @@ std::map<std::string, std::vector<operand_type>> operand_map
     }
 };
 
-int main()
+int main(int argc, const char **argv)
 {
     // https://minecraft.fandom.com/wiki/Argument_types
     // https://minecraft.fandom.com/wiki/Commands
-    // https://minecraft.fandom.com/wiki/Tutorials/Creating_a_data_pack
+    // https://minecraft.fandom.com/wiki/Data_pack
 
-    std::ifstream stream("example/src/plus.mcc");
+    mcc::Actions actions(
+        {
+            {
+                0,
+                "help",
+                "",
+            },
+            // mcc init [-name <package name>] [-version <package version>] [-description <package description>] -> initialize a new package with a given name, version and description
+            {
+                1,
+                "init",
+                "",
+                {
+                    {false, "-name", ""},
+                    {false, "-version", ""},
+                    {false, "-description", ""}
+                }
+            },
+            // mcc compile [-pkg <package file>] [-target <target directory>] -> compile a package to a target directory
+            {
+                2,
+                "compile",
+                "",
+                {
+                    {false, "-pkg", ""},
+                    {false, "-target", ""},
+                }
+            },
+            // mcc package [-pkg <package file>] [-target <target directory>] [-destination <destination file>] -> package a package into a zip destination file
+            {
+                3,
+                "package",
+                "",
+                {
+                    {false, "-pkg", ""},
+                    {false, "-target", ""},
+                    {false, "-destination", ""},
+                }
+            },
+        }
+    );
+    actions(argc, argv);
+
+    std::ifstream stream("example/src/add.mcc");
     if (!stream)
         return 1;
 
-    mcc::parser_t parser(stream, mcc::lex(stream));
+    std::string namespace_ = "minecraft";
 
-    while (!stream.eof())
-    {
+    mcc::Parser parser(stream, "example/src/add.mcc");
+    while (parser)
         if (const auto statement = parser())
-            statement->print(std::cout) << std::endl;
-    }
+        {
+            statement->Print(std::cout) << std::endl;
+
+            if (auto ptr = dynamic_cast<mcc::NamespaceStatement *>(statement.get()))
+            {
+                namespace_ = ptr->GetID();
+                continue;
+            }
+
+            if (auto ptr = dynamic_cast<mcc::DefineStatement *>(statement.get()))
+            {
+            }
+        }
 
     stream.close();
     return 0;

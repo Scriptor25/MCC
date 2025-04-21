@@ -6,24 +6,59 @@
 
 namespace mcc
 {
-    struct parser_t
+    class Parser
     {
-        [[nodiscard]] bool at(token_type type, const std::string &value = {}) const;
+    public:
+        Parser(std::istream &stream, std::string filename);
 
-        bool skip_if(token_type type, const std::string &value = {});
+        explicit operator bool() const;
+        StatementPtr operator()();
 
-        token_t skip();
-        token_t expect(token_type type, std::string value = {});
+    private:
+        void Get();
+        Token &Next();
 
-        statement_ptr_t operator()();
+        [[nodiscard]] bool At(TokenType type, const std::string &value = {}) const;
 
-        statement_ptr_t parse_statement();
-        statement_ptr_t parse_namespace_statement();
-        statement_ptr_t parse_define_statement();
+        bool SkipIf(TokenType type, const std::string &value = {});
 
-        expression_ptr_t parse_expression();
+        Token Skip();
+        Token Expect(TokenType type, std::string value = {});
+        Token ExpectEnum(std::vector<std::string> values);
 
-        std::istream &stream;
-        token_t token;
+        template<typename... Args>
+        Token ExpectEnum(Args... args)
+        {
+            return ExpectEnum({args...});
+        }
+
+        ResourceLocation ParseResourceLocation();
+
+        StatementPtr ParseStatement();
+        StatementPtr ParseNamespaceStatement();
+        StatementPtr ParseDefineStatement();
+
+        ExpressionPtr ParseExpression();
+
+        ExpressionPtr ParseBoolExpression();
+        ExpressionPtr ParseIntegerExpression();
+        ExpressionPtr ParseFloatExpression();
+        ExpressionPtr ParseStringExpression();
+        ExpressionPtr ParseSymbolExpression();
+        ExpressionPtr ParseTargetExpression();
+
+        ExpressionPtr ParseArrayExpression();
+        ExpressionPtr ParseObjectExpression();
+
+        ExpressionPtr ParseFormatExpression();
+
+        ExpressionPtr ParsePrimaryExpression();
+        ExpressionPtr ParseActionExpression();
+        ExpressionPtr ParseBinaryExpression(ExpressionPtr left, ExpressionPtr (Parser::*next)(), unsigned min_pre);
+
+        std::istream &m_Stream;
+        int m_Buf = -1;
+        Location m_Location;
+        Token m_Token;
     };
 }
