@@ -44,13 +44,16 @@ namespace mcc
         ExpressionPtr ParseIntegerExpression();
         ExpressionPtr ParseFloatExpression();
         ExpressionPtr ParseStringExpression();
-        ExpressionPtr ParseSymbolExpression();
+        ExpressionPtr ParseResourceExpression();
         ExpressionPtr ParseTargetExpression();
 
         ExpressionPtr ParseArrayExpression();
         ExpressionPtr ParseObjectExpression();
 
         ExpressionPtr ParseFormatExpression();
+
+        ExpressionPtr ParseIfExpression();
+        ExpressionPtr ParseReturnExpression();
 
         ExpressionPtr ParsePrimaryExpression();
         ExpressionPtr ParseActionExpression();

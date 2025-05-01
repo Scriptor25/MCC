@@ -1,6 +1,5 @@
 {
   "name": "example",
-  "version": 71,
   "description": [
     "this is the ",
     {
@@ -8,5 +7,6 @@
       "color": "gold"
     },
     " mcc project"
-  ]
+  ],
+  "version": 71
 }

@@ -6,50 +6,87 @@
 
 namespace mcc
 {
-    using StatementPtr = std::unique_ptr<class Statement>;
-    using ExpressionPtr = std::unique_ptr<class Expression>;
-    using FormatNodePtr = std::unique_ptr<class FormatNode>;
+    using StatementPtr = std::unique_ptr<struct Statement>;
+    using ExpressionPtr = std::unique_ptr<struct Expression>;
+    using FormatNodePtr = std::unique_ptr<struct FormatNode>;
+
+    struct Context;
 
     struct ResourceLocation
     {
         std::ostream &Print(std::ostream &stream) const;
+        [[nodiscard]] std::string Gen(const ResourceLocation &location) const;
 
-        std::string NS;
-        std::string ID;
+        std::string Namespace;
+        std::string Path;
     };
 
-    class Statement
+    struct Statement
     {
-    public:
         virtual ~Statement() = default;
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
+        virtual void Gen(Context &context) const = 0;
     };
 
-    class Expression
+    struct Expression
     {
-    public:
         virtual ~Expression() = default;
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
+        [[nodiscard]] virtual bool IsConstant() const = 0;
+        [[nodiscard]] virtual std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const = 0;
     };
 
-    class NamespaceStatement final : public Statement
+    struct FormatNode
     {
-    public:
-        explicit NamespaceStatement(std::string id);
+        virtual ~FormatNode() = default;
+
+        virtual std::ostream &Print(std::ostream &stream) const = 0;
+        virtual bool IsText() const = 0;
+        virtual bool IsConstant() const = 0;
+        virtual std::string Gen(const ResourceLocation &location, std::vector<std::string> &commands) const = 0;
+    };
+
+    struct StringNode final : FormatNode
+    {
+        explicit StringNode(std::string value);
 
         std::ostream &Print(std::ostream &stream) const override;
+        bool IsText() const override;
+        bool IsConstant() const override;
+        std::string Gen(const ResourceLocation &location, std::vector<std::string> &commands) const override;
 
-        std::string GetID() const;
-
-    private:
-        std::string m_ID;
+        std::string Value;
     };
 
-    class DefineStatement final : public Statement
+    struct ExpressionNode final : FormatNode
     {
-    public:
+        explicit ExpressionNode(ExpressionPtr expression);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        bool IsText() const override;
+        bool IsConstant() const override;
+        std::string Gen(const ResourceLocation &location, std::vector<std::string> &commands) const override;
+
+        ExpressionPtr Expression;
+    };
+
+    struct NamespaceStatement final : Statement
+    {
+        explicit NamespaceStatement(std::string namespace_);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Gen(Context &context) const override;
+
+        std::string Namespace;
+    };
+
+    struct DefineStatement final : Statement
+    {
         DefineStatement(
             ResourceLocation location,
             std::vector<std::string> parameters,
@@ -57,181 +94,240 @@ namespace mcc
             std::vector<ExpressionPtr> expressions);
 
         std::ostream &Print(std::ostream &stream) const override;
+        void Gen(Context &context) const override;
 
-    private:
-        ResourceLocation m_Location;
-        std::vector<std::string> m_Parameters;
-        std::vector<ResourceLocation> m_Tags;
-        std::vector<ExpressionPtr> m_Expressions;
+        ResourceLocation Location;
+        std::vector<std::string> Parameters;
+        std::vector<ResourceLocation> Tags;
+        std::vector<ExpressionPtr> Expressions;
     };
 
-    class BoolExpression final : public Expression
+    struct BoolExpression final : Expression
     {
-    public:
         explicit BoolExpression(bool value);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        bool m_Value;
+        bool Value;
     };
 
-    class IntegerExpression final : public Expression
+    struct IntegerExpression final : Expression
     {
-    public:
         explicit IntegerExpression(int64_t value);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        int64_t m_Value;
+        int64_t Value;
     };
 
-    class FloatExpression final : public Expression
+    struct FloatExpression final : Expression
     {
-    public:
         explicit FloatExpression(double value);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        double m_Value;
+        double Value;
     };
 
-    class StringExpression final : public Expression
+    struct StringExpression final : Expression
     {
-    public:
         explicit StringExpression(std::string value);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        std::string m_Value;
+        std::string Value;
     };
 
-    class SymbolExpression final : public Expression
+    struct ResourceExpression final : Expression
     {
-    public:
-        explicit SymbolExpression(std::string id);
+        ResourceExpression(std::string ns, std::string id);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        std::string m_ID;
+        ResourceLocation Location;
     };
 
-    class TargetExpression final : public Expression
+    struct TargetExpression final : Expression
     {
-    public:
-        explicit TargetExpression(std::string id);
+        explicit TargetExpression(std::string specifier);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        std::string m_ID;
+        std::string Specifier;
     };
 
-    class ArrayExpression final : public Expression
+    struct ArrayExpression final : Expression
     {
-    public:
         explicit ArrayExpression(std::vector<ExpressionPtr> elements);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        std::vector<ExpressionPtr> m_Elements;
+        std::vector<ExpressionPtr> Elements;
     };
 
-    class ObjectExpression final : public Expression
+    struct ObjectExpression final : Expression
     {
-    public:
         explicit ObjectExpression(std::map<std::string, ExpressionPtr> elements);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        std::map<std::string, ExpressionPtr> m_Elements;
+        std::map<std::string, ExpressionPtr> Elements;
     };
 
-    class RelativeOffsetExpression final : public Expression
+    struct RelativeOffsetExpression final : Expression
     {
-    public:
-        RelativeOffsetExpression();
+        explicit RelativeOffsetExpression(double offset);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
+
+        double Offset;
     };
 
-    class LocalOffsetExpression final : public Expression
+    struct LocalOffsetExpression final : Expression
     {
-    public:
-        LocalOffsetExpression();
+        explicit LocalOffsetExpression(double offset);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
+
+        double Offset;
     };
 
-    class BinaryExpression final : public Expression
+    struct BinaryExpression final : Expression
     {
-    public:
         BinaryExpression(std::string operator_, ExpressionPtr left, ExpressionPtr right);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        std::string m_Operator;
-        ExpressionPtr m_Left;
-        ExpressionPtr m_Right;
+        std::string Operator;
+        ExpressionPtr Left;
+        ExpressionPtr Right;
     };
 
-    class CallExpression final : public Expression
+    struct CallExpression final : Expression
     {
-    public:
-        CallExpression(ExpressionPtr callee, std::vector<ExpressionPtr> arguments);
+        CallExpression(std::string callee, std::vector<ExpressionPtr> arguments);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        ExpressionPtr m_Callee;
-        std::vector<ExpressionPtr> m_Arguments;
+        std::string Callee;
+        std::vector<ExpressionPtr> Arguments;
     };
 
-    class FormatNode
+    struct FormatExpression final : Expression
     {
-    public:
-        virtual ~FormatNode() = default;
-
-        virtual std::ostream &Print(std::ostream &stream) const = 0;
-    };
-
-    class StringNode final : public FormatNode
-    {
-    public:
-        explicit StringNode(std::string value);
-
-        std::ostream &Print(std::ostream &stream) const override;
-
-    private:
-        std::string m_Value;
-    };
-
-    class ExpressionNode final : public FormatNode
-    {
-    public:
-        explicit ExpressionNode(ExpressionPtr expression);
-
-        std::ostream &Print(std::ostream &stream) const override;
-
-    private:
-        ExpressionPtr m_Expression;
-    };
-
-    class FormatExpression final : public Expression
-    {
-    public:
         explicit FormatExpression(std::vector<FormatNodePtr> nodes);
 
         std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
 
-    private:
-        std::vector<FormatNodePtr> m_Nodes;
+        std::vector<FormatNodePtr> Nodes;
+    };
+
+    struct IfExpression final : Expression
+    {
+        explicit IfExpression(ExpressionPtr condition, ExpressionPtr then, ExpressionPtr else_);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
+
+        ExpressionPtr Condition;
+        ExpressionPtr Then;
+        ExpressionPtr Else;
+    };
+
+    struct ReturnExpression final : Expression
+    {
+        explicit ReturnExpression(ExpressionPtr value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
+
+        ExpressionPtr Value;
+    };
+
+    struct SymbolExpression final : Expression
+    {
+        explicit SymbolExpression(std::string id);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] bool IsConstant() const override;
+        [[nodiscard]] std::string Gen(
+            const ResourceLocation &location,
+            std::vector<std::string> &commands,
+            bool inlined) const override;
+
+        std::string ID;
     };
 }

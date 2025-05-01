@@ -10,6 +10,6 @@ set(JSON_Install OFF CACHE INTERNAL "")
 
 add_subdirectory(deps/json)
 
-add_executable(mcc src/main.cpp src/parse.cpp src/tree.cpp src/actions.cpp)
+add_executable(mcc src/main.cpp src/parse.cpp src/tree.cpp src/actions.cpp src/package.cpp)
 target_include_directories(mcc PRIVATE include)
 target_link_libraries(mcc PRIVATE nlohmann_json::nlohmann_json)

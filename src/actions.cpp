@@ -36,3 +36,21 @@ void mcc::Actions::operator()(const int argc, const char **argv)
         }
     }
 }
+
+unsigned mcc::Actions::ActionID() const
+{
+    return m_Action ? m_Action->ID : ~0;
+}
+
+bool mcc::Actions::String(const unsigned index, std::string &destination) const
+{
+    if (!m_Strings.contains(index))
+        return false;
+    destination = m_Strings.at(index);
+    return true;
+}
+
+bool mcc::Actions::Flag(const unsigned index) const
+{
+    return m_Flags.contains(index);
+}

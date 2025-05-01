@@ -1,0 +1,22 @@
+namespace example
+
+define :add(x, y) #:math {
+    %result = %x + %y;
+    tellraw(@s, `${%x} + ${%y} = ${%result}`);
+    return %result;
+}
+
+define :sub(x, y) #:math {
+    %result = %x - %y;
+    tellraw(@s, `${%x} - ${%y} = ${%result}`);
+    return %result;
+}
+
+/* TODO: variable function arguments
+define :fib(n) #:math {
+    if (%n <= 1)
+        return %n
+    else
+        return function(:fib, { n: %n - 1 }) + function(:fib, { n: %n - 2 })
+    ;
+}*/

@@ -31,5 +31,7 @@ namespace mcc
         Location Where;
         std::string RawValue;
         std::string Value;
+        long long Integer;
+        double Float;
     };
 }

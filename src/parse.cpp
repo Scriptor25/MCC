@@ -1,4 +1,5 @@
 #include <istream>
+#include <set>
 #include <sstream>
 #include <mcc/format.hpp>
 #include <mcc/parse.hpp>
@@ -37,6 +38,14 @@ void mcc::Parser::Get()
 
 mcc::Token &mcc::Parser::Next()
 {
+    static const std::map<std::string, std::set<int>> operator_map
+    {
+        {"=", {'='}},
+        {"!", {'='}},
+        {"<", {'='}},
+        {">", {'='}},
+    };
+
     enum LexState
     {
         LexState_None,
@@ -44,6 +53,8 @@ mcc::Token &mcc::Parser::Next()
         LexState_Int,
         LexState_Float,
         LexState_String,
+        LexState_Operator,
+        LexState_Comment,
     };
 
     auto state = LexState_None;
@@ -74,23 +85,26 @@ mcc::Token &mcc::Parser::Next()
                     case '~':
                     case '^':
                     case '#':
+                        token_location = m_Location;
                         raw_value += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
-                        m_Token = {TokenType_Other, m_Location, raw_value, value};
                         Get();
-                        return m_Token;
+                        return m_Token = {TokenType_Other, token_location, raw_value, value, 0, 0};
 
                     case '=':
+                    case '<':
+                    case '>':
                     case '+':
                     case '-':
                     case '*':
                     case '/':
                     case '%':
+                        token_location = m_Location;
                         raw_value += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
-                        m_Token = {TokenType_Operator, m_Location, raw_value, value};
                         Get();
-                        return m_Token;
+                        state = LexState_Operator;
+                        break;
 
                     case '@':
                         token_location = m_Location;
@@ -99,7 +113,7 @@ mcc::Token &mcc::Parser::Next()
                         raw_value += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         Get();
-                        return m_Token = {TokenType_Target, token_location, raw_value, value};
+                        return m_Token = {TokenType_Target, token_location, raw_value, value, 0, 0};
 
                     case '`':
                         formatted = true;
@@ -132,17 +146,19 @@ mcc::Token &mcc::Parser::Next()
                             break;
                         }
 
+                        token_location = m_Location;
                         raw_value += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
-                        m_Token = {TokenType_Undefined, m_Location, raw_value, value};
                         Get();
-                        return m_Token;
+                        return m_Token = {TokenType_Undefined, token_location, raw_value, value, 0, 0};
                 }
                 break;
 
             case LexState_Symbol:
                 if (!std::isalnum(m_Buf) && m_Buf != '_')
-                    return m_Token = {TokenType_Symbol, token_location, raw_value, value};
+                {
+                    return m_Token = {TokenType_Symbol, token_location, raw_value, value, 0, 0};
+                }
 
                 raw_value += static_cast<char>(m_Buf);
                 value += static_cast<char>(m_Buf);
@@ -150,8 +166,19 @@ mcc::Token &mcc::Parser::Next()
                 break;
 
             case LexState_Int:
+                if (m_Buf == '.')
+                {
+                    raw_value += static_cast<char>(m_Buf);
+                    value += static_cast<char>(m_Buf);
+                    Get();
+                    state = LexState_Float;
+                    break;
+                }
+
                 if (!std::isdigit(m_Buf))
-                    return m_Token = {TokenType_Integer, token_location, raw_value, value};
+                {
+                    return m_Token = {TokenType_Integer, token_location, raw_value, value, std::stoll(value), 0};
+                }
 
                 raw_value += static_cast<char>(m_Buf);
                 value += static_cast<char>(m_Buf);
@@ -159,6 +186,14 @@ mcc::Token &mcc::Parser::Next()
                 break;
 
             case LexState_Float:
+                if (!std::isdigit(m_Buf))
+                {
+                    return m_Token = {TokenType_Float, token_location, raw_value, value, 0, std::stod(value)};
+                }
+
+                raw_value += static_cast<char>(m_Buf);
+                value += static_cast<char>(m_Buf);
+                Get();
                 break;
 
             case LexState_String:
@@ -167,10 +202,14 @@ mcc::Token &mcc::Parser::Next()
                     raw_value += static_cast<char>(m_Buf);
                     Get();
                     return m_Token = {
-                               formatted ? TokenType_FormatString : TokenType_String,
+                               formatted
+                                   ? TokenType_FormatString
+                                   : TokenType_String,
                                token_location,
                                raw_value,
-                               value
+                               value,
+                               0,
+                               0,
                            };
                 }
 
@@ -178,10 +217,47 @@ mcc::Token &mcc::Parser::Next()
                 value += static_cast<char>(m_Buf);
                 Get();
                 break;
+
+            case LexState_Operator:
+                if (value == "/" && m_Buf == '*')
+                {
+                    Get();
+                    state = LexState_Comment;
+                    break;
+                }
+
+                if (!operator_map.contains(value) || !operator_map.at(value).contains(m_Buf))
+                {
+                    return m_Token = {TokenType_Operator, token_location, raw_value, value, 0, 0};
+                }
+
+                raw_value += static_cast<char>(m_Buf);
+                value += static_cast<char>(m_Buf);
+                Get();
+                break;
+
+            case LexState_Comment:
+                if (m_Buf == '*')
+                {
+                    Get();
+                    if (m_Buf == '/')
+                    {
+                        value.clear();
+                        raw_value.clear();
+                        Get();
+                        state = LexState_None;
+                        break;
+                    }
+                }
+                else
+                {
+                    Get();
+                }
+                break;
         }
     }
 
-    return m_Token = {TokenType_EOF, token_location};
+    return m_Token = {TokenType_EOF, token_location, {}, {}, 0, 0};
 }
 
 bool mcc::Parser::At(const TokenType type, const std::string &value) const
@@ -294,9 +370,9 @@ mcc::StatementPtr mcc::Parser::ParseNamespaceStatement()
 {
     Expect(TokenType_Symbol, "namespace");
 
-    auto id = Expect(TokenType_Symbol).Value;
+    auto namespace_ = Expect(TokenType_Symbol).Value;
 
-    return std::make_unique<NamespaceStatement>(id);
+    return std::make_unique<NamespaceStatement>(namespace_);
 }
 
 mcc::StatementPtr mcc::Parser::ParseDefineStatement()
@@ -371,16 +447,28 @@ mcc::ExpressionPtr mcc::Parser::ParseStringExpression()
     return std::make_unique<StringExpression>(value);
 }
 
-mcc::ExpressionPtr mcc::Parser::ParseSymbolExpression()
+mcc::ExpressionPtr mcc::Parser::ParseResourceExpression()
 {
+    std::string ns;
+
+    if (!SkipIf(TokenType_Other, ":"))
+        ns = "minecraft";
+
     auto id = Expect(TokenType_Symbol).Value;
-    return std::make_unique<SymbolExpression>(id);
+
+    if (!ns.empty() && SkipIf(TokenType_Other, ":"))
+    {
+        ns = id;
+        id = Expect(TokenType_Symbol).Value;
+    }
+
+    return std::make_unique<ResourceExpression>(ns, id);
 }
 
 mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
 {
-    auto id = Expect(TokenType_Target).Value;
-    return std::make_unique<TargetExpression>(id);
+    auto specifier = Expect(TokenType_Target).Value;
+    return std::make_unique<TargetExpression>(specifier);
 }
 
 mcc::ExpressionPtr mcc::Parser::ParseArrayExpression()
@@ -440,14 +528,45 @@ mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
         auto expression = parser.ParseExpression();
         nodes.emplace_back(std::make_unique<ExpressionNode>(std::move(expression)));
 
-        format = format.substr(stream.gcount() + 1);
+        format = format.substr(stream.gcount() + 2);
     }
 
     return std::make_unique<FormatExpression>(std::move(nodes));
 }
 
+mcc::ExpressionPtr mcc::Parser::ParseIfExpression()
+{
+    Expect(TokenType_Symbol, "if");
+    Expect(TokenType_Other, "(");
+
+    auto condition = ParseExpression();
+
+    Expect(TokenType_Other, ")");
+
+    auto then = ParseExpression();
+
+    Expect(TokenType_Symbol, "else");
+
+    auto else_ = ParseExpression();
+
+    return std::make_unique<IfExpression>(std::move(condition), std::move(then), std::move(else_));
+}
+
+mcc::ExpressionPtr mcc::Parser::ParseReturnExpression()
+{
+    Expect(TokenType_Symbol, "return");
+    auto expression = ParseExpression();
+    return std::make_unique<ReturnExpression>(std::move(expression));
+}
+
 mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
 {
+    if (At(TokenType_Symbol, "if"))
+        return ParseIfExpression();
+
+    if (At(TokenType_Symbol, "return"))
+        return ParseReturnExpression();
+
     if (At(TokenType_Symbol, "true") || At(TokenType_Symbol, "false"))
         return ParseBoolExpression();
 
@@ -460,8 +579,8 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_String))
         return ParseStringExpression();
 
-    if (At(TokenType_Symbol))
-        return ParseSymbolExpression();
+    if (At(TokenType_Symbol) || At(TokenType_Other, ":"))
+        return ParseResourceExpression();
 
     if (At(TokenType_Target))
         return ParseTargetExpression();
@@ -476,10 +595,30 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         return ParseFormatExpression();
 
     if (SkipIf(TokenType_Other, "~"))
-        return std::make_unique<RelativeOffsetExpression>();
+    {
+        auto offset = At(TokenType_Float)
+                          ? Skip().Float
+                          : At(TokenType_Integer)
+                                ? static_cast<double>(Skip().Integer)
+                                : 0.0;
+        return std::make_unique<RelativeOffsetExpression>(offset);
+    }
 
     if (SkipIf(TokenType_Other, "^"))
-        return std::make_unique<LocalOffsetExpression>();
+    {
+        auto offset = At(TokenType_Float)
+                          ? Skip().Float
+                          : At(TokenType_Integer)
+                                ? static_cast<double>(Skip().Integer)
+                                : 0.0;
+        return std::make_unique<LocalOffsetExpression>(offset);
+    }
+
+    if (SkipIf(TokenType_Operator, "%"))
+    {
+        auto id = Expect(TokenType_Symbol).Value;
+        return std::make_unique<SymbolExpression>(id);
+    }
 
     throw std::runtime_error(
         std::format(
@@ -499,6 +638,12 @@ mcc::ExpressionPtr mcc::Parser::ParseActionExpression()
     {
         if (SkipIf(TokenType_Other, "("))
         {
+            auto callee = dynamic_cast<ResourceExpression *>(actor.get());
+            if (!callee)
+            {
+                throw std::runtime_error("function callee must be a resource location of any kind");
+            }
+
             std::vector<ExpressionPtr> arguments;
             while (!SkipIf(TokenType_Other, ")"))
             {
@@ -506,7 +651,9 @@ mcc::ExpressionPtr mcc::Parser::ParseActionExpression()
                 if (!At(TokenType_Other, ")"))
                     Expect(TokenType_Other, ",");
             }
-            actor = std::make_unique<CallExpression>(std::move(actor), std::move(arguments));
+            actor = std::make_unique<CallExpression>(
+                callee->Location.Path,
+                std::move(arguments));
             continue;
         }
 
@@ -524,11 +671,17 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(
     static const std::map<std::string, unsigned> pres
     {
         {"=", 0},
-        {"+", 1},
-        {"-", 1},
-        {"*", 2},
-        {"/", 2},
-        {"%", 2},
+        {"==", 1},
+        {"!=", 1},
+        {"<=", 1},
+        {">=", 1},
+        {"<", 1},
+        {">", 1},
+        {"+", 2},
+        {"-", 2},
+        {"*", 3},
+        {"/", 3},
+        {"%", 3},
     };
 
     auto has_pre = [this]

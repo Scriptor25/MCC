@@ -1,6 +1,0 @@
-namespace example
-
-define :add(x, y) #:math {
-    result = x + y;
-    tellraw(@s, `${x} + ${y} = ${result}`);
-}

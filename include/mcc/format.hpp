@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <mcc/lex.hpp>
+#include <mcc/tree.hpp>
 
 namespace std
 {
@@ -49,6 +50,16 @@ namespace std
             s += " ]";
 
             return formatter<string>::format(s, ctx);
+        }
+    };
+
+    template<>
+    struct formatter<mcc::ResourceLocation> final : formatter<string>
+    {
+        template<typename FormatContext>
+        auto format(const mcc::ResourceLocation &location, FormatContext &ctx) const
+        {
+            return formatter<string>::format(location.Namespace + ':' + location.Path, ctx);
         }
     };
 }
