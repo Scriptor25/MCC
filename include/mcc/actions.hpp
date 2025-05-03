@@ -25,13 +25,15 @@ namespace mcc
     class Actions
     {
     public:
-        explicit Actions(std::vector<Action> actions);
+        explicit Actions(const std::vector<Action> &actions);
 
         void operator()(int argc, const char **argv);
 
         [[nodiscard]] unsigned ActionID() const;
         [[nodiscard]] bool String(unsigned index, std::string &destination) const;
         [[nodiscard]] bool Flag(unsigned index) const;
+
+        void Print() const;
 
     private:
         std::map<std::string, Action> m_Actions;

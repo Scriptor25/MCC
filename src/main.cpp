@@ -38,13 +38,13 @@ int main(const int argc, const char **argv)
             {
                 0,
                 "help",
-                "display help text for valid arguments"
+                "display help text and program description"
             },
             // mcc init [-name <package name>] [-version <package version>] [-description <package description>] -> initialize a new package with a given name, version and description
             {
                 1,
                 "init",
-                "initialize a new package, optionally with a given name, version and description",
+                "initialize a new package",
                 {
                     {false, "-name", "package name (default: 'example')"},
                     {false, "-description", "package description (default: 'the example package')"},
@@ -55,7 +55,7 @@ int main(const int argc, const char **argv)
             {
                 2,
                 "compile",
-                "compile a package to a optional target directory, defaults to 'target'",
+                "compile a package into the target directory",
                 {
                     {false, "-pkg", "package file (default: 'info.json')"},
                     {false, "-target", "target directory (default: 'target')"}
@@ -65,7 +65,7 @@ int main(const int argc, const char **argv)
             {
                 3,
                 "package",
-                "compress a package into a zip file, defaults to '<package name>.zip', in a target directory, defaults to 'target'",
+                "compress a package into a zip file, into the target directory",
                 {
                     {false, "-pkg", "package file (default: 'info.json')"},
                     {false, "-target", "taget directory (default: 'target')"},
@@ -133,11 +133,11 @@ int main(const int argc, const char **argv)
         }
 
         case 0: // help
-            // TODO: print help text
+            actions.Print();
             break;
 
         default:
-            std::cerr << "no valid action" << std::endl;
+            std::cerr << "no valid action. see 'help' for how to use." << std::endl;
             return 1;
     }
 

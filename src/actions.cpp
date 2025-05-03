@@ -1,6 +1,9 @@
+#include <iomanip>
+#include <iostream>
+#include <ranges>
 #include <mcc/actions.hpp>
 
-mcc::Actions::Actions(std::vector<Action> actions)
+mcc::Actions::Actions(const std::vector<Action> &actions)
 {
     for (auto &action: actions)
         m_Actions.emplace(action.Pattern, action);
@@ -53,4 +56,37 @@ bool mcc::Actions::String(const unsigned index, std::string &destination) const
 bool mcc::Actions::Flag(const unsigned index) const
 {
     return m_Flags.contains(index);
+}
+
+void mcc::Actions::Print() const
+{
+    std::cerr << "MCC - Minecraft Command Compiler" << std::endl;
+    std::cerr << "Usage: mcc <action> [<option|flag>...]" << std::endl;
+
+    std::cerr << "Actions:" << std::endl;
+    for (auto &action: m_Actions | std::ranges::views::values)
+    {
+        std::cerr
+                << std::endl
+                << "  "
+                << action.Pattern
+                << " - "
+                << action.Description
+                << std::endl;
+
+        size_t width = 0;
+        for (auto &parameter: action.Parameters)
+            width = std::max(width, parameter.Pattern.size());
+
+        for (unsigned i = 0; i < action.Parameters.size(); ++i)
+            std::cerr
+                    << "   + '"
+                    << action.Parameters[i].Pattern
+                    << "'"
+                    << std::setw(width - action.Parameters[i].Pattern.size())
+                    << std::left
+                    << ""
+                    << " - "
+                    << action.Parameters[i].Description << std::endl;
+    }
 }
