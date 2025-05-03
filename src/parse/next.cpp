@@ -223,8 +223,9 @@ mcc::Token &mcc::Parser::Next()
             case LexState_Operator:
                 if (value == "/" && m_Buf == '*')
                 {
-                    Get();
+                    raw_value += static_cast<char>(m_Buf);
                     state = LexState_Comment;
+                    Get();
                     break;
                 }
 
@@ -244,18 +245,20 @@ mcc::Token &mcc::Parser::Next()
             case LexState_Comment:
                 if (m_Buf == '*')
                 {
+                    raw_value += static_cast<char>(m_Buf);
                     Get();
                     if (m_Buf == '/')
                     {
+                        raw_value += static_cast<char>(m_Buf);
                         value.clear();
-                        raw_value.clear();
-                        Get();
                         state = LexState_None;
+                        Get();
                         break;
                     }
                 }
                 else
                 {
+                    raw_value += static_cast<char>(m_Buf);
                     Get();
                 }
                 break;

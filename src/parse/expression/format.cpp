@@ -21,6 +21,8 @@ mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
 
         format = format.substr(parser.Count());
     }
+    if (!format.empty())
+        nodes.emplace_back(std::make_unique<StringNode>(format));
 
     return std::make_unique<FormatExpression>(std::move(nodes));
 }
