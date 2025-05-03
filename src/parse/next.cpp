@@ -15,8 +15,7 @@ mcc::Token &mcc::Parser::Next()
     {
         LexState_None,
         LexState_Symbol,
-        LexState_Int,
-        LexState_Float,
+        LexState_Integer,
         LexState_String,
         LexState_Operator,
         LexState_Comment,
@@ -29,6 +28,7 @@ mcc::Token &mcc::Parser::Next()
     std::string value;
 
     auto formatted = false;
+    unsigned decimals = 0;
 
     while (m_Buf >= 0)
     {
@@ -43,7 +43,6 @@ mcc::Token &mcc::Parser::Next()
                     case '}':
                     case '[':
                     case ']':
-                    case '.':
                     case ':':
                     case ',':
                     case ';':
@@ -54,7 +53,12 @@ mcc::Token &mcc::Parser::Next()
                         raw_value += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         Get();
-                        return m_Token = {TokenType_Other, token_location, raw_value, value, 0, 0};
+                        return m_Token = {
+                                   .Type = TokenType_Other,
+                                   .Where = token_location,
+                                   .RawValue = raw_value,
+                                   .Value = value
+                               };
 
                     case '!':
                     case '=':
@@ -68,8 +72,8 @@ mcc::Token &mcc::Parser::Next()
                         token_location = m_Location;
                         raw_value += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
-                        Get();
                         state = LexState_Operator;
+                        Get();
                         break;
 
                     case '@':
@@ -79,7 +83,12 @@ mcc::Token &mcc::Parser::Next()
                         raw_value += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         Get();
-                        return m_Token = {TokenType_Target, token_location, raw_value, value, 0, 0};
+                        return m_Token = {
+                                   .Type = TokenType_Target,
+                                   .Where = token_location,
+                                   .RawValue = raw_value,
+                                   .Value = value
+                               };
 
                     case '`':
                         formatted = true;
@@ -98,10 +107,10 @@ mcc::Token &mcc::Parser::Next()
                             break;
                         }
 
-                        if (std::isdigit(m_Buf))
+                        if (std::isdigit(m_Buf) || m_Buf == '.')
                         {
                             token_location = m_Location;
-                            state = LexState_Int;
+                            state = LexState_Integer;
                             break;
                         }
 
@@ -116,45 +125,74 @@ mcc::Token &mcc::Parser::Next()
                         raw_value += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         Get();
-                        return m_Token = {TokenType_Undefined, token_location, raw_value, value, 0, 0};
+                        return m_Token = {
+                                   .Type = TokenType_Undefined,
+                                   .Where = token_location,
+                                   .RawValue = raw_value,
+                                   .Value = value
+                               };
                 }
                 break;
 
             case LexState_Symbol:
                 if (!std::isalnum(m_Buf) && m_Buf != '_')
-                {
-                    return m_Token = {TokenType_Symbol, token_location, raw_value, value, 0, 0};
-                }
+                    return m_Token = {
+                               .Type = TokenType_Symbol,
+                               .Where = token_location,
+                               .RawValue = raw_value,
+                               .Value = value
+                           };
 
                 raw_value += static_cast<char>(m_Buf);
                 value += static_cast<char>(m_Buf);
                 Get();
                 break;
 
-            case LexState_Int:
+            case LexState_Integer:
                 if (m_Buf == '.')
                 {
-                    raw_value += static_cast<char>(m_Buf);
-                    value += static_cast<char>(m_Buf);
-                    Get();
-                    state = LexState_Float;
-                    break;
+                    decimals++;
                 }
-
-                if (!std::isdigit(m_Buf))
+                else if (!std::isdigit(m_Buf))
                 {
-                    return m_Token = {TokenType_Integer, token_location, raw_value, value, std::stoll(value), 0};
-                }
+                    switch (decimals)
+                    {
+                        case 0:
+                            return m_Token = {
+                                       .Type = TokenType_Integer,
+                                       .Where = token_location,
+                                       .RawValue = raw_value,
+                                       .Value = value,
+                                       .Integer = std::stoll(value),
+                                   };
 
-                raw_value += static_cast<char>(m_Buf);
-                value += static_cast<char>(m_Buf);
-                Get();
-                break;
+                        case 1:
+                            return m_Token = {
+                                       .Type = TokenType_Float,
+                                       .Where = token_location,
+                                       .RawValue = raw_value,
+                                       .Value = value,
+                                       .Float = std::stold(value),
+                                   };
 
-            case LexState_Float:
-                if (!std::isdigit(m_Buf))
-                {
-                    return m_Token = {TokenType_Float, token_location, raw_value, value, 0, std::stold(value)};
+                        case 2:
+                        {
+                            auto split = value.find("..");
+                            return m_Token = {
+                                       .Type = TokenType_Range,
+                                       .Where = token_location,
+                                       .RawValue = raw_value,
+                                       .Value = value,
+                                       .Range = {
+                                           std::stoll(value.substr(0, split)),
+                                           std::stoll(value.substr(split + 2)),
+                                       },
+                                   };
+                        }
+
+                        default:
+                            throw std::runtime_error("TODO");
+                    }
                 }
 
                 raw_value += static_cast<char>(m_Buf);
@@ -168,14 +206,12 @@ mcc::Token &mcc::Parser::Next()
                     raw_value += static_cast<char>(m_Buf);
                     Get();
                     return m_Token = {
-                               formatted
-                                   ? TokenType_FormatString
-                                   : TokenType_String,
-                               token_location,
-                               raw_value,
-                               value,
-                               0,
-                               0,
+                               .Type = formatted
+                                           ? TokenType_FormatString
+                                           : TokenType_String,
+                               .Where = token_location,
+                               .RawValue = raw_value,
+                               .Value = value,
                            };
                 }
 
@@ -193,9 +229,12 @@ mcc::Token &mcc::Parser::Next()
                 }
 
                 if (!operator_map.contains(value) || !operator_map.at(value).contains(m_Buf))
-                {
-                    return m_Token = {TokenType_Operator, token_location, raw_value, value, 0, 0};
-                }
+                    return m_Token = {
+                               .Type = TokenType_Operator,
+                               .Where = token_location,
+                               .RawValue = raw_value,
+                               .Value = value
+                           };
 
                 raw_value += static_cast<char>(m_Buf);
                 value += static_cast<char>(m_Buf);
@@ -223,5 +262,5 @@ mcc::Token &mcc::Parser::Next()
         }
     }
 
-    return m_Token = {TokenType_EOF, token_location, {}, {}, 0, 0};
+    return m_Token = {.Type = TokenType_EOF, .Where = token_location};
 }

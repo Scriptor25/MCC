@@ -65,12 +65,6 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         return std::make_unique<SymbolExpression>(id);
     }
 
-    if (SkipIf(TokenType_Operator, "!"))
-    {
-        auto value = ParsePrimaryExpression();
-        return std::make_unique<InversionExpression>(std::move(value));
-    }
-
     throw std::runtime_error(
         std::format(
             "{}({},{}): cannot parse {} '{}'",

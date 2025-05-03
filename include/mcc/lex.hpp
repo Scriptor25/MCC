@@ -13,6 +13,7 @@ namespace mcc
         TokenType_Operator,
         TokenType_Integer,
         TokenType_Float,
+        TokenType_Range,
         TokenType_String,
         TokenType_FormatString,
         TokenType_Target,
@@ -33,8 +34,9 @@ namespace mcc
         Location Where;
         std::string RawValue;
         std::string Value;
-        IntegerT Integer;
-        FloatT Float;
+        IntegerT Integer = 0;
+        FloatT Float = 0;
+        std::pair<IntegerT, IntegerT> Range;
     };
 }
 

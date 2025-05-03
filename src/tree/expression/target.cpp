@@ -3,21 +3,21 @@
 
 mcc::TargetExpression::TargetExpression(
     const TargetSelectorE selector,
-    std::map<std::string, std::vector<ExpressionPtr>> arguments)
+    std::map<std::string, std::vector<TargetAttributePtr>> attributes)
     : Selector(selector),
-      Arguments(std::move(arguments))
+      Attributes(std::move(attributes))
 {
 }
 
 std::ostream &mcc::TargetExpression::Print(std::ostream &stream) const
 {
-    if (Arguments.empty())
+    if (Attributes.empty())
         return stream << '@' << Selector;
 
     stream << '@' << Selector << '[';
 
     auto first = true;
-    for (auto &[key_, values_]: Arguments)
+    for (auto &[key_, values_]: Attributes)
     {
         for (auto &value_: values_)
         {
@@ -25,7 +25,6 @@ std::ostream &mcc::TargetExpression::Print(std::ostream &stream) const
                 first = false;
             else
                 stream << ',';
-
             value_->Print(stream << key_ << '=');
         }
     }
@@ -35,21 +34,5 @@ std::ostream &mcc::TargetExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::TargetExpression::Gen(Builder &builder, const bool inline_) const
 {
-    std::map<std::string, std::vector<ConstantPtr>> arguments;
-
-    for (auto &[key_, values_]: Arguments)
-    {
-        for (auto &value_: values_)
-        {
-            auto value = value_->Gen(builder, inline_);
-            auto constant = std::dynamic_pointer_cast<Constant>(value);
-
-            if (!constant)
-                throw std::runtime_error("non - constant value in target arguments");
-
-            arguments[key_].emplace_back(constant);
-        }
-    }
-
-    return ConstantTarget::Create(Selector, arguments);
+    return ConstantTarget::Create(Selector, Attributes);
 }

@@ -89,7 +89,7 @@ void mcc::PackageInfo::Serialize(const std::filesystem::path &path) const
 
 void mcc::to_json(nlohmann::json &json, const ResourceLocation &location)
 {
-    json = location.Namespace + ':' + location.Path;
+    json = location.String();
 }
 
 void mcc::from_json(const nlohmann::json &json, ResourceLocation &location)

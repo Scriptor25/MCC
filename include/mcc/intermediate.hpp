@@ -16,8 +16,6 @@ namespace mcc
         virtual void Gen(CommandVector &commands) const;
         virtual Command GenInline() const;
         virtual CommandResult GenResult(bool stringify = false) const;
-
-        bool Invert = false;
     };
 
     struct Constant : Value
@@ -107,38 +105,18 @@ namespace mcc
 
     struct ConstantTarget final : Constant
     {
-        static ConstantPtr Create(TargetSelectorE selector, std::map<std::string, std::vector<ConstantPtr>> arguments);
+        static ConstantPtr Create(
+            TargetSelectorE selector,
+            std::map<std::string, std::vector<TargetAttributePtr>> attributes);
 
         ConstantTarget(
             TargetSelectorE selector,
-            const std::map<std::string, std::vector<ConstantPtr>> &arguments);
+            std::map<std::string, std::vector<TargetAttributePtr>> attributes);
 
         CommandResult GenResult(bool stringify = false) const override;
 
         TargetSelectorE Selector;
-
-        std::optional<FloatT> X, Y, Z;
-        std::optional<FloatT> DX, DY, DZ;
-        OptionalRange<FloatT> Distance;
-        OptionalRange<FloatT> X_Rotation;
-        OptionalRange<FloatT> Y_Rotation;
-
-        std::map<std::string, Range<FloatT>> Scores;
-        std::vector<Invertible<std::string>> Tags;
-        std::vector<Invertible<std::string>> Teams;
-
-        std::vector<Invertible<std::string>> Names;
-        std::vector<Invertible<ResourceTag>> Types;
-        std::vector<Invertible<ResourceLocation>> Predicates;
-
-        std::optional<Invertible<ConstantPtr>> NBT;
-
-        OptionalRange<FloatT> Level;
-        std::vector<Invertible<GameModeE>> GameModes;
-        std::map<ResourceLocation, std::pair<bool, Invertible<std::string>>> Advancements;
-
-        std::optional<IntegerT> Limit;
-        std::optional<SortOrderE> Sort;
+        std::map<std::string, std::vector<TargetAttributePtr>> Attributes;
     };
 
     struct ConstantResource final : Constant

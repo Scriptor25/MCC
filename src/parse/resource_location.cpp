@@ -2,14 +2,18 @@
 
 mcc::ResourceLocation mcc::Parser::ParseResourceLocation()
 {
-    auto ns = std::string(SkipIf(TokenType_Other, ":") ? "" : "minecraft");
-    auto id = Expect(TokenType_Symbol).Value;
+    auto namespace_ = std::string(SkipIf(TokenType_Other, ":") ? "" : "minecraft");
+    auto path = Expect(TokenType_Symbol).Value;
+    while (SkipIf(TokenType_Operator, "/"))
+        path += '/' + Expect(TokenType_Symbol).Value;
 
-    if (!ns.empty() && SkipIf(TokenType_Other, ":"))
+    if (!namespace_.empty() && SkipIf(TokenType_Other, ":"))
     {
-        ns = id;
-        id = Expect(TokenType_Symbol).Value;
+        namespace_ = path;
+        path = Expect(TokenType_Symbol).Value;
+        while (SkipIf(TokenType_Operator, "/"))
+            path += '/' + Expect(TokenType_Symbol).Value;
     }
 
-    return {ns, id};
+    return {namespace_, path};
 }

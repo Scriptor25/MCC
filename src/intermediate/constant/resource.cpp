@@ -14,6 +14,6 @@ mcc::CommandResult mcc::ConstantResource::GenResult(const bool stringify) const
 {
     return {
         .Type = CommandResultType_Value,
-        .Value = Location.Namespace + ':' + Location.Path,
+        .Value = Location.String(),
     };
 }

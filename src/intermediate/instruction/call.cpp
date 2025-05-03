@@ -45,9 +45,7 @@ void mcc::CallInstruction::Gen(CommandVector &commands) const
 
                 case CommandResultType_Storage:
                     command += "with storage ";
-                    command += Location.Namespace;
-                    command += ':';
-                    command += Location.Path;
+                    command += Location.String();
                     command += ' ';
                     command += arguments.Path;
                     break;
@@ -83,9 +81,7 @@ void mcc::CallInstruction::Gen(CommandVector &commands) const
                 case CommandResultType_Storage:
                     command += "{storage:";
                     command += '"';
-                    command += Location.Namespace;
-                    command += ':';
-                    command += Location.Path;
+                    command += Location.String();
                     command += '"';
                     command += ",nbt:";
                     command += '"';
@@ -151,9 +147,7 @@ mcc::Command mcc::CallInstruction::GenInline() const
 
                 case CommandResultType_Storage:
                     command += "with storage ";
-                    command += Location.Namespace;
-                    command += ':';
-                    command += Location.Path;
+                    command += Location.String();
                     command += ' ';
                     command += arguments.Path;
                     break;
@@ -189,9 +183,7 @@ mcc::Command mcc::CallInstruction::GenInline() const
                 case CommandResultType_Storage:
                     command += "{storage:";
                     command += '"';
-                    command += Location.Namespace;
-                    command += ':';
-                    command += Location.Path;
+                    command += Location.String();
                     command += '"';
                     command += ",nbt:";
                     command += '"';

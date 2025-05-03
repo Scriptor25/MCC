@@ -3,34 +3,26 @@
 #include <format>
 #include <map>
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
 namespace mcc
 {
-    using StatementPtr = std::unique_ptr<struct Statement>;
-    using ExpressionPtr = std::unique_ptr<struct Expression>;
-    using FormatNodePtr = std::unique_ptr<struct FormatNode>;
-
-    template<typename T>
-    using Range = std::pair<std::optional<T>, std::optional<T>>;
-
-    template<typename T>
-    using OptionalRange = std::optional<Range<T>>;
-
-    template<typename T>
-    using Invertible = std::pair<T, bool>;
-
     using IntegerT = long long;
     using FloatT = long double;
     using IndexT = unsigned long long;
 
+    using Command = std::string;
+
+    using StatementPtr = std::unique_ptr<struct Statement>;
+    using ExpressionPtr = std::unique_ptr<struct Expression>;
+    using FormatNodePtr = std::unique_ptr<struct FormatNode>;
+
+    using TargetAttributePtr = std::shared_ptr<struct TargetAttribute>;
+
     using ValuePtr = std::shared_ptr<struct Value>;
     using ConstantPtr = std::shared_ptr<struct Constant>;
     using InstructionPtr = std::shared_ptr<struct Instruction>;
-
-    using Command = std::string;
 
     enum CommandResultTypeE
     {
@@ -64,7 +56,7 @@ namespace mcc
 
         CommandVector &Append(Command command)
         {
-            m_Commands.emplace_back(command);
+            m_Commands.emplace_back(std::move(command));
             return *this;
         }
 
@@ -87,6 +79,11 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const
         {
             return stream << (TAG ? "#" : "") << Namespace << ':' << Path;
+        }
+
+        std::string String() const
+        {
+            return (TAG ? "#" : "") + Namespace + ':' + Path;
         }
 
         std::string Namespace;
@@ -475,7 +472,7 @@ namespace std
         template<typename FormatContext>
         auto format(const mcc::ResourceLocation &location, FormatContext &ctx) const
         {
-            return formatter<string>::format(location.Namespace + ':' + location.Path, ctx);
+            return formatter<string>::format(location.String(), ctx);
         }
     };
 

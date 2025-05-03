@@ -95,7 +95,7 @@ mcc::Token mcc::Parser::Expect(TokenType type, std::string value)
     return Skip();
 }
 
-mcc::Token mcc::Parser::ExpectEnum(std::vector<std::string> values)
+mcc::Token mcc::Parser::ExpectEnum(const std::vector<const char *> &values)
 {
     for (auto &value: values)
         if (At(TokenType_Symbol, value))

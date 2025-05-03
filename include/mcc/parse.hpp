@@ -1,17 +1,20 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <mcc/lex.hpp>
 #include <mcc/tree.hpp>
 
 namespace mcc
 {
+    using Parse = std::function<TargetAttributePtr(class Parser &self, bool invert)>;
+
     class Parser
     {
     public:
         Parser(std::istream &stream, std::string filename);
 
-        size_t Count() const;
+        [[nodiscard]] size_t Count() const;
 
         explicit operator bool() const;
         StatementPtr operator()();
@@ -26,7 +29,7 @@ namespace mcc
 
         Token Skip();
         Token Expect(TokenType type, std::string value = {});
-        Token ExpectEnum(std::vector<std::string> values);
+        Token ExpectEnum(const std::vector<const char *> &values);
 
         template<typename... Args>
         Token ExpectEnum(Args... args)
@@ -35,6 +38,19 @@ namespace mcc
         }
 
         ResourceLocation ParseResourceLocation();
+
+        TargetAttributePtr ParseIntegerAttribute(bool invert);
+        TargetAttributePtr ParseFloatAttribute(bool invert);
+        TargetAttributePtr ParseIntegerRangeAttribute(bool invert);
+        TargetAttributePtr ParseFloatRangeAttribute(bool invert);
+        TargetAttributePtr ParseStringAttribute(bool invert);
+        TargetAttributePtr ParseEnumAttribute(bool invert, const std::vector<const char *> &values);
+        TargetAttributePtr ParseNameAttribute(bool invert);
+        TargetAttributePtr ParseMapAttribute(bool invert, const Parse &parse);
+        TargetAttributePtr ParseResourceMapAttribute(bool invert, const Parse &parse);
+        TargetAttributePtr ParseNBTAttribute(bool invert);
+        TargetAttributePtr ParseResourceAttribute(bool invert);
+        TargetAttributePtr ParseTagAttribute(bool invert);
 
         StatementPtr ParseStatement();
         StatementPtr ParseNamespaceStatement();
