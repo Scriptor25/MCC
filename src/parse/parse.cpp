@@ -1,7 +1,4 @@
 #include <istream>
-#include <set>
-#include <sstream>
-#include <mcc/format.hpp>
 #include <mcc/parse.hpp>
 
 mcc::Parser::Parser(std::istream &stream, std::string filename)
@@ -10,6 +7,11 @@ mcc::Parser::Parser(std::istream &stream, std::string filename)
 {
     Get();
     Next();
+}
+
+size_t mcc::Parser::Count() const
+{
+    return m_Count - m_Token.RawValue.size();
 }
 
 mcc::Parser::operator bool() const
@@ -25,6 +27,7 @@ mcc::StatementPtr mcc::Parser::operator()()
 void mcc::Parser::Get()
 {
     m_Buf = m_Stream.get();
+    m_Count++;
     if (m_Buf == '\n')
     {
         m_Location.Col = 0;

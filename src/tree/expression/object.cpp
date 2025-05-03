@@ -35,7 +35,7 @@ mcc::ValuePtr mcc::ObjectExpression::Gen(Builder &builder, const bool inline_) c
     }
 
     if (inline_ && !all_constant)
-        throw std::runtime_error("TODO");
+        throw std::runtime_error("inline requires all object entries to be constant");
 
     if (all_constant)
     {

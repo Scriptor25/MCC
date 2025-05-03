@@ -10,7 +10,10 @@ mcc::ConstantString::ConstantString(std::string value)
 {
 }
 
-mcc::Command mcc::ConstantString::GenInline() const
+mcc::CommandResult mcc::ConstantString::GenResult(const bool stringify) const
 {
-    return '"' + Value + '"';
+    return {
+        .Type = CommandResultType_Value,
+        .Value = '"' + Value + '"',
+    };
 }

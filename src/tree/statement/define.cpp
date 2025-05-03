@@ -78,5 +78,16 @@ void mcc::DefineStatement::Gen(Context &context) const
     for (auto &expression: Expressions)
         (void) expression->Gen(builder, false);
 
+    commands_.emplace_back(std::format("data modify storage {} stack prepend value {{}}", location_));
+
+    for (auto &parameter: Parameters)
+        commands_.emplace_back(
+            std::format(
+                "$data modify storage {0} stack[0].var.{1} set value $({1})",
+                location_,
+                parameter));
+
     builder.Gen(commands_);
+
+    commands_.emplace_back(std::format("data remove storage {} stack[0]", location_));
 }

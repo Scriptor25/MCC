@@ -214,14 +214,13 @@ namespace mcc
 
     struct IfUnlessExpression final : Expression
     {
-        IfUnlessExpression(bool unless, ExpressionPtr condition, ExpressionPtr then);
+        IfUnlessExpression(bool unless, ExpressionPtr condition, ExpressionPtr then, ExpressionPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
 
         bool Unless;
-        ExpressionPtr Condition;
-        ExpressionPtr Then;
+        ExpressionPtr Condition, Then, Else;
     };
 
     struct ReturnExpression final : Expression

@@ -10,7 +10,14 @@ mcc::ConstantBoolean::ConstantBoolean(const bool value)
 {
 }
 
-mcc::Command mcc::ConstantBoolean::GenInline() const
+mcc::CommandResult mcc::ConstantBoolean::GenResult(const bool stringify) const
 {
-    return Value ? "true" : "false";
+    std::string value(Value ? "true" : "false");
+    if (stringify)
+        value = '"' + value + '"';
+
+    return {
+        .Type = CommandResultType_Value,
+        .Value = value,
+    };
 }

@@ -23,15 +23,33 @@ mcc::AllocationInstruction::AllocationInstruction(
       Location(std::move(location)),
       Index(index)
 {
-    // data modify storage <location> stack[0].values insert <index> value (value: 0|array: []|object: {})
 }
 
-void mcc::AllocationInstruction::Gen(std::vector<Command> &commands) const
+void mcc::AllocationInstruction::Gen(CommandVector &commands) const
 {
-    throw std::runtime_error("TODO");
+    std::string value;
+    switch (AllocationType)
+    {
+        case AllocationType_Value:
+            value = "0";
+            break;
+
+        case AllocationType_Array:
+            value = "[]";
+            break;
+
+        case AllocationType_Object:
+            value = "{}";
+            break;
+    }
+
+    commands.Append("data modify storage {} stack[0].val insert {} value {}", Location, Index, value);
 }
 
-mcc::Command mcc::AllocationInstruction::GenInline() const
+mcc::CommandResult mcc::AllocationInstruction::GenResult(const bool stringify) const
 {
-    throw std::runtime_error("TODO");
+    return {
+        .Type = CommandResultType_Storage,
+        .Path = "stack[0].val[" + std::to_string(Index) + ']',
+    };
 }

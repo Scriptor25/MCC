@@ -10,7 +10,10 @@ mcc::ConstantRelativeOffset::ConstantRelativeOffset(const FloatT offset)
 {
 }
 
-mcc::Command mcc::ConstantRelativeOffset::GenInline() const
+mcc::CommandResult mcc::ConstantRelativeOffset::GenResult(const bool stringify) const
 {
-    return "~" + std::to_string(Offset);
+    return {
+        .Type = CommandResultType_Value,
+        .Value = '~' + std::to_string(Offset),
+    };
 }

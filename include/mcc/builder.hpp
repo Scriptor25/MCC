@@ -19,15 +19,32 @@ namespace mcc
         InstructionPtr CreateOperation(OperatorE operator_, ValuePtr left, ValuePtr right, bool inline_);
         InstructionPtr CreateCall(CalleeE callee, std::vector<ValuePtr> arguments, bool inline_);
         InstructionPtr CreateReturn(ValuePtr value, bool inline_);
-        InstructionPtr CreateIf(bool unless, ValuePtr condition, ValuePtr then, bool inline_);
+        InstructionPtr CreateIf(bool unless, ValuePtr condition, ValuePtr then, ValuePtr else_, bool inline_);
 
         InstructionPtr AllocateValue(bool inline_);
         InstructionPtr AllocateArray(bool inline_);
         InstructionPtr AllocateObject(bool inline_);
-        InstructionPtr CreateAppend(ValuePtr array, ValuePtr value, bool inline_);
-        InstructionPtr CreatePrepend(ValuePtr array, ValuePtr value, bool inline_);
-        InstructionPtr CreateInsert(ValuePtr array, ValuePtr value, IndexT index, bool inline_);
-        InstructionPtr CreateInsert(ValuePtr object, ValuePtr value, std::string key, bool inline_);
+        InstructionPtr CreateAppend(
+            ValuePtr array,
+            ValuePtr value,
+            bool stringify,
+            bool inline_);
+        InstructionPtr CreatePrepend(
+            ValuePtr array,
+            ValuePtr value,
+            bool stringify,
+            bool inline_);
+        InstructionPtr CreateInsert(
+            ValuePtr array,
+            ValuePtr value,
+            IndexT index,
+            bool stringify,
+            bool inline_);
+        InstructionPtr CreateInsert(
+            ValuePtr object,
+            ValuePtr value,
+            std::string key,
+            bool inline_);
 
         InstructionPtr Insert(InstructionPtr instruction, bool inline_);
 

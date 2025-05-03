@@ -159,9 +159,9 @@ static mcc::Command gen_float_range(const mcc::Range<mcc::FloatT> &range)
     return min_string + ".." + max_string;
 }
 
-mcc::Command mcc::ConstantTarget::GenInline() const
+mcc::CommandResult mcc::ConstantTarget::GenResult(const bool stringify) const
 {
-    Command result;
+    std::string result;
     result += '@';
 
     switch (Selector)
@@ -181,8 +181,6 @@ mcc::Command mcc::ConstantTarget::GenInline() const
         case TargetSelector_S:
             result += 's';
             break;
-        default:
-            throw std::runtime_error("TODO");
     }
 
     result += '[';
@@ -209,5 +207,12 @@ mcc::Command mcc::ConstantTarget::GenInline() const
     // TODO: ...
 
     result += ']';
-    return result;
+
+    if (stringify)
+        result = "{selector:\"" + result + "\"}";
+
+    return {
+        .Type = CommandResultType_Value,
+        .Value = result,
+    };
 }

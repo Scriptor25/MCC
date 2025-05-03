@@ -33,5 +33,5 @@ mcc::ValuePtr mcc::ArrayExpression::Gen(Builder &builder, const bool inline_) co
         values.emplace_back(constant);
     }
 
-    return ConstantArray::Create(values);
+    return ConstantArray::Create(values, false);
 }

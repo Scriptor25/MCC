@@ -19,7 +19,7 @@ mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
         auto expression = parser.ParseExpression();
         nodes.emplace_back(std::make_unique<ExpressionNode>(std::move(expression)));
 
-        format = format.substr(stream.gcount() + 2);
+        format = format.substr(parser.Count());
     }
 
     return std::make_unique<FormatExpression>(std::move(nodes));

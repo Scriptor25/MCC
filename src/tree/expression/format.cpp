@@ -37,13 +37,13 @@ mcc::ValuePtr mcc::FormatExpression::Gen(Builder &builder, const bool inline_) c
         for (auto &value: values)
             constants.emplace_back(std::dynamic_pointer_cast<Constant>(value));
 
-        return ConstantArray::Create(constants);
+        return ConstantArray::Create(constants, true);
     }
 
     auto array = builder.AllocateArray(inline_);
 
     for (const auto &value: values)
-        builder.CreateAppend(array, value, inline_);
+        builder.CreateAppend(array, value, true, inline_);
 
     return array;
 }

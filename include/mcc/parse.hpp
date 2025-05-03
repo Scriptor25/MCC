@@ -11,6 +11,8 @@ namespace mcc
     public:
         Parser(std::istream &stream, std::string filename);
 
+        size_t Count() const;
+
         explicit operator bool() const;
         StatementPtr operator()();
 
@@ -59,5 +61,7 @@ namespace mcc
         int m_Buf = -1;
         Location m_Location;
         Token m_Token;
+
+        size_t m_Count = 0;
     };
 }

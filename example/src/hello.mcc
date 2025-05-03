@@ -10,3 +10,11 @@ define :hello() {
 define :hello_all() {
     tellraw(@s, `Hello ${@s}! Hello to all of ${@e[ type = !player ]}!`);
 }
+
+define :hello_rec(d) {
+    tellraw(@s, `Hello ${%d}`);
+    %args = { d: %d - 1 };
+    if (%d <= 0)
+        tellraw(@s, "reached end of recursive loop")
+    else function(:hello_rec, %args);
+}

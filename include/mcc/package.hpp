@@ -4,14 +4,11 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <mcc/package.hpp>
-#include <mcc/tree.hpp>
+#include <mcc/common.hpp>
 #include <nlohmann/json.hpp>
 
 namespace mcc
 {
-    using Command = std::string;
-
     template<typename T>
     class ResourceMap
     {

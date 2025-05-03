@@ -21,10 +21,19 @@ mcc::ConstantFloatRange::ConstantFloatRange(std::optional<FloatT> min, std::opti
 {
 }
 
-mcc::Command mcc::ConstantFloatRange::GenInline() const
+mcc::CommandResult mcc::ConstantFloatRange::GenResult(const bool stringify) const
 {
     if (Min == Max)
-        return std::to_string(Min.value());
+    {
+        auto value = std::to_string(Min.value());
+        if (stringify)
+            value += '"' + value + '"';
+
+        return {
+            .Type = CommandResultType_Value,
+            .Value = value,
+        };
+    }
 
     const auto min_string = Min.has_value()
                                 ? std::to_string(Min.value())
@@ -34,5 +43,12 @@ mcc::Command mcc::ConstantFloatRange::GenInline() const
                                 ? std::to_string(Max.value())
                                 : "";
 
-    return min_string + ".." + max_string;
+    auto value = min_string + ".." + max_string;
+    if (stringify)
+        value += '"' + value + '"';
+
+    return {
+        .Type = CommandResultType_Value,
+        .Value = value,
+    };
 }

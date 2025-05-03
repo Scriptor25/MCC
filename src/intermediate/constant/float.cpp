@@ -10,7 +10,14 @@ mcc::ConstantFloat::ConstantFloat(const FloatT value)
 {
 }
 
-mcc::Command mcc::ConstantFloat::GenInline() const
+mcc::CommandResult mcc::ConstantFloat::GenResult(const bool stringify) const
 {
-    return std::to_string(Value);
+    auto value = std::to_string(Value);
+    if (stringify)
+        value = '"' + value + '"';
+
+    return {
+        .Type = CommandResultType_Value,
+        .Value = value,
+    };
 }

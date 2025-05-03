@@ -1,18 +1,19 @@
 #include <mcc/intermediate.hpp>
 
-mcc::ConstantPtr mcc::ConstantArray::Create(std::vector<ConstantPtr> values)
+mcc::ConstantPtr mcc::ConstantArray::Create(std::vector<ConstantPtr> values, bool stringify)
 {
-    return std::make_shared<ConstantArray>(std::move(values));
+    return std::make_shared<ConstantArray>(std::move(values), stringify);
 }
 
-mcc::ConstantArray::ConstantArray(std::vector<ConstantPtr> values)
-    : Values(std::move(values))
+mcc::ConstantArray::ConstantArray(std::vector<ConstantPtr> values, const bool stringify)
+    : Values(std::move(values)),
+      Stringify(stringify)
 {
 }
 
-mcc::Command mcc::ConstantArray::GenInline() const
+mcc::CommandResult mcc::ConstantArray::GenResult(const bool stringify) const
 {
-    Command result;
+    std::string result;
     result += '[';
 
     auto first = true;
@@ -22,9 +23,12 @@ mcc::Command mcc::ConstantArray::GenInline() const
             first = false;
         else
             result += ',';
-        result += value->GenInline();
+        result += value->GenResult(Stringify || stringify).Value;
     }
 
     result += ']';
-    return result;
+    return {
+        .Type = CommandResultType_Value,
+        .Value = result,
+    };
 }

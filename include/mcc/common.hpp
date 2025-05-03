@@ -1,15 +1,82 @@
 #pragma once
 
+#include <format>
 #include <map>
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace mcc
 {
     using StatementPtr = std::unique_ptr<struct Statement>;
     using ExpressionPtr = std::unique_ptr<struct Expression>;
     using FormatNodePtr = std::unique_ptr<struct FormatNode>;
+
+    template<typename T>
+    using Range = std::pair<std::optional<T>, std::optional<T>>;
+
+    template<typename T>
+    using OptionalRange = std::optional<Range<T>>;
+
+    template<typename T>
+    using Invertible = std::pair<T, bool>;
+
+    using IntegerT = long long;
+    using FloatT = long double;
+    using IndexT = unsigned long long;
+
+    using ValuePtr = std::shared_ptr<struct Value>;
+    using ConstantPtr = std::shared_ptr<struct Constant>;
+    using InstructionPtr = std::shared_ptr<struct Instruction>;
+
+    using Command = std::string;
+
+    enum CommandResultTypeE
+    {
+        CommandResultType_Value,
+        CommandResultType_Storage,
+        CommandResultType_Score,
+    };
+
+    struct CommandResult
+    {
+        CommandResultTypeE Type;
+
+        /* Constant */
+        std::string Value;
+
+        /* Storage */
+        std::string Path;
+
+        /* Score */
+        std::string Player;
+        std::string Objective;
+    };
+
+    class CommandVector
+    {
+    public:
+        explicit CommandVector(std::vector<Command> &commands)
+            : m_Commands(commands)
+        {
+        }
+
+        CommandVector &Append(Command command)
+        {
+            m_Commands.emplace_back(command);
+            return *this;
+        }
+
+        template<typename... Args>
+        CommandVector &Append(std::string_view format, Args &&... args)
+        {
+            return Append(std::vformat(std::move(format), std::make_format_args(args...)));
+        }
+
+    private:
+        std::vector<Command> &m_Commands;
+    };
 
     struct Context;
     class Builder;
@@ -29,26 +96,8 @@ namespace mcc
     using ResourceLocation = Resource<false>;
     using ResourceTag = Resource<true>;
 
-    template<typename T>
-    using Range = std::pair<std::optional<T>, std::optional<T>>;
-
-    template<typename T>
-    using OptionalRange = std::optional<Range<T>>;
-
-    template<typename T>
-    using Invertible = std::pair<T, bool>;
-
-    using IntegerT = long long;
-    using FloatT = long double;
-    using IndexT = unsigned long long;
-
-    using ValuePtr = std::shared_ptr<struct Value>;
-    using ConstantPtr = std::shared_ptr<struct Constant>;
-    using InstructionPtr = std::shared_ptr<struct Instruction>;
-
     enum TargetSelectorE
     {
-        TargetSelector_None,
         TargetSelector_P,
         TargetSelector_R,
         TargetSelector_A,
@@ -77,7 +126,6 @@ namespace mcc
 
     enum CalleeE
     {
-        Callee_None,
         Callee_Advancement,
         Callee_Attribute,
         Callee_Ban,
@@ -180,7 +228,6 @@ namespace mcc
 
     enum AllocationTypeE
     {
-        AllocationType_None,
         AllocationType_Value,
         AllocationType_Array,
         AllocationType_Object,
@@ -188,7 +235,6 @@ namespace mcc
 
     enum ArrayOperationE
     {
-        ArrayOperation_None,
         ArrayOperation_Append,
         ArrayOperation_Prepend,
         ArrayOperation_Insert,
@@ -205,10 +251,7 @@ namespace mcc
             {"s", TargetSelector_S},
         };
 
-        if (map.contains(selector_string))
-            return map.at(selector_string);
-
-        return TargetSelector_None;
+        return map.at(selector_string);
     }
 
     inline CalleeE ToCallee(const std::string &callee_string)
@@ -299,22 +342,19 @@ namespace mcc
             {"xp", Callee_Experience},
         };
 
-        if (map.contains(callee_string))
-            return map.at(callee_string);
-
-        return Callee_None;
+        return map.at(callee_string);
     }
 
     inline const char *ToString(const TargetSelectorE &selector)
     {
         static const std::map<TargetSelectorE, const char *> map
         {
-                {TargetSelector_P, "p"},
-                {TargetSelector_R, "r"},
-                {TargetSelector_A, "a"},
-                {TargetSelector_E, "e"},
-                {TargetSelector_S, "s"},
-            };
+            {TargetSelector_P, "p"},
+            {TargetSelector_R, "r"},
+            {TargetSelector_A, "a"},
+            {TargetSelector_E, "e"},
+            {TargetSelector_S, "s"},
+        };
 
         if (map.contains(selector))
             return map.at(selector);
@@ -425,4 +465,48 @@ namespace mcc
     {
         return stream << ToString(e);
     }
+}
+
+namespace std
+{
+    template<>
+    struct formatter<mcc::ResourceLocation> final : formatter<string>
+    {
+        template<typename FormatContext>
+        auto format(const mcc::ResourceLocation &location, FormatContext &ctx) const
+        {
+            return formatter<string>::format(location.Namespace + ':' + location.Path, ctx);
+        }
+    };
+
+    template<>
+    struct formatter<mcc::CalleeE> final : formatter<string>
+    {
+        template<typename FormatContext>
+        auto format(const mcc::CalleeE &callee, FormatContext &ctx) const
+        {
+            return formatter<string>::format(mcc::ToString(callee), ctx);
+        }
+    };
+
+    template<typename T>
+    struct formatter<vector<T>> final : formatter<string>
+    {
+        template<typename FormatContext>
+        auto format(const vector<T> &elements, FormatContext &ctx) const
+        {
+            string s = "[ ";
+
+            for (unsigned i = 0; i < elements.size(); ++i)
+            {
+                if (i > 0)
+                    s += ", ";
+                s += std::format("{}", elements[i]);
+            }
+
+            s += " ]";
+
+            return formatter<string>::format(s, ctx);
+        }
+    };
 }

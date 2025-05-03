@@ -10,9 +10,9 @@ mcc::ConstantObject::ConstantObject(std::map<std::string, ConstantPtr> values)
 {
 }
 
-mcc::Command mcc::ConstantObject::GenInline() const
+mcc::CommandResult mcc::ConstantObject::GenResult(const bool stringify) const
 {
-    Command result;
+    std::string result;
     result += '{';
 
     auto first = true;
@@ -22,11 +22,13 @@ mcc::Command mcc::ConstantObject::GenInline() const
             first = false;
         else
             result += ',';
-        result += key_;
-        result += ':';
-        result += value_->GenInline();
+        result += key_ + ':' + value_->GenResult(stringify).Value;
     }
 
     result += '}';
-    return result;
+
+    return {
+        .Type = CommandResultType_Value,
+        .Value = result,
+    };
 }

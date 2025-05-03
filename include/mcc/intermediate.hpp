@@ -13,8 +13,9 @@ namespace mcc
     {
         virtual ~Value() = default;
 
-        virtual void Gen(std::vector<Command> &commands) const;
-        virtual Command GenInline() const = 0;
+        virtual void Gen(CommandVector &commands) const;
+        virtual Command GenInline() const;
+        virtual CommandResult GenResult(bool stringify = false) const;
 
         bool Invert = false;
     };
@@ -29,7 +30,7 @@ namespace mcc
 
         explicit ConstantBoolean(bool value);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         bool Value;
     };
@@ -40,7 +41,7 @@ namespace mcc
 
         explicit ConstantInteger(IntegerT value);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         IntegerT Value;
     };
@@ -51,7 +52,7 @@ namespace mcc
 
         explicit ConstantFloat(FloatT value);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         FloatT Value;
     };
@@ -64,7 +65,7 @@ namespace mcc
 
         ConstantFloatRange(std::optional<FloatT> min, std::optional<FloatT> max);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         std::optional<FloatT> Min;
         std::optional<FloatT> Max;
@@ -76,20 +77,21 @@ namespace mcc
 
         explicit ConstantString(std::string value);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         std::string Value;
     };
 
     struct ConstantArray final : Constant
     {
-        static ConstantPtr Create(std::vector<ConstantPtr> values);
+        static ConstantPtr Create(std::vector<ConstantPtr> values, bool stringify);
 
-        explicit ConstantArray(std::vector<ConstantPtr> values);
+        ConstantArray(std::vector<ConstantPtr> values, bool stringify);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         std::vector<ConstantPtr> Values;
+        bool Stringify;
     };
 
     struct ConstantObject final : Constant
@@ -98,7 +100,7 @@ namespace mcc
 
         explicit ConstantObject(std::map<std::string, ConstantPtr> values);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         std::map<std::string, ConstantPtr> Values;
     };
@@ -111,7 +113,7 @@ namespace mcc
             TargetSelectorE selector,
             const std::map<std::string, std::vector<ConstantPtr>> &arguments);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         TargetSelectorE Selector;
 
@@ -145,7 +147,7 @@ namespace mcc
 
         explicit ConstantResource(ResourceLocation location);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
     };
@@ -156,7 +158,7 @@ namespace mcc
 
         explicit ConstantLocalOffset(FloatT offset);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         FloatT Offset;
     };
@@ -167,89 +169,101 @@ namespace mcc
 
         explicit ConstantRelativeOffset(FloatT offset);
 
-        Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         FloatT Offset;
     };
 
     struct Instruction : Value
     {
+        std::string GetResultID() const;
     };
 
     struct CallInstruction final : Instruction
     {
-        static InstructionPtr Create(CalleeE callee, std::vector<ValuePtr> arguments);
+        static InstructionPtr Create(ResourceLocation location, CalleeE callee, std::vector<ValuePtr> arguments);
 
-        CallInstruction(CalleeE callee, std::vector<ValuePtr> arguments);
+        CallInstruction(ResourceLocation location, CalleeE callee, std::vector<ValuePtr> arguments);
 
-        void Gen(std::vector<Command> &commands) const override;
+        void Gen(CommandVector &commands) const override;
         Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
+        ResourceLocation Location;
         CalleeE Callee;
         std::vector<ValuePtr> Arguments;
     };
 
     struct ReturnInstruction final : Instruction
     {
-        static InstructionPtr Create(ValuePtr value);
+        static InstructionPtr Create(ResourceLocation location, ValuePtr value);
 
-        explicit ReturnInstruction(ValuePtr value);
+        ReturnInstruction(ResourceLocation location, ValuePtr value);
 
-        void Gen(std::vector<Command> &commands) const override;
+        void Gen(CommandVector &commands) const override;
         Command GenInline() const override;
 
+        ResourceLocation Location;
         ValuePtr Value;
     };
 
     struct IfUnlessInstruction final : Instruction
     {
-        static InstructionPtr Create(bool unless, ValuePtr condition, ValuePtr then);
+        static InstructionPtr Create(
+            ResourceLocation location,
+            bool unless,
+            ValuePtr condition,
+            ValuePtr then,
+            ValuePtr else_);
 
-        IfUnlessInstruction(bool unless, ValuePtr condition, ValuePtr then);
+        IfUnlessInstruction(ResourceLocation location, bool unless, ValuePtr condition, ValuePtr then, ValuePtr else_);
 
-        void Gen(std::vector<Command> &commands) const override;
-        Command GenInline() const override;
+        void Gen(CommandVector &commands) const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
+        ResourceLocation Location;
         bool Unless;
-        ValuePtr Condition;
-        ValuePtr Then;
+        ValuePtr Condition, Then, Else;
     };
 
     struct StoreInstruction final : Instruction
     {
-        static InstructionPtr Create(ValuePtr dst, ValuePtr src);
+        static InstructionPtr Create(ResourceLocation location, ValuePtr dst, ValuePtr src);
 
-        StoreInstruction(ValuePtr dst, ValuePtr src);
+        StoreInstruction(ResourceLocation location, ValuePtr dst, ValuePtr src);
 
-        void Gen(std::vector<Command> &commands) const override;
-        Command GenInline() const override;
+        void Gen(CommandVector &commands) const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
+        ResourceLocation Location;
         ValuePtr Dst, Src;
     };
 
     struct ComparisonInstruction final : Instruction
     {
-        static InstructionPtr Create(ComparatorE comparator, ValuePtr left, ValuePtr right);
+        static InstructionPtr Create(ComparatorE comparator, ResourceLocation location, ValuePtr left, ValuePtr right);
 
-        ComparisonInstruction(ComparatorE comparator, ValuePtr left, ValuePtr right);
+        ComparisonInstruction(ComparatorE comparator, ResourceLocation location, ValuePtr left, ValuePtr right);
 
-        void Gen(std::vector<Command> &commands) const override;
-        Command GenInline() const override;
+        void Gen(CommandVector &commands) const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         ComparatorE Comparator;
+        ResourceLocation Location;
         ValuePtr Left, Right;
     };
 
     struct OperationInstruction final : Instruction
     {
-        static InstructionPtr Create(OperatorE operator_, ValuePtr left, ValuePtr right);
+        static InstructionPtr Create(OperatorE operator_, ResourceLocation location, ValuePtr left, ValuePtr right);
 
-        OperationInstruction(OperatorE operator_, ValuePtr left, ValuePtr right);
+        OperationInstruction(OperatorE operator_, ResourceLocation location, ValuePtr left, ValuePtr right);
 
-        void Gen(std::vector<Command> &commands) const override;
-        Command GenInline() const override;
+        void Gen(CommandVector &commands) const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         OperatorE Operator;
+        ResourceLocation Location;
         ValuePtr Left, Right;
     };
 
@@ -264,8 +278,8 @@ namespace mcc
             ResourceLocation location,
             IndexT index);
 
-        void Gen(std::vector<Command> &commands) const override;
-        Command GenInline() const override;
+        void Gen(CommandVector &commands) const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         AllocationTypeE AllocationType;
         ResourceLocation Location;
@@ -274,24 +288,39 @@ namespace mcc
 
     struct ArrayInstruction final : Instruction
     {
-        static InstructionPtr CreateAppend(ResourceLocation location, ValuePtr array, ValuePtr value);
-        static InstructionPtr CreatePrepend(ResourceLocation location, ValuePtr array, ValuePtr value);
-        static InstructionPtr CreateInsert(ResourceLocation location, ValuePtr array, ValuePtr value, IndexT index);
+        static InstructionPtr CreateAppend(
+            ResourceLocation location,
+            ValuePtr array,
+            ValuePtr value,
+            bool stringify);
+        static InstructionPtr CreatePrepend(
+            ResourceLocation location,
+            ValuePtr array,
+            ValuePtr value,
+            bool stringify);
+        static InstructionPtr CreateInsert(
+            ResourceLocation location,
+            ValuePtr array,
+            ValuePtr value,
+            IndexT index,
+            bool stringify);
 
         ArrayInstruction(
             ArrayOperationE array_operation,
             ResourceLocation location,
             ValuePtr array,
             ValuePtr value,
-            IndexT index);
+            IndexT index,
+            bool stringify);
 
-        void Gen(std::vector<Command> &commands) const override;
-        Command GenInline() const override;
+        void Gen(CommandVector &commands) const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         ArrayOperationE ArrayOperation;
         ResourceLocation Location;
         ValuePtr Array, Value;
         IndexT Index;
+        bool Stringify;
     };
 
     struct ObjectInstruction final : Instruction
@@ -300,8 +329,8 @@ namespace mcc
 
         ObjectInstruction(ResourceLocation location, ValuePtr object, ValuePtr value, std::string key);
 
-        void Gen(std::vector<Command> &commands) const override;
-        Command GenInline() const override;
+        void Gen(CommandVector &commands) const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
         ValuePtr Object, Value;
@@ -315,6 +344,7 @@ namespace mcc
         NamedValue(ResourceLocation location, std::string id);
 
         Command GenInline() const override;
+        CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
         std::string ID;

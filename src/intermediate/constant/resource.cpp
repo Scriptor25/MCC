@@ -10,7 +10,10 @@ mcc::ConstantResource::ConstantResource(ResourceLocation location)
 {
 }
 
-mcc::Command mcc::ConstantResource::GenInline() const
+mcc::CommandResult mcc::ConstantResource::GenResult(const bool stringify) const
 {
-    return Location.Namespace + ':' + Location.Path;
+    return {
+        .Type = CommandResultType_Value,
+        .Value = Location.Namespace + ':' + Location.Path,
+    };
 }
