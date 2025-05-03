@@ -6,3 +6,7 @@ define :hello() {
         color: "gold"
     }, "!" ]);
 }
+
+define :hello_all() {
+    tellraw(@s, `Hello ${@s}! Hello to all of ${@e[ type = !player ]}!`);
+}

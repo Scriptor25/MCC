@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <mcc/common.hpp>
 
 namespace mcc
 {
@@ -31,7 +32,7 @@ namespace mcc
         Location Where;
         std::string RawValue;
         std::string Value;
-        long long Integer;
-        double Float;
+        IntegerT Integer;
+        FloatT Float;
     };
 }

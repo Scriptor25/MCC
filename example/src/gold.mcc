@@ -2,6 +2,6 @@ namespace example
 
 define :gold() {
     give(@s, gold_ingot, 1);
-    setblock(^, ^, ^ 2, gold_block);
+    setblock(^, ^, ^2, gold_block);
     tellraw(@s, "GOLD");
 }

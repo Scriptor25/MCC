@@ -40,10 +40,6 @@ namespace mcc
 
         ExpressionPtr ParseExpression();
 
-        ExpressionPtr ParseBoolExpression();
-        ExpressionPtr ParseIntegerExpression();
-        ExpressionPtr ParseFloatExpression();
-        ExpressionPtr ParseStringExpression();
         ExpressionPtr ParseResourceExpression();
         ExpressionPtr ParseTargetExpression();
 
@@ -52,11 +48,11 @@ namespace mcc
 
         ExpressionPtr ParseFormatExpression();
 
-        ExpressionPtr ParseIfExpression();
+        ExpressionPtr ParseIfUnlessExpression(bool unless);
         ExpressionPtr ParseReturnExpression();
 
         ExpressionPtr ParsePrimaryExpression();
-        ExpressionPtr ParseActionExpression();
+        ExpressionPtr ParseCallExpression();
         ExpressionPtr ParseBinaryExpression(ExpressionPtr left, ExpressionPtr (Parser::*next)(), unsigned min_pre);
 
         std::istream &m_Stream;

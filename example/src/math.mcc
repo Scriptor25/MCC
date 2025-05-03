@@ -12,11 +12,13 @@ define :sub(x, y) #:math {
     return %result;
 }
 
-/* TODO: variable function arguments
 define :fib(n) #:math {
     if (%n <= 1)
-        return %n
-    else
-        return function(:fib, { n: %n - 1 }) + function(:fib, { n: %n - 2 })
-    ;
-}*/
+        return %n;
+    return function(:fib_else, { n: %n });
+}
+
+define :fib_else(n) {
+    return function(:fib, { n: %n - 1 })
+         + function(:fib, { n: %n - 2 });
+}
