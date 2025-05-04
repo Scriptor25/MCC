@@ -10,10 +10,10 @@ mcc::ConstantResource::ConstantResource(ResourceLocation location)
 {
 }
 
-mcc::CommandResult mcc::ConstantResource::GenResult(const bool stringify) const
+mcc::Result mcc::ConstantResource::GenResult(const bool stringify, bool use_stack) const
 {
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = Location.String(),
     };
 }

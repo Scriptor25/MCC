@@ -1,101 +1,117 @@
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
-#include <mcc/lex.hpp>
 
-mcc::InstructionPtr mcc::StoreInstruction::Create(ResourceLocation location, ValuePtr dst, ValuePtr src)
+mcc::InstructionPtr mcc::StoreInstruction::Create(ValuePtr dst, ValuePtr src)
 {
-    return std::make_shared<StoreInstruction>(std::move(location), std::move(dst), std::move(src));
+    return std::make_shared<StoreInstruction>(std::move(dst), std::move(src));
 }
 
-mcc::StoreInstruction::StoreInstruction(ResourceLocation location, ValuePtr dst, ValuePtr src)
-    : Location(std::move(location)),
-      Dst(std::move(dst)),
+mcc::StoreInstruction::StoreInstruction(ValuePtr dst, ValuePtr src)
+    : Dst(std::move(dst)),
       Src(std::move(src))
 {
+    Dst->Use();
+    Src->Use();
 }
 
-void mcc::StoreInstruction::Gen(CommandVector &commands) const
+mcc::StoreInstruction::~StoreInstruction()
 {
-    auto [
-        dst_type_,
-        dst_value_,
-        dst_path_,
-        dst_player_,
-        dst_objective_
-    ] = Dst->GenResult();
-    auto [
-        src_type_,
-        src_value_,
-        src_path_,
-        src_player_,
-        src_objective_
-    ] = Src->GenResult();
+    Dst->Drop();
+    Src->Drop();
+}
 
-    switch (dst_type_)
+void mcc::StoreInstruction::Generate(CommandVector &commands, const bool use_stack) const
+{
+    auto dst = Dst->GenResult(false, use_stack);
+    auto src = Src->GenResult(false, use_stack);
+
+    switch (dst.Type)
     {
-        case CommandResultType_Storage:
-            switch (src_type_)
+        case ResultType_Storage:
+            switch (src.Type)
             {
-                case CommandResultType_Value:
-                    commands.Append("data modify storage {} {} set value {}", Location, dst_path_, src_value_);
+                case ResultType_Value:
+                    commands.Append("data modify storage {} {} set value {}", dst.Location, dst.Path, src.Value);
                     break;
 
-                case CommandResultType_Storage:
+                case ResultType_Storage:
                     commands.Append(
-                        "data modify storage {0} {1} set from storage {0} {2}",
-                        Location,
-                        dst_path_,
-                        src_path_);
+                        "data modify storage {} {} set from storage {} {}",
+                        dst.Location,
+                        dst.Path,
+                        src.Location,
+                        src.Path);
                     break;
 
-                case CommandResultType_Score:
+                case ResultType_Score:
                     commands.Append(
                         "execute store result storage {} {} double 1 run scoreboard players get {} {}",
-                        Location,
-                        dst_path_,
-                        src_player_,
-                        src_objective_);
+                        dst.Location,
+                        dst.Path,
+                        src.Player,
+                        src.Objective);
                     break;
+
+                default:
+                    Error(
+                        "src must be {}, {} or {}, but is {}",
+                        ResultType_Value,
+                        ResultType_Storage,
+                        ResultType_Score,
+                        src.Type);
             }
             break;
 
-        case CommandResultType_Score:
-            switch (src_type_)
+        case ResultType_Score:
+            switch (src.Type)
             {
-                case CommandResultType_Value:
-                    commands.Append("scoreboard players set {} {} {}", dst_player_, dst_objective_, src_value_);
+                case ResultType_Value:
+                    commands.Append("scoreboard players set {} {} {}", dst.Player, dst.Objective, src.Value);
                     break;
 
-                case CommandResultType_Storage:
+                case ResultType_Storage:
                     commands.Append(
                         "execute store result score {} {} run data get storage {} {}",
-                        dst_player_,
-                        dst_objective_,
-                        Location,
-                        src_path_);
+                        dst.Player,
+                        dst.Objective,
+                        src.Location,
+                        src.Path);
                     break;
 
-                case CommandResultType_Score:
+                case ResultType_Score:
                     commands.Append(
                         "scoreboard players operation {} {} = {} {}",
-                        dst_player_,
-                        dst_objective_,
-                        src_player_,
-                        src_objective_);
+                        dst.Player,
+                        dst.Objective,
+                        src.Player,
+                        src.Objective);
                     break;
+
+                default:
+                    Error(
+                        "src must be {}, {} or {}, but is {}",
+                        ResultType_Value,
+                        ResultType_Storage,
+                        ResultType_Score,
+                        src.Type);
             }
             break;
 
         default:
             Error(
-                "store instruction destination operand must be either {} or {}, but is {}",
-                CommandResultType_Storage,
-                CommandResultType_Score,
-                dst_type_);
+                "dst must be {} or {}, but is {}",
+                ResultType_Storage,
+                ResultType_Score,
+                dst.Type);
     }
 }
 
-mcc::CommandResult mcc::StoreInstruction::GenResult(const bool stringify) const
+mcc::Result mcc::StoreInstruction::GenResult(const bool stringify, const bool use_stack) const
 {
-    return Dst->GenResult();
+    return Dst->GenResult(false, use_stack);
+}
+
+bool mcc::StoreInstruction::RequireStack() const
+{
+    return Src->RequireStack() || Dst->RequireStack();
 }

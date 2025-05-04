@@ -10,14 +10,14 @@ mcc::ConstantInteger::ConstantInteger(const IntegerT value)
 {
 }
 
-mcc::CommandResult mcc::ConstantInteger::GenResult(const bool stringify) const
+mcc::Result mcc::ConstantInteger::GenResult(const bool stringify, bool use_stack) const
 {
     auto value = std::to_string(Value);
     if (stringify)
         value = '"' + value + '"';
 
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = value,
     };
 }

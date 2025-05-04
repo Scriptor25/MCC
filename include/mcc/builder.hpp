@@ -14,6 +14,9 @@ namespace mcc
         [[nodiscard]] Context &GetContext() const;
         [[nodiscard]] const ResourceLocation &GetLocation() const;
 
+        [[nodiscard]] bool RequireStack() const;
+        [[nodiscard]] bool RequireCleanup() const;
+
         InstructionPtr CreateStore(ValuePtr dst, ValuePtr src, bool inline_);
         InstructionPtr CreateComparison(ComparatorE comparator, ValuePtr left, ValuePtr right, bool inline_);
         InstructionPtr CreateOperation(OperatorE operator_, ValuePtr left, ValuePtr right, bool inline_);
@@ -48,7 +51,7 @@ namespace mcc
 
         InstructionPtr Insert(InstructionPtr instruction, bool inline_);
 
-        void Gen(std::vector<CommandT> &commands) const;
+        void Generate(std::vector<CommandT> &commands, bool use_stack) const;
 
     private:
         Context &m_Context;

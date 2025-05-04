@@ -18,9 +18,24 @@ const mcc::ResourceLocation &mcc::Builder::GetLocation() const
     return m_Location;
 }
 
+bool mcc::Builder::RequireStack() const
+{
+    return std::ranges::any_of(
+        m_Instructions,
+        [](auto &instruction)
+        {
+            return instruction->RequireStack();
+        });
+}
+
+bool mcc::Builder::RequireCleanup() const
+{
+    return m_Instructions.empty() || !std::dynamic_pointer_cast<ReturnInstruction>(m_Instructions.back());
+}
+
 mcc::InstructionPtr mcc::Builder::CreateStore(ValuePtr dst, ValuePtr src, const bool inline_)
 {
-    return Insert(StoreInstruction::Create(m_Location, std::move(dst), std::move(src)), inline_);
+    return Insert(StoreInstruction::Create(std::move(dst), std::move(src)), inline_);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateComparison(
@@ -164,9 +179,9 @@ mcc::InstructionPtr mcc::Builder::Insert(InstructionPtr instruction, const bool 
     return m_Instructions.back();
 }
 
-void mcc::Builder::Gen(std::vector<CommandT> &commands) const
+void mcc::Builder::Generate(std::vector<CommandT> &commands, const bool use_stack) const
 {
     CommandVector command_vector(commands);
     for (auto &instruction: m_Instructions)
-        instruction->Gen(command_vector);
+        instruction->Generate(command_vector, use_stack);
 }

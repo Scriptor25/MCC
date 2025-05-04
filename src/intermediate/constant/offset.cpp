@@ -11,22 +11,10 @@ mcc::ConstantOffset::ConstantOffset(const OffsetTypeE type, const FloatT offset)
 {
 }
 
-mcc::CommandResult mcc::ConstantOffset::GenResult(const bool stringify) const
+mcc::Result mcc::ConstantOffset::GenResult(const bool stringify, bool use_stack) const
 {
-    char prefix = 0;
-    switch (Type)
-    {
-        case OffsetType_Relative:
-            prefix = '~';
-            break;
-
-        case OffsetType_Local:
-            prefix = '^';
-            break;
-    }
-
     return {
-        .Type = CommandResultType_Value,
-        .Value = prefix + std::to_string(Offset),
+        .Type = ResultType_Value,
+        .Value = ToString(Type) + std::to_string(Offset),
     };
 }

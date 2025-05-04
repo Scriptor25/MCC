@@ -21,7 +21,7 @@ mcc::ConstantFloatRange::ConstantFloatRange(std::optional<FloatT> min, std::opti
 {
 }
 
-mcc::CommandResult mcc::ConstantFloatRange::GenResult(const bool stringify) const
+mcc::Result mcc::ConstantFloatRange::GenResult(const bool stringify, bool use_stack) const
 {
     if (Min == Max)
     {
@@ -30,7 +30,7 @@ mcc::CommandResult mcc::ConstantFloatRange::GenResult(const bool stringify) cons
             value += '"' + value + '"';
 
         return {
-            .Type = CommandResultType_Value,
+            .Type = ResultType_Value,
             .Value = value,
         };
     }
@@ -48,7 +48,7 @@ mcc::CommandResult mcc::ConstantFloatRange::GenResult(const bool stringify) cons
         value += '"' + value + '"';
 
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = value,
     };
 }

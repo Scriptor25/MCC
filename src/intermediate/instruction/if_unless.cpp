@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 mcc::InstructionPtr mcc::IfUnlessInstruction::Create(
@@ -27,76 +28,109 @@ mcc::IfUnlessInstruction::IfUnlessInstruction(
       Then(std::move(then)),
       Else(std::move(else_))
 {
+    Condition->Use();
+    Then->Use();
+    Else->Use();
 }
 
-void mcc::IfUnlessInstruction::Gen(CommandVector &commands) const
+mcc::IfUnlessInstruction::~IfUnlessInstruction()
 {
-    auto [
-        condition_type_,
-        condition_value_,
-        condition_path_,
-        condition_player_,
-        condition_objective_
-    ] = Condition->GenResult();
+    Condition->Drop();
+    Then->Drop();
+    Else->Drop();
+}
 
-    auto then = Then->GenInline();
-    auto else_ = Else->GenInline();
+void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_stack) const
+{
+    Assert(!UseCount || use_stack, "if-unless instruction requires stack usage");
 
-    switch (condition_type_)
+    auto condition = Condition->GenResult(false, use_stack);
+
+    auto then = Then->GenerateInline(use_stack);
+    auto else_ = Else->GenerateInline(use_stack);
+
+    auto store_result = UseCount
+                            ? std::format("run execute store result storage {} {} double 1 ", Location, GetStackPath())
+                            : "";
+
+    switch (condition.Type)
     {
-        case CommandResultType_Value:
-            if (Unless == (condition_value_ == "false" || condition_value_ == "0"))
-                Then->Gen(commands);
+        case ResultType_Value:
+            if (Unless == (condition.Value == "false" || condition.Value == "0"))
+                Then->Generate(commands, use_stack);
             else
-                Else->Gen(commands);
+                Else->Generate(commands, use_stack);
             break;
 
-        case CommandResultType_Storage:
+        case ResultType_Storage:
             commands.Append("scoreboard objectives add tmp dummy");
             commands.Append(
                 "execute store result score %c tmp run data get storage {} {}",
-                Location,
-                condition_path_);
+                condition.Location,
+                condition.Path);
             commands.Append(
-                "execute {} score %c tmp matches 0 run execute store result storage {} stack[0].result.{} double 1 run {}",
+                "execute {} score %c tmp matches 0 {}run {}",
                 Unless ? "if" : "unless",
-                Location,
-                GetResultID(),
+                store_result,
                 then);
             commands.Append(
-                "execute {} score %c tmp matches 0 run execute store result storage {} stack[0].result.{} double 1 run {}",
+                "execute {} score %c tmp matches 0 {}run {}",
                 Unless ? "unless" : "if",
-                Location,
-                GetResultID(),
+                store_result,
                 else_);
             commands.Append("scoreboard objectives remove tmp");
             break;
 
-        case CommandResultType_Score:
+        case ResultType_Score:
             commands.Append(
-                "execute {} score {} {} matches 0 run execute store result storage {} stack[0].result.{} double 1 run {}",
+                "execute {} score {} {} matches 0 {}run {}",
                 Unless ? "if" : "unless",
-                condition_player_,
-                condition_objective_,
-                Location,
-                GetResultID(),
+                condition.Player,
+                condition.Objective,
+                store_result,
                 then);
             commands.Append(
-                "execute {} score {} {} matches 0 run execute store result storage {} stack[0].result.{} double 1 run {}",
+                "execute {} score {} {} matches 0 {}run {}",
                 Unless ? "unless" : "if",
-                condition_player_,
-                condition_objective_,
-                Location,
-                GetResultID(),
+                condition.Player,
+                condition.Objective,
+                store_result,
                 else_);
             break;
+
+        default:
+            Error(
+                "condition must be {}, {} or {}, but is {}",
+                ResultType_Value,
+                ResultType_Storage,
+                ResultType_Score,
+                condition.Type);
     }
 }
 
-mcc::CommandResult mcc::IfUnlessInstruction::GenResult(const bool stringify) const
+mcc::Result mcc::IfUnlessInstruction::GenResult(const bool stringify, const bool use_stack) const
 {
+    if (!UseCount)
+        return {.Type = ResultType_None};
+
+    Assert(use_stack, "if-unless instruction requires stack usage");
+
+    if (const auto condition = Condition->GenResult(false, use_stack);
+        condition.Type == ResultType_Value)
+    {
+        if (Unless == (condition.Value == "false" || condition.Value == "0"))
+            return Then->GenResult(stringify, use_stack);
+        return Else->GenResult(stringify, use_stack);
+    }
+
     return {
-        .Type = CommandResultType_Storage,
-        .Path = "stack[0].result." + GetResultID(),
+        .Type = ResultType_Storage,
+        .Location = Location,
+        .Path = GetStackPath(),
     };
+}
+
+bool mcc::IfUnlessInstruction::RequireStack() const
+{
+    return UseCount;
 }

@@ -10,14 +10,14 @@ mcc::ConstantBoolean::ConstantBoolean(const bool value)
 {
 }
 
-mcc::CommandResult mcc::ConstantBoolean::GenResult(const bool stringify) const
+mcc::Result mcc::ConstantBoolean::GenResult(const bool stringify, bool use_stack) const
 {
     std::string value(Value ? "true" : "false");
     if (stringify)
         value = '"' + value + '"';
 
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = value,
     };
 }

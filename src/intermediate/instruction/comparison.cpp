@@ -20,66 +20,81 @@ mcc::ComparisonInstruction::ComparisonInstruction(
       Left(std::move(left)),
       Right(std::move(right))
 {
+    Left->Use();
+    Right->Use();
 }
 
-void mcc::ComparisonInstruction::Gen(CommandVector &commands) const
+mcc::ComparisonInstruction::~ComparisonInstruction()
 {
-    auto [
-        left_type_,
-        left_value_,
-        left_path_,
-        left_player_,
-        left_objective_
-    ] = Left->GenResult();
-    auto [
-        right_type_,
-        right_value_,
-        right_path_,
-        right_player_,
-        right_objective_
-    ] = Right->GenResult();
+    Left->Drop();
+    Right->Drop();
+}
+
+void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool use_stack) const
+{
+    Assert(use_stack, "comparison instruction requires stack usage");
+
+    const auto left = Left->GenResult(false, use_stack);
+    const auto right = Right->GenResult(false, use_stack);
 
     commands.Append("scoreboard objectives add tmp dummy");
 
-    switch (left_type_)
+    switch (left.Type)
     {
-        case CommandResultType_Value:
-            commands.Append("scoreboard players set %a tmp {}", left_value_);
+        case ResultType_Value:
+            commands.Append("scoreboard players set %a tmp {}", left.Value);
             break;
 
-        case CommandResultType_Storage:
+        case ResultType_Storage:
             commands.Append(
                 "execute store result score %a tmp run data get storage {} {}",
-                Location,
-                left_path_);
+                left.Location,
+                left.Path);
             break;
 
-        case CommandResultType_Score:
+        case ResultType_Score:
             commands.Append(
                 "scoreboard players operation %a tmp = {} {}",
-                left_player_,
-                left_objective_);
-            break;
-    }
-    switch (right_type_)
-    {
-        case CommandResultType_Value:
-            commands.Append("scoreboard players set %b tmp {}", right_value_);
+                left.Player,
+                left.Objective);
             break;
 
-        case CommandResultType_Storage:
+        default:
+            Error(
+                "left must be {}, {} or {}, but is {}",
+                ResultType_Value,
+                ResultType_Storage,
+                ResultType_Score,
+                left.Type);
+    }
+
+    switch (right.Type)
+    {
+        case ResultType_Value:
+            commands.Append("scoreboard players set %b tmp {}", right.Value);
+            break;
+
+        case ResultType_Storage:
             commands.Append(
                 "execute store result score %b tmp run data get storage {} {}",
-                Location,
-                right_path_);
+                right.Location,
+                right.Path);
             break;
 
-        case CommandResultType_Score:
+        case ResultType_Score:
             commands.Append(
                 "scoreboard players operation %b tmp = {} {}",
-                right_player_,
-                right_objective_);
+                right.Player,
+                right.Objective);
             break;
+
+        default:
+            Error(
+                "right must be {}, {} or {}, but is {}",
+                ResultType_Value,
+                ResultType_Storage,
+                ResultType_Score,
+                right.Type);
     }
 
     std::string operator_;
@@ -110,17 +125,26 @@ void mcc::ComparisonInstruction::Gen(CommandVector &commands) const
     }
 
     commands.Append(
-        "execute store result storage {} stack[0].result.{} byte 1 if score %a tmp {} %b tmp",
+        "execute store result storage {} {} byte 1 if score %a tmp {} %b tmp",
         Location,
-        GetResultID(),
+        GetStackPath(),
         operator_);
+
     commands.Append("scoreboard objectives remove tmp");
 }
 
-mcc::CommandResult mcc::ComparisonInstruction::GenResult(const bool stringify) const
+mcc::Result mcc::ComparisonInstruction::GenResult(const bool stringify, const bool use_stack) const
 {
+    Assert(use_stack, "comparison instruction requires stack usage");
+
     return {
-        .Type = CommandResultType_Storage,
-        .Path = "stack[0].result." + GetResultID(),
+        .Type = ResultType_Storage,
+        .Location = Location,
+        .Path = GetStackPath(),
     };
+}
+
+bool mcc::ComparisonInstruction::RequireStack() const
+{
+    return true;
 }

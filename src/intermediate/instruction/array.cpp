@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
@@ -60,9 +61,17 @@ mcc::ArrayInstruction::ArrayInstruction(
       Index(index),
       Stringify(stringify)
 {
+    Array->Use();
+    Value->Use();
 }
 
-void mcc::ArrayInstruction::Gen(CommandVector &commands) const
+mcc::ArrayInstruction::~ArrayInstruction()
+{
+    Array->Drop();
+    Value->Drop();
+}
+
+void mcc::ArrayInstruction::Generate(CommandVector &commands, bool use_stack) const
 {
     //
     // array: stack-allocated
@@ -78,20 +87,10 @@ void mcc::ArrayInstruction::Gen(CommandVector &commands) const
     //      execute store result storage <location> stack[0].values[<array.index>][(<back>|0|<index>)] double 1 run scoreboard players get <value.player> <value.objective>
     //
 
-    auto [
-        array_type_,
-        array_value_,
-        array_path_,
-        array_player_,
-        array_objective_
-    ] = Array->GenResult();
-    auto [
-        value_type_,
-        value_value_,
-        value_path_,
-        value_player_,
-        value_objective_
-    ] = Value->GenResult(Stringify);
+    const auto array = Array->GenResult(false, use_stack);
+    const auto value = Value->GenResult(Stringify, use_stack);
+
+    Assert(array.Type == ResultType_Storage, "array must be {}, but is {}", ResultType_Storage, array.Type);
 
     std::string operation;
     switch (ArrayOperation)
@@ -109,34 +108,55 @@ void mcc::ArrayInstruction::Gen(CommandVector &commands) const
             break;
     }
 
-    switch (value_type_)
+    switch (value.Type)
     {
-        case CommandResultType_Value:
-            commands.Append("data modify storage {} {} {} value {}", Location, array_path_, operation, value_value_);
+        case ResultType_Value:
+            commands.Append(
+                "data modify storage {} {} {} value {}",
+                array.Location,
+                array.Path,
+                operation,
+                value.Value);
             break;
 
-        case CommandResultType_Storage:
+        case ResultType_Storage:
             commands.Append(
-                "data modify storage {0} {1} {2} {3} storage {0} {4}",
-                Location,
-                array_path_,
+                "data modify storage {} {} {} {} storage {} {}",
+                array.Location,
+                array.Path,
                 operation,
                 Stringify ? "string" : "from",
-                value_path_);
+                value.Location,
+                value.Path);
             break;
 
-        case CommandResultType_Score:
+        case ResultType_Score:
             commands.Append(
                 "execute store result storage {} tmp double 1 run scoreboard players get {} {}",
                 Location,
-                value_player_,
-                value_objective_);
+                value.Player,
+                value.Objective);
             commands.Append(
-                "data modify storage {0} {1} {2} {3} storage {0} tmp",
-                Location,
-                array_path_,
+                "data modify storage {} {} {} {} storage {} tmp",
+                array.Location,
+                array.Path,
                 operation,
-                Stringify ? "string" : "from");
+                Stringify ? "string" : "from",
+                Location);
+            commands.Append("data remove storage {} tmp", Location);
             break;
+
+        default:
+            Error(
+                "value must be {}, {} or {}, but is {}",
+                ResultType_Value,
+                ResultType_Storage,
+                ResultType_Score,
+                value.Type);
     }
+}
+
+bool mcc::ArrayInstruction::RequireStack() const
+{
+    return Array->RequireStack() || Value->RequireStack();
 }

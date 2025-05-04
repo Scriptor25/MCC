@@ -74,20 +74,26 @@ void mcc::DefineStatement::Gen(Context &context) const
     commands_.clear();
 
     Builder builder(context, location_);
-
     for (auto &expression: Expressions)
         (void) expression->Gen(builder, false);
 
-    commands_.emplace_back(std::format("data modify storage {} stack prepend value {{}}", location_));
+    const auto require_stack = builder.RequireStack();
+    const auto require_cleanup = builder.RequireCleanup();
 
-    for (auto &parameter: Parameters)
-        commands_.emplace_back(
-            std::format(
-                "$data modify storage {0} stack[0].var.{1} set value $({1})",
-                location_,
-                parameter));
+    if (require_stack)
+    {
+        commands_.emplace_back(std::format("data modify storage {} stack prepend value {{}}", location_));
 
-    builder.Gen(commands_);
+        for (auto &parameter: Parameters)
+            commands_.emplace_back(
+                std::format(
+                    "$data modify storage {0} stack[0].var.{1} set value $({1})",
+                    location_,
+                    parameter));
+    }
 
-    commands_.emplace_back(std::format("data remove storage {} stack[0]", location_));
+    builder.Generate(commands_, require_stack);
+
+    if (require_stack && require_cleanup)
+        commands_.emplace_back(std::format("data remove storage {} stack[0]", location_));
 }

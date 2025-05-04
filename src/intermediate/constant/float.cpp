@@ -10,14 +10,14 @@ mcc::ConstantFloat::ConstantFloat(const FloatT value)
 {
 }
 
-mcc::CommandResult mcc::ConstantFloat::GenResult(const bool stringify) const
+mcc::Result mcc::ConstantFloat::GenResult(const bool stringify, bool use_stack) const
 {
     auto value = std::to_string(Value);
     if (stringify)
         value = '"' + value + '"';
 
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = value,
     };
 }

@@ -7,11 +7,12 @@
 
 namespace mcc
 {
-    enum CommandResultTypeE
+    enum ResultTypeE
     {
-        CommandResultType_Value,
-        CommandResultType_Storage,
-        CommandResultType_Score,
+        ResultType_None,
+        ResultType_Value,
+        ResultType_Storage,
+        ResultType_Score,
     };
 
     enum TargetSelectorE
@@ -280,13 +281,14 @@ namespace mcc
         return map.at(string);
     }
 
-    inline const char *ToString(const CommandResultTypeE enum_)
+    inline const char *ToString(const ResultTypeE enum_)
     {
-        static const std::map<CommandResultTypeE, const char *> map
+        static const std::map<ResultTypeE, const char *> map
         {
-            {CommandResultType_Value, "value"},
-            {CommandResultType_Storage, "storage"},
-            {CommandResultType_Score, "score"},
+            {ResultType_None, "none"},
+            {ResultType_Value, "value"},
+            {ResultType_Storage, "storage"},
+            {ResultType_Score, "score"},
         };
 
         return map.at(enum_);
@@ -453,10 +455,10 @@ namespace mcc
 namespace std
 {
     template<>
-    struct formatter<mcc::CommandResultTypeE> final : formatter<string>
+    struct formatter<mcc::ResultTypeE> final : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::CommandResultTypeE &type, FormatContext &ctx) const
+        auto format(const mcc::ResultTypeE &type, FormatContext &ctx) const
         {
             return formatter<string>::format(mcc::ToString(type), ctx);
         }

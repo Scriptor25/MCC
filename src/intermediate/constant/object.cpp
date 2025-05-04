@@ -8,9 +8,17 @@ mcc::ConstantPtr mcc::ConstantObject::Create(std::map<std::string, ConstantPtr> 
 mcc::ConstantObject::ConstantObject(std::map<std::string, ConstantPtr> values)
     : Values(std::move(values))
 {
+    for (const auto &value: Values | std::views::values)
+        value->Use();
 }
 
-mcc::CommandResult mcc::ConstantObject::GenResult(const bool stringify) const
+mcc::ConstantObject::~ConstantObject()
+{
+    for (const auto &value: Values | std::views::values)
+        value->Drop();
+}
+
+mcc::Result mcc::ConstantObject::GenResult(const bool stringify, const bool use_stack) const
 {
     std::string result;
     result += '{';
@@ -22,13 +30,13 @@ mcc::CommandResult mcc::ConstantObject::GenResult(const bool stringify) const
             first = false;
         else
             result += ',';
-        result += key_ + ':' + value_->GenResult(stringify).Value;
+        result += key_ + ':' + value_->GenResult(stringify, use_stack).Value;
     }
 
     result += '}';
 
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = result,
     };
 }

@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
@@ -19,9 +20,17 @@ mcc::ObjectInstruction::ObjectInstruction(ResourceLocation location, ValuePtr ob
       Value(std::move(value)),
       Key(std::move(key))
 {
+    Object->Use();
+    Value->Use();
 }
 
-void mcc::ObjectInstruction::Gen(CommandVector &commands) const
+mcc::ObjectInstruction::~ObjectInstruction()
+{
+    Object->Drop();
+    Value->Drop();
+}
+
+void mcc::ObjectInstruction::Generate(CommandVector &commands, const bool use_stack) const
 {
     //
     // object: stack-allocated
@@ -36,45 +45,51 @@ void mcc::ObjectInstruction::Gen(CommandVector &commands) const
     //      execute store result storage <location> stack[0].values[<object.index>].<key> double 1 run scoreboard players get <value.player> <value.objective>
     //
 
-    auto [
-        object_type_,
-        object_value_,
-        object_path_,
-        object_player,
-        object_objective_
-    ] = Object->GenResult();
-    auto [
-        value_type_,
-        value_value_,
-        value_path_,
-        value_player_,
-        value_objective_
-    ] = Value->GenResult();
+    auto object = Object->GenResult(false, use_stack);
+    auto value = Value->GenResult(false, use_stack);
 
-    switch (value_type_)
+    switch (value.Type)
     {
-        case CommandResultType_Value:
-            commands.Append("data modify storage {} {}.{} set value {}", Location, object_path_, Key, value_value_);
+        case ResultType_Value:
+            commands.Append(
+                "data modify storage {} {}.{} set value {}",
+                object.Location,
+                object.Path,
+                Key,
+                value.Value);
             break;
 
-        case CommandResultType_Storage:
+        case ResultType_Storage:
             commands.Append(
                 "data modify storage {} {}.{} set from storage {} {}",
-                Location,
-                object_path_,
+                object.Location,
+                object.Path,
                 Key,
-                Location,
-                value_path_);
+                value.Location,
+                value.Path);
             break;
 
-        case CommandResultType_Score:
+        case ResultType_Score:
             commands.Append(
                 "execute store result storage {} {}.{} double 1 run scoreboard players get {} {}",
-                Location,
-                object_path_,
+                object.Location,
+                object.Path,
                 Key,
-                value_player_,
-                value_objective_);
+                value.Player,
+                value.Objective);
             break;
+
+        default:
+            Error(
+                "value must be {}, {} or {}, but is {}",
+                ResultType_Value,
+                ResultType_Storage,
+                ResultType_Score,
+                value.Type);
     }
+}
+
+bool mcc::ObjectInstruction::RequireStack() const
+{
+    return Object->RequireStack() || Value->RequireStack();
 }

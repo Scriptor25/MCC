@@ -26,21 +26,6 @@ namespace mcc
     struct Context;
     class Builder;
 
-    struct CommandResult
-    {
-        CommandResultTypeE Type;
-
-        /* Constant */
-        std::string Value;
-
-        /* Storage */
-        std::string Path;
-
-        /* Score */
-        std::string Player;
-        std::string Objective;
-    };
-
     class CommandVector
     {
     public:

@@ -14,27 +14,35 @@ mcc::CallInstruction::CallInstruction(ResourceLocation location, const CalleeE c
       Callee(callee),
       Arguments(std::move(arguments))
 {
+    for (const auto &argument: Arguments)
+        argument->Use();
+}
+
+mcc::CallInstruction::~CallInstruction()
+{
+    for (const auto &argument: Arguments)
+        argument->Drop();
 }
 
 static void _generic(
     mcc::CommandT &command,
-    const mcc::ResourceLocation &,
     const mcc::CalleeE callee,
-    const std::vector<mcc::ValuePtr> &arguments)
+    const std::vector<mcc::ValuePtr> &arguments,
+    const bool use_stack)
 {
     command += mcc::ToString(callee);
     for (auto &argument: arguments)
-        command += ' ' + argument->GenResult().Value;
+        command += ' ' + argument->GenResult(false, use_stack).Value;
 }
 
 static void _function(
     mcc::CommandT &command,
-    const mcc::ResourceLocation &location,
     const mcc::CalleeE,
-    const std::vector<mcc::ValuePtr> &arguments)
+    const std::vector<mcc::ValuePtr> &arguments,
+    const bool use_stack)
 {
-    const auto callee_ = arguments[0]->GenResult();
-    const auto arguments_ = arguments[1]->GenResult();
+    const auto callee_ = arguments[0]->GenResult(false, use_stack);
+    const auto arguments_ = arguments[1]->GenResult(false, use_stack);
 
     command += "function ";
     command += callee_.Value;
@@ -42,126 +50,167 @@ static void _function(
 
     switch (arguments_.Type)
     {
-        case mcc::CommandResultType_Value:
+        case mcc::ResultType_Value:
             command += arguments_.Value;
             break;
 
-        case mcc::CommandResultType_Storage:
+        case mcc::ResultType_Storage:
             command += "with storage ";
-            command += location.String();
+            command += arguments_.Location.String();
             command += ' ';
             command += arguments_.Path;
             break;
 
-        case mcc::CommandResultType_Score:
-            mcc::Error("invalid argument type score");
+        default:
+            mcc::Error(
+                "arguments must be {} or {}, but is {}",
+                mcc::ResultType_Value,
+                mcc::ResultType_Storage,
+                arguments_.Type);
     }
 }
 
-
 static void _tellraw(
     mcc::CommandT &command,
-    const mcc::ResourceLocation &location,
     const mcc::CalleeE,
-    const std::vector<mcc::ValuePtr> &arguments)
+    const std::vector<mcc::ValuePtr> &arguments,
+    const bool use_stack)
 {
-    const auto targets = arguments[0]->GenResult();
-    auto [
-        message_type_,
-        message_value_,
-        message_path_,
-        message_player_,
-        message_objective_
-    ] = arguments[1]->GenResult();
+    const auto targets = arguments[0]->GenResult(false, use_stack);
+    const auto message = arguments[1]->GenResult(false, use_stack);
 
     command += "tellraw ";
     command += targets.Value;
     command += ' ';
 
-    switch (message_type_)
+    switch (message.Type)
     {
-        case mcc::CommandResultType_Value:
-            command += message_value_;
+        case mcc::ResultType_Value:
+            command += message.Value;
             break;
 
-        case mcc::CommandResultType_Storage:
+        case mcc::ResultType_Storage:
             command += "{storage:";
             command += '"';
-            command += location.String();
+            command += message.Location.String();
             command += '"';
             command += ",nbt:";
             command += '"';
-            command += message_path_;
+            command += message.Path;
             command += '"';
             command += ",interpret:true}";
             break;
 
-        case mcc::CommandResultType_Score:
+        case mcc::ResultType_Score:
             command += "{score:{name:";
             command += '"';
-            command += message_player_;
+            command += message.Player;
             command += '"';
             command += ",objective:";
             command += '"';
-            command += message_objective_;
+            command += message.Objective;
             command += '"';
             command += "}}";
             break;
+
+        default:
+            mcc::Error(
+                "message must be {}, {} or {}, but is {}",
+                mcc::ResultType_Value,
+                mcc::ResultType_Storage,
+                mcc::ResultType_Score,
+                message.Type);
     }
 }
 
-using Generator = std::function<void(
+using GeneratorT = std::function<void(
     mcc::CommandT &command,
-    const mcc::ResourceLocation &location,
     mcc::CalleeE callee,
-    const std::vector<mcc::ValuePtr> &arguments)>;
+    const std::vector<mcc::ValuePtr> &arguments,
+    bool use_stack)>;
 
-static const std::map<mcc::CalleeE, std::pair<bool, Generator>> generator_map
+struct GeneratorInfo
 {
-    {mcc::Callee_Give, {true, _generic}},
-    {mcc::Callee_SetBlock, {true, _generic}},
-
-    {mcc::Callee_Function, {true, _function}},
-    {mcc::Callee_TellRaw, {true, _tellraw}},
+    GeneratorT Generator;
+    bool RequireStack;
+    bool Inlinable;
 };
 
-void mcc::CallInstruction::Gen(CommandVector &commands) const
+static const std::map<mcc::CalleeE, GeneratorInfo> generator_map
 {
-    Assert(generator_map.contains(Callee), "no generator for call to {}", Callee);
+    {mcc::Callee_Give, {_generic, false, true}},
+    {mcc::Callee_SetBlock, {_generic, false, true}},
 
-    auto &[inlinable_, generator_] = generator_map.at(Callee);
+    {mcc::Callee_Function, {_function, false, true}},
+    {mcc::Callee_TellRaw, {_tellraw, false, true}},
+};
+
+void mcc::CallInstruction::Generate(CommandVector &commands, const bool use_stack) const
+{
+    Assert(!UseCount || use_stack, "call instruction requires stack usage");
+
+    Assert(generator_map.contains(Callee), "no generator for call to {}", Callee);
+    auto &[generator_, require_stack_, inlinable_] = generator_map.at(Callee);
+    Assert(use_stack || !require_stack_, "cannot generate stackless call to {}", Callee);
 
     CommandT command;
-    generator_(command, Location, Callee, Arguments);
+    generator_(command, Callee, Arguments, use_stack);
+
+    if (!UseCount)
+    {
+        commands.Append(command);
+        return;
+    }
 
     commands.Append(
-        "execute store result storage {} stack[0].result.{} double 1 run {}",
+        "execute store result storage {} {} double 1 run {}",
         Location,
-        GetResultID(),
+        GetStackPath(),
         command);
 }
 
-mcc::CommandT mcc::CallInstruction::GenInline() const
+mcc::CommandT mcc::CallInstruction::GenerateInline(const bool use_stack) const
 {
-    Assert(generator_map.contains(Callee), "no generator for call to {}", Callee);
+    Assert(!UseCount || use_stack, "call instruction requires stack usage");
 
-    auto &[inlinable_, generator_] = generator_map.at(Callee);
+    Assert(generator_map.contains(Callee), "no generator for call to {}", Callee);
+    auto &[generator_, require_stack_, inlinable_] = generator_map.at(Callee);
+    Assert(use_stack || !require_stack_, "cannot generate stackless call to {}", Callee);
     Assert(inlinable_, "cannot generate inline call to {}", Callee);
 
     CommandT command;
-    generator_(command, Location, Callee, Arguments);
+    generator_(command, Callee, Arguments, use_stack);
+
+    if (!UseCount)
+        return command;
 
     return std::format(
-        "execute store result storage {} stack[0].result.{} double 1 run {}",
+        "execute store result storage {} {} double 1 run {}",
         Location,
-        GetResultID(),
+        GetStackPath(),
         command);
 }
 
-mcc::CommandResult mcc::CallInstruction::GenResult(const bool stringify) const
+mcc::Result mcc::CallInstruction::GenResult(const bool stringify, const bool use_stack) const
 {
+    if (!UseCount)
+        return {.Type = ResultType_None};
+
+    Assert(use_stack, "call instruction requires stack usage");
+
     return {
-        .Type = CommandResultType_Storage,
-        .Path = "stack[0].result." + GetResultID(),
+        .Type = ResultType_Storage,
+        .Location = Location,
+        .Path = GetStackPath(),
     };
+}
+
+bool mcc::CallInstruction::RequireStack() const
+{
+    if (UseCount)
+        return true;
+
+    Assert(generator_map.contains(Callee), "no generator for call to {}", Callee);
+    auto &[generator_, require_stack_, inlinable_] = generator_map.at(Callee);
+    return require_stack_;
 }

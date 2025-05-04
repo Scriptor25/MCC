@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 mcc::InstructionPtr mcc::AllocationInstruction::CreateValue(ResourceLocation location, IndexT index)
@@ -25,8 +26,10 @@ mcc::AllocationInstruction::AllocationInstruction(
 {
 }
 
-void mcc::AllocationInstruction::Gen(CommandVector &commands) const
+void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool use_stack) const
 {
+    Assert(use_stack, "allocation instruction requires stack usage");
+
     std::string value;
     switch (AllocationType)
     {
@@ -46,10 +49,18 @@ void mcc::AllocationInstruction::Gen(CommandVector &commands) const
     commands.Append("data modify storage {} stack[0].val insert {} value {}", Location, Index, value);
 }
 
-mcc::CommandResult mcc::AllocationInstruction::GenResult(const bool stringify) const
+mcc::Result mcc::AllocationInstruction::GenResult(const bool stringify, const bool use_stack) const
 {
+    Assert(use_stack, "allocation instruction requires stack usage");
+
     return {
-        .Type = CommandResultType_Storage,
+        .Type = ResultType_Storage,
+        .Location = Location,
         .Path = "stack[0].val[" + std::to_string(Index) + ']',
     };
+}
+
+bool mcc::AllocationInstruction::RequireStack() const
+{
+    return true;
 }

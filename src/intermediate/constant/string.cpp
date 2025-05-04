@@ -10,10 +10,10 @@ mcc::ConstantString::ConstantString(std::string value)
 {
 }
 
-mcc::CommandResult mcc::ConstantString::GenResult(const bool stringify) const
+mcc::Result mcc::ConstantString::GenResult(const bool stringify, bool use_stack) const
 {
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = '"' + Value + '"',
     };
 }

@@ -16,7 +16,7 @@ mcc::ConstantTarget::ConstantTarget(
 {
 }
 
-mcc::CommandResult mcc::ConstantTarget::GenResult(const bool stringify) const
+mcc::Result mcc::ConstantTarget::GenResult(const bool stringify, bool use_stack) const
 {
     std::string result;
     result += '@';
@@ -63,7 +63,7 @@ mcc::CommandResult mcc::ConstantTarget::GenResult(const bool stringify) const
         result = "{selector:\"" + result + "\"}";
 
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = result,
     };
 }

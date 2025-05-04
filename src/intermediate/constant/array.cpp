@@ -9,9 +9,17 @@ mcc::ConstantArray::ConstantArray(std::vector<ConstantPtr> values, const bool st
     : Values(std::move(values)),
       Stringify(stringify)
 {
+    for (const auto &value: Values)
+        value->Use();
 }
 
-mcc::CommandResult mcc::ConstantArray::GenResult(const bool stringify) const
+mcc::ConstantArray::~ConstantArray()
+{
+    for (const auto &value: Values)
+        value->Drop();
+}
+
+mcc::Result mcc::ConstantArray::GenResult(const bool stringify, const bool use_stack) const
 {
     std::string result;
     result += '[';
@@ -23,12 +31,12 @@ mcc::CommandResult mcc::ConstantArray::GenResult(const bool stringify) const
             first = false;
         else
             result += ',';
-        result += value->GenResult(Stringify || stringify).Value;
+        result += value->GenResult(Stringify || stringify, use_stack).Value;
     }
 
     result += ']';
     return {
-        .Type = CommandResultType_Value,
+        .Type = ResultType_Value,
         .Value = result,
     };
 }
