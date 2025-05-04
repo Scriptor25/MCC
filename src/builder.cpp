@@ -1,4 +1,5 @@
 #include <mcc/builder.hpp>
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 mcc::Builder::Builder(Context &context, const ResourceLocation &location)
@@ -69,24 +70,21 @@ mcc::InstructionPtr mcc::Builder::CreateIf(
 
 mcc::InstructionPtr mcc::Builder::AllocateValue(const bool inline_)
 {
-    if (inline_)
-        throw std::runtime_error("cannot inline allocation");
+    Assert(!inline_, "cannot inline allocation instruction");
 
     return Insert(AllocationInstruction::CreateValue(m_Location, m_StackIndex++), false);
 }
 
 mcc::InstructionPtr mcc::Builder::AllocateArray(const bool inline_)
 {
-    if (inline_)
-        throw std::runtime_error("cannot inline allocation");
+    Assert(!inline_, "cannot inline allocation instruction");
 
     return Insert(AllocationInstruction::CreateArray(m_Location, m_StackIndex++), false);
 }
 
 mcc::InstructionPtr mcc::Builder::AllocateObject(const bool inline_)
 {
-    if (inline_)
-        throw std::runtime_error("cannot inline allocation");
+    Assert(!inline_, "cannot inline allocation instruction");
 
     return Insert(AllocationInstruction::CreateObject(m_Location, m_StackIndex++), false);
 }
@@ -97,8 +95,7 @@ mcc::InstructionPtr mcc::Builder::CreateAppend(
     const bool stringify,
     const bool inline_)
 {
-    if (inline_)
-        throw std::runtime_error("cannot inline array operation");
+    Assert(!inline_, "cannot inline array operation instruction");
 
     return Insert(
         ArrayInstruction::CreateAppend(
@@ -115,8 +112,7 @@ mcc::InstructionPtr mcc::Builder::CreatePrepend(
     const bool stringify,
     const bool inline_)
 {
-    if (inline_)
-        throw std::runtime_error("cannot inline array operation");
+    Assert(!inline_, "cannot inline array operation");
 
     return Insert(
         ArrayInstruction::CreatePrepend(
@@ -134,8 +130,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
     const bool stringify,
     const bool inline_)
 {
-    if (inline_)
-        throw std::runtime_error("cannot inline array operation");
+    Assert(!inline_, "cannot inline array operation");
 
     return Insert(
         ArrayInstruction::CreateInsert(
@@ -149,8 +144,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(ValuePtr object, ValuePtr value, std::string key, const bool inline_)
 {
-    if (inline_)
-        throw std::runtime_error("cannot inline object operation");
+    Assert(!inline_, "cannot inline object operation");
 
     return Insert(
         ObjectInstruction::CreateInsert(
@@ -170,7 +164,7 @@ mcc::InstructionPtr mcc::Builder::Insert(InstructionPtr instruction, const bool 
     return m_Instructions.back();
 }
 
-void mcc::Builder::Gen(std::vector<Command> &commands) const
+void mcc::Builder::Gen(std::vector<CommandT> &commands) const
 {
     CommandVector command_vector(commands);
     for (auto &instruction: m_Instructions)

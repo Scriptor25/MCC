@@ -1,4 +1,5 @@
 #include <set>
+#include <mcc/error.hpp>
 #include <mcc/parse.hpp>
 
 mcc::Token &mcc::Parser::Next()
@@ -191,7 +192,9 @@ mcc::Token &mcc::Parser::Next()
                         }
 
                         default:
-                            throw std::runtime_error("TODO");
+                            Error(
+                                "invalid number of decimal points in range token, must be either 0, 1 or 2, but is {}",
+                                decimals);
                     }
                 }
 

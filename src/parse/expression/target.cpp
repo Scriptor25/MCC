@@ -1,10 +1,12 @@
 #include <functional>
+#include <mcc/attribute.hpp>
+#include <mcc/intermediate.hpp>
 #include <mcc/parse.hpp>
 
 mcc::TargetAttributePtr mcc::Parser::ParseIntegerAttribute(bool invert)
 {
     auto value = Expect(TokenType_Integer).Integer;
-    return std::make_shared<IntegerAttribute>(invert, value);
+    return std::make_unique<IntegerAttribute>(invert, value);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseFloatAttribute(bool invert)
@@ -12,10 +14,10 @@ mcc::TargetAttributePtr mcc::Parser::ParseFloatAttribute(bool invert)
     if (At(TokenType_Integer))
     {
         auto value = Skip().Integer;
-        return std::make_shared<IntegerAttribute>(invert, value);
+        return std::make_unique<IntegerAttribute>(invert, value);
     }
     auto value = Expect(TokenType_Float).Float;
-    return std::make_shared<FloatAttribute>(invert, value);
+    return std::make_unique<FloatAttribute>(invert, value);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseIntegerRangeAttribute(bool invert)
@@ -23,10 +25,10 @@ mcc::TargetAttributePtr mcc::Parser::ParseIntegerRangeAttribute(bool invert)
     if (At(TokenType_Integer))
     {
         auto value = Skip().Integer;
-        return std::make_shared<IntegerAttribute>(invert, value);
+        return std::make_unique<IntegerAttribute>(invert, value);
     }
     auto [beg_, end_] = Expect(TokenType_Range).Range;
-    return std::make_shared<RangeAttribute>(invert, beg_, end_);
+    return std::make_unique<RangeAttribute>(invert, beg_, end_);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseFloatRangeAttribute(bool invert)
@@ -34,33 +36,33 @@ mcc::TargetAttributePtr mcc::Parser::ParseFloatRangeAttribute(bool invert)
     if (At(TokenType_Integer))
     {
         auto value = Skip().Integer;
-        return std::make_shared<IntegerAttribute>(invert, value);
+        return std::make_unique<IntegerAttribute>(invert, value);
     }
     if (At(TokenType_Float))
     {
         auto value = Skip().Float;
-        return std::make_shared<FloatAttribute>(invert, value);
+        return std::make_unique<FloatAttribute>(invert, value);
     }
     auto [beg_, end_] = Expect(TokenType_Range).Range;
-    return std::make_shared<RangeAttribute>(invert, beg_, end_);
+    return std::make_unique<RangeAttribute>(invert, beg_, end_);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseStringAttribute(bool invert)
 {
     auto value = Expect(TokenType_String).Value;
-    return std::make_shared<StringAttribute>(invert, std::move(value));
+    return std::make_unique<StringAttribute>(invert, std::move(value));
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseEnumAttribute(bool invert, const std::vector<const char *> &values)
 {
     auto value = ExpectEnum(values).Value;
-    return std::make_shared<EnumAttribute>(invert, std::move(value));
+    return std::make_unique<EnumAttribute>(invert, std::move(value));
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseNameAttribute(bool invert)
 {
     auto value = Expect(TokenType_Symbol).Value;
-    return std::make_shared<NameAttribute>(invert, std::move(value));
+    return std::make_unique<NameAttribute>(invert, std::move(value));
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseMapAttribute(bool invert, const Parse &parse)
@@ -78,7 +80,7 @@ mcc::TargetAttributePtr mcc::Parser::ParseMapAttribute(bool invert, const Parse 
             Expect(TokenType_Other, ",");
     }
 
-    return std::make_shared<MapAttribute>(invert, std::move(values));
+    return std::make_unique<MapAttribute>(invert, std::move(values));
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseResourceMapAttribute(bool invert, const Parse &parse)
@@ -96,26 +98,26 @@ mcc::TargetAttributePtr mcc::Parser::ParseResourceMapAttribute(bool invert, cons
             Expect(TokenType_Other, ",");
     }
 
-    return std::make_shared<ResourceMapAttribute>(invert, std::move(values));
+    return std::make_unique<ResourceMapAttribute>(invert, std::move(values));
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseNBTAttribute(bool invert)
 {
     auto value = ParseObjectExpression();
-    return std::make_shared<NBTAttribute>(invert, std::move(value));
+    return std::make_unique<NBTAttribute>(invert, std::move(value));
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseResourceAttribute(bool invert)
 {
     auto value = ParseResourceLocation();
-    return std::make_shared<ResourceAttribute>(invert, std::move(value));
+    return std::make_unique<ResourceAttribute>(invert, std::move(value));
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseTagAttribute(bool invert)
 {
     Expect(TokenType_Other, "#");
     auto [namespace_, path_] = ParseResourceLocation();
-    return std::make_shared<TagAttribute>(invert, ResourceTag(std::move(namespace_), std::move(path_)));
+    return std::make_unique<TagAttribute>(invert, ResourceTag(std::move(namespace_), std::move(path_)));
 }
 
 mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
@@ -215,7 +217,7 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
         {"predicate", parse_resource},
     };
 
-    auto selector = ToTargetSelector(Expect(TokenType_Target).Value);
+    const auto selector = ToTargetSelector(Expect(TokenType_Target).Value);
 
     std::map<std::string, std::vector<TargetAttributePtr>> attributes;
     if (SkipIf(TokenType_Other, "["))
@@ -233,5 +235,24 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
         }
     }
 
-    return std::make_unique<TargetExpression>(selector, std::move(attributes));
+    auto view = '@' + std::string(ToString(selector));
+    if (!attributes.empty())
+    {
+        view += '[';
+
+        auto first = true;
+        for (auto &[key_, value_]: attributes)
+            for (const auto &attribute: value_)
+            {
+                if (first)
+                    first = false;
+                else
+                    view += ',';
+                view += key_ + '=' + attribute->String();
+            }
+
+        view += ']';
+    }
+
+    return std::make_unique<ConstantExpression>(ConstantTarget::Create(selector, std::move(attributes)), view);
 }

@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 mcc::InstructionPtr mcc::OperationInstruction::Create(
@@ -105,7 +106,7 @@ void mcc::OperationInstruction::Gen(CommandVector &commands) const
             break;
 
         default:
-            throw std::runtime_error("TODO");
+            Error("undefined operator {}", Operator);
     }
 
     commands.Append("scoreboard players operation %a tmp {} %b tmp", operator_);

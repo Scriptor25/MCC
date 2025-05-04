@@ -48,7 +48,7 @@ namespace mcc
 
         InstructionPtr Insert(InstructionPtr instruction, bool inline_);
 
-        void Gen(std::vector<Command> &commands) const;
+        void Gen(std::vector<CommandT> &commands) const;
 
     private:
         Context &m_Context;

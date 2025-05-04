@@ -78,8 +78,3 @@ void mcc::ObjectInstruction::Gen(CommandVector &commands) const
             break;
     }
 }
-
-mcc::CommandResult mcc::ObjectInstruction::GenResult(const bool stringify) const
-{
-    throw std::runtime_error("TODO");
-}

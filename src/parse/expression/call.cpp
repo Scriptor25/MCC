@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/parse.hpp>
 
 mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
@@ -8,8 +9,7 @@ mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
         return expression;
 
     const auto callee = dynamic_cast<ResourceExpression *>(expression.get());
-    if (!callee)
-        throw std::runtime_error("function callee must be a resource location of any kind");
+    Assert(callee, "function callee must be a valid resource location");
 
     std::vector<ExpressionPtr> arguments;
 

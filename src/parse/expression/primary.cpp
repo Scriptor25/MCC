@@ -1,4 +1,6 @@
 #include <format>
+#include <mcc/error.hpp>
+#include <mcc/intermediate.hpp>
 #include <mcc/parse.hpp>
 
 mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
@@ -12,17 +14,35 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_Symbol, "return"))
         return ParseReturnExpression();
 
-    if (At(TokenType_Symbol, "true") || At(TokenType_Symbol, "false"))
-        return std::make_unique<BooleanExpression>(ExpectEnum("true", "false").Value == "true");
+    if (AtEnum("true", "false"))
+    {
+        auto token = Skip();
+        return std::make_unique<ConstantExpression>(
+            ConstantBoolean::Create(token.Value == "true"),
+            std::move(token.Value));
+    }
 
     if (At(TokenType_Integer))
-        return std::make_unique<IntegerExpression>(Expect(TokenType_Integer).Integer);
+    {
+        auto token = Skip();
+        return std::make_unique<ConstantExpression>(
+            ConstantInteger::Create(token.Integer),
+            token.Value);
+    }
 
     if (At(TokenType_Float))
-        return std::make_unique<FloatExpression>(Expect(TokenType_Float).Float);
+    {
+        auto token = Skip();
+        return std::make_unique<ConstantExpression>(
+            ConstantFloat::Create(token.Float),
+            token.Value);
+    }
 
     if (At(TokenType_String))
-        return std::make_unique<StringExpression>(Expect(TokenType_String).Value);
+    {
+        auto token = Skip();
+        return std::make_unique<ConstantExpression>(ConstantString::Create(token.Value), '"' + token.Value + '"');
+    }
 
     if (At(TokenType_Symbol) || At(TokenType_Other, ":"))
         return ParseResourceExpression();
@@ -39,24 +59,20 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_FormatString))
         return ParseFormatExpression();
 
-    if (SkipIf(TokenType_Other, "~"))
+    if (SkipIf(TokenType_Operator, "-"))
     {
-        auto offset = At(TokenType_Float)
-                          ? Skip().Float
-                          : At(TokenType_Integer)
-                                ? static_cast<double>(Skip().Integer)
-                                : 0.0;
-        return std::make_unique<RelativeOffsetExpression>(offset);
-    }
+        if (At(TokenType_Integer))
+        {
+            auto token = Skip();
+            return std::make_unique<ConstantExpression>(
+                ConstantInteger::Create(-token.Integer),
+                '-' + token.Value);
+        }
 
-    if (SkipIf(TokenType_Other, "^"))
-    {
-        auto offset = At(TokenType_Float)
-                          ? Skip().Float
-                          : At(TokenType_Integer)
-                                ? static_cast<double>(Skip().Integer)
-                                : 0.0;
-        return std::make_unique<LocalOffsetExpression>(offset);
+        auto token = Expect(TokenType_Float);
+        return std::make_unique<ConstantExpression>(
+            ConstantFloat::Create(-token.Float),
+            '-' + token.Value);
     }
 
     if (SkipIf(TokenType_Operator, "%"))
@@ -65,12 +81,27 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         return std::make_unique<SymbolExpression>(id);
     }
 
-    throw std::runtime_error(
-        std::format(
-            "{}({},{}): cannot parse {} '{}'",
-            m_Token.Where.Filename,
-            m_Token.Where.Row,
-            m_Token.Where.Col,
-            m_Token.Type,
-            m_Token.Value));
+    if (At(TokenType_Other, "~") || At(TokenType_Other, "^"))
+    {
+        auto type = ToOffsetType(Skip().Value);
+
+        auto negative = SkipIf(TokenType_Operator, "-");
+        auto token = negative
+                         ? std::optional(ExpectAny(TokenType_Integer, TokenType_Float))
+                         : AtAny(TokenType_Integer, TokenType_Float)
+                               ? std::optional(Skip())
+                               : std::nullopt;
+
+        auto offset = !token
+                          ? 0
+                          : token->Type == TokenType_Integer
+                                ? token->Integer
+                                : token->Float;
+
+        return std::make_unique<ConstantExpression>(
+            ConstantOffset::Create(type, offset),
+            ToString(type) + (token ? (negative ? "-" : "") + token->Value : ""));
+    }
+
+    Error(m_Token.Where, "cannot parse {} '{}'", m_Token.Type, m_Token.Value);
 }

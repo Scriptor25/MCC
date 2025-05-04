@@ -37,7 +37,7 @@ namespace mcc
     struct FunctionInfo
     {
         ResourceLocation Location;
-        std::vector<Command> Commands;
+        std::vector<CommandT> Commands;
     };
 
     struct Tag

@@ -41,7 +41,7 @@ void mcc::ReturnInstruction::Gen(CommandVector &commands) const
     }
 }
 
-mcc::Command mcc::ReturnInstruction::GenInline() const
+mcc::CommandT mcc::ReturnInstruction::GenInline() const
 {
     return "return run " + Value->GenInline();
 }

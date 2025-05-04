@@ -24,17 +24,38 @@ namespace mcc
         Token &Next();
 
         [[nodiscard]] bool At(TokenType type, const std::string &value = {}) const;
+        [[nodiscard]] bool AtAny(const std::vector<TokenType> &types) const;
+        [[nodiscard]] bool AtEnum(const std::vector<const char *> &values) const;
+
+        template<typename... Args>
+        [[nodiscard]] bool AtEnum(Args... args) const
+        {
+            return AtEnum({args...});
+        }
+
+        template<typename... Args>
+        [[nodiscard]] bool AtAny(Args... args) const
+        {
+            return AtAny({args...});
+        }
 
         bool SkipIf(TokenType type, const std::string &value = {});
 
         Token Skip();
         Token Expect(TokenType type, std::string value = {});
+        Token ExpectAny(const std::vector<TokenType> &types);
         Token ExpectEnum(const std::vector<const char *> &values);
 
         template<typename... Args>
         Token ExpectEnum(Args... args)
         {
             return ExpectEnum({args...});
+        }
+
+        template<typename... Args>
+        Token ExpectAny(Args... args)
+        {
+            return ExpectAny({args...});
         }
 
         ResourceLocation ParseResourceLocation();

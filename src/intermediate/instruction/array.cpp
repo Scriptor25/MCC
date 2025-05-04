@@ -140,8 +140,3 @@ void mcc::ArrayInstruction::Gen(CommandVector &commands) const
             break;
     }
 }
-
-mcc::CommandResult mcc::ArrayInstruction::GenResult(const bool stringify) const
-{
-    throw std::runtime_error("TODO");
-}

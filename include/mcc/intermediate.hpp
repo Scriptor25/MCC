@@ -14,8 +14,8 @@ namespace mcc
         virtual ~Value() = default;
 
         virtual void Gen(CommandVector &commands) const;
-        virtual Command GenInline() const;
-        virtual CommandResult GenResult(bool stringify = false) const;
+        [[nodiscard]] virtual CommandT GenInline() const;
+        [[nodiscard]] virtual CommandResult GenResult(bool stringify = false) const;
     };
 
     struct Constant : Value
@@ -28,7 +28,7 @@ namespace mcc
 
         explicit ConstantBoolean(bool value);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         bool Value;
     };
@@ -39,7 +39,7 @@ namespace mcc
 
         explicit ConstantInteger(IntegerT value);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         IntegerT Value;
     };
@@ -50,7 +50,7 @@ namespace mcc
 
         explicit ConstantFloat(FloatT value);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         FloatT Value;
     };
@@ -63,7 +63,7 @@ namespace mcc
 
         ConstantFloatRange(std::optional<FloatT> min, std::optional<FloatT> max);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         std::optional<FloatT> Min;
         std::optional<FloatT> Max;
@@ -75,7 +75,7 @@ namespace mcc
 
         explicit ConstantString(std::string value);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         std::string Value;
     };
@@ -86,7 +86,7 @@ namespace mcc
 
         ConstantArray(std::vector<ConstantPtr> values, bool stringify);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         std::vector<ConstantPtr> Values;
         bool Stringify;
@@ -98,7 +98,7 @@ namespace mcc
 
         explicit ConstantObject(std::map<std::string, ConstantPtr> values);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         std::map<std::string, ConstantPtr> Values;
     };
@@ -113,7 +113,7 @@ namespace mcc
             TargetSelectorE selector,
             std::map<std::string, std::vector<TargetAttributePtr>> attributes);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         TargetSelectorE Selector;
         std::map<std::string, std::vector<TargetAttributePtr>> Attributes;
@@ -125,36 +125,26 @@ namespace mcc
 
         explicit ConstantResource(ResourceLocation location);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
     };
 
-    struct ConstantLocalOffset final : Constant
+    struct ConstantOffset final : Constant
     {
-        static ConstantPtr Create(FloatT offset);
+        static ConstantPtr Create(OffsetTypeE type, FloatT offset);
 
-        explicit ConstantLocalOffset(FloatT offset);
+        ConstantOffset(OffsetTypeE type, FloatT offset);
 
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
-        FloatT Offset;
-    };
-
-    struct ConstantRelativeOffset final : Constant
-    {
-        static ConstantPtr Create(FloatT offset);
-
-        explicit ConstantRelativeOffset(FloatT offset);
-
-        CommandResult GenResult(bool stringify = false) const override;
-
+        OffsetTypeE Type;
         FloatT Offset;
     };
 
     struct Instruction : Value
     {
-        std::string GetResultID() const;
+        [[nodiscard]] std::string GetResultID() const;
     };
 
     struct CallInstruction final : Instruction
@@ -164,8 +154,8 @@ namespace mcc
         CallInstruction(ResourceLocation location, CalleeE callee, std::vector<ValuePtr> arguments);
 
         void Gen(CommandVector &commands) const override;
-        Command GenInline() const override;
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandT GenInline() const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
         CalleeE Callee;
@@ -179,7 +169,7 @@ namespace mcc
         ReturnInstruction(ResourceLocation location, ValuePtr value);
 
         void Gen(CommandVector &commands) const override;
-        Command GenInline() const override;
+        [[nodiscard]] CommandT GenInline() const override;
 
         ResourceLocation Location;
         ValuePtr Value;
@@ -197,7 +187,7 @@ namespace mcc
         IfUnlessInstruction(ResourceLocation location, bool unless, ValuePtr condition, ValuePtr then, ValuePtr else_);
 
         void Gen(CommandVector &commands) const override;
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
         bool Unless;
@@ -211,7 +201,7 @@ namespace mcc
         StoreInstruction(ResourceLocation location, ValuePtr dst, ValuePtr src);
 
         void Gen(CommandVector &commands) const override;
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
         ValuePtr Dst, Src;
@@ -224,7 +214,7 @@ namespace mcc
         ComparisonInstruction(ComparatorE comparator, ResourceLocation location, ValuePtr left, ValuePtr right);
 
         void Gen(CommandVector &commands) const override;
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         ComparatorE Comparator;
         ResourceLocation Location;
@@ -238,7 +228,7 @@ namespace mcc
         OperationInstruction(OperatorE operator_, ResourceLocation location, ValuePtr left, ValuePtr right);
 
         void Gen(CommandVector &commands) const override;
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         OperatorE Operator;
         ResourceLocation Location;
@@ -257,7 +247,7 @@ namespace mcc
             IndexT index);
 
         void Gen(CommandVector &commands) const override;
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         AllocationTypeE AllocationType;
         ResourceLocation Location;
@@ -292,7 +282,6 @@ namespace mcc
             bool stringify);
 
         void Gen(CommandVector &commands) const override;
-        CommandResult GenResult(bool stringify = false) const override;
 
         ArrayOperationE ArrayOperation;
         ResourceLocation Location;
@@ -308,7 +297,6 @@ namespace mcc
         ObjectInstruction(ResourceLocation location, ValuePtr object, ValuePtr value, std::string key);
 
         void Gen(CommandVector &commands) const override;
-        CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
         ValuePtr Object, Value;
@@ -321,8 +309,8 @@ namespace mcc
 
         NamedValue(ResourceLocation location, std::string id);
 
-        Command GenInline() const override;
-        CommandResult GenResult(bool stringify = false) const override;
+        [[nodiscard]] CommandT GenInline() const override;
+        [[nodiscard]] CommandResult GenResult(bool stringify = false) const override;
 
         ResourceLocation Location;
         std::string ID;

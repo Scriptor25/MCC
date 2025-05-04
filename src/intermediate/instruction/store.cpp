@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/lex.hpp>
 
@@ -86,7 +87,11 @@ void mcc::StoreInstruction::Gen(CommandVector &commands) const
             break;
 
         default:
-            throw std::runtime_error("TODO");
+            Error(
+                "store instruction destination operand must be either {} or {}, but is {}",
+                CommandResultType_Storage,
+                CommandResultType_Score,
+                dst_type_);
     }
 }
 

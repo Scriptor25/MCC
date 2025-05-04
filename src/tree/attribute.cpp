@@ -1,4 +1,5 @@
 #include <sstream>
+#include <mcc/attribute.hpp>
 #include <mcc/tree.hpp>
 
 mcc::TargetAttribute::TargetAttribute(const bool invert)
@@ -38,10 +39,13 @@ std::string mcc::FloatAttribute::String() const
     return (Invert ? "!" : "") + std::to_string(Value);
 }
 
-mcc::RangeAttribute::RangeAttribute(const bool invert, std::optional<IntegerT> beg, std::optional<IntegerT> end)
+mcc::RangeAttribute::RangeAttribute(
+    const bool invert,
+    const std::optional<IntegerT> beg,
+    const std::optional<IntegerT> end)
     : TargetAttribute(invert),
-      Beg(std::move(beg)),
-      End(std::move(end))
+      Beg(beg),
+      End(end)
 {
 }
 

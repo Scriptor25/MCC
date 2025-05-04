@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
@@ -27,8 +28,7 @@ mcc::ValuePtr mcc::ArrayExpression::Gen(Builder &builder, const bool inline_) co
         auto value = element->Gen(builder, inline_);
 
         auto constant = std::dynamic_pointer_cast<Constant>(value);
-        if (!constant)
-            throw std::runtime_error("non-constant value in constant array");
+        Assert(!!constant, "inline array must only contain constant values");
 
         values.emplace_back(constant);
     }

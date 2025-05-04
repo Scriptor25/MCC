@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 mcc::InstructionPtr mcc::ComparisonInstruction::Create(
@@ -105,7 +106,7 @@ void mcc::ComparisonInstruction::Gen(CommandVector &commands) const
             break;
 
         default:
-            throw std::runtime_error("TODO");
+            Error("undefined comparator {}", Comparator);
     }
 
     commands.Append(

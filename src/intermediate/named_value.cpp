@@ -11,7 +11,7 @@ mcc::NamedValue::NamedValue(ResourceLocation location, std::string id)
 {
 }
 
-mcc::Command mcc::NamedValue::GenInline() const
+mcc::CommandT mcc::NamedValue::GenInline() const
 {
     return "data get storage " + Location.String() + " stack[0].var." + ID;
 }

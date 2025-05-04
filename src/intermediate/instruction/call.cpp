@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 mcc::InstructionPtr mcc::CallInstruction::Create(
@@ -15,100 +16,123 @@ mcc::CallInstruction::CallInstruction(ResourceLocation location, const CalleeE c
 {
 }
 
+static void _generic(
+    mcc::CommandT &command,
+    const mcc::ResourceLocation &,
+    const mcc::CalleeE callee,
+    const std::vector<mcc::ValuePtr> &arguments)
+{
+    command += mcc::ToString(callee);
+    for (auto &argument: arguments)
+        command += ' ' + argument->GenResult().Value;
+}
+
+static void _function(
+    mcc::CommandT &command,
+    const mcc::ResourceLocation &location,
+    const mcc::CalleeE,
+    const std::vector<mcc::ValuePtr> &arguments)
+{
+    const auto callee_ = arguments[0]->GenResult();
+    const auto arguments_ = arguments[1]->GenResult();
+
+    command += "function ";
+    command += callee_.Value;
+    command += ' ';
+
+    switch (arguments_.Type)
+    {
+        case mcc::CommandResultType_Value:
+            command += arguments_.Value;
+            break;
+
+        case mcc::CommandResultType_Storage:
+            command += "with storage ";
+            command += location.String();
+            command += ' ';
+            command += arguments_.Path;
+            break;
+
+        case mcc::CommandResultType_Score:
+            mcc::Error("invalid argument type score");
+    }
+}
+
+
+static void _tellraw(
+    mcc::CommandT &command,
+    const mcc::ResourceLocation &location,
+    const mcc::CalleeE,
+    const std::vector<mcc::ValuePtr> &arguments)
+{
+    const auto targets = arguments[0]->GenResult();
+    auto [
+        message_type_,
+        message_value_,
+        message_path_,
+        message_player_,
+        message_objective_
+    ] = arguments[1]->GenResult();
+
+    command += "tellraw ";
+    command += targets.Value;
+    command += ' ';
+
+    switch (message_type_)
+    {
+        case mcc::CommandResultType_Value:
+            command += message_value_;
+            break;
+
+        case mcc::CommandResultType_Storage:
+            command += "{storage:";
+            command += '"';
+            command += location.String();
+            command += '"';
+            command += ",nbt:";
+            command += '"';
+            command += message_path_;
+            command += '"';
+            command += ",interpret:true}";
+            break;
+
+        case mcc::CommandResultType_Score:
+            command += "{score:{name:";
+            command += '"';
+            command += message_player_;
+            command += '"';
+            command += ",objective:";
+            command += '"';
+            command += message_objective_;
+            command += '"';
+            command += "}}";
+            break;
+    }
+}
+
+using Generator = std::function<void(
+    mcc::CommandT &command,
+    const mcc::ResourceLocation &location,
+    mcc::CalleeE callee,
+    const std::vector<mcc::ValuePtr> &arguments)>;
+
+static const std::map<mcc::CalleeE, std::pair<bool, Generator>> generator_map
+{
+    {mcc::Callee_Give, {true, _generic}},
+    {mcc::Callee_SetBlock, {true, _generic}},
+
+    {mcc::Callee_Function, {true, _function}},
+    {mcc::Callee_TellRaw, {true, _tellraw}},
+};
+
 void mcc::CallInstruction::Gen(CommandVector &commands) const
 {
-    Command command;
+    Assert(generator_map.contains(Callee), "no generator for call to {}", Callee);
 
-    switch (Callee)
-    {
-        case Callee_Give:
-        case Callee_SetBlock:
-            command += ToString(Callee);
-            for (auto &argument: Arguments)
-                command += ' ' + argument->GenResult().Value;
-            break;
+    auto &[inlinable_, generator_] = generator_map.at(Callee);
 
-        case Callee_Function:
-        {
-            auto callee = Arguments[0]->GenResult();
-            auto arguments = Arguments[1]->GenResult();
-
-            command += "function ";
-            command += callee.Value;
-            command += ' ';
-
-            switch (arguments.Type)
-            {
-                case CommandResultType_Value:
-                    command += arguments.Value;
-                    break;
-
-                case CommandResultType_Storage:
-                    command += "with storage ";
-                    command += Location.String();
-                    command += ' ';
-                    command += arguments.Path;
-                    break;
-
-                case CommandResultType_Score:
-                    throw std::runtime_error("TODO");
-            }
-
-            break;
-        }
-
-        case Callee_TellRaw:
-        {
-            auto targets = Arguments[0]->GenResult();
-            auto [
-                message_type_,
-                message_value_,
-                message_path_,
-                message_player_,
-                message_objective_
-            ] = Arguments[1]->GenResult();
-
-            command += "tellraw ";
-            command += targets.Value;
-            command += ' ';
-
-            switch (message_type_)
-            {
-                case CommandResultType_Value:
-                    command += message_value_;
-                    break;
-
-                case CommandResultType_Storage:
-                    command += "{storage:";
-                    command += '"';
-                    command += Location.String();
-                    command += '"';
-                    command += ",nbt:";
-                    command += '"';
-                    command += message_path_;
-                    command += '"';
-                    command += ",interpret:true}";
-                    break;
-
-                case CommandResultType_Score:
-                    command += "{score:{name:";
-                    command += '"';
-                    command += message_player_;
-                    command += '"';
-                    command += ",objective:";
-                    command += '"';
-                    command += message_objective_;
-                    command += '"';
-                    command += "}}";
-                    break;
-            }
-
-            break;
-        }
-
-        default:
-            throw std::runtime_error("TODO");
-    }
+    CommandT command;
+    generator_(command, Location, Callee, Arguments);
 
     commands.Append(
         "execute store result storage {} stack[0].result.{} double 1 run {}",
@@ -117,100 +141,15 @@ void mcc::CallInstruction::Gen(CommandVector &commands) const
         command);
 }
 
-mcc::Command mcc::CallInstruction::GenInline() const
+mcc::CommandT mcc::CallInstruction::GenInline() const
 {
-    Command command;
+    Assert(generator_map.contains(Callee), "no generator for call to {}", Callee);
 
-    switch (Callee)
-    {
-        case Callee_Give:
-        case Callee_SetBlock:
-            command += ToString(Callee);
-            for (auto &argument: Arguments)
-                command += ' ' + argument->GenResult().Value;
-            break;
+    auto &[inlinable_, generator_] = generator_map.at(Callee);
+    Assert(inlinable_, "cannot generate inline call to {}", Callee);
 
-        case Callee_Function:
-        {
-            auto callee = Arguments[0]->GenResult();
-            auto arguments = Arguments[1]->GenResult();
-
-            command += "function ";
-            command += callee.Value;
-            command += ' ';
-
-            switch (arguments.Type)
-            {
-                case CommandResultType_Value:
-                    command += arguments.Value;
-                    break;
-
-                case CommandResultType_Storage:
-                    command += "with storage ";
-                    command += Location.String();
-                    command += ' ';
-                    command += arguments.Path;
-                    break;
-
-                case CommandResultType_Score:
-                    throw std::runtime_error("TODO");
-            }
-
-            break;
-        }
-
-        case Callee_TellRaw:
-        {
-            auto targets = Arguments[0]->GenResult();
-            auto [
-                message_type_,
-                message_value_,
-                message_path_,
-                message_player_,
-                message_objective_
-            ] = Arguments[1]->GenResult();
-
-            command += "tellraw ";
-            command += targets.Value;
-            command += ' ';
-
-            switch (message_type_)
-            {
-                case CommandResultType_Value:
-                    command += message_value_;
-                    break;
-
-                case CommandResultType_Storage:
-                    command += "{storage:";
-                    command += '"';
-                    command += Location.String();
-                    command += '"';
-                    command += ",nbt:";
-                    command += '"';
-                    command += message_path_;
-                    command += '"';
-                    command += ",interpret:true}";
-                    break;
-
-                case CommandResultType_Score:
-                    command += "{score:{name:";
-                    command += '"';
-                    command += message_player_;
-                    command += '"';
-                    command += ",objective:";
-                    command += '"';
-                    command += message_objective_;
-                    command += '"';
-                    command += "}}";
-                    break;
-            }
-
-            break;
-        }
-
-        default:
-            throw std::runtime_error("TODO");
-    }
+    CommandT command;
+    generator_(command, Location, Callee, Arguments);
 
     return std::format(
         "execute store result storage {} stack[0].result.{} double 1 run {}",

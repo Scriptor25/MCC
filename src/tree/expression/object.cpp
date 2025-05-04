@@ -1,4 +1,5 @@
 #include <mcc/builder.hpp>
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
@@ -34,8 +35,7 @@ mcc::ValuePtr mcc::ObjectExpression::Gen(Builder &builder, const bool inline_) c
         values.emplace(key_, value);
     }
 
-    if (inline_ && !all_constant)
-        throw std::runtime_error("inline requires all object entries to be constant");
+    Assert(!inline_ || all_constant, "inline object must only contain constant values");
 
     if (all_constant)
     {

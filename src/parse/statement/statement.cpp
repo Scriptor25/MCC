@@ -1,4 +1,5 @@
 #include <format>
+#include <mcc/error.hpp>
 #include <mcc/parse.hpp>
 
 mcc::StatementPtr mcc::Parser::ParseStatement()
@@ -11,12 +12,10 @@ mcc::StatementPtr mcc::Parser::ParseStatement()
     if (At(TokenType_Symbol, "define"))
         return ParseDefineStatement();
 
-    throw std::runtime_error(
-        std::format(
-            "{}({},{}): cannot parse {} '{}'",
-            m_Token.Where.Filename,
-            m_Token.Where.Row,
-            m_Token.Where.Col,
-            m_Token.Type,
-            m_Token.Value));
+
+    Error(
+        m_Token.Where,
+        "cannot parse {} '{}'",
+        m_Token.Type,
+        m_Token.Value);
 }

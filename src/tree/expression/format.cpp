@@ -1,4 +1,5 @@
 #include <mcc/builder.hpp>
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
@@ -27,8 +28,7 @@ mcc::ValuePtr mcc::FormatExpression::Gen(Builder &builder, const bool inline_) c
         values.emplace_back(value);
     }
 
-    if (inline_ && !all_constant)
-        throw std::runtime_error("TODO");
+    Assert(!inline_ || all_constant, "inline format string must only contain constant values");
 
     if (all_constant)
     {

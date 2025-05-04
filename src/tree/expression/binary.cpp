@@ -1,4 +1,5 @@
 #include <mcc/builder.hpp>
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
@@ -54,5 +55,5 @@ mcc::ValuePtr mcc::BinaryExpression::Gen(Builder &builder, const bool inline_) c
     if (operator_)
         return builder.CreateOperation(operator_, left, right, inline_);
 
-    throw std::runtime_error("TODO");
+    Error("undefined operator or comparator {}", Operator);
 }

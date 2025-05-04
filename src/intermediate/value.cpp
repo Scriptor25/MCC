@@ -1,18 +1,19 @@
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
 void mcc::Value::Gen(CommandVector &commands) const
 {
-    throw std::runtime_error("only inlinable");
+    Error("mcc::Value::Gen");
 }
 
-mcc::Command mcc::Value::GenInline() const
+mcc::CommandT mcc::Value::GenInline() const
 {
-    throw std::runtime_error("not inlinable");
+    Error("mcc::Value::GenInline");
 }
 
 mcc::CommandResult mcc::Value::GenResult(const bool stringify) const
 {
-    throw std::runtime_error("no result");
+    Error("mcc::Value::GenResult");
 }
 
 std::string mcc::Instruction::GetResultID() const
