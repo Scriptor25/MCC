@@ -5,11 +5,8 @@
 
 mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
 {
-    if (SkipIf(TokenType_Symbol, "if"))
-        return ParseIfUnlessExpression(false);
-
-    if (SkipIf(TokenType_Symbol, "unless"))
-        return ParseIfUnlessExpression(true);
+    if (AtEnum("if", "unless"))
+        return ParseIfUnlessExpression();
 
     if (At(TokenType_Symbol, "return"))
         return ParseReturnExpression();
@@ -18,6 +15,7 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     {
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
+            token.Where,
             ConstantBoolean::Create(token.Value == "true"),
             std::move(token.Value));
     }
@@ -26,6 +24,7 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     {
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
+            token.Where,
             ConstantInteger::Create(token.Integer),
             token.Value);
     }
@@ -34,6 +33,7 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     {
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
+            token.Where,
             ConstantFloat::Create(token.Float),
             token.Value);
     }
@@ -41,7 +41,10 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_String))
     {
         auto token = Skip();
-        return std::make_unique<ConstantExpression>(ConstantString::Create(token.Value), '"' + token.Value + '"');
+        return std::make_unique<ConstantExpression>(
+            token.Where,
+            ConstantString::Create(token.Value),
+            '"' + token.Value + '"');
     }
 
     if (At(TokenType_Symbol) || At(TokenType_Other, ":"))
@@ -65,25 +68,28 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         {
             auto token = Skip();
             return std::make_unique<ConstantExpression>(
+                token.Where,
                 ConstantInteger::Create(-token.Integer),
                 '-' + token.Value);
         }
 
         auto token = Expect(TokenType_Float);
         return std::make_unique<ConstantExpression>(
+            token.Where,
             ConstantFloat::Create(-token.Float),
             '-' + token.Value);
     }
 
     if (SkipIf(TokenType_Operator, "%"))
     {
-        auto id = Expect(TokenType_Symbol).Value;
-        return std::make_unique<SymbolExpression>(id);
+        auto token = Expect(TokenType_Symbol);
+        return std::make_unique<SymbolExpression>(token.Where, token.Value);
     }
 
     if (At(TokenType_Other, "~") || At(TokenType_Other, "^"))
     {
-        auto type = ToOffsetType(Skip().Value);
+        auto type_token = Skip();
+        auto type = ToOffsetType(type_token.Value);
 
         auto negative = SkipIf(TokenType_Operator, "-");
         auto token = negative
@@ -99,7 +105,8 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
                                 : token->Float;
 
         return std::make_unique<ConstantExpression>(
-            ConstantOffset::Create(type, offset),
+            type_token.Where,
+            ConstantOffset::Create(type, negative ? -offset : offset),
             ToString(type) + (token ? (negative ? "-" : "") + token->Value : ""));
     }
 

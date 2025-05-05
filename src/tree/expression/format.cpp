@@ -3,8 +3,9 @@
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
-mcc::FormatExpression::FormatExpression(std::vector<FormatNodePtr> nodes)
-    : Nodes(std::move(nodes))
+mcc::FormatExpression::FormatExpression(SourceLocation where, std::vector<FormatNodePtr> nodes)
+    : Expression(std::move(where)),
+      Nodes(std::move(nodes))
 {
 }
 
@@ -16,14 +17,14 @@ std::ostream &mcc::FormatExpression::Print(std::ostream &stream) const
     return stream << '`';
 }
 
-mcc::ValuePtr mcc::FormatExpression::Gen(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::FormatExpression::Generate(Builder &builder, const bool inline_) const
 {
     std::vector<ValuePtr> values;
 
     auto all_constant = true;
     for (auto &node: Nodes)
     {
-        auto value = node->Gen(builder, inline_);
+        auto value = node->Generate(builder, inline_);
         all_constant &= !!std::dynamic_pointer_cast<Constant>(value);
         values.emplace_back(value);
     }

@@ -217,6 +217,7 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
         {"predicate", parse_resource},
     };
 
+    auto where = m_Token.Where;
     const auto selector = ToTargetSelector(Expect(TokenType_Target).Value);
 
     std::map<std::string, std::vector<TargetAttributePtr>> attributes;
@@ -254,5 +255,5 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
         view += ']';
     }
 
-    return std::make_unique<ConstantExpression>(ConstantTarget::Create(selector, std::move(attributes)), view);
+    return std::make_unique<ConstantExpression>(where, ConstantTarget::Create(selector, std::move(attributes)), view);
 }

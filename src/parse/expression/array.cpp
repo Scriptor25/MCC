@@ -2,7 +2,7 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseArrayExpression()
 {
-    Expect(TokenType_Other, "[");
+    auto where = Expect(TokenType_Other, "[").Where;
 
     std::vector<ExpressionPtr> elements;
 
@@ -13,5 +13,5 @@ mcc::ExpressionPtr mcc::Parser::ParseArrayExpression()
             Expect(TokenType_Other, ",");
     }
 
-    return std::make_unique<ArrayExpression>(std::move(elements));
+    return std::make_unique<ArrayExpression>(where, std::move(elements));
 }

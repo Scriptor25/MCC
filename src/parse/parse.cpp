@@ -11,9 +11,17 @@ mcc::Parser::Parser(std::istream &stream, std::string filename)
     Next();
 }
 
+mcc::Parser::Parser(std::istream &stream, SourceLocation location)
+    : m_Stream(stream),
+      m_Location(std::move(location))
+{
+    Get();
+    Next();
+}
+
 size_t mcc::Parser::Count() const
 {
-    return m_Count - m_Token.RawValue.size();
+    return m_Count - m_Token.Raw.size();
 }
 
 mcc::Parser::operator bool() const

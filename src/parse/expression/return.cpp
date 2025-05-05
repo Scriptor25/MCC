@@ -2,7 +2,7 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseReturnExpression()
 {
-    Expect(TokenType_Symbol, "return");
+    auto where = Expect(TokenType_Symbol, "return").Where;
     auto expression = ParseExpression();
-    return std::make_unique<ReturnExpression>(std::move(expression));
+    return std::make_unique<ReturnExpression>(where, std::move(expression));
 }

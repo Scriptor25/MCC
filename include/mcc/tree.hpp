@@ -1,59 +1,72 @@
 #pragma once
 
 #include <mcc/common.hpp>
+#include <mcc/lex.hpp>
 
 namespace mcc
 {
     struct Statement
     {
+        explicit Statement(SourceLocation where);
+
         virtual ~Statement() = default;
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
-        virtual void Gen(Context &context) const = 0;
+        virtual void Generate(Context &context) const = 0;
+
+        SourceLocation Where;
     };
 
     struct Expression
     {
+        explicit Expression(SourceLocation where);
+
         virtual ~Expression() = default;
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
-        [[nodiscard]] virtual ValuePtr Gen(Builder &builder, bool inline_) const = 0;
+        [[nodiscard]] virtual ValuePtr Generate(Builder &builder, bool inline_) const = 0;
+
+        SourceLocation Where;
     };
 
     struct FormatNode
     {
+        explicit FormatNode(SourceLocation where);
+
         virtual ~FormatNode() = default;
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
-        [[nodiscard]] virtual ValuePtr Gen(Builder &builder, bool inline_) const = 0;
+        [[nodiscard]] virtual ValuePtr Generate(Builder &builder, bool inline_) const = 0;
+
+        SourceLocation Where;
     };
 
     struct StringNode final : FormatNode
     {
-        explicit StringNode(std::string value);
+        StringNode(SourceLocation where, std::string value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         std::string Value;
     };
 
     struct ExpressionNode final : FormatNode
     {
-        explicit ExpressionNode(ExpressionPtr expression);
+        ExpressionNode(SourceLocation where, ExpressionPtr expression);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         ExpressionPtr Expression;
     };
 
     struct NamespaceStatement final : Statement
     {
-        explicit NamespaceStatement(std::string namespace_);
+        NamespaceStatement(SourceLocation where, std::string namespace_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Gen(Context &context) const override;
+        void Generate(Context &context) const override;
 
         std::string Namespace;
     };
@@ -61,13 +74,14 @@ namespace mcc
     struct DefineStatement final : Statement
     {
         DefineStatement(
+            SourceLocation where,
             ResourceLocation location,
             std::vector<std::string> parameters,
             std::vector<ResourceLocation> tags,
             std::vector<ExpressionPtr> expressions);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Gen(Context &context) const override;
+        void Generate(Context &context) const override;
 
         ResourceLocation Location;
         std::vector<std::string> Parameters;
@@ -77,10 +91,10 @@ namespace mcc
 
     struct ConstantExpression final : Expression
     {
-        ConstantExpression(ConstantPtr value, std::string view);
+        ConstantExpression(SourceLocation where, ConstantPtr value, std::string view);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         ConstantPtr Value;
         std::string View;
@@ -88,40 +102,40 @@ namespace mcc
 
     struct ResourceExpression final : Expression
     {
-        ResourceExpression(std::string namespace_, std::string path);
+        ResourceExpression(SourceLocation where, ResourceLocation location);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         ResourceLocation Location;
     };
 
     struct ArrayExpression final : Expression
     {
-        explicit ArrayExpression(std::vector<ExpressionPtr> elements);
+        ArrayExpression(SourceLocation where, std::vector<ExpressionPtr> elements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         std::vector<ExpressionPtr> Elements;
     };
 
     struct ObjectExpression final : Expression
     {
-        explicit ObjectExpression(std::map<std::string, ExpressionPtr> elements);
+        ObjectExpression(SourceLocation where, std::map<std::string, ExpressionPtr> elements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         std::map<std::string, ExpressionPtr> Elements;
     };
 
     struct BinaryExpression final : Expression
     {
-        BinaryExpression(std::string operator_, ExpressionPtr left, ExpressionPtr right);
+        BinaryExpression(SourceLocation where, std::string operator_, ExpressionPtr left, ExpressionPtr right);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         std::string Operator;
         ExpressionPtr Left;
@@ -130,10 +144,10 @@ namespace mcc
 
     struct CallExpression final : Expression
     {
-        CallExpression(std::string callee, std::vector<ExpressionPtr> arguments);
+        CallExpression(SourceLocation where, std::string callee, std::vector<ExpressionPtr> arguments);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         std::string Callee;
         std::vector<ExpressionPtr> Arguments;
@@ -141,20 +155,25 @@ namespace mcc
 
     struct FormatExpression final : Expression
     {
-        explicit FormatExpression(std::vector<FormatNodePtr> nodes);
+        FormatExpression(SourceLocation where, std::vector<FormatNodePtr> nodes);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         std::vector<FormatNodePtr> Nodes;
     };
 
     struct IfUnlessExpression final : Expression
     {
-        IfUnlessExpression(bool unless, ExpressionPtr condition, ExpressionPtr then, ExpressionPtr else_);
+        IfUnlessExpression(
+            SourceLocation where,
+            bool unless,
+            ExpressionPtr condition,
+            ExpressionPtr then,
+            ExpressionPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         bool Unless;
         ExpressionPtr Condition, Then, Else;
@@ -162,20 +181,20 @@ namespace mcc
 
     struct ReturnExpression final : Expression
     {
-        explicit ReturnExpression(ExpressionPtr value);
+        ReturnExpression(SourceLocation where, ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         ExpressionPtr Value;
     };
 
     struct SymbolExpression final : Expression
     {
-        explicit SymbolExpression(std::string id);
+        SymbolExpression(SourceLocation where, std::string id);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Gen(Builder &builder, bool inline_) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         std::string ID;
     };

@@ -5,6 +5,7 @@ mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
 {
     auto expression = ParsePrimaryExpression();
 
+    auto where = m_Token.Where;
     if (!SkipIf(TokenType_Other, "("))
         return expression;
 
@@ -20,5 +21,5 @@ mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
             Expect(TokenType_Other, ",");
     }
 
-    return std::make_unique<CallExpression>(callee->Location.Path, std::move(arguments));
+    return std::make_unique<CallExpression>(where, callee->Location.Path, std::move(arguments));
 }

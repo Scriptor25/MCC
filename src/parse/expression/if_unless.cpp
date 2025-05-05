@@ -1,7 +1,10 @@
 #include <mcc/parse.hpp>
 
-mcc::ExpressionPtr mcc::Parser::ParseIfUnlessExpression(bool unless)
+mcc::ExpressionPtr mcc::Parser::ParseIfUnlessExpression()
 {
+    auto token = ExpectEnum("if", "unless");
+    auto unless = token.Value == "unless";
+
     Expect(TokenType_Other, "(");
 
     auto condition = ParseExpression();
@@ -14,5 +17,10 @@ mcc::ExpressionPtr mcc::Parser::ParseIfUnlessExpression(bool unless)
 
     auto else_ = ParseExpression();
 
-    return std::make_unique<IfUnlessExpression>(unless, std::move(condition), std::move(then), std::move(else_));
+    return std::make_unique<IfUnlessExpression>(
+        token.Where,
+        unless,
+        std::move(condition),
+        std::move(then),
+        std::move(else_));
 }

@@ -21,7 +21,7 @@ namespace mcc
         TokenType_Undefined,
     };
 
-    struct Location
+    struct SourceLocation
     {
         std::string Filename;
         unsigned Row;
@@ -31,11 +31,11 @@ namespace mcc
     struct Token
     {
         TokenType Type;
-        Location Where;
-        std::string RawValue;
+        SourceLocation Where;
+        std::string Raw;
         std::string Value;
         IntegerT Integer = 0;
-        FloatT Float = 0;
+        FloatT Float = 0.0;
         std::pair<IntegerT, IntegerT> Range;
     };
 }

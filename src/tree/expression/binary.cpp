@@ -3,8 +3,13 @@
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
-mcc::BinaryExpression::BinaryExpression(std::string operator_, ExpressionPtr left, ExpressionPtr right)
-    : Operator(std::move(operator_)),
+mcc::BinaryExpression::BinaryExpression(
+    SourceLocation where,
+    std::string operator_,
+    ExpressionPtr left,
+    ExpressionPtr right)
+    : Expression(std::move(where)),
+      Operator(std::move(operator_)),
       Left(std::move(left)),
       Right(std::move(right))
 {
@@ -15,10 +20,10 @@ std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
     return Right->Print(Left->Print(stream) << ' ' << Operator << ' ');
 }
 
-mcc::ValuePtr mcc::BinaryExpression::Gen(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::BinaryExpression::Generate(Builder &builder, const bool inline_) const
 {
-    const auto left = Left->Gen(builder, inline_);
-    const auto right = Right->Gen(builder, inline_);
+    const auto left = Left->Generate(builder, inline_);
+    const auto right = Right->Generate(builder, inline_);
 
     if (Operator == "=")
         return builder.CreateStore(left, right, inline_);

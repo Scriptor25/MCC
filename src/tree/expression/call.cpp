@@ -2,8 +2,9 @@
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
-mcc::CallExpression::CallExpression(std::string callee, std::vector<ExpressionPtr> arguments)
-    : Callee(std::move(callee)),
+mcc::CallExpression::CallExpression(SourceLocation where, std::string callee, std::vector<ExpressionPtr> arguments)
+    : Expression(std::move(where)),
+      Callee(std::move(callee)),
       Arguments(std::move(arguments))
 {
 }
@@ -20,12 +21,12 @@ std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
     return stream << ')';
 }
 
-mcc::ValuePtr mcc::CallExpression::Gen(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::CallExpression::Generate(Builder &builder, const bool inline_) const
 {
     std::vector<ValuePtr> arguments;
 
     for (auto &argument: Arguments)
-        arguments.emplace_back(argument->Gen(builder, inline_));
+        arguments.emplace_back(argument->Generate(builder, inline_));
 
     return builder.CreateCall(ToCallee(Callee), std::move(arguments), inline_);
 }

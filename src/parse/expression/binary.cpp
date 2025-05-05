@@ -34,11 +34,11 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(
     while (At(TokenType_Operator) && has_pre() && get_pre() >= min_pre)
     {
         const auto pre = get_pre();
-        auto operator_ = Skip().Value;
+        auto operator_ = Skip();
         auto right = (this->*next)();
         while (At(TokenType_Operator) && has_pre() && (get_pre() > pre || (!get_pre() && !pre)))
             right = ParseBinaryExpression(std::move(right), next, pre + (get_pre() > pre ? 1 : 0));
-        left = std::make_unique<BinaryExpression>(operator_, std::move(left), std::move(right));
+        left = std::make_unique<BinaryExpression>(operator_.Where, operator_.Value, std::move(left), std::move(right));
     }
 
     return left;

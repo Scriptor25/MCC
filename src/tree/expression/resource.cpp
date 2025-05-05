@@ -2,8 +2,9 @@
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
-mcc::ResourceExpression::ResourceExpression(std::string namespace_, std::string path)
-    : Location(std::move(namespace_), std::move(path))
+mcc::ResourceExpression::ResourceExpression(SourceLocation where, ResourceLocation location)
+    : Expression(std::move(where)),
+      Location(std::move(location))
 {
 }
 
@@ -12,7 +13,7 @@ std::ostream &mcc::ResourceExpression::Print(std::ostream &stream) const
     return Location.Print(stream);
 }
 
-mcc::ValuePtr mcc::ResourceExpression::Gen(Builder &builder, bool inline_) const
+mcc::ValuePtr mcc::ResourceExpression::Generate(Builder &builder, bool inline_) const
 {
     auto location = Location;
     if (location.Namespace.empty())

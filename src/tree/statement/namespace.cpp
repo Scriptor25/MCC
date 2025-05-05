@@ -1,8 +1,9 @@
 #include <mcc/context.hpp>
 #include <mcc/tree.hpp>
 
-mcc::NamespaceStatement::NamespaceStatement(std::string namespace_)
-    : Namespace(std::move(namespace_))
+mcc::NamespaceStatement::NamespaceStatement(SourceLocation where, std::string namespace_)
+    : Statement(std::move(where)),
+      Namespace(std::move(namespace_))
 {
 }
 
@@ -11,7 +12,7 @@ std::ostream &mcc::NamespaceStatement::Print(std::ostream &stream) const
     return stream << "namespace " << Namespace;
 }
 
-void mcc::NamespaceStatement::Gen(Context &context) const
+void mcc::NamespaceStatement::Generate(Context &context) const
 {
     context.Namespace = Namespace;
 }

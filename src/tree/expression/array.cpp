@@ -2,8 +2,9 @@
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
-mcc::ArrayExpression::ArrayExpression(std::vector<ExpressionPtr> elements)
-    : Elements(std::move(elements))
+mcc::ArrayExpression::ArrayExpression(SourceLocation where, std::vector<ExpressionPtr> elements)
+    : Expression(std::move(where)),
+      Elements(std::move(elements))
 {
 }
 
@@ -19,13 +20,13 @@ std::ostream &mcc::ArrayExpression::Print(std::ostream &stream) const
     return stream << " ]";
 }
 
-mcc::ValuePtr mcc::ArrayExpression::Gen(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::ArrayExpression::Generate(Builder &builder, const bool inline_) const
 {
     std::vector<ConstantPtr> values;
 
     for (auto &element: Elements)
     {
-        auto value = element->Gen(builder, inline_);
+        auto value = element->Generate(builder, inline_);
 
         auto constant = std::dynamic_pointer_cast<Constant>(value);
         Assert(!!constant, "inline array must only contain constant values");

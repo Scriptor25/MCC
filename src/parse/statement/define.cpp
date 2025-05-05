@@ -2,7 +2,7 @@
 
 mcc::StatementPtr mcc::Parser::ParseDefineStatement()
 {
-    Expect(TokenType_Symbol, "define");
+    auto where = Expect(TokenType_Symbol, "define").Where;
 
     auto location = ParseResourceLocation();
 
@@ -40,5 +40,5 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
         Expect(TokenType_Other, ";");
     }
 
-    return std::make_unique<DefineStatement>(location, parameters, tags, std::move(expressions));
+    return std::make_unique<DefineStatement>(where, location, parameters, tags, std::move(expressions));
 }

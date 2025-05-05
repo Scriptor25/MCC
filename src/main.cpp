@@ -19,10 +19,7 @@ static void parse_file(mcc::Package &package, const std::filesystem::path &path)
     mcc::Parser parser(stream, path.string());
     while (parser)
         if (const auto statement = parser())
-        {
-            statement->Print(std::cout) << std::endl;
-            statement->Gen(context);
-        }
+            statement->Generate(context);
 
     stream.close();
 }

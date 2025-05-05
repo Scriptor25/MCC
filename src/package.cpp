@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream>
 #include <mcc/package.hpp>
 
 mcc::Package::Package(const PackageInfo &info)

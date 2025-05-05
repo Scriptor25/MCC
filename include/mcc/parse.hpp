@@ -13,6 +13,7 @@ namespace mcc
     {
     public:
         Parser(std::istream &stream, std::string filename);
+        Parser(std::istream &stream, SourceLocation location);
 
         [[nodiscard]] size_t Count() const;
 
@@ -87,7 +88,7 @@ namespace mcc
 
         ExpressionPtr ParseFormatExpression();
 
-        ExpressionPtr ParseIfUnlessExpression(bool unless);
+        ExpressionPtr ParseIfUnlessExpression();
         ExpressionPtr ParseReturnExpression();
 
         ExpressionPtr ParsePrimaryExpression();
@@ -96,7 +97,7 @@ namespace mcc
 
         std::istream &m_Stream;
         int m_Buf = -1;
-        Location m_Location;
+        SourceLocation m_Location;
         Token m_Token;
 
         size_t m_Count = 0;

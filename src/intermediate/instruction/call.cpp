@@ -24,7 +24,7 @@ mcc::CallInstruction::~CallInstruction()
         argument->Drop();
 }
 
-static void _generic(
+static void generate_generic(
     mcc::CommandT &command,
     const mcc::CalleeE callee,
     const std::vector<mcc::ValuePtr> &arguments,
@@ -32,10 +32,18 @@ static void _generic(
 {
     command += mcc::ToString(callee);
     for (auto &argument: arguments)
-        command += ' ' + argument->GenResult(false, use_stack).Value;
+    {
+        auto value = argument->GenResult(false, use_stack);
+        mcc::Assert(
+            value.Type == mcc::ResultType_Value,
+            "argument must be {}, but is {}",
+            mcc::ResultType_Value,
+            value.Type);
+        command += ' ' + value.Value;
+    }
 }
 
-static void _function(
+static void generate_function(
     mcc::CommandT &command,
     const mcc::CalleeE,
     const std::vector<mcc::ValuePtr> &arguments,
@@ -43,6 +51,12 @@ static void _function(
 {
     const auto callee_ = arguments[0]->GenResult(false, use_stack);
     const auto arguments_ = arguments[1]->GenResult(false, use_stack);
+
+    mcc::Assert(
+        callee_.Type == mcc::ResultType_Value,
+        "callee must be {}, but is {}",
+        mcc::ResultType_Value,
+        callee_.Type);
 
     command += "function ";
     command += callee_.Value;
@@ -70,7 +84,7 @@ static void _function(
     }
 }
 
-static void _tellraw(
+static void generate_tellraw(
     mcc::CommandT &command,
     const mcc::CalleeE,
     const std::vector<mcc::ValuePtr> &arguments,
@@ -138,11 +152,11 @@ struct GeneratorInfo
 
 static const std::map<mcc::CalleeE, GeneratorInfo> generator_map
 {
-    {mcc::Callee_Give, {_generic, false, true}},
-    {mcc::Callee_SetBlock, {_generic, false, true}},
+    {mcc::Callee_Give, {generate_generic, false, true}},
+    {mcc::Callee_SetBlock, {generate_generic, false, true}},
 
-    {mcc::Callee_Function, {_function, false, true}},
-    {mcc::Callee_TellRaw, {_tellraw, false, true}},
+    {mcc::Callee_Function, {generate_function, false, true}},
+    {mcc::Callee_TellRaw, {generate_tellraw, false, true}},
 };
 
 void mcc::CallInstruction::Generate(CommandVector &commands, const bool use_stack) const
