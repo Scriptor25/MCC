@@ -1,0 +1,16 @@
+namespace example
+
+define :all() {
+    advancement.grant.everything(@s)
+    advancement.revoke.everything(@s)
+    advancement.grant.only(@s, $test)
+    advancement.revoke.only(@s, $test)
+    advancement.grant.only(@s, $test, $crit)
+    advancement.revoke.only(@s, $test, $crit)
+    advancement.grant.from(@s, $test)
+    advancement.revoke.from(@s, $test)
+    advancement.grant.through(@s, $test)
+    advancement.revoke.through(@s, $test)
+    advancement.grant.until(@s, $test)
+    advancement.revoke.until(@s, $test)
+}

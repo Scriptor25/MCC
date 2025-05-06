@@ -16,7 +16,7 @@ mcc::Token &mcc::Parser::Next()
     {
         LexState_None,
         LexState_Symbol,
-        LexState_Integer,
+        LexState_Number,
         LexState_String,
         LexState_Operator,
         LexState_Comment,
@@ -112,7 +112,7 @@ mcc::Token &mcc::Parser::Next()
                         if (std::isdigit(m_Buf) || m_Buf == '.')
                         {
                             token_location = m_Location;
-                            state = LexState_Integer;
+                            state = LexState_Number;
                             break;
                         }
 
@@ -137,7 +137,7 @@ mcc::Token &mcc::Parser::Next()
                 break;
 
             case LexState_Symbol:
-                if (!std::isalnum(m_Buf) && m_Buf != '_')
+                if (!std::isalnum(m_Buf) && m_Buf != '.' && m_Buf != '_')
                     return m_Token = {
                                .Type = TokenType_Symbol,
                                .Where = std::move(token_location),
@@ -150,7 +150,7 @@ mcc::Token &mcc::Parser::Next()
                 Get();
                 break;
 
-            case LexState_Integer:
+            case LexState_Number:
                 if (m_Buf == '.')
                 {
                     decimals++;

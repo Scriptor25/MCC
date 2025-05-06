@@ -28,5 +28,20 @@ mcc::ValuePtr mcc::CallExpression::Generate(Builder &builder, const bool inline_
     for (auto &argument: Arguments)
         arguments.emplace_back(argument->Generate(builder, inline_));
 
-    return builder.CreateCall(ToCallee(Callee), std::move(arguments), inline_);
+    std::vector<std::string> path;
+
+    auto callee = Callee;
+    for (size_t pos; (pos = callee.find('.')) != std::string::npos;)
+    {
+        path.emplace_back(callee.substr(0, pos));
+        callee = callee.substr(pos + 1);
+    }
+
+    if (!callee.empty())
+        path.emplace_back(callee);
+
+    return builder.CreateCall(
+        std::move(path),
+        std::move(arguments),
+        inline_);
 }

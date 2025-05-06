@@ -178,9 +178,12 @@ namespace mcc
 
     struct CallInstruction final : Instruction
     {
-        static InstructionPtr Create(ResourceLocation location, CalleeE callee, std::vector<ValuePtr> arguments);
+        static InstructionPtr Create(
+            ResourceLocation location,
+            std::vector<std::string> path,
+            std::vector<ValuePtr> arguments);
 
-        CallInstruction(ResourceLocation location, CalleeE callee, std::vector<ValuePtr> arguments);
+        CallInstruction(ResourceLocation location, std::vector<std::string> path, std::vector<ValuePtr> arguments);
         ~CallInstruction() override;
 
         void Generate(CommandVector &commands, bool use_stack) const override;
@@ -189,7 +192,7 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
 
         ResourceLocation Location;
-        CalleeE Callee;
+        std::vector<std::string> Path;
         std::vector<ValuePtr> Arguments;
     };
 
@@ -355,7 +358,7 @@ namespace mcc
 
         [[nodiscard]] CommandT GenerateInline(bool use_stack) const override;
         [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
-        bool RequireStack() const override;
+        [[nodiscard]] bool RequireStack() const override;
 
         ResourceLocation Location;
         std::string ID;

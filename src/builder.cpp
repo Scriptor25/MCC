@@ -57,11 +57,11 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
-    const CalleeE callee,
+    std::vector<std::string> path,
     std::vector<ValuePtr> arguments,
     const bool inline_)
 {
-    return Insert(CallInstruction::Create(m_Location, callee, std::move(arguments)), inline_);
+    return Insert(CallInstruction::Create(m_Location, std::move(path), std::move(arguments)), inline_);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(
