@@ -1,0 +1,97 @@
+{
+  "base": "bossbar",
+  "nodes": [
+    {
+      "type": "switch",
+      "cases": {
+        "add": [
+          {
+            "type": "value",
+            "label": "id"
+          },
+          {
+            "type": "value",
+            "label": "name"
+          }
+        ],
+        "get": [
+          {
+            "type": "value",
+            "label": "id"
+          },
+          [
+            "value",
+            "max",
+            "visible",
+            "players"
+          ]
+        ],
+        "list": [],
+        "remove": [
+          {
+            "type": "value",
+            "label": "id"
+          }
+        ],
+        "set": [
+          {
+            "type": "switch",
+            "cases": {
+              "color": [
+                [
+                  "blue",
+                  "green",
+                  "pink",
+                  "purple",
+                  "red",
+                  "white",
+                  "yellow"
+                ]
+              ],
+              "max": [
+                {
+                  "type": "value",
+                  "label": "max"
+                }
+              ],
+              "name": [
+                {
+                  "type": "value",
+                  "label": "name"
+                }
+              ],
+              "players": [
+                {
+                  "type": "value",
+                  "label": "targets",
+                  "optional": true
+                }
+              ],
+              "style": [
+                [
+                  "notched_6",
+                  "notched_10",
+                  "notched_12",
+                  "notched_20",
+                  "progress"
+                ]
+              ],
+              "value": [
+                {
+                  "type": "value",
+                  "label": "value"
+                }
+              ],
+              "visible": [
+                {
+                  "type": "value",
+                  "label": "visible"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

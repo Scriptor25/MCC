@@ -30,7 +30,7 @@ mcc::ComparisonInstruction::~ComparisonInstruction()
     Right->Drop();
 }
 
-void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool use_stack) const
+void mcc::ComparisonInstruction::Generate(const Builder &builder, CommandVector &commands, bool use_stack) const
 {
     Assert(use_stack, "comparison instruction requires stack usage");
 

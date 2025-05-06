@@ -1,0 +1,15 @@
+{
+  "base": "ban_ip",
+  "as": "ban-ip",
+  "nodes": [
+    {
+      "type": "value",
+      "label": "targets"
+    },
+    {
+      "type": "value",
+      "label": "reason",
+      "optional": true
+    }
+  ]
+}

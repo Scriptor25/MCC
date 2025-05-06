@@ -9,8 +9,8 @@ mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
     if (!SkipIf(TokenType_Other, "("))
         return expression;
 
-    const auto callee = dynamic_cast<SymbolExpression *>(expression.get());
-    Assert(callee, "function callee must be a valid command symbol");
+    const auto command = dynamic_cast<SymbolExpression *>(expression.get());
+    Assert(command, "command must be a symbol");
 
     std::vector<ExpressionPtr> arguments;
 
@@ -21,5 +21,5 @@ mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
             Expect(TokenType_Other, ",");
     }
 
-    return std::make_unique<CallExpression>(where, callee->ID, std::move(arguments));
+    return std::make_unique<CommandExpression>(where, command->ID, std::move(arguments));
 }

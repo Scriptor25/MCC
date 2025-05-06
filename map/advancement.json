@@ -1,0 +1,41 @@
+{
+  "base": "advancement",
+  "nodes": [
+    [
+      "grant",
+      "revoke"
+    ],
+    {
+      "type": "value",
+      "label": "targets"
+    },
+    {
+      "type": "switch",
+      "cases": {
+        "everything": [],
+        "only": [
+          {
+            "type": "value",
+            "label": "advancement"
+          },
+          {
+            "type": "value",
+            "label": "criterion",
+            "optional": true
+          }
+        ]
+      },
+      "default": [
+        [
+          "from",
+          "through",
+          "until"
+        ],
+        {
+          "type": "value",
+          "label": "advancement"
+        }
+      ]
+    }
+  ]
+}

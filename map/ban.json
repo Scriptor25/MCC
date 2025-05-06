@@ -1,0 +1,14 @@
+{
+  "base": "ban",
+  "nodes": [
+    {
+      "type": "value",
+      "label": "targets"
+    },
+    {
+      "type": "value",
+      "label": "reason",
+      "optional": true
+    }
+  ]
+}

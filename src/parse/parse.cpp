@@ -3,13 +3,14 @@
 #include <mcc/error.hpp>
 #include <mcc/parse.hpp>
 
-mcc::Parser::Parser(std::istream &stream, std::string filename)
-    : Parser(stream, SourceLocation(std::move(filename), 1, 0))
+mcc::Parser::Parser(Context &context, std::istream &stream, std::string filename)
+    : Parser(context, stream, SourceLocation(std::move(filename), 1, 0))
 {
 }
 
-mcc::Parser::Parser(std::istream &stream, SourceLocation location)
-    : m_Stream(stream),
+mcc::Parser::Parser(Context &context, std::istream &stream, SourceLocation location)
+    : m_Context(context),
+      m_Stream(stream),
       m_Location(std::move(location))
 {
     Get();

@@ -12,8 +12,8 @@ namespace mcc
     class Parser
     {
     public:
-        Parser(std::istream &stream, std::string filename);
-        Parser(std::istream &stream, SourceLocation location);
+        Parser(Context& context, std::istream &stream, std::string filename);
+        Parser(Context& context, std::istream &stream, SourceLocation location);
 
         [[nodiscard]] size_t Count() const;
 
@@ -91,11 +91,15 @@ namespace mcc
         ExpressionPtr ParseIfUnlessExpression();
         ExpressionPtr ParseReturnExpression();
 
+        ExpressionPtr ParseCommandExpression();
+
         ExpressionPtr ParsePrimaryExpression();
         ExpressionPtr ParseCallExpression();
         ExpressionPtr ParseBinaryExpression(ExpressionPtr left, ExpressionPtr (Parser::*next)(), unsigned min_pre);
 
+        Context &m_Context;
         std::istream &m_Stream;
+
         int m_Buf = -1;
         SourceLocation m_Location;
         Token m_Token;

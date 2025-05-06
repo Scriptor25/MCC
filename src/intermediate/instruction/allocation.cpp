@@ -26,7 +26,7 @@ mcc::AllocationInstruction::AllocationInstruction(
 {
 }
 
-void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::AllocationInstruction::Generate(const Builder &builder, CommandVector &commands, const bool use_stack) const
 {
     Assert(use_stack, "allocation instruction requires stack usage");
 

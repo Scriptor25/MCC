@@ -1,0 +1,10 @@
+{
+  "base": "banlist",
+  "nodes": [
+    "banlist",
+    [
+      "ips",
+      "players"
+    ]
+  ]
+}

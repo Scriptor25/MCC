@@ -20,7 +20,7 @@ mcc::StoreInstruction::~StoreInstruction()
     Src->Drop();
 }
 
-void mcc::StoreInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::StoreInstruction::Generate(const Builder &builder, CommandVector &commands, const bool use_stack) const
 {
     auto dst = Dst->GenerateResult(false, use_stack);
     auto src = Src->GenerateResult(false, use_stack);

@@ -1,0 +1,51 @@
+{
+  "base": "datapack",
+  "nodes": [
+    {
+      "type": "switch",
+      "cases": {
+        "disable": [
+          {
+            "type": "value",
+            "label": "name"
+          }
+        ],
+        "enable": [
+          {
+            "type": "value",
+            "label": "name"
+          },
+          {
+            "type": "switch",
+            "cases": {
+              "first": [],
+              "last": [],
+              "before": [
+                {
+                  "type": "value",
+                  "label": "existing"
+                }
+              ],
+              "after": [
+                {
+                  "type": "value",
+                  "label": "existing"
+                }
+              ]
+            }
+          }
+        ],
+        "list": [
+          {
+            "type": "enum",
+            "allowed": [
+              "available",
+              "enabled"
+            ],
+            "optional": true
+          }
+        ]
+      }
+    }
+  ]
+}

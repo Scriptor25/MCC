@@ -1,0 +1,18 @@
+{
+  "base": "enchant",
+  "nodes": [
+    {
+      "type": "value",
+      "label": "targets"
+    },
+    {
+      "type": "value",
+      "label": "enchantment"
+    },
+    {
+      "type": "value",
+      "label": "level",
+      "optional": true
+    }
+  ]
+}

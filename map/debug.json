@@ -1,0 +1,18 @@
+{
+  "base": "debug",
+  "nodes": [
+    {
+      "type": "switch",
+      "cases": {
+        "start": [],
+        "stop": [],
+        "function": [
+          {
+            "type": "value",
+            "label": "name"
+          }
+        ]
+      }
+    }
+  ]
+}

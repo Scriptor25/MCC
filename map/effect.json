@@ -1,0 +1,47 @@
+{
+  "base": "effect",
+  "nodes": [
+    {
+      "type": "switch",
+      "cases": {
+        "clear": [
+          {
+            "type": "value",
+            "label": "targets",
+            "optional": true
+          },
+          {
+            "type": "value",
+            "label": "effect",
+            "optional": true
+          }
+        ],
+        "give": [
+          {
+            "type": "value",
+            "label": "targets"
+          },
+          {
+            "type": "value",
+            "label": "effect"
+          },
+          {
+            "type": "value",
+            "label": "seconds",
+            "optional": true
+          },
+          {
+            "type": "value",
+            "label": "amplifier",
+            "optional": true
+          },
+          {
+            "type": "value",
+            "label": "hideParticles",
+            "optional": true
+          }
+        ]
+      }
+    }
+  ]
+}

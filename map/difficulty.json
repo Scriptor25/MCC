@@ -1,0 +1,15 @@
+{
+  "base": "difficulty",
+  "nodes": [
+    {
+      "type": "enum",
+      "allowed": [
+        "peaceful",
+        "easy",
+        "normal",
+        "hard"
+      ],
+      "optional": true
+    }
+  ]
+}

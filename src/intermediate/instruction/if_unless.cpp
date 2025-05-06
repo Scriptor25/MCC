@@ -40,14 +40,14 @@ mcc::IfUnlessInstruction::~IfUnlessInstruction()
     Else->Drop();
 }
 
-void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::IfUnlessInstruction::Generate(const Builder &builder, CommandVector &commands, const bool use_stack) const
 {
     Assert(!UseCount || use_stack, "if-unless instruction requires stack usage");
 
     auto condition = Condition->GenerateResult(false, use_stack);
 
-    auto then = Then->GenerateInline(use_stack);
-    auto else_ = Else->GenerateInline(use_stack);
+    auto then = Then->GenerateInline(builder, use_stack);
+    auto else_ = Else->GenerateInline(builder, use_stack);
 
     auto store_result = UseCount
                             ? std::format("run execute store result storage {} {} double 1 ", Location, GetStackPath())
@@ -60,9 +60,9 @@ void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_
     {
         case ResultType_Value:
             if (Unless == (condition.Value == "false" || condition.Value == "0"))
-                Then->Generate(commands, use_stack);
+                Then->Generate(builder, commands, use_stack);
             else
-                Else->Generate(commands, use_stack);
+                Else->Generate(builder, commands, use_stack);
             break;
 
         case ResultType_Storage:

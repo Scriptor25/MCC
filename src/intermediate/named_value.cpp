@@ -12,7 +12,7 @@ mcc::NamedValue::NamedValue(ResourceLocation location, std::string id)
 {
 }
 
-mcc::CommandT mcc::NamedValue::GenerateInline(const bool use_stack) const
+mcc::CommandT mcc::NamedValue::GenerateInline(const Builder &builder, const bool use_stack) const
 {
     Assert(use_stack, "named value requires stack usage");
 

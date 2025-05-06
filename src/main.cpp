@@ -4,19 +4,22 @@
 #include <string>
 #include <vector>
 #include <mcc/actions.hpp>
+#include <mcc/command.hpp>
 #include <mcc/context.hpp>
 #include <mcc/package.hpp>
 #include <mcc/parse.hpp>
 
-static void parse_file(mcc::Package &package, const std::filesystem::path &path)
+static void parse_file(
+    mcc::Package &package,
+    const mcc::DefinitionsT &definitions,
+    const std::filesystem::path &path)
 {
     std::ifstream stream(path);
     if (!stream)
         return;
 
-    mcc::Context context(package, {});
-
-    mcc::Parser parser(stream, path.string());
+    mcc::Context context(package, definitions, {});
+    mcc::Parser parser(context, stream, path.string());
     while (parser)
         if (const auto statement = parser())
             statement->Generate(context);
@@ -29,6 +32,14 @@ int main(const int argc, const char **argv)
     // https://minecraft.fandom.com/wiki/Argument_types
     // https://minecraft.fandom.com/wiki/Commands
     // https://minecraft.fandom.com/wiki/Data_pack
+
+    mcc::DefinitionsT definitions;
+    for (auto &entry: std::filesystem::directory_iterator("C:\\Users\\felix\\Documents\\Projects\\CLion\\MCC\\map"))
+    {
+        mcc::CommandDefinition definition;
+        mcc::ReadDefinition(definition, entry.path());
+        definitions.emplace(definition.Base, std::move(definition));
+    }
 
     mcc::Actions actions(
         {
@@ -112,7 +123,7 @@ int main(const int argc, const char **argv)
                 if (entry.path().extension() != ".mcc")
                     continue;
 
-                parse_file(package, entry.path());
+                parse_file(package, definitions, entry.path());
             }
 
             package.Write(target);

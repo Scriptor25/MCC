@@ -62,6 +62,9 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (SkipIf(TokenType_Other, "$"))
         return ParseResourceExpression();
 
+    if (SkipIf(TokenType_Operator, "%"))
+        return ParseCommandExpression();
+
     if (At(TokenType_Other, "["))
         return ParseArrayExpression();
 

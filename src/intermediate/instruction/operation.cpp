@@ -30,7 +30,7 @@ mcc::OperationInstruction::~OperationInstruction()
     Right->Drop();
 }
 
-void mcc::OperationInstruction::Generate(CommandVector &commands, bool use_stack) const
+void mcc::OperationInstruction::Generate(const Builder &builder, CommandVector &commands, bool use_stack) const
 {
     Assert(use_stack, "operation instruction requires stack usage");
 

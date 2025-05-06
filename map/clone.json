@@ -1,0 +1,83 @@
+{
+  "base": "clone",
+  "nodes": [
+    {
+      "type": "switch",
+      "cases": {
+        "from": [
+          {
+            "type": "value",
+            "label": "sourceDimension"
+          }
+        ]
+      },
+      "default": []
+    },
+    {
+      "type": "value",
+      "label": "begin x"
+    },
+    {
+      "type": "value",
+      "label": "begin y"
+    },
+    {
+      "type": "value",
+      "label": "begin z"
+    },
+    {
+      "type": "value",
+      "label": "end x"
+    },
+    {
+      "type": "value",
+      "label": "end y"
+    },
+    {
+      "type": "value",
+      "label": "end z"
+    },
+    {
+      "type": "switch",
+      "cases": {
+        "to": [
+          {
+            "type": "value",
+            "label": "targetDimension"
+          }
+        ]
+      },
+      "default": []
+    },
+    {
+      "type": "value",
+      "label": "destination x"
+    },
+    {
+      "type": "value",
+      "label": "destination y"
+    },
+    {
+      "type": "value",
+      "label": "destination z"
+    },
+    {
+      "type": "switch",
+      "cases": {
+        "filtered": [
+          {
+            "type": "value",
+            "label": "filter"
+          }
+        ],
+        "replace": [],
+        "masked": []
+      }
+    },
+    [
+      "force",
+      "move",
+      "normal"
+    ]
+  ]
+}

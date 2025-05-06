@@ -1,40 +1,27 @@
 #include <set>
+#include <mcc/builder.hpp>
+#include <mcc/context.hpp>
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
-mcc::InstructionPtr mcc::CallInstruction::Create(
-    ResourceLocation location,
-    std::vector<std::string> path,
-    std::vector<ValuePtr> arguments)
-{
-    return std::make_shared<CallInstruction>(std::move(location), std::move(path), std::move(arguments));
-}
+using namespace std::string_view_literals;
 
-mcc::CallInstruction::CallInstruction(
-    ResourceLocation location,
-    std::vector<std::string> path,
-    std::vector<ValuePtr> arguments)
-    : Location(std::move(location)),
-      Path(std::move(path)),
-      Arguments(std::move(arguments))
-{
-    for (const auto &argument: Arguments)
-        argument->Use();
-}
+using GeneratorT = std::function<void(const mcc::CommandInstruction &self, mcc::CommandT &command, bool use_stack)>;
 
-mcc::CallInstruction::~CallInstruction()
+struct GeneratorInfo
 {
-    for (const auto &argument: Arguments)
-        argument->Drop();
-}
+    GeneratorT Generator;
+    bool RequireStack;
+    bool Inlinable;
+};
 
 static void generate_generic(
-    const mcc::CallInstruction &instruction,
+    const mcc::CommandInstruction &self,
     mcc::CommandT &command,
     const bool use_stack)
 {
-    command += instruction.Path.front();
-    for (auto &argument: instruction.Arguments)
+    command += self.Path.front();
+    for (auto &argument: self.Arguments)
     {
         auto value = argument->GenerateResult(false, use_stack);
         mcc::Assert(
@@ -46,55 +33,13 @@ static void generate_generic(
     }
 }
 
-static void generate_advancement(
-    const mcc::CallInstruction &instruction,
-    mcc::CommandT &command,
-    const bool use_stack)
-{
-    auto &sub1 = instruction.Path[1];
-    auto &sub2 = instruction.Path[2];
-
-    auto targets = instruction.Arguments[0]->GenerateResult(false, use_stack);
-    mcc::Assert(
-        targets.Type == mcc::ResultType_Value,
-        "targets must be {}, but is {}",
-        mcc::ResultType_Value,
-        targets.Type);
-
-    command += std::format("advancement {} {} {}", sub1, targets.Value, sub2);
-
-    if (sub2 == "everything")
-        return;
-
-    auto advancement = instruction.Arguments[1]->GenerateResult(false, use_stack);
-    mcc::Assert(
-        advancement.Type == mcc::ResultType_Value,
-        "advancement must be {}, but is {}",
-        mcc::ResultType_Value,
-        advancement.Type);
-
-    command += ' ' + advancement.Value;
-
-    if (sub2 == "only" && instruction.Arguments.size() == 3)
-    {
-        auto criterion = instruction.Arguments[2]->GenerateResult(false, use_stack);
-        mcc::Assert(
-            criterion.Type == mcc::ResultType_Value,
-            "criterion must be {}, but is {}",
-            mcc::ResultType_Value,
-            criterion.Type);
-
-        command += ' ' + criterion.Value;
-    }
-}
-
 static void generate_function(
-    const mcc::CallInstruction &instruction,
+    const mcc::CommandInstruction &self,
     mcc::CommandT &command,
     const bool use_stack)
 {
-    auto callee = instruction.Arguments[0]->GenerateResult(false, use_stack);
-    auto arguments = instruction.Arguments[1]->GenerateResult(false, use_stack);
+    auto callee = self.Arguments[0]->GenerateResult(false, use_stack);
+    auto arguments = self.Arguments[1]->GenerateResult(false, use_stack);
 
     mcc::Assert(
         callee.Type == mcc::ResultType_Value,
@@ -124,12 +69,12 @@ static void generate_function(
 }
 
 static void generate_tellraw(
-    const mcc::CallInstruction &instruction,
+    const mcc::CommandInstruction &self,
     mcc::CommandT &command,
     const bool use_stack)
 {
-    auto targets = instruction.Arguments[0]->GenerateResult(false, use_stack);
-    auto message = instruction.Arguments[1]->GenerateResult(false, use_stack);
+    auto targets = self.Arguments[0]->GenerateResult(false, use_stack);
+    auto message = self.Arguments[1]->GenerateResult(false, use_stack);
 
     command += std::format("tellraw {} ", targets.Value);
 
@@ -157,31 +102,43 @@ static void generate_tellraw(
     }
 }
 
-using GeneratorT = std::function<void(
-    const mcc::CallInstruction &instruction,
-    mcc::CommandT &command,
-    bool use_stack
-)>;
-
-struct GeneratorInfo
+static const std::set generic_set
 {
-    GeneratorT Generator;
-    bool RequireStack;
-    bool Inlinable;
-};
-
-static const std::set<std::string_view> generic_set
-{
-    "give",
-    "setblock",
+    "give"sv,
+    "setblock"sv,
 };
 
 static const std::map<std::string_view, GeneratorInfo> generator_map
 {
-    {"advancement", {generate_advancement, false, true}},
-    {"function", {generate_function, false, true}},
-    {"tellraw", {generate_tellraw, false, true}},
+    {"function"sv, {generate_function, false, true}},
+    {"tellraw"sv, {generate_tellraw, false, true}},
 };
+
+mcc::InstructionPtr mcc::CommandInstruction::Create(
+    ResourceLocation location,
+    std::vector<std::string> path,
+    std::vector<ValuePtr> arguments)
+{
+    return std::make_shared<CommandInstruction>(std::move(location), std::move(path), std::move(arguments));
+}
+
+mcc::CommandInstruction::CommandInstruction(
+    ResourceLocation location,
+    std::vector<std::string> path,
+    std::vector<ValuePtr> arguments)
+    : Location(std::move(location)),
+      Path(std::move(path)),
+      Arguments(std::move(arguments))
+{
+    for (const auto &argument: Arguments)
+        argument->Use();
+}
+
+mcc::CommandInstruction::~CommandInstruction()
+{
+    for (const auto &argument: Arguments)
+        argument->Drop();
+}
 
 static const GeneratorInfo &get_generator(const bool inline_, const bool use_stack, const std::string &base)
 {
@@ -195,22 +152,21 @@ static const GeneratorInfo &get_generator(const bool inline_, const bool use_sta
     return generator;
 }
 
-void mcc::CallInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::CommandInstruction::Generate(const Builder &builder, CommandVector &commands, const bool use_stack) const
 {
     Assert(!UseCount || use_stack, "call instruction requires stack usage");
 
     auto &base = Path.front();
+    auto &definitions = builder.GetContext().Definitions;
+    Assert(definitions.contains(base), "undefined command base {}", base);
+
+    auto &definition = definitions.at(base);
 
     CommandT command;
     if (Path.size() == 1 && generic_set.contains(base))
-    {
         generate_generic(*this, command, use_stack);
-    }
     else
-    {
-        auto &generator = get_generator(false, use_stack, base);
-        generator.Generator(*this, command, use_stack);
-    }
+        get_generator(false, use_stack, base).Generator(*this, command, use_stack);
 
     if (!UseCount)
     {
@@ -225,7 +181,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool use_stac
         command);
 }
 
-mcc::CommandT mcc::CallInstruction::GenerateInline(const bool use_stack) const
+mcc::CommandT mcc::CommandInstruction::GenerateInline(const Builder &builder, const bool use_stack) const
 {
     Assert(!UseCount || use_stack, "call instruction requires stack usage");
 
@@ -233,14 +189,9 @@ mcc::CommandT mcc::CallInstruction::GenerateInline(const bool use_stack) const
 
     CommandT command;
     if (Path.size() == 1 && generic_set.contains(base))
-    {
         generate_generic(*this, command, use_stack);
-    }
     else
-    {
-        auto &generator = get_generator(true, use_stack, base);
-        generator.Generator(*this, command, use_stack);
-    }
+        get_generator(true, use_stack, base).Generator(*this, command, use_stack);
 
     if (!UseCount)
         return command;
@@ -252,7 +203,7 @@ mcc::CommandT mcc::CallInstruction::GenerateInline(const bool use_stack) const
         command);
 }
 
-mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::CommandInstruction::GenerateResult(const bool stringify, const bool use_stack) const
 {
     if (!UseCount)
         return {.Type = ResultType_None};
@@ -266,7 +217,7 @@ mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify, const boo
     };
 }
 
-bool mcc::CallInstruction::RequireStack() const
+bool mcc::CommandInstruction::RequireStack() const
 {
     if (UseCount)
         return true;
@@ -284,6 +235,5 @@ bool mcc::CallInstruction::RequireStack() const
     if (Path.size() == 1 && generic_set.contains(base))
         return false;
 
-    auto &generator = get_generator(false, true, base);
-    return generator.RequireStack;
+    return get_generator(false, true, base).RequireStack;
 }

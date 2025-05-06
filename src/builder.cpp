@@ -56,12 +56,12 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
     return Insert(OperationInstruction::Create(operator_, m_Location, std::move(left), std::move(right)), inline_);
 }
 
-mcc::InstructionPtr mcc::Builder::CreateCall(
+mcc::InstructionPtr mcc::Builder::CreateCommand(
     std::vector<std::string> path,
     std::vector<ValuePtr> arguments,
     const bool inline_)
 {
-    return Insert(CallInstruction::Create(m_Location, std::move(path), std::move(arguments)), inline_);
+    return Insert(CommandInstruction::Create(m_Location, std::move(path), std::move(arguments)), inline_);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(
@@ -183,5 +183,5 @@ void mcc::Builder::Generate(std::vector<CommandT> &commands, const bool use_stac
 {
     CommandVector command_vector(commands);
     for (auto &instruction: m_Instructions)
-        instruction->Generate(command_vector, use_stack);
+        instruction->Generate(*this, command_vector, use_stack);
 }

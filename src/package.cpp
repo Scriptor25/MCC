@@ -72,7 +72,6 @@ mcc::PackageInfo mcc::PackageInfo::Deserialize(const std::filesystem::path &path
 
     nlohmann::json json;
     stream >> json;
-    stream.close();
 
     return json;
 }
@@ -85,7 +84,6 @@ void mcc::PackageInfo::Serialize(const std::filesystem::path &path) const
 
     const nlohmann::json json = *this;
     stream << std::setw(2) << json;
-    stream.close();
 }
 
 void mcc::to_json(nlohmann::json &json, const ResourceLocation &location)

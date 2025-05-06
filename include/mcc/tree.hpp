@@ -142,14 +142,14 @@ namespace mcc
         ExpressionPtr Right;
     };
 
-    struct CallExpression final : Expression
+    struct CommandExpression final : Expression
     {
-        CallExpression(SourceLocation where, std::string callee, std::vector<ExpressionPtr> arguments);
+        CommandExpression(SourceLocation where, std::string command, std::vector<ExpressionPtr> arguments);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
-        std::string Callee;
+        std::string Command;
         std::vector<ExpressionPtr> Arguments;
     };
 
