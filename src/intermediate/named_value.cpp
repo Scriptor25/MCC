@@ -3,7 +3,7 @@
 
 mcc::ValuePtr mcc::NamedValue::Create(ResourceLocation location, std::string id)
 {
-    return std::make_shared<NamedValue>(location, id);
+    return std::make_shared<NamedValue>(std::move(location), std::move(id));
 }
 
 mcc::NamedValue::NamedValue(ResourceLocation location, std::string id)
@@ -12,13 +12,17 @@ mcc::NamedValue::NamedValue(ResourceLocation location, std::string id)
 {
 }
 
-mcc::CommandT mcc::NamedValue::GenerateInline(bool use_stack) const
+mcc::CommandT mcc::NamedValue::GenerateInline(const bool use_stack) const
 {
+    Assert(use_stack, "named value requires stack usage");
+
     return "data get storage " + Location.String() + " stack[0].var." + ID;
 }
 
-mcc::Result mcc::NamedValue::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::NamedValue::GenerateResult(const bool stringify, const bool use_stack) const
 {
+    Assert(use_stack, "named value requires stack usage");
+
     return {
         .Type = ResultType_Storage,
         .Location = Location,

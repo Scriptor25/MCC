@@ -12,7 +12,6 @@ mcc::StatementPtr mcc::Parser::ParseStatement()
     if (At(TokenType_Symbol, "define"))
         return ParseDefineStatement();
 
-
     Error(
         m_Token.Where,
         "cannot parse {} '{}'",

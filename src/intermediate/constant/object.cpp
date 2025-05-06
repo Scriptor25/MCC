@@ -18,7 +18,7 @@ mcc::ConstantObject::~ConstantObject()
         value->Drop();
 }
 
-mcc::Result mcc::ConstantObject::GenResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::ConstantObject::GenerateResult(const bool stringify, const bool use_stack) const
 {
     std::string result;
     result += '{';
@@ -30,13 +30,13 @@ mcc::Result mcc::ConstantObject::GenResult(const bool stringify, const bool use_
             first = false;
         else
             result += ',';
-        result += key_ + ':' + value_->GenResult(stringify, use_stack).Value;
+        result += key_ + ':' + value_->GenerateResult(stringify, use_stack).Value;
     }
 
     result += '}';
 
     return {
         .Type = ResultType_Value,
-        .Value = result,
+        .Value = std::move(result),
     };
 }

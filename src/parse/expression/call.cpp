@@ -9,8 +9,8 @@ mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
     if (!SkipIf(TokenType_Other, "("))
         return expression;
 
-    const auto callee = dynamic_cast<ResourceExpression *>(expression.get());
-    Assert(callee, "function callee must be a valid resource location");
+    const auto callee = dynamic_cast<SymbolExpression *>(expression.get());
+    Assert(callee, "function callee must be a valid command symbol");
 
     std::vector<ExpressionPtr> arguments;
 
@@ -21,5 +21,5 @@ mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
             Expect(TokenType_Other, ",");
     }
 
-    return std::make_unique<CallExpression>(where, callee->Location.Path, std::move(arguments));
+    return std::make_unique<CallExpression>(where, callee->ID, std::move(arguments));
 }

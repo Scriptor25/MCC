@@ -33,7 +33,7 @@ static void generate_generic(
     command += mcc::ToString(callee);
     for (auto &argument: arguments)
     {
-        auto value = argument->GenResult(false, use_stack);
+        auto value = argument->GenerateResult(false, use_stack);
         mcc::Assert(
             value.Type == mcc::ResultType_Value,
             "argument must be {}, but is {}",
@@ -49,8 +49,8 @@ static void generate_function(
     const std::vector<mcc::ValuePtr> &arguments,
     const bool use_stack)
 {
-    const auto callee_ = arguments[0]->GenResult(false, use_stack);
-    const auto arguments_ = arguments[1]->GenResult(false, use_stack);
+    auto callee_ = arguments[0]->GenerateResult(false, use_stack);
+    auto arguments_ = arguments[1]->GenerateResult(false, use_stack);
 
     mcc::Assert(
         callee_.Type == mcc::ResultType_Value,
@@ -58,9 +58,7 @@ static void generate_function(
         mcc::ResultType_Value,
         callee_.Type);
 
-    command += "function ";
-    command += callee_.Value;
-    command += ' ';
+    command += std::format("function {} ", callee_.Value);
 
     switch (arguments_.Type)
     {
@@ -69,10 +67,7 @@ static void generate_function(
             break;
 
         case mcc::ResultType_Storage:
-            command += "with storage ";
-            command += arguments_.Location.String();
-            command += ' ';
-            command += arguments_.Path;
+            command += std::format("with storage {} {}", arguments_.Location, arguments_.Path);
             break;
 
         default:
@@ -90,12 +85,10 @@ static void generate_tellraw(
     const std::vector<mcc::ValuePtr> &arguments,
     const bool use_stack)
 {
-    const auto targets = arguments[0]->GenResult(false, use_stack);
-    const auto message = arguments[1]->GenResult(false, use_stack);
+    auto targets = arguments[0]->GenerateResult(false, use_stack);
+    auto message = arguments[1]->GenerateResult(false, use_stack);
 
-    command += "tellraw ";
-    command += targets.Value;
-    command += ' ';
+    command += std::format("tellraw {} ", targets.Value);
 
     switch (message.Type)
     {
@@ -104,27 +97,11 @@ static void generate_tellraw(
             break;
 
         case mcc::ResultType_Storage:
-            command += "{storage:";
-            command += '"';
-            command += message.Location.String();
-            command += '"';
-            command += ",nbt:";
-            command += '"';
-            command += message.Path;
-            command += '"';
-            command += ",interpret:true}";
+            command += std::format("{{storage:\"{}\",nbt:\"{}\",interpret:true}}", message.Location, message.Path);
             break;
 
         case mcc::ResultType_Score:
-            command += "{score:{name:";
-            command += '"';
-            command += message.Player;
-            command += '"';
-            command += ",objective:";
-            command += '"';
-            command += message.Objective;
-            command += '"';
-            command += "}}";
+            command += std::format("{{score:{{name:\"{}\",objective:\"{}\"}}}}", message.Player, message.Objective);
             break;
 
         default:
@@ -205,7 +182,7 @@ mcc::CommandT mcc::CallInstruction::GenerateInline(const bool use_stack) const
         command);
 }
 
-mcc::Result mcc::CallInstruction::GenResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify, const bool use_stack) const
 {
     if (!UseCount)
         return {.Type = ResultType_None};

@@ -15,40 +15,41 @@ mcc::ConstantPtr mcc::ConstantFloatRange::CreateMax(FloatT max)
     return std::make_shared<ConstantFloatRange>(std::nullopt, max);
 }
 
-mcc::ConstantFloatRange::ConstantFloatRange(std::optional<FloatT> min, std::optional<FloatT> max)
-    : Min(std::move(min)),
-      Max(std::move(max))
+mcc::ConstantFloatRange::ConstantFloatRange(const std::optional<FloatT> min, const std::optional<FloatT> max)
+    : Min(min),
+      Max(max)
 {
 }
 
-mcc::Result mcc::ConstantFloatRange::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantFloatRange::GenerateResult(const bool stringify, bool use_stack) const
 {
     if (Min == Max)
     {
         auto value = std::to_string(Min.value());
         if (stringify)
-            value += '"' + value + '"';
+            value = '"' + value + '"';
 
         return {
             .Type = ResultType_Value,
-            .Value = value,
+            .Value = std::move(value),
         };
     }
 
-    const auto min_string = Min.has_value()
-                                ? std::to_string(Min.value())
-                                : "";
+    std::string value;
 
-    const auto max_string = Max.has_value()
-                                ? std::to_string(Max.value())
-                                : "";
+    value += Min.has_value()
+                 ? std::to_string(Min.value())
+                 : "";
+    value += "..";
+    value += Max.has_value()
+                 ? std::to_string(Max.value())
+                 : "";
 
-    auto value = min_string + ".." + max_string;
     if (stringify)
-        value += '"' + value + '"';
+        value = '"' + value + '"';
 
     return {
         .Type = ResultType_Value,
-        .Value = value,
+        .Value = std::move(value),
     };
 }

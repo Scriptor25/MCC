@@ -16,54 +16,36 @@ mcc::ConstantTarget::ConstantTarget(
 {
 }
 
-mcc::Result mcc::ConstantTarget::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantTarget::GenerateResult(const bool stringify, bool use_stack) const
 {
     std::string result;
     result += '@';
+    result += ToString(Selector);
 
-    switch (Selector)
+    if (!Attributes.empty())
     {
-        case TargetSelector_P:
-            result += 'p';
-            break;
-        case TargetSelector_R:
-            result += 'r';
-            break;
-        case TargetSelector_A:
-            result += 'a';
-            break;
-        case TargetSelector_E:
-            result += 'e';
-            break;
-        case TargetSelector_S:
-            result += 's';
-            break;
+        result += '[';
+
+        auto first = true;
+        for (auto &[key_, value_]: Attributes)
+            for (auto &attribute: value_)
+            {
+                if (first)
+                    first = false;
+                else
+                    result += ',';
+
+                result += key_ + '=' + attribute->String();
+            }
+
+        result += ']';
     }
-
-    result += '[';
-
-    auto first = true;
-    for (auto &[key_, value_]: Attributes)
-    {
-        for (auto &attribute: value_)
-        {
-            if (first)
-                first = false;
-            else
-                result += ',';
-            result += key_;
-            result += '=';
-            result += attribute->String();
-        }
-    }
-
-    result += ']';
 
     if (stringify)
         result = "{selector:\"" + result + "\"}";
 
     return {
         .Type = ResultType_Value,
-        .Value = result,
+        .Value = std::move(result),
     };
 }

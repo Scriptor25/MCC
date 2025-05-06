@@ -34,27 +34,29 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, bool use_stack
 {
     Assert(use_stack, "operation instruction requires stack usage");
 
-    auto left = Left->GenResult(false, use_stack);
-    auto right = Right->GenResult(false, use_stack);
+    auto left = Left->GenerateResult(false, use_stack);
+    auto right = Right->GenerateResult(false, use_stack);
 
-    commands.Append("scoreboard objectives add tmp dummy");
+    commands.Append(CreateTmpScore());
 
     switch (left.Type)
     {
         case ResultType_Value:
-            commands.Append("scoreboard players set %a tmp {}", left.Value);
+            commands.Append("scoreboard players set %a {} {}", GetTmpName(), left.Value);
             break;
 
         case ResultType_Storage:
             commands.Append(
-                "execute store result score %a tmp run data get storage {} {}",
+                "execute store result score %a {} run data get storage {} {}",
+                GetTmpName(),
                 left.Location,
                 left.Path);
             break;
 
         case ResultType_Score:
             commands.Append(
-                "scoreboard players operation %a tmp = {} {}",
+                "scoreboard players operation %a {} = {} {}",
+                GetTmpName(),
                 left.Player,
                 left.Objective);
             break;
@@ -71,19 +73,21 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, bool use_stack
     switch (right.Type)
     {
         case ResultType_Value:
-            commands.Append("scoreboard players set %b tmp {}", right.Value);
+            commands.Append("scoreboard players set %b {} {}", GetTmpName(), right.Value);
             break;
 
         case ResultType_Storage:
             commands.Append(
-                "execute store result score %b tmp run data get storage {} {}",
+                "execute store result score %b {} run data get storage {} {}",
+                GetTmpName(),
                 right.Location,
                 right.Path);
             break;
 
         case ResultType_Score:
             commands.Append(
-                "scoreboard players operation %b tmp = {} {}",
+                "scoreboard players operation %b {} = {} {}",
+                GetTmpName(),
                 right.Player,
                 right.Objective);
             break;
@@ -124,17 +128,18 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, bool use_stack
             Error("undefined operator {}", Operator);
     }
 
-    commands.Append("scoreboard players operation %a tmp {} %b tmp", operator_);
+    commands.Append("scoreboard players operation %a {} {} %b {}", GetTmpName(), operator_, GetTmpName());
 
     commands.Append(
-        "execute store result storage {} {} double 1 run scoreboard players get %a tmp",
+        "execute store result storage {} {} double 1 run scoreboard players get %a {}",
         Location,
-        GetStackPath());
+        GetStackPath(),
+        GetTmpName());
 
-    commands.Append("scoreboard objectives remove tmp");
+    commands.Append(RemoveTmpScore());
 }
 
-mcc::Result mcc::OperationInstruction::GenResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::OperationInstruction::GenerateResult(const bool stringify, const bool use_stack) const
 {
     Assert(use_stack, "operation instruction requires stack usage");
 

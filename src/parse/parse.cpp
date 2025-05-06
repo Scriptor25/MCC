@@ -4,11 +4,8 @@
 #include <mcc/parse.hpp>
 
 mcc::Parser::Parser(std::istream &stream, std::string filename)
-    : m_Stream(stream),
-      m_Location(std::move(filename), 1, 0)
+    : Parser(stream, SourceLocation(std::move(filename), 1, 0))
 {
-    Get();
-    Next();
 }
 
 mcc::Parser::Parser(std::istream &stream, SourceLocation location)

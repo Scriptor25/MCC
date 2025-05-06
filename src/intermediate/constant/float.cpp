@@ -10,7 +10,7 @@ mcc::ConstantFloat::ConstantFloat(const FloatT value)
 {
 }
 
-mcc::Result mcc::ConstantFloat::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantFloat::GenerateResult(const bool stringify, bool use_stack) const
 {
     auto value = std::to_string(Value);
     if (stringify)
@@ -18,6 +18,6 @@ mcc::Result mcc::ConstantFloat::GenResult(const bool stringify, bool use_stack) 
 
     return {
         .Type = ResultType_Value,
-        .Value = value,
+        .Value = std::move(value),
     };
 }

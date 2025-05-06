@@ -45,8 +45,8 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands, const bool use_st
     //      execute store result storage <location> stack[0].values[<object.index>].<key> double 1 run scoreboard players get <value.player> <value.objective>
     //
 
-    auto object = Object->GenResult(false, use_stack);
-    auto value = Value->GenResult(false, use_stack);
+    auto object = Object->GenerateResult(false, use_stack);
+    auto value = Value->GenerateResult(false, use_stack);
 
     switch (value.Type)
     {

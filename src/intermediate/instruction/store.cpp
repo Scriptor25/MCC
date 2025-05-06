@@ -22,8 +22,8 @@ mcc::StoreInstruction::~StoreInstruction()
 
 void mcc::StoreInstruction::Generate(CommandVector &commands, const bool use_stack) const
 {
-    auto dst = Dst->GenResult(false, use_stack);
-    auto src = Src->GenResult(false, use_stack);
+    auto dst = Dst->GenerateResult(false, use_stack);
+    auto src = Src->GenerateResult(false, use_stack);
 
     switch (dst.Type)
     {
@@ -106,9 +106,9 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, const bool use_sta
     }
 }
 
-mcc::Result mcc::StoreInstruction::GenResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::StoreInstruction::GenerateResult(const bool stringify, const bool use_stack) const
 {
-    return Dst->GenResult(false, use_stack);
+    return Dst->GenerateResult(false, use_stack);
 }
 
 bool mcc::StoreInstruction::RequireStack() const

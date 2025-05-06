@@ -87,10 +87,14 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool use_stack) co
     //      execute store result storage <location> stack[0].values[<array.index>][(<back>|0|<index>)] double 1 run scoreboard players get <value.player> <value.objective>
     //
 
-    const auto array = Array->GenResult(false, use_stack);
-    const auto value = Value->GenResult(Stringify, use_stack);
+    auto array = Array->GenerateResult(false, use_stack);
+    auto value = Value->GenerateResult(Stringify, use_stack);
 
-    Assert(array.Type == ResultType_Storage, "array must be {}, but is {}", ResultType_Storage, array.Type);
+    Assert(
+        array.Type == ResultType_Storage,
+        "array must be {}, but is {}",
+        ResultType_Storage,
+        array.Type);
 
     std::string operation;
     switch (ArrayOperation)
@@ -104,9 +108,11 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool use_stack) co
             break;
 
         case ArrayOperation_Insert:
-            operation = "insert " + std::to_string(Index);
+            operation = std::format("insert {}", Index);
             break;
     }
+
+    auto conversion = Stringify ? "string" : "from";
 
     switch (value.Type)
     {
@@ -125,25 +131,27 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool use_stack) co
                 array.Location,
                 array.Path,
                 operation,
-                Stringify ? "string" : "from",
+                conversion,
                 value.Location,
                 value.Path);
             break;
 
         case ResultType_Score:
             commands.Append(
-                "execute store result storage {} tmp double 1 run scoreboard players get {} {}",
+                "execute store result storage {} {} double 1 run scoreboard players get {} {}",
                 Location,
+                GetTmpName(),
                 value.Player,
                 value.Objective);
             commands.Append(
-                "data modify storage {} {} {} {} storage {} tmp",
+                "data modify storage {} {} {} {} storage {} {}",
                 array.Location,
                 array.Path,
                 operation,
-                Stringify ? "string" : "from",
-                Location);
-            commands.Append("data remove storage {} tmp", Location);
+                conversion,
+                Location,
+                GetTmpName());
+            commands.Append("data remove storage {} {}", Location, GetTmpName());
             break;
 
         default:

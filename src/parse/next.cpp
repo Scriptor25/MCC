@@ -50,6 +50,7 @@ mcc::Token &mcc::Parser::Next()
                     case '~':
                     case '^':
                     case '#':
+                    case '$':
                         token_location = m_Location;
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);

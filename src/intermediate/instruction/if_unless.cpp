@@ -44,7 +44,7 @@ void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_
 {
     Assert(!UseCount || use_stack, "if-unless instruction requires stack usage");
 
-    auto condition = Condition->GenResult(false, use_stack);
+    auto condition = Condition->GenerateResult(false, use_stack);
 
     auto then = Then->GenerateInline(use_stack);
     auto else_ = Else->GenerateInline(use_stack);
@@ -52,6 +52,9 @@ void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_
     auto store_result = UseCount
                             ? std::format("run execute store result storage {} {} double 1 ", Location, GetStackPath())
                             : "";
+
+    auto if_unless = Unless ? "if" : "unless";
+    auto unless_if = Unless ? "unless" : "if";
 
     switch (condition.Type)
     {
@@ -63,35 +66,38 @@ void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_
             break;
 
         case ResultType_Storage:
-            commands.Append("scoreboard objectives add tmp dummy");
+            commands.Append(CreateTmpScore());
             commands.Append(
-                "execute store result score %c tmp run data get storage {} {}",
+                "execute store result score %c {} run data get storage {} {}",
+                GetTmpName(),
                 condition.Location,
                 condition.Path);
             commands.Append(
-                "execute {} score %c tmp matches 0 {}run {}",
-                Unless ? "if" : "unless",
+                "execute {} score %c {} matches 0 {}run {}",
+                if_unless,
+                GetTmpName(),
                 store_result,
                 then);
             commands.Append(
-                "execute {} score %c tmp matches 0 {}run {}",
-                Unless ? "unless" : "if",
+                "execute {} score %c {} matches 0 {}run {}",
+                unless_if,
+                GetTmpName(),
                 store_result,
                 else_);
-            commands.Append("scoreboard objectives remove tmp");
+            commands.Append(RemoveTmpScore());
             break;
 
         case ResultType_Score:
             commands.Append(
                 "execute {} score {} {} matches 0 {}run {}",
-                Unless ? "if" : "unless",
+                if_unless,
                 condition.Player,
                 condition.Objective,
                 store_result,
                 then);
             commands.Append(
                 "execute {} score {} {} matches 0 {}run {}",
-                Unless ? "unless" : "if",
+                unless_if,
                 condition.Player,
                 condition.Objective,
                 store_result,
@@ -108,19 +114,19 @@ void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_
     }
 }
 
-mcc::Result mcc::IfUnlessInstruction::GenResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::IfUnlessInstruction::GenerateResult(const bool stringify, const bool use_stack) const
 {
     if (!UseCount)
         return {.Type = ResultType_None};
 
     Assert(use_stack, "if-unless instruction requires stack usage");
 
-    if (const auto condition = Condition->GenResult(false, use_stack);
+    if (auto condition = Condition->GenerateResult(false, use_stack);
         condition.Type == ResultType_Value)
     {
         if (Unless == (condition.Value == "false" || condition.Value == "0"))
-            return Then->GenResult(stringify, use_stack);
-        return Else->GenResult(stringify, use_stack);
+            return Then->GenerateResult(stringify, use_stack);
+        return Else->GenerateResult(stringify, use_stack);
     }
 
     return {

@@ -1,23 +1,23 @@
 namespace example
 
 define :add(x, y) #:math {
-    %result = %x + %y;
-    tellraw(@s, `${%x} + ${%y} = ${%result}`);
-    return %result;
+    result = x + y
+    tellraw(@s, `${x} + ${y} = ${result}`)
+    return result
 }
 
 define :sub(x, y) #:math {
-    %result = %x - %y;
-    tellraw(@s, `${%x} - ${%y} = ${%result}`);
-    return %result;
+    result = x - y
+    tellraw(@s, `${x} - ${y} = ${result}`)
+    return result
 }
 
 define :fib(n) {
-    %args = { n: %n };
-    return if (%n <= 1) %n
-    else function(:fib_else, %args);
+    args = { n: n }
+    return if (n <= 1) n
+    else function($:fib_else, args)
 }
 
 define :fib_else(n) {
-    return function(:fib, { n: %n - 1 }) + function(:fib, { n: %n - 2 });
+    return function($:fib, { n: n - 1 }) + function($:fib, { n: n - 2 })
 }

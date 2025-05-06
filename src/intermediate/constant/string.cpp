@@ -10,7 +10,7 @@ mcc::ConstantString::ConstantString(std::string value)
 {
 }
 
-mcc::Result mcc::ConstantString::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantString::GenerateResult(const bool stringify, bool use_stack) const
 {
     return {
         .Type = ResultType_Value,

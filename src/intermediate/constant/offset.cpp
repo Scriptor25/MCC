@@ -11,7 +11,7 @@ mcc::ConstantOffset::ConstantOffset(const OffsetTypeE type, const FloatT offset)
 {
 }
 
-mcc::Result mcc::ConstantOffset::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantOffset::GenerateResult(const bool stringify, bool use_stack) const
 {
     return {
         .Type = ResultType_Value,

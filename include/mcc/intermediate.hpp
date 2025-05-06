@@ -31,7 +31,7 @@ namespace mcc
 
         virtual void Generate(CommandVector &commands, bool use_stack) const;
         [[nodiscard]] virtual CommandT GenerateInline(bool use_stack) const;
-        [[nodiscard]] virtual Result GenResult(bool stringify, bool use_stack) const;
+        [[nodiscard]] virtual Result GenerateResult(bool stringify, bool use_stack) const;
         [[nodiscard]] virtual bool RequireStack() const = 0;
 
         void Use();
@@ -51,7 +51,7 @@ namespace mcc
 
         explicit ConstantBoolean(bool value);
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         bool Value;
     };
@@ -62,7 +62,7 @@ namespace mcc
 
         explicit ConstantInteger(IntegerT value);
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         IntegerT Value;
     };
@@ -73,7 +73,7 @@ namespace mcc
 
         explicit ConstantFloat(FloatT value);
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         FloatT Value;
     };
@@ -86,7 +86,7 @@ namespace mcc
 
         ConstantFloatRange(std::optional<FloatT> min, std::optional<FloatT> max);
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         std::optional<FloatT> Min;
         std::optional<FloatT> Max;
@@ -98,7 +98,7 @@ namespace mcc
 
         explicit ConstantString(std::string value);
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         std::string Value;
     };
@@ -110,7 +110,7 @@ namespace mcc
         ConstantArray(std::vector<ConstantPtr> values, bool stringify);
         ~ConstantArray() override;
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         std::vector<ConstantPtr> Values;
         bool Stringify;
@@ -123,7 +123,7 @@ namespace mcc
         explicit ConstantObject(std::map<std::string, ConstantPtr> values);
         ~ConstantObject() override;
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         std::map<std::string, ConstantPtr> Values;
     };
@@ -138,7 +138,7 @@ namespace mcc
             TargetSelectorE selector,
             std::map<std::string, std::vector<TargetAttributePtr>> attributes);
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         TargetSelectorE Selector;
         std::map<std::string, std::vector<TargetAttributePtr>> Attributes;
@@ -150,7 +150,7 @@ namespace mcc
 
         explicit ConstantResource(ResourceLocation location);
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         ResourceLocation Location;
     };
@@ -161,7 +161,7 @@ namespace mcc
 
         ConstantOffset(OffsetTypeE type, FloatT offset);
 
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         OffsetTypeE Type;
         FloatT Offset;
@@ -170,6 +170,10 @@ namespace mcc
     struct Instruction : Value
     {
         [[nodiscard]] std::string GetStackPath() const;
+        [[nodiscard]] std::string GetTmpName() const;
+
+        [[nodiscard]] std::string CreateTmpScore() const;
+        [[nodiscard]] std::string RemoveTmpScore() const;
     };
 
     struct CallInstruction final : Instruction
@@ -181,7 +185,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool use_stack) const override;
         [[nodiscard]] CommandT GenerateInline(bool use_stack) const override;
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
         [[nodiscard]] bool RequireStack() const override;
 
         ResourceLocation Location;
@@ -216,7 +220,7 @@ namespace mcc
         ~IfUnlessInstruction() override;
 
         void Generate(CommandVector &commands, bool use_stack) const override;
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
         [[nodiscard]] bool RequireStack() const override;
 
         ResourceLocation Location;
@@ -232,7 +236,7 @@ namespace mcc
         ~StoreInstruction() override;
 
         void Generate(CommandVector &commands, bool use_stack) const override;
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
         [[nodiscard]] bool RequireStack() const override;
 
         ValuePtr Dst, Src;
@@ -246,7 +250,7 @@ namespace mcc
         ~ComparisonInstruction() override;
 
         void Generate(CommandVector &commands, bool use_stack) const override;
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
         [[nodiscard]] bool RequireStack() const override;
 
         ComparatorE Comparator;
@@ -262,7 +266,7 @@ namespace mcc
         ~OperationInstruction() override;
 
         void Generate(CommandVector &commands, bool use_stack) const override;
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
         [[nodiscard]] bool RequireStack() const override;
 
         OperatorE Operator;
@@ -282,7 +286,7 @@ namespace mcc
             IndexT index);
 
         void Generate(CommandVector &commands, bool use_stack) const override;
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
         [[nodiscard]] bool RequireStack() const override;
 
         AllocationTypeE AllocationType;
@@ -350,7 +354,7 @@ namespace mcc
         NamedValue(ResourceLocation location, std::string id);
 
         [[nodiscard]] CommandT GenerateInline(bool use_stack) const override;
-        [[nodiscard]] Result GenResult(bool stringify, bool use_stack) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
         bool RequireStack() const override;
 
         ResourceLocation Location;

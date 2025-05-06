@@ -10,7 +10,7 @@ mcc::ConstantBoolean::ConstantBoolean(const bool value)
 {
 }
 
-mcc::Result mcc::ConstantBoolean::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantBoolean::GenerateResult(const bool stringify, bool use_stack) const
 {
     std::string value(Value ? "true" : "false");
     if (stringify)
@@ -18,6 +18,6 @@ mcc::Result mcc::ConstantBoolean::GenResult(const bool stringify, bool use_stack
 
     return {
         .Type = ResultType_Value,
-        .Value = value,
+        .Value = std::move(value),
     };
 }

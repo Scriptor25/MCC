@@ -49,14 +49,14 @@ void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool us
     commands.Append("data modify storage {} stack[0].val insert {} value {}", Location, Index, value);
 }
 
-mcc::Result mcc::AllocationInstruction::GenResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::AllocationInstruction::GenerateResult(const bool stringify, const bool use_stack) const
 {
     Assert(use_stack, "allocation instruction requires stack usage");
 
     return {
         .Type = ResultType_Storage,
         .Location = Location,
-        .Path = "stack[0].val[" + std::to_string(Index) + ']',
+        .Path = std::format("stack[0].val[{}]", Index),
     };
 }
 

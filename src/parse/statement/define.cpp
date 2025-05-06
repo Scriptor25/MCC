@@ -6,21 +6,23 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
 
     auto location = ParseResourceLocation();
 
-    Expect(TokenType_Other, "(");
-
     std::vector<std::string> parameters;
+    std::vector<ResourceLocation> tags;
+    std::vector<ExpressionPtr> expressions;
 
-    while (!SkipIf(TokenType_Other, ")"))
+    Expect(TokenType_Other, "(");
+    while (!At(TokenType_Other, ")") && !At(TokenType_EOF))
     {
         parameters.emplace_back(Expect(TokenType_Symbol).Value);
+
         if (!At(TokenType_Other, ")"))
             Expect(TokenType_Other, ",");
     }
+    Expect(TokenType_Other, ")");
 
-    std::vector<ResourceLocation> tags;
     if (At(TokenType_Other, "#"))
     {
-        while (!At(TokenType_Other, "{"))
+        while (!At(TokenType_Other, "{") && !At(TokenType_EOF))
         {
             Expect(TokenType_Other, "#");
             tags.emplace_back(ParseResourceLocation());
@@ -31,14 +33,9 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
     }
 
     Expect(TokenType_Other, "{");
-
-    std::vector<ExpressionPtr> expressions;
-
-    while (!SkipIf(TokenType_Other, "}"))
-    {
+    while (!At(TokenType_Other, "}") && !At(TokenType_EOF))
         expressions.emplace_back(ParseExpression());
-        Expect(TokenType_Other, ";");
-    }
+    Expect(TokenType_Other, "}");
 
     return std::make_unique<DefineStatement>(where, location, parameters, tags, std::move(expressions));
 }

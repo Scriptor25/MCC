@@ -47,20 +47,26 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
             '"' + token.Value + '"');
     }
 
-    if (At(TokenType_Symbol) || At(TokenType_Other, ":"))
-        return ParseResourceExpression();
+    if (At(TokenType_FormatString))
+        return ParseFormatExpression();
 
     if (At(TokenType_Target))
         return ParseTargetExpression();
+
+    if (At(TokenType_Symbol))
+    {
+        auto token = Skip();
+        return std::make_unique<SymbolExpression>(token.Where, token.Value);
+    }
+
+    if (SkipIf(TokenType_Other, "$"))
+        return ParseResourceExpression();
 
     if (At(TokenType_Other, "["))
         return ParseArrayExpression();
 
     if (At(TokenType_Other, "{"))
         return ParseObjectExpression();
-
-    if (At(TokenType_FormatString))
-        return ParseFormatExpression();
 
     if (SkipIf(TokenType_Operator, "-"))
     {
@@ -78,12 +84,6 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
             token.Where,
             ConstantFloat::Create(-token.Float),
             '-' + token.Value);
-    }
-
-    if (SkipIf(TokenType_Operator, "%"))
-    {
-        auto token = Expect(TokenType_Symbol);
-        return std::make_unique<SymbolExpression>(token.Where, token.Value);
     }
 
     if (At(TokenType_Other, "~") || At(TokenType_Other, "^"))

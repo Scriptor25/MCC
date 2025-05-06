@@ -10,7 +10,7 @@ mcc::ConstantInteger::ConstantInteger(const IntegerT value)
 {
 }
 
-mcc::Result mcc::ConstantInteger::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantInteger::GenerateResult(const bool stringify, bool use_stack) const
 {
     auto value = std::to_string(Value);
     if (stringify)
@@ -18,6 +18,6 @@ mcc::Result mcc::ConstantInteger::GenResult(const bool stringify, bool use_stack
 
     return {
         .Type = ResultType_Value,
-        .Value = value,
+        .Value = std::move(value),
     };
 }

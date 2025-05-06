@@ -20,7 +20,7 @@ mcc::ReturnInstruction::~ReturnInstruction()
 
 void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool use_stack) const
 {
-    auto value = Value->GenResult(false, use_stack);
+    auto value = Value->GenerateResult(false, use_stack);
 
     switch (value.Type)
     {

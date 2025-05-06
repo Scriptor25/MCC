@@ -10,7 +10,7 @@ mcc::ConstantResource::ConstantResource(ResourceLocation location)
 {
 }
 
-mcc::Result mcc::ConstantResource::GenResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantResource::GenerateResult(const bool stringify, bool use_stack) const
 {
     return {
         .Type = ResultType_Value,
