@@ -1,11 +1,11 @@
 namespace example
 
 define :hello() {
-    ;tellraw @s [ "Hello ", { "selector": "@s", "color": "gold" }, "!" ];
+    ?`tellraw @s ["Hello ",{"selector":"@s","color":"gold"},"!"]`
 }
 
 define :hello_all() {
-    print(@s, `Hello ${@s}! Hello to all of ${@e[ type = !player ]}!`)
+    print(@s, `Hello ${@s}! Hello to all of ${@e[type=!player]}!`)
 }
 
 define :hello_rec(d) {

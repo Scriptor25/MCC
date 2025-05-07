@@ -1,16 +1,16 @@
 namespace example
 
 define :all() {
-    ;advancement grant @s everything;
-    ;advancement revoke @s everything;
-    ;advancement grant @s only test;
-    ;advancement revoke @s only test;
-    ;advancement grant @s only test crit;
-    ;advancement revoke @s only test crit;
-    ;advancement grant @s from test;
-    ;advancement revoke @s from test;
-    ;advancement grant @s through test;
-    ;advancement revoke @s through test;
-    ;advancement grant @s until test;
-    ;advancement revoke @s until test;
+    ?`advancement grant @s everything`
+    ?`advancement revoke @s everything`
+    ?`advancement grant @s only test`
+    ?`advancement revoke @s only test`
+    ?`advancement grant @s only test crit`
+    ?`advancement revoke @s only test crit`
+    ?`advancement grant @s from test`
+    ?`advancement revoke @s from test`
+    ?`advancement grant @s through test`
+    ?`advancement revoke @s through test`
+    ?`advancement grant @s until test`
+    ?`advancement revoke @s until test`
 }

@@ -1,14 +1,15 @@
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
-mcc::ConstantPtr mcc::ConstantResource::Create(ResourceLocation location, ConstantPtr nbt)
+mcc::ConstantPtr mcc::ConstantResource::Create(ResourceLocation location, ConstantPtr state, ConstantPtr data)
 {
-    return std::make_shared<ConstantResource>(std::move(location), std::move(nbt));
+    return std::make_shared<ConstantResource>(std::move(location), std::move(state), std::move(data));
 }
 
-mcc::ConstantResource::ConstantResource(ResourceLocation location, ConstantPtr nbt)
+mcc::ConstantResource::ConstantResource(ResourceLocation location, ConstantPtr state, ConstantPtr data)
     : Location(std::move(location)),
-      NBT(std::move(nbt))
+      State(std::move(state)),
+      Data(std::move(data))
 {
 }
 
@@ -16,11 +17,18 @@ mcc::Result mcc::ConstantResource::GenerateResult(const bool stringify, const bo
 {
     auto value = Location.String();
 
-    if (NBT)
+    if (State)
     {
-        auto nbt = NBT->GenerateResult(stringify, use_stack);
-        Assert(nbt.Type == ResultType_Value, "nbt must be {}, but is {}", ResultType_Value, nbt.Type);
-        value += nbt.Value;
+        auto state = State->GenerateResult(stringify, use_stack);
+        Assert(state.Type == ResultType_Value, "state must be {}, but is {}", ResultType_Value, state.Type);
+        value += state.Value;
+    }
+
+    if (Data)
+    {
+        auto data = Data->GenerateResult(stringify, use_stack);
+        Assert(data.Type == ResultType_Value, "data must be {}, but is {}", ResultType_Value, data.Type);
+        value += data.Value;
     }
 
     return {

@@ -56,12 +56,9 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
     return Insert(OperationInstruction::Create(operator_, m_Location, std::move(left), std::move(right)), inline_);
 }
 
-mcc::InstructionPtr mcc::Builder::CreateCommand(
-    std::string command,
-    std::vector<ValuePtr> arguments,
-    const bool inline_)
+mcc::InstructionPtr mcc::Builder::CreateCommand(CommandT command, const bool inline_)
 {
-    return Insert(CommandInstruction::Create(m_Location, std::move(command), std::move(arguments)), inline_);
+    return Insert(CommandInstruction::Create(m_Location, std::move(command)), inline_);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(

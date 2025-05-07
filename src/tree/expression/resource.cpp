@@ -3,10 +3,15 @@
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
-mcc::ResourceExpression::ResourceExpression(SourceLocation where, ResourceLocation location, ExpressionPtr nbt)
+mcc::ResourceExpression::ResourceExpression(
+    SourceLocation where,
+    ResourceLocation location,
+    ExpressionPtr state,
+    ExpressionPtr data)
     : Expression(std::move(where)),
       Location(std::move(location)),
-      NBT(std::move(nbt))
+      State(std::move(state)),
+      Data(std::move(data))
 {
 }
 
@@ -14,8 +19,11 @@ std::ostream &mcc::ResourceExpression::Print(std::ostream &stream) const
 {
     Location.Print(stream);
 
-    if (NBT)
-        NBT->Print(stream);
+    if (State)
+        State->Print(stream);
+
+    if (Data)
+        Data->Print(stream);
 
     return stream;
 }
@@ -26,12 +34,19 @@ mcc::ValuePtr mcc::ResourceExpression::Generate(Builder &builder, bool inline_) 
     if (location.Namespace.empty())
         location.Namespace = builder.GetLocation().Namespace;
 
-    ConstantPtr nbt;
-    if (NBT)
+    ConstantPtr state;
+    if (State)
     {
-        nbt = std::dynamic_pointer_cast<Constant>(NBT->Generate(builder, true));
-        Assert(!!nbt, "nbt must be constant");
+        state = std::dynamic_pointer_cast<Constant>(State->Generate(builder, true));
+        Assert(!!state, "state must be constant");
     }
 
-    return ConstantResource::Create(std::move(location), std::move(nbt));
+    ConstantPtr data;
+    if (Data)
+    {
+        data = std::dynamic_pointer_cast<Constant>(Data->Generate(builder, true));
+        Assert(!!data, "data must be constant");
+    }
+
+    return ConstantResource::Create(std::move(location), std::move(state), std::move(data));
 }

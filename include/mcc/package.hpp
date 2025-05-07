@@ -67,7 +67,7 @@ namespace mcc
     {
         explicit Package(const PackageInfo &info);
 
-        void Write(const std::filesystem::path &root) const;
+        void Write(const std::filesystem::path &path) const;
 
         const PackageInfo &Info;
         /**

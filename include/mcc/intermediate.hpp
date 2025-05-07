@@ -146,14 +146,15 @@ namespace mcc
 
     struct ConstantResource final : Constant
     {
-        static ConstantPtr Create(ResourceLocation location, ConstantPtr nbt);
+        static ConstantPtr Create(ResourceLocation location, ConstantPtr state, ConstantPtr data);
 
-        ConstantResource(ResourceLocation location, ConstantPtr nbt);
+        ConstantResource(ResourceLocation location, ConstantPtr state, ConstantPtr data);
 
         [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
 
         ResourceLocation Location;
-        ConstantPtr NBT;
+        ConstantPtr State;
+        ConstantPtr Data;
     };
 
     struct ConstantOffset final : Constant
@@ -168,17 +169,6 @@ namespace mcc
         FloatT Offset;
     };
 
-    struct ConstantSymbol final : Constant
-    {
-        static ConstantPtr Create(std::string value);
-
-        explicit ConstantSymbol(std::string value);
-
-        [[nodiscard]] Result GenerateResult(bool stringify, bool use_stack) const override;
-
-        std::string Value;
-    };
-
     struct Instruction : Value
     {
         [[nodiscard]] std::string GetStackPath() const;
@@ -190,13 +180,9 @@ namespace mcc
 
     struct CommandInstruction final : Instruction
     {
-        static InstructionPtr Create(
-            ResourceLocation location,
-            CommandT command,
-            std::vector<ValuePtr> arguments);
+        static InstructionPtr Create(ResourceLocation location, CommandT command);
 
-        CommandInstruction(ResourceLocation location, CommandT command, std::vector<ValuePtr> arguments);
-        ~CommandInstruction() override;
+        CommandInstruction(ResourceLocation location, CommandT command);
 
         void Generate(CommandVector &commands, bool use_stack) const override;
         [[nodiscard]] CommandT GenerateInline(bool use_stack) const override;
@@ -205,7 +191,6 @@ namespace mcc
 
         ResourceLocation Location;
         CommandT Command;
-        std::vector<ValuePtr> Arguments;
     };
 
     struct ReturnInstruction final : Instruction

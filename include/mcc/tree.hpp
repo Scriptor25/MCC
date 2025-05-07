@@ -102,13 +102,14 @@ namespace mcc
 
     struct ResourceExpression final : Expression
     {
-        ResourceExpression(SourceLocation where, ResourceLocation location, ExpressionPtr nbt);
+        ResourceExpression(SourceLocation where, ResourceLocation location, ExpressionPtr state, ExpressionPtr data);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         ResourceLocation Location;
-        ExpressionPtr NBT;
+        ExpressionPtr State;
+        ExpressionPtr Data;
     };
 
     struct ArrayExpression final : Expression
@@ -141,17 +142,6 @@ namespace mcc
         std::string Operator;
         ExpressionPtr Left;
         ExpressionPtr Right;
-    };
-
-    struct CommandExpression final : Expression
-    {
-        CommandExpression(SourceLocation where, std::string command, std::vector<ExpressionPtr> arguments);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
-
-        std::string Command;
-        std::vector<ExpressionPtr> Arguments;
     };
 
     struct FormatExpression final : Expression
@@ -192,12 +182,11 @@ namespace mcc
 
     struct SymbolExpression final : Expression
     {
-        SymbolExpression(SourceLocation where, bool placeholder, std::string id);
+        SymbolExpression(SourceLocation where, std::string id);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
-        bool Placeholder;
         std::string ID;
     };
 
@@ -211,5 +200,15 @@ namespace mcc
         std::string Callee;
         bool Builtin;
         std::vector<ExpressionPtr> Arguments;
+    };
+
+    struct CommandExpression final : Expression
+    {
+        CommandExpression(SourceLocation where, CommandT command);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
+
+        CommandT Command;
     };
 }

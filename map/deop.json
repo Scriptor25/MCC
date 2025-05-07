@@ -1,9 +1,0 @@
-{
-  "base": "deop",
-  "nodes": [
-    {
-      "type": "value",
-      "label": "targets"
-    }
-  ]
-}

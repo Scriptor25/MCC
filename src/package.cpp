@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <mcc/error.hpp>
 #include <mcc/package.hpp>
 
 mcc::Package::Package(const PackageInfo &info)
@@ -7,12 +8,12 @@ mcc::Package::Package(const PackageInfo &info)
 {
 }
 
-void mcc::Package::Write(const std::filesystem::path &root) const
+void mcc::Package::Write(const std::filesystem::path &path) const
 {
-    if (std::filesystem::exists(root))
-        std::filesystem::remove_all(root);
+    if (std::filesystem::exists(path))
+        std::filesystem::remove_all(path);
 
-    const auto data = root / "data";
+    const auto data = path / "data";
     create_directories(data);
 
     Functions.ForEach(
@@ -23,8 +24,7 @@ void mcc::Package::Write(const std::filesystem::path &root) const
 
             const auto file = directory / (key.Path + ".mcfunction");
             std::ofstream stream(file);
-            if (!stream)
-                return;
+            Assert(stream.is_open(), "failed to open function file {}", file.string());
 
             for (auto &command: value.Commands)
                 stream << command << std::endl;
@@ -40,17 +40,17 @@ void mcc::Package::Write(const std::filesystem::path &root) const
 
             const auto file = directory / (key.Path + ".json");
             std::ofstream stream(file);
-            if (!stream)
-                return;
+            Assert(stream.is_open(), "failed to open tag file {}", file.string());
 
             stream << std::setw(2) << nlohmann::json(value);
 
             stream.close();
         });
 
-    std::ofstream stream(root / "pack.mcmeta");
-    if (!stream)
-        return;
+    auto package = path / "pack.mcmeta";
+    std::ofstream stream(package);
+    Assert(stream.is_open(), "failed to open package file {}", package.string());
+
     stream << std::setw(2) << nlohmann::json(
         {
             {
@@ -67,20 +67,17 @@ void mcc::Package::Write(const std::filesystem::path &root) const
 mcc::PackageInfo mcc::PackageInfo::Deserialize(const std::filesystem::path &path)
 {
     std::ifstream stream(path);
-    if (!stream)
-        return {};
+    Assert(stream.is_open(), "failed to open info file {}", path.string());
 
     nlohmann::json json;
     stream >> json;
-
     return json;
 }
 
 void mcc::PackageInfo::Serialize(const std::filesystem::path &path) const
 {
     std::ofstream stream(path);
-    if (!stream)
-        return;
+    Assert(stream.is_open(), "failed to open info file {}", path.string());
 
     const nlohmann::json json = *this;
     stream << std::setw(2) << json;

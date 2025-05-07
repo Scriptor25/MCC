@@ -1,9 +1,0 @@
-{
-  "base": "defaultgamemode",
-  "nodes": [
-    {
-      "type": "value",
-      "label": "gamemode"
-    }
-  ]
-}
