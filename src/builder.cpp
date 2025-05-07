@@ -57,11 +57,11 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCommand(
-    std::vector<std::string> path,
+    std::string command,
     std::vector<ValuePtr> arguments,
     const bool inline_)
 {
-    return Insert(CommandInstruction::Create(m_Location, std::move(path), std::move(arguments)), inline_);
+    return Insert(CommandInstruction::Create(m_Location, std::move(command), std::move(arguments)), inline_);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(
@@ -81,6 +81,15 @@ mcc::InstructionPtr mcc::Builder::CreateIf(
     return Insert(
         IfUnlessInstruction::Create(m_Location, unless, std::move(condition), std::move(then), std::move(else_)),
         inline_);
+}
+
+mcc::InstructionPtr mcc::Builder::CreateCall(
+    std::string callee,
+    const bool builtin,
+    std::vector<ValuePtr> arguments,
+    const bool inline_)
+{
+    return Insert(CallInstruction::Create(m_Location, std::move(callee), builtin, std::move(arguments)), inline_);
 }
 
 mcc::InstructionPtr mcc::Builder::AllocateValue(const bool inline_)
@@ -183,5 +192,5 @@ void mcc::Builder::Generate(std::vector<CommandT> &commands, const bool use_stac
 {
     CommandVector command_vector(commands);
     for (auto &instruction: m_Instructions)
-        instruction->Generate(*this, command_vector, use_stack);
+        instruction->Generate(command_vector, use_stack);
 }

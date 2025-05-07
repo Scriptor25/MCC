@@ -1,5 +1,6 @@
 #include <sstream>
 #include <mcc/parse.hpp>
+#include <mcc/tree.hpp>
 
 mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
 {
@@ -33,7 +34,7 @@ mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
         auto stream_where = get_where();
 
         std::stringstream stream(format);
-        Parser parser(stream, stream_where);
+        Parser parser(m_Context, stream, stream_where);
 
         auto expression = parser.ParseExpression();
 

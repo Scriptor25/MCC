@@ -2,6 +2,7 @@
 #include <istream>
 #include <mcc/error.hpp>
 #include <mcc/parse.hpp>
+#include <mcc/tree.hpp>
 
 mcc::Parser::Parser(Context &context, std::istream &stream, std::string filename)
     : Parser(context, stream, SourceLocation(std::move(filename), 1, 0))

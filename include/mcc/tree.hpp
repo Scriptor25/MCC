@@ -102,12 +102,13 @@ namespace mcc
 
     struct ResourceExpression final : Expression
     {
-        ResourceExpression(SourceLocation where, ResourceLocation location);
+        ResourceExpression(SourceLocation where, ResourceLocation location, ExpressionPtr nbt);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
         ResourceLocation Location;
+        ExpressionPtr NBT;
     };
 
     struct ArrayExpression final : Expression
@@ -191,11 +192,24 @@ namespace mcc
 
     struct SymbolExpression final : Expression
     {
-        SymbolExpression(SourceLocation where, std::string id);
+        SymbolExpression(SourceLocation where, bool placeholder, std::string id);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
+        bool Placeholder;
         std::string ID;
+    };
+
+    struct CallExpression final : Expression
+    {
+        CallExpression(SourceLocation where, std::string callee, bool builtin, std::vector<ExpressionPtr> arguments);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
+
+        std::string Callee;
+        bool Builtin;
+        std::vector<ExpressionPtr> Arguments;
     };
 }

@@ -1,4 +1,5 @@
 #include <mcc/parse.hpp>
+#include <mcc/tree.hpp>
 
 mcc::ExpressionPtr mcc::Parser::ParseObjectExpression()
 {
@@ -8,7 +9,7 @@ mcc::ExpressionPtr mcc::Parser::ParseObjectExpression()
 
     while (!SkipIf(TokenType_Other, "}"))
     {
-        auto key = Expect(TokenType_Symbol).Value;
+        auto key = At(TokenType_String) ? Skip().Value : Expect(TokenType_Symbol).Value;
 
         Expect(TokenType_Other, ":");
 

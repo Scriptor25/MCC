@@ -30,7 +30,7 @@ mcc::ObjectInstruction::~ObjectInstruction()
     Value->Drop();
 }
 
-void mcc::ObjectInstruction::Generate(const Builder &builder, CommandVector &commands, const bool use_stack) const
+void mcc::ObjectInstruction::Generate(CommandVector &commands, const bool use_stack) const
 {
     //
     // object: stack-allocated

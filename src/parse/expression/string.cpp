@@ -1,0 +1,12 @@
+#include <mcc/intermediate.hpp>
+#include <mcc/parse.hpp>
+#include <mcc/tree.hpp>
+
+mcc::ExpressionPtr mcc::Parser::ParseStringExpression()
+{
+    auto token = Expect(TokenType_String);
+    return std::make_unique<ConstantExpression>(
+        token.Where,
+        ConstantString::Create(token.Value),
+        '"' + token.Value + '"');
+}

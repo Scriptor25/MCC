@@ -18,7 +18,7 @@ mcc::ReturnInstruction::~ReturnInstruction()
     Value->Drop();
 }
 
-void mcc::ReturnInstruction::Generate(const Builder &builder, CommandVector &commands, const bool use_stack) const
+void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool use_stack) const
 {
     auto value = Value->GenerateResult(false, use_stack);
 

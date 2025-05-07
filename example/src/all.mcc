@@ -1,28 +1,16 @@
 namespace example
 
 define :all() {
-    advancement.grant.everything(@s)
-    advancement.revoke.everything(@s)
-    advancement.grant.only(@s, $test)
-    advancement.revoke.only(@s, $test)
-    advancement.grant.only(@s, $test, $crit)
-    advancement.revoke.only(@s, $test, $crit)
-    advancement.grant.from(@s, $test)
-    advancement.revoke.from(@s, $test)
-    advancement.grant.through(@s, $test)
-    advancement.revoke.through(@s, $test)
-    advancement.grant.until(@s, $test)
-    advancement.revoke.until(@s, $test)
-
-    attribute.get(@s, $attr)
-    attribute.get(@s, $attr, 1.0)
-    attribute.base.get(@s, $attr)
-    attribute.base.get(@s, $attr, 1.0)
-    attribute.base.set(@s, $attr, 123)
-    attribute.modifier.add.add(@s, $attr, e9608e9e649046f39bf7e2f0b2f02882)
-    attribute.modifier.add.multiply(@s, $attr, e9608e9e649046f39bf7e2f0b2f02882)
-    attribute.modifier.add.multiply_base(@s, $attr, e9608e9e649046f39bf7e2f0b2f02882)
-    attribute.modifier.remove(@s, $attr, e9608e9e649046f39bf7e2f0b2f02882)
-    attribute.modifier.value.get(@s, $attr, e9608e9e649046f39bf7e2f0b2f02882)
-    attribute.modifier.value.get(@s, $attr, e9608e9e649046f39bf7e2f0b2f02882, 1.0)
+    ;advancement grant @s everything;
+    ;advancement revoke @s everything;
+    ;advancement grant @s only test;
+    ;advancement revoke @s only test;
+    ;advancement grant @s only test crit;
+    ;advancement revoke @s only test crit;
+    ;advancement grant @s from test;
+    ;advancement revoke @s from test;
+    ;advancement grant @s through test;
+    ;advancement revoke @s through test;
+    ;advancement grant @s until test;
+    ;advancement revoke @s until test;
 }

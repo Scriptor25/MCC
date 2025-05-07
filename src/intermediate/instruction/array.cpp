@@ -71,7 +71,7 @@ mcc::ArrayInstruction::~ArrayInstruction()
     Value->Drop();
 }
 
-void mcc::ArrayInstruction::Generate(const Builder &builder, CommandVector &commands, bool use_stack) const
+void mcc::ArrayInstruction::Generate(CommandVector &commands, bool use_stack) const
 {
     //
     // array: stack-allocated

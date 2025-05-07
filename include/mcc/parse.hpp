@@ -2,8 +2,8 @@
 
 #include <functional>
 #include <memory>
+#include <mcc/common.hpp>
 #include <mcc/lex.hpp>
-#include <mcc/tree.hpp>
 
 namespace mcc
 {
@@ -11,9 +11,14 @@ namespace mcc
 
     class Parser
     {
+        friend FixedNode;
+        friend SwitchNode;
+        friend ValueNode;
+        friend GreedyNode;
+
     public:
-        Parser(Context& context, std::istream &stream, std::string filename);
-        Parser(Context& context, std::istream &stream, SourceLocation location);
+        Parser(Context &context, std::istream &stream, std::string filename);
+        Parser(Context &context, std::istream &stream, SourceLocation location);
 
         [[nodiscard]] size_t Count() const;
 
@@ -81,7 +86,7 @@ namespace mcc
         ExpressionPtr ParseExpression();
 
         ExpressionPtr ParseResourceExpression();
-        ExpressionPtr ParseTargetExpression();
+        ExpressionPtr ParseTargetExpression(bool with_attributes);
 
         ExpressionPtr ParseArrayExpression();
         ExpressionPtr ParseObjectExpression();
@@ -92,6 +97,12 @@ namespace mcc
         ExpressionPtr ParseReturnExpression();
 
         ExpressionPtr ParseCommandExpression();
+
+        ExpressionPtr ParseIntegerExpression(bool negative = false);
+        ExpressionPtr ParseFloatExpression(bool negative = false);
+        ExpressionPtr ParseRangeExpression(bool negative = false);
+        ExpressionPtr ParseStringExpression();
+        ExpressionPtr ParseSymbolExpression(bool placeholder);
 
         ExpressionPtr ParsePrimaryExpression();
         ExpressionPtr ParseCallExpression();

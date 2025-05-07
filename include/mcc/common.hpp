@@ -24,7 +24,16 @@ namespace mcc
     using InstructionPtr = std::shared_ptr<struct Instruction>;
 
     struct Context;
+    class Parser;
     class Builder;
+
+    struct CommandNode;
+    struct FixedNode;
+    struct EnumNode;
+    struct SwitchNode;
+    struct ValueNode;
+    struct RuleNode;
+    struct GreedyNode;
 
     class CommandVector
     {

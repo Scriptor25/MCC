@@ -1,4 +1,21 @@
 {
-  "base": "",
-  "nodes": []
+  "base": "give",
+  "nodes": [
+    {
+      "type": "value",
+      "label": "target",
+      "is": "entity"
+    },
+    {
+      "type": "value",
+      "label": "item",
+      "is": "resource_nbt"
+    },
+    {
+      "type": "value",
+      "label": "count",
+      "is": "integer",
+      "optional": true
+    }
+  ]
 }

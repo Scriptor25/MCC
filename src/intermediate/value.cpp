@@ -1,12 +1,12 @@
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
-void mcc::Value::Generate(const Builder &builder, CommandVector &commands, bool use_stack) const
+void mcc::Value::Generate(CommandVector &commands, bool use_stack) const
 {
     Error("mcc::Value::Generate");
 }
 
-mcc::CommandT mcc::Value::GenerateInline(const Builder &builder, bool use_stack) const
+mcc::CommandT mcc::Value::GenerateInline(bool use_stack) const
 {
     Error("mcc::Value::GenerateInline");
 }

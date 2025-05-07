@@ -8,6 +8,7 @@
 #include <mcc/context.hpp>
 #include <mcc/package.hpp>
 #include <mcc/parse.hpp>
+#include <mcc/tree.hpp>
 
 static void parse_file(
     mcc::Package &package,
@@ -27,19 +28,21 @@ static void parse_file(
     stream.close();
 }
 
-int main(const int argc, const char **argv)
+static void read_command_map(mcc::DefinitionsT &definitions, const std::filesystem::path &map_root)
 {
-    // https://minecraft.fandom.com/wiki/Argument_types
-    // https://minecraft.fandom.com/wiki/Commands
-    // https://minecraft.fandom.com/wiki/Data_pack
-
-    mcc::DefinitionsT definitions;
-    for (auto &entry: std::filesystem::directory_iterator("C:\\Users\\felix\\Documents\\Projects\\CLion\\MCC\\map"))
+    for (auto &entry: std::filesystem::directory_iterator(map_root))
     {
         mcc::CommandDefinition definition;
         mcc::ReadDefinition(definition, entry.path());
         definitions.emplace(definition.Base, std::move(definition));
     }
+}
+
+int main(const int argc, const char **argv)
+{
+    // https://minecraft.fandom.com/wiki/Argument_types
+    // https://minecraft.fandom.com/wiki/Commands
+    // https://minecraft.fandom.com/wiki/Data_pack
 
     mcc::Actions actions(
         {
@@ -65,6 +68,7 @@ int main(const int argc, const char **argv)
                 "compile",
                 "compile a package into the target directory",
                 {
+                    {false, "-map", "command definitions map root directory (default: 'map')"},
                     {false, "-pkg", "package file (default: 'info.json')"},
                     {false, "-target", "target directory (default: 'target')"}
                 }
@@ -75,6 +79,7 @@ int main(const int argc, const char **argv)
                 "package",
                 "compress a package into a zip file, into the target directory",
                 {
+                    {false, "-map", "command definitions map root directory (default: 'map')"},
                     {false, "-pkg", "package file (default: 'info.json')"},
                     {false, "-target", "taget directory (default: 'target')"},
                     {false, "-destination", "destination file name (default: '<package name>.zip')"}
@@ -108,8 +113,16 @@ int main(const int argc, const char **argv)
 
         case 2: // compile
         {
+            std::string map_root = "map";
             std::string pkg = "info.json";
             std::string target = "target";
+
+            (void) actions.String(0, map_root);
+            (void) actions.String(1, pkg);
+            (void) actions.String(2, target);
+
+            mcc::DefinitionsT definitions;
+            read_command_map(definitions, map_root);
 
             auto info = mcc::PackageInfo::Deserialize(pkg);
 

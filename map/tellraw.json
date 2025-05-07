@@ -1,4 +1,15 @@
 {
-  "base": "",
-  "nodes": []
+  "base": "tellraw",
+  "nodes": [
+    {
+      "type": "value",
+      "label": "targets",
+      "is": "entity"
+    },
+    {
+      "type": "value",
+      "label": "message",
+      "is": "component"
+    }
+  ]
 }

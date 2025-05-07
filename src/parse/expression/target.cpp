@@ -2,6 +2,7 @@
 #include <mcc/attribute.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/parse.hpp>
+#include <mcc/tree.hpp>
 
 mcc::TargetAttributePtr mcc::Parser::ParseIntegerAttribute(bool invert)
 {
@@ -120,7 +121,7 @@ mcc::TargetAttributePtr mcc::Parser::ParseTagAttribute(bool invert)
     return std::make_unique<TagAttribute>(invert, ResourceTag(std::move(namespace_), std::move(path_)));
 }
 
-mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
+mcc::ExpressionPtr mcc::Parser::ParseTargetExpression(const bool with_attributes)
 {
     static const Parse parse_boolean = [](Parser &self, const bool invert) -> TargetAttributePtr
     {
@@ -218,12 +219,16 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
     };
 
     auto where = m_Token.Where;
-    const auto selector = ToTargetSelector(Expect(TokenType_Target).Value);
+    const auto selector = ToTargetSelector(
+        Expect(
+            with_attributes
+                ? TokenType_TargetAttributes
+                : TokenType_Target).Value);
 
     std::map<std::string, std::vector<TargetAttributePtr>> attributes;
-    if (SkipIf(TokenType_Other, "["))
+    if (with_attributes)
     {
-        while (!SkipIf(TokenType_Other, "]"))
+        while (!At(TokenType_Other, "]") && !At(TokenType_EOF))
         {
             auto key = Expect(TokenType_Symbol).Value;
             Expect(TokenType_Operator, "=");
@@ -234,6 +239,7 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression()
             if (!At(TokenType_Other, "]"))
                 Expect(TokenType_Other, ",");
         }
+        Expect(TokenType_Other, "]");
     }
 
     auto view = '@' + std::string(ToString(selector));

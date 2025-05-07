@@ -2,6 +2,7 @@
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/parse.hpp>
+#include <mcc/tree.hpp>
 
 mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
 {
@@ -21,48 +22,33 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     }
 
     if (At(TokenType_Integer))
-    {
-        auto token = Skip();
-        return std::make_unique<ConstantExpression>(
-            token.Where,
-            ConstantInteger::Create(token.Integer),
-            token.Value);
-    }
+        return ParseIntegerExpression();
 
     if (At(TokenType_Float))
-    {
-        auto token = Skip();
-        return std::make_unique<ConstantExpression>(
-            token.Where,
-            ConstantFloat::Create(token.Float),
-            token.Value);
-    }
+        return ParseFloatExpression();
+
+    if (At(TokenType_Range))
+        return ParseRangeExpression();
 
     if (At(TokenType_String))
-    {
-        auto token = Skip();
-        return std::make_unique<ConstantExpression>(
-            token.Where,
-            ConstantString::Create(token.Value),
-            '"' + token.Value + '"');
-    }
+        return ParseStringExpression();
 
     if (At(TokenType_FormatString))
         return ParseFormatExpression();
 
     if (At(TokenType_Target))
-        return ParseTargetExpression();
+        return ParseTargetExpression(false);
+
+    if (At(TokenType_TargetAttributes))
+        return ParseTargetExpression(true);
 
     if (At(TokenType_Symbol))
-    {
-        auto token = Skip();
-        return std::make_unique<SymbolExpression>(token.Where, token.Value);
-    }
+        return ParseSymbolExpression(false);
 
     if (SkipIf(TokenType_Other, "$"))
         return ParseResourceExpression();
 
-    if (SkipIf(TokenType_Operator, "%"))
+    if (SkipIf(TokenType_Other, ";"))
         return ParseCommandExpression();
 
     if (At(TokenType_Other, "["))
@@ -74,19 +60,10 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (SkipIf(TokenType_Operator, "-"))
     {
         if (At(TokenType_Integer))
-        {
-            auto token = Skip();
-            return std::make_unique<ConstantExpression>(
-                token.Where,
-                ConstantInteger::Create(-token.Integer),
-                '-' + token.Value);
-        }
-
-        auto token = Expect(TokenType_Float);
-        return std::make_unique<ConstantExpression>(
-            token.Where,
-            ConstantFloat::Create(-token.Float),
-            '-' + token.Value);
+            return ParseIntegerExpression(true);
+        if (At(TokenType_Float))
+            return ParseFloatExpression(true);
+        return ParseRangeExpression(true);
     }
 
     if (At(TokenType_Other, "~") || At(TokenType_Other, "^"))

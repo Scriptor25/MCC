@@ -27,24 +27,11 @@ std::ostream &mcc::CommandExpression::Print(std::ostream &stream) const
 mcc::ValuePtr mcc::CommandExpression::Generate(Builder &builder, const bool inline_) const
 {
     std::vector<ValuePtr> arguments;
-
     for (auto &argument: Arguments)
-        arguments.emplace_back(argument->Generate(builder, inline_));
-
-    std::vector<std::string> path;
-
-    auto command = Command;
-    for (size_t pos; (pos = command.find('.')) != std::string::npos;)
-    {
-        path.emplace_back(command.substr(0, pos));
-        command = command.substr(pos + 1);
-    }
-
-    if (!command.empty())
-        path.emplace_back(command);
+        arguments.emplace_back(argument->Generate(builder, true));
 
     return builder.CreateCommand(
-        std::move(path),
+        Command,
         std::move(arguments),
         inline_);
 }

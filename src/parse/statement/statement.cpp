@@ -1,6 +1,7 @@
 #include <format>
 #include <mcc/error.hpp>
 #include <mcc/parse.hpp>
+#include <mcc/tree.hpp>
 
 mcc::StatementPtr mcc::Parser::ParseStatement()
 {

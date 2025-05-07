@@ -20,9 +20,10 @@ namespace mcc
         InstructionPtr CreateStore(ValuePtr dst, ValuePtr src, bool inline_);
         InstructionPtr CreateComparison(ComparatorE comparator, ValuePtr left, ValuePtr right, bool inline_);
         InstructionPtr CreateOperation(OperatorE operator_, ValuePtr left, ValuePtr right, bool inline_);
-        InstructionPtr CreateCommand(std::vector<std::string> path, std::vector<ValuePtr> arguments, bool inline_);
+        InstructionPtr CreateCommand(std::string command, std::vector<ValuePtr> arguments, bool inline_);
         InstructionPtr CreateReturn(ValuePtr value, bool inline_);
         InstructionPtr CreateIf(bool unless, ValuePtr condition, ValuePtr then, ValuePtr else_, bool inline_);
+        InstructionPtr CreateCall(std::string callee, bool builtin, std::vector<ValuePtr> arguments, bool inline_);
 
         InstructionPtr AllocateValue(bool inline_);
         InstructionPtr AllocateArray(bool inline_);

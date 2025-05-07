@@ -7,7 +7,8 @@
     ],
     {
       "type": "value",
-      "label": "targets"
+      "label": "targets",
+      "is": "entity"
     },
     {
       "type": "switch",
@@ -16,10 +17,11 @@
         "only": [
           {
             "type": "value",
-            "label": "advancement"
+            "label": "advancement",
+            "is": "resource"
           },
           {
-            "type": "value",
+            "type": "greedy",
             "label": "criterion",
             "optional": true
           }
@@ -33,7 +35,8 @@
         ],
         {
           "type": "value",
-          "label": "advancement"
+          "label": "advancement",
+          "is": "resource"
         }
       ]
     }

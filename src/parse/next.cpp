@@ -85,6 +85,17 @@ mcc::Token &mcc::Parser::Next()
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         Get();
+                        if (m_Buf == '[')
+                        {
+                            raw += static_cast<char>(m_Buf);
+                            Get();
+                            return m_Token = {
+                                       .Type = TokenType_TargetAttributes,
+                                       .Where = std::move(token_location),
+                                       .Raw = std::move(raw),
+                                       .Value = std::move(value),
+                                   };
+                        }
                         return m_Token = {
                                    .Type = TokenType_Target,
                                    .Where = std::move(token_location),
@@ -186,14 +197,16 @@ mcc::Token &mcc::Parser::Next()
                         case 2:
                         {
                             auto split = value.find("..");
-                            auto min = std::stoll(value.substr(0, split));
-                            auto max = std::stoll(value.substr(split + 2));
+                            auto beg_string = value.substr(0, split);
+                            auto end_string = value.substr(split + 2);
+                            auto beg = beg_string.empty() ? std::nullopt : std::optional(std::stoll(beg_string));
+                            auto end = end_string.empty() ? std::nullopt : std::optional(std::stoll(end_string));
                             return m_Token = {
                                        .Type = TokenType_Range,
                                        .Where = std::move(token_location),
                                        .Raw = std::move(raw),
                                        .Value = std::move(value),
-                                       .Range = {min, max},
+                                       .Range = {beg, end},
                                    };
                         }
 

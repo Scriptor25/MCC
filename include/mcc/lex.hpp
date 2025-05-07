@@ -17,6 +17,7 @@ namespace mcc
         TokenType_String,
         TokenType_FormatString,
         TokenType_Target,
+        TokenType_TargetAttributes,
         TokenType_Other,
         TokenType_Undefined,
     };
@@ -36,7 +37,7 @@ namespace mcc
         std::string Value;
         IntegerT Integer = 0;
         FloatT Float = 0.0;
-        std::pair<IntegerT, IntegerT> Range;
+        std::pair<std::optional<IntegerT>, std::optional<IntegerT>> Range;
     };
 }
 
