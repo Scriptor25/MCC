@@ -36,7 +36,7 @@ mcc::ValuePtr mcc::ObjectExpression::Generate(Builder &builder, const bool inlin
         values.emplace(key_, value);
     }
 
-    Assert(!inline_ || all_constant, "inline object must only contain constant values");
+    Assert(!inline_ || all_constant, Where, "inline object must only contain constant values");
 
     if (all_constant)
     {

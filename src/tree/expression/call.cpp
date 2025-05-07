@@ -5,19 +5,17 @@
 
 mcc::CallExpression::CallExpression(
     SourceLocation where,
-    std::string callee,
-    const bool builtin,
+    ExpressionPtr callee,
     std::vector<ExpressionPtr> arguments)
     : Expression(std::move(where)),
       Callee(std::move(callee)),
-      Builtin(builtin),
       Arguments(std::move(arguments))
 {
 }
 
 std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
 {
-    stream << Callee << '(';
+    Callee->Print(stream) << '(';
     auto first = true;
     for (auto &argument: Arguments)
     {
@@ -32,9 +30,30 @@ std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::CallExpression::Generate(Builder &builder, const bool inline_) const
 {
+    std::string callee;
+    bool builtin;
+
+    if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
+    {
+        callee = symbol->ID;
+        builtin = true;
+    }
+    else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))
+    {
+        auto location = resource->Location;
+        if (location.Namespace.empty())
+            location.Namespace = builder.GetLocation().Namespace;
+        callee = location.String();
+        builtin = false;
+    }
+    else
+    {
+        Error(Where, "invalid callee expression, must be a builtin symbol or function resource");
+    }
+
     std::vector<ValuePtr> arguments;
     for (auto &argument: Arguments)
         arguments.emplace_back(argument->Generate(builder, inline_));
 
-    return builder.CreateCall(Callee, Builtin, std::move(arguments), inline_);
+    return builder.CreateCall(callee, builtin, std::move(arguments), inline_);
 }

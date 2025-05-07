@@ -14,9 +14,9 @@ mcc::ExpressionPtr mcc::Parser::ParseIfUnlessExpression()
 
     auto then = ParseExpression();
 
-    Expect(TokenType_Symbol, "else");
-
-    auto else_ = ParseExpression();
+    ExpressionPtr else_;
+    if (SkipIf(TokenType_Symbol, "else"))
+        else_ = ParseExpression();
 
     return std::make_unique<IfUnlessExpression>(
         token.Where,

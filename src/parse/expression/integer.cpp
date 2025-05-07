@@ -8,5 +8,5 @@ mcc::ExpressionPtr mcc::Parser::ParseIntegerExpression(const bool negative)
     return std::make_unique<ConstantExpression>(
         token.Where,
         ConstantInteger::Create(negative ? -token.Integer : token.Integer),
-        token.Value);
+        negative ? '-' + token.Value : token.Value);
 }

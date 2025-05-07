@@ -30,24 +30,27 @@ mcc::IfUnlessInstruction::IfUnlessInstruction(
 {
     Condition->Use();
     Then->Use();
-    Else->Use();
+    if (Else)
+        Else->Use();
 }
 
 mcc::IfUnlessInstruction::~IfUnlessInstruction()
 {
     Condition->Drop();
     Then->Drop();
-    Else->Drop();
+    if (Else)
+        Else->Drop();
 }
 
 void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_stack) const
 {
     Assert(!UseCount || use_stack, "if-unless instruction requires stack usage");
+    Assert(!UseCount || !!Else, "used if-unless instructions requires an else branch to satisfy all conditions");
 
     auto condition = Condition->GenerateResult(false, use_stack);
 
     auto then = Then->GenerateInline(use_stack);
-    auto else_ = Else->GenerateInline(use_stack);
+    auto else_ = Else ? Else->GenerateInline(use_stack) : "";
 
     auto store_result = UseCount
                             ? std::format("run execute store result storage {} {} double 1 ", Location, GetStackPath())
@@ -78,12 +81,13 @@ void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_
                 GetTmpName(),
                 store_result,
                 then);
-            commands.Append(
-                "execute {} score %c {} matches 0 {}run {}",
-                unless_if,
-                GetTmpName(),
-                store_result,
-                else_);
+            if (Else)
+                commands.Append(
+                    "execute {} score %c {} matches 0 {}run {}",
+                    unless_if,
+                    GetTmpName(),
+                    store_result,
+                    else_);
             commands.Append(RemoveTmpScore());
             break;
 
@@ -95,13 +99,14 @@ void mcc::IfUnlessInstruction::Generate(CommandVector &commands, const bool use_
                 condition.Objective,
                 store_result,
                 then);
-            commands.Append(
-                "execute {} score {} {} matches 0 {}run {}",
-                unless_if,
-                condition.Player,
-                condition.Objective,
-                store_result,
-                else_);
+            if (Else)
+                commands.Append(
+                    "execute {} score {} {} matches 0 {}run {}",
+                    unless_if,
+                    condition.Player,
+                    condition.Objective,
+                    store_result,
+                    else_);
             break;
 
         default:
@@ -121,11 +126,13 @@ mcc::Result mcc::IfUnlessInstruction::GenerateResult(const bool stringify, const
 
     Assert(use_stack, "if-unless instruction requires stack usage");
 
-    if (auto condition = Condition->GenerateResult(false, use_stack);
+    if (const auto condition = Condition->GenerateResult(false, use_stack);
         condition.Type == ResultType_Value)
     {
         if (Unless == (condition.Value == "false" || condition.Value == "0"))
             return Then->GenerateResult(stringify, use_stack);
+
+        Assert(!!Else, "used if-unless instruction requires an else branch to satisfy all conditions");
         return Else->GenerateResult(stringify, use_stack);
     }
 

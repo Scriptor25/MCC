@@ -192,13 +192,12 @@ namespace mcc
 
     struct CallExpression final : Expression
     {
-        CallExpression(SourceLocation where, std::string callee, bool builtin, std::vector<ExpressionPtr> arguments);
+        CallExpression(SourceLocation where, ExpressionPtr callee, std::vector<ExpressionPtr> arguments);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
 
-        std::string Callee;
-        bool Builtin;
+        ExpressionPtr Callee;
         std::vector<ExpressionPtr> Arguments;
     };
 

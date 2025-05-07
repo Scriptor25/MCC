@@ -19,10 +19,10 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     Functions.ForEach(
         [&](const ResourceLocation &key, const FunctionInfo &value)
         {
-            const auto directory = data / key.Namespace / "function";
+            const auto file = data / key.Namespace / "function" / (key.Path + ".mcfunction");
+            const auto directory = file.parent_path();
             create_directories(directory);
 
-            const auto file = directory / (key.Path + ".mcfunction");
             std::ofstream stream(file);
             Assert(stream.is_open(), "failed to open function file {}", file.string());
 
@@ -35,10 +35,10 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     Tags.ForEach(
         [&](const ResourceLocation &key, const TagInfo &value)
         {
-            const auto directory = data / key.Namespace / "tags" / "function";
+            const auto file = data / key.Namespace / "tags" / "function" / (key.Path + ".json");
+            const auto directory = file.parent_path();
             create_directories(directory);
 
-            const auto file = directory / (key.Path + ".json");
             std::ofstream stream(file);
             Assert(stream.is_open(), "failed to open tag file {}", file.string());
 
@@ -47,7 +47,7 @@ void mcc::Package::Write(const std::filesystem::path &path) const
             stream.close();
         });
 
-    auto package = path / "pack.mcmeta";
+    const auto package = path / "pack.mcmeta";
     std::ofstream stream(package);
     Assert(stream.is_open(), "failed to open package file {}", package.string());
 

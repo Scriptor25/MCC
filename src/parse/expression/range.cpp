@@ -10,7 +10,7 @@ mcc::ExpressionPtr mcc::Parser::ParseRangeExpression(const bool negative)
         return std::make_unique<ConstantExpression>(
             token.Where,
             ConstantFloat::Create(negative ? -token.Integer : token.Integer),
-            token.Value);
+            negative ? '-' + token.Value : token.Value);
     }
 
     if (At(TokenType_Float))
@@ -19,7 +19,7 @@ mcc::ExpressionPtr mcc::Parser::ParseRangeExpression(const bool negative)
         return std::make_unique<ConstantExpression>(
             token.Where,
             ConstantFloat::Create(negative ? -token.Float : token.Float),
-            token.Value);
+            negative ? '-' + token.Value : token.Value);
     }
 
     auto token = Expect(TokenType_Range);
@@ -27,9 +27,9 @@ mcc::ExpressionPtr mcc::Parser::ParseRangeExpression(const bool negative)
     return std::make_unique<ConstantExpression>(
         token.Where,
         beg_.has_value() && end_.has_value()
-            ? ConstantFloatRange::Create(negative ? -*beg_ : *beg_, negative ? -*end_ : *end_)
+            ? ConstantFloatRange::Create(negative ? -*beg_ : *beg_, *end_)
             : beg_.has_value()
                   ? ConstantFloatRange::CreateMin(negative ? -*beg_ : *beg_)
-                  : ConstantFloatRange::CreateMax(negative ? -*end_ : *end_),
-        token.Value);
+                  : ConstantFloatRange::CreateMax(*end_),
+        negative ? '-' + token.Value : token.Value);
 }

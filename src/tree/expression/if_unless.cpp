@@ -18,13 +18,16 @@ mcc::IfUnlessExpression::IfUnlessExpression(
 
 std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 {
-    return Else->Print(Then->Print(Condition->Print(stream << "if (") << ") ") << " else ");
+    Then->Print(Condition->Print(stream << "if (") << ") ");
+    if (Else)
+        Else->Print(stream << " else ");
+    return stream;
 }
 
 mcc::ValuePtr mcc::IfUnlessExpression::Generate(Builder &builder, const bool inline_) const
 {
     const auto condition = Condition->Generate(builder, inline_);
     const auto then = Then->Generate(builder, true);
-    const auto else_ = Else->Generate(builder, true);
+    const auto else_ = Else ? Else->Generate(builder, true) : nullptr;
     return builder.CreateIf(Unless, condition, then, else_, inline_);
 }

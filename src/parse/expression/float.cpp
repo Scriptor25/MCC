@@ -10,12 +10,12 @@ mcc::ExpressionPtr mcc::Parser::ParseFloatExpression(const bool negative)
         return std::make_unique<ConstantExpression>(
             token.Where,
             ConstantFloat::Create(negative ? -token.Integer : token.Integer),
-            token.Value);
+            negative ? '-' + token.Value : token.Value);
     }
 
     auto token = Expect(TokenType_Float);
     return std::make_unique<ConstantExpression>(
         token.Where,
         ConstantFloat::Create(negative ? -token.Float : token.Float),
-        token.Value);
+        negative ? '-' + token.Value : token.Value);
 }
