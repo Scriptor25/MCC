@@ -3,7 +3,7 @@
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
 
-mcc::StatementPtr mcc::Parser::ParseStatement()
+mcc::StatementPtr mcc::Parser::ParseTopLevel()
 {
     if (m_Token.Type == TokenType_EOF)
         return {};
@@ -18,4 +18,18 @@ mcc::StatementPtr mcc::Parser::ParseStatement()
         "cannot parse {} '{}'",
         m_Token.Type,
         m_Token.Value);
+}
+
+mcc::StatementPtr mcc::Parser::ParseStatement()
+{
+    if (At(TokenType_Other, "{"))
+        return ParseMultiStatement();
+    if (AtEnum("if", "unless"))
+        return ParseIfUnlessStatement();
+    if (At(TokenType_Symbol, "for"))
+        return ParseForStatement();
+    if (At(TokenType_Symbol, "return"))
+        return ParseReturnStatement();
+
+    return ParseExpression();
 }

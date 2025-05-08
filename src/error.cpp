@@ -42,28 +42,28 @@ void mcc::Error(const SourceLocation &where, const std::string &message) noexcep
     throw std::runtime_error(message);
 }
 
-void mcc::Assert(const bool condition, const char *message)
+void mcc::Assert(const bool condition, const char *message) noexcept(false)
 {
     if (condition)
         return;
     Error(message);
 }
 
-void mcc::Assert(const bool condition, const std::string &message)
+void mcc::Assert(const bool condition, const std::string &message) noexcept(false)
 {
     if (condition)
         return;
     Error(message);
 }
 
-void mcc::Assert(const bool condition, const SourceLocation &where, const char *message)
+void mcc::Assert(const bool condition, const SourceLocation &where, const char *message) noexcept(false)
 {
     if (condition)
         return;
     Error(where, message);
 }
 
-void mcc::Assert(const bool condition, const SourceLocation &where, const std::string &message)
+void mcc::Assert(const bool condition, const SourceLocation &where, const std::string &message) noexcept(false)
 {
     if (condition)
         return;

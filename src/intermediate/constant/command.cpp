@@ -12,10 +12,8 @@ mcc::CommandInstruction::CommandInstruction(ResourceLocation location, CommandT 
 {
 }
 
-void mcc::CommandInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::CommandInstruction::Generate(CommandVector &commands) const
 {
-    Assert(!UseCount || use_stack, "command instruction with result requires stack usage");
-
     if (!UseCount)
     {
         commands.Append(Command);
@@ -29,10 +27,8 @@ void mcc::CommandInstruction::Generate(CommandVector &commands, const bool use_s
         Command);
 }
 
-mcc::CommandT mcc::CommandInstruction::GenerateInline(const bool use_stack) const
+mcc::CommandT mcc::CommandInstruction::GenerateInline() const
 {
-    Assert(!UseCount || use_stack, "command instruction with result requires stack usage");
-
     if (!UseCount)
         return Command;
 
@@ -43,21 +39,14 @@ mcc::CommandT mcc::CommandInstruction::GenerateInline(const bool use_stack) cons
         Command);
 }
 
-mcc::Result mcc::CommandInstruction::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::CommandInstruction::GenerateResult(const bool stringify) const
 {
     if (!UseCount)
         return {.Type = ResultType_None};
-
-    Assert(use_stack, "command instruction with result requires stack usage");
 
     return {
         .Type = ResultType_Storage,
         .Location = Location,
         .Path = GetStackPath(),
     };
-}
-
-bool mcc::CommandInstruction::RequireStack() const
-{
-    return !!UseCount;
 }

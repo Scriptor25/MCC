@@ -12,7 +12,7 @@ mcc::ConstantOffset::ConstantOffset(const OffsetTypeE type, ConstantPtr offset)
 {
 }
 
-mcc::Result mcc::ConstantOffset::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::ConstantOffset::GenerateResult(const bool stringify) const
 {
     if (!Offset)
         return {
@@ -20,7 +20,7 @@ mcc::Result mcc::ConstantOffset::GenerateResult(const bool stringify, const bool
             .Value = ToString(Type),
         };
 
-    auto offset = Offset->GenerateResult(stringify, use_stack);
+    auto offset = Offset->GenerateResult(stringify);
     Assert(offset.Type == ResultType_Value, "offset must be {}, but is {}", ResultType_Value, offset.Type);
 
     return {

@@ -79,9 +79,15 @@ namespace mcc
         TargetAttributePtr ParseResourceAttribute(bool invert);
         TargetAttributePtr ParseTagAttribute(bool invert);
 
-        StatementPtr ParseStatement();
+        StatementPtr ParseTopLevel();
         StatementPtr ParseNamespaceStatement();
         StatementPtr ParseDefineStatement();
+
+        StatementPtr ParseStatement();
+        StatementPtr ParseMultiStatement();
+        StatementPtr ParseIfUnlessStatement();
+        StatementPtr ParseForStatement();
+        StatementPtr ParseReturnStatement();
 
         ExpressionPtr ParseExpression();
 
@@ -94,7 +100,6 @@ namespace mcc
         ExpressionPtr ParseFormatExpression();
 
         ExpressionPtr ParseIfUnlessExpression();
-        ExpressionPtr ParseReturnExpression();
 
         ExpressionPtr ParseCommandExpression();
 

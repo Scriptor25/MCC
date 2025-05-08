@@ -10,7 +10,7 @@ mcc::ConstantInteger::ConstantInteger(const IntegerT value)
 {
 }
 
-mcc::Result mcc::ConstantInteger::GenerateResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantInteger::GenerateResult(const bool stringify) const
 {
     auto value = std::to_string(Value);
     if (stringify)

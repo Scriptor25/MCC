@@ -30,7 +30,7 @@ mcc::ObjectInstruction::~ObjectInstruction()
     Value->Drop();
 }
 
-void mcc::ObjectInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::ObjectInstruction::Generate(CommandVector &commands) const
 {
     //
     // object: stack-allocated
@@ -45,8 +45,8 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands, const bool use_st
     //      execute store result storage <location> stack[0].values[<object.index>].<key> double 1 run scoreboard players get <value.player> <value.objective>
     //
 
-    auto object = Object->GenerateResult(false, use_stack);
-    auto value = Value->GenerateResult(false, use_stack);
+    auto object = Object->GenerateResult(false);
+    auto value = Value->GenerateResult(false);
 
     switch (value.Type)
     {
@@ -87,9 +87,4 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands, const bool use_st
                 ResultType_Score,
                 value.Type);
     }
-}
-
-bool mcc::ObjectInstruction::RequireStack() const
-{
-    return Object->RequireStack() || Value->RequireStack();
 }

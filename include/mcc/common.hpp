@@ -22,10 +22,13 @@ namespace mcc
     using ValuePtr = std::shared_ptr<struct Value>;
     using ConstantPtr = std::shared_ptr<struct Constant>;
     using InstructionPtr = std::shared_ptr<struct Instruction>;
+    using BlockPtr = std::shared_ptr<struct Block>;
 
     struct Context;
     class Parser;
     class Builder;
+
+    struct Block;
 
     struct CommandNode;
     struct FixedNode;

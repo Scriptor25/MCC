@@ -13,20 +13,20 @@ mcc::ConstantResource::ConstantResource(ResourceLocation location, ConstantPtr s
 {
 }
 
-mcc::Result mcc::ConstantResource::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::ConstantResource::GenerateResult(const bool stringify) const
 {
     auto value = Location.String();
 
     if (State)
     {
-        auto state = State->GenerateResult(stringify, use_stack);
+        auto state = State->GenerateResult(stringify);
         Assert(state.Type == ResultType_Value, "state must be {}, but is {}", ResultType_Value, state.Type);
         value += state.Value;
     }
 
     if (Data)
     {
-        auto data = Data->GenerateResult(stringify, use_stack);
+        auto data = Data->GenerateResult(stringify);
         Assert(data.Type == ResultType_Value, "data must be {}, but is {}", ResultType_Value, data.Type);
         value += data.Value;
     }

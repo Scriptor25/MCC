@@ -9,13 +9,15 @@ mcc::ExpressionPtr mcc::Parser::ParseObjectExpression()
 
     while (!SkipIf(TokenType_Other, "}"))
     {
-        auto key = At(TokenType_String) ? Skip().Value : Expect(TokenType_Symbol).Value;
+        auto key = At(TokenType_String) ? Skip() : Expect(TokenType_Symbol);
 
-        Expect(TokenType_Other, ":");
+        ExpressionPtr value;
+        if (SkipIf(TokenType_Other, ":"))
+            value = ParseExpression();
+        else
+            value = std::make_unique<SymbolExpression>(key.Where, key.Value);
 
-        auto value = ParseExpression();
-
-        elements.emplace(std::move(key), std::move(value));
+        elements.emplace(std::move(key.Value), std::move(value));
 
         if (!At(TokenType_Other, "}"))
             Expect(TokenType_Other, ",");

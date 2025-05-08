@@ -10,7 +10,7 @@ mcc::ConstantFloat::ConstantFloat(const FloatT value)
 {
 }
 
-mcc::Result mcc::ConstantFloat::GenerateResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantFloat::GenerateResult(const bool stringify) const
 {
     auto value = std::to_string(Value);
     if (stringify)

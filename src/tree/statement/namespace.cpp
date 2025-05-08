@@ -1,3 +1,4 @@
+#include <mcc/builder.hpp>
 #include <mcc/context.hpp>
 #include <mcc/tree.hpp>
 
@@ -12,7 +13,7 @@ std::ostream &mcc::NamespaceStatement::Print(std::ostream &stream) const
     return stream << "namespace " << Namespace;
 }
 
-void mcc::NamespaceStatement::Generate(Context &context) const
+void mcc::NamespaceStatement::Generate(Builder &builder) const
 {
-    context.Namespace = Namespace;
+    builder.GetContext().Namespace = Namespace;
 }

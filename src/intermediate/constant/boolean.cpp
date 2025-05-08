@@ -10,7 +10,7 @@ mcc::ConstantBoolean::ConstantBoolean(const bool value)
 {
 }
 
-mcc::Result mcc::ConstantBoolean::GenerateResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantBoolean::GenerateResult(const bool stringify) const
 {
     std::string value(Value ? "true" : "false");
     if (stringify)

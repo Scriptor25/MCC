@@ -1,46 +1,32 @@
 namespace example
 
-define :sphere(cx, cy, cz, r) {
-    r2 = r * r
-    $:sphere/loop_z({ dz: 0 - r, cx: cx, cy: cy, cz: cz, r: r, r2: r2 })
-}
-
 define :setblock(x, y, z, block, mode) {
     ?`$setblock $(x) $(y) $(z) $(block) $(mode)`
 }
 
-define :sphere/loop_z(dz, cx, cy, cz, r, r2) {
-    /*print(@s, `loop_z: dz=${dz}, cx=${cx}, cy=${cy}, cz=${cz}, r=${r}, r2=${r2}`)*/
+define :sphere(cx, cy, cz, r) {
+    r2 = r * r
+    for (dz = 0 - r, dz <= r, dz = dz + 1) {
+        dz2 = dz * dz
+        z = cz + dz
 
-    z = cz + dz
-    z2 = dz * dz
-    $:sphere/loop_y({ dy: 0 - r, cx: cx, cy: cy, z: z, z2: z2, r: r, r2: r2 })
+        for (dy = 0 - r, dy <= r, dy = dy + 1) {
+            dy2 = dy * dy
+            y = cy + dy
 
-    loop_args = { dz: dz + 1, cx: cx, cy: cy, cz: cz, r: r, r2: r2 }
-    if (dz < r) $:sphere/loop_z(loop_args)
+            for (dx = 0 - r, dx <= r, dx = dx + 1) {
+                dx2 = dx * dx
+                x = cx + dx
+
+                d2 = dx2 + dy2 + dz2
+
+                if (d2 <     r2)
+                    $:setblock({ x, y, z, block: "gold_block", mode: "replace" })
+            }
+        }
+    }
 }
 
-define :sphere/loop_y(dy, cx, cy, z, z2, r, r2) {
-    /*print(@s, `loop_y: dy=${dy}, cx=${cx}, cy=${cy}, z=${z}, z2=${z2}, r=${r}, r2=${r2}`)*/
-
-    y = cy + dy
-    y2 = dy * dy
-    $:sphere/loop_x({ dx: 0 - r, cx: cx, y: y, y2: y2, z: z, z2: z2, r: r, r2: r2 })
-
-    loop_args = { dy: dy + 1, cx: cx, cy: cy, z: z, z2: z2, r: r, r2: r2 }
-    if (dy < r) $:sphere/loop_y(loop_args)
-}
-
-define :sphere/loop_x(dx, cx, y, y2, z, z2, r, r2) {
-    /*print(@s, `loop_x: dx=${dx}, cx=${cx}, y=${y}, y2=${y2}, z=${z}, z2=${z2}, r=${r}, r2=${r2}`)*/
-
-    x = cx + dx
-    x2 = dx * dx
-    d = x2 + y2 + z2
-
-    setblock_args = { x: x, y: y, z: z, block: "minecraft:gold_block", mode: "replace" }
-    if (d <= r2) $:setblock(setblock_args)
-
-    loop_args = { dx: dx + 1, cx: cx, y: y, y2: y2, z: z, z2: z2, r: r, r2: r2 }
-    if (dx < r) $:sphere/loop_x(loop_args)
+define :test() {
+    $:sphere({ cx: 0, cy: 0 - 30, cz: 0, r: 5 })
 }

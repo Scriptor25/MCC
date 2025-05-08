@@ -30,7 +30,7 @@ mcc::Parser::operator bool() const
 
 mcc::StatementPtr mcc::Parser::operator()()
 {
-    return ParseStatement();
+    return ParseTopLevel();
 }
 
 void mcc::Parser::Get()

@@ -9,9 +9,6 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (AtEnum("if", "unless"))
         return ParseIfUnlessExpression();
 
-    if (At(TokenType_Symbol, "return"))
-        return ParseReturnExpression();
-
     if (AtEnum("true", "false"))
     {
         auto token = Skip();

@@ -10,9 +10,8 @@ define :hello_all() {
 
 define :hello_rec(d) {
     print(@s, `Hello ${d}`)
-    args = { d: d - 1 }
     if (d <= 0)
         print(@s, "reached end of recursive loop")
     else
-        $:hello_rec(args)
+        $:hello_rec({ d: d - 1 })
 }

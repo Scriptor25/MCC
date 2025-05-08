@@ -10,23 +10,31 @@ mcc::ReturnInstruction::ReturnInstruction(ResourceLocation location, ValuePtr va
     : Location(std::move(location)),
       Value(std::move(value))
 {
-    Value->Use();
+    if (Value)
+        Value->Use();
 }
 
 mcc::ReturnInstruction::~ReturnInstruction()
 {
-    Value->Drop();
+    if (Value)
+        Value->Drop();
 }
 
-void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::ReturnInstruction::Generate(CommandVector &commands) const
 {
-    auto value = Value->GenerateResult(false, use_stack);
+    if (!Value)
+    {
+        commands.Append("data remove storage {} stack[0]", Location);
+        commands.Append("return 0");
+        return;
+    }
+
+    auto value = Value->GenerateResult(false);
 
     switch (value.Type)
     {
         case ResultType_Value:
-            if (use_stack)
-                commands.Append("data remove storage {} stack[0]", Location);
+            commands.Append("data remove storage {} stack[0]", Location);
             commands.Append("return {}", value.Value);
             break;
 
@@ -36,14 +44,12 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool use_st
                 Location,
                 value.Location,
                 value.Path);
-            if (use_stack)
-                commands.Append("data remove storage {} stack[0]", Location);
+            commands.Append("data remove storage {} stack[0]", Location);
             commands.Append("return run data get storage {} result", Location);
             break;
 
         case ResultType_Score:
-            if (use_stack)
-                commands.Append("data remove storage {} stack[0]", Location);
+            commands.Append("data remove storage {} stack[0]", Location);
             commands.Append("return run scoreboard players get {} {}", value.Player, value.Objective);
             break;
 
@@ -57,7 +63,7 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool use_st
     }
 }
 
-bool mcc::ReturnInstruction::RequireStack() const
+bool mcc::ReturnInstruction::IsTerminator() const
 {
-    return Value->RequireStack();
+    return true;
 }

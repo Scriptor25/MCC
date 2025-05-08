@@ -12,21 +12,18 @@ namespace mcc
         virtual ~Statement() = default;
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
-        virtual void Generate(Context &context) const = 0;
+        virtual void Generate(Builder &builder) const = 0;
 
         SourceLocation Where;
     };
 
-    struct Expression
+    struct Expression : Statement
     {
         explicit Expression(SourceLocation where);
 
-        virtual ~Expression() = default;
+        void Generate(Builder &builder) const override;
 
-        virtual std::ostream &Print(std::ostream &stream) const = 0;
         [[nodiscard]] virtual ValuePtr Generate(Builder &builder, bool inline_) const = 0;
-
-        SourceLocation Where;
     };
 
     struct FormatNode
@@ -66,7 +63,7 @@ namespace mcc
         NamespaceStatement(SourceLocation where, std::string namespace_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Context &context) const override;
+        void Generate(Builder &builder) const override;
 
         std::string Namespace;
     };
@@ -78,15 +75,70 @@ namespace mcc
             ResourceLocation location,
             std::vector<std::string> parameters,
             std::vector<ResourceLocation> tags,
-            std::vector<ExpressionPtr> expressions);
+            StatementPtr body);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Context &context) const override;
+        void Generate(Builder &builder) const override;
 
         ResourceLocation Location;
         std::vector<std::string> Parameters;
         std::vector<ResourceLocation> Tags;
-        std::vector<ExpressionPtr> Expressions;
+        StatementPtr Body;
+    };
+
+    struct IfUnlessStatement final : Statement
+    {
+        IfUnlessStatement(
+            SourceLocation where,
+            bool unless,
+            ExpressionPtr condition,
+            StatementPtr then,
+            StatementPtr else_);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder) const override;
+
+        bool Unless;
+        ExpressionPtr Condition;
+        StatementPtr Then, Else;
+    };
+
+    struct ForStatement final : Statement
+    {
+        ForStatement(
+            SourceLocation where,
+            StatementPtr prefix,
+            ExpressionPtr condition,
+            StatementPtr suffix,
+            StatementPtr do_);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder) const override;
+
+        StatementPtr Prefix;
+        ExpressionPtr Condition;
+        StatementPtr Suffix;
+        StatementPtr Do;
+    };
+
+    struct ReturnStatement final : Statement
+    {
+        ReturnStatement(SourceLocation where, ExpressionPtr value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder) const override;
+
+        ExpressionPtr Value;
+    };
+
+    struct MultiStatement final : Statement
+    {
+        MultiStatement(SourceLocation where, std::vector<StatementPtr> statements);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder) const override;
+
+        std::vector<StatementPtr> Statements;
     };
 
     struct ConstantExpression final : Expression
@@ -168,16 +220,6 @@ namespace mcc
 
         bool Unless;
         ExpressionPtr Condition, Then, Else;
-    };
-
-    struct ReturnExpression final : Expression
-    {
-        ReturnExpression(SourceLocation where, ExpressionPtr value);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr Generate(Builder &builder, bool inline_) const override;
-
-        ExpressionPtr Value;
     };
 
     struct SymbolExpression final : Expression

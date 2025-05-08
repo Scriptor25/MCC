@@ -71,7 +71,7 @@ mcc::ArrayInstruction::~ArrayInstruction()
     Value->Drop();
 }
 
-void mcc::ArrayInstruction::Generate(CommandVector &commands, bool use_stack) const
+void mcc::ArrayInstruction::Generate(CommandVector &commands) const
 {
     //
     // array: stack-allocated
@@ -87,8 +87,8 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool use_stack) co
     //      execute store result storage <location> stack[0].values[<array.index>][(<back>|0|<index>)] double 1 run scoreboard players get <value.player> <value.objective>
     //
 
-    auto array = Array->GenerateResult(false, use_stack);
-    auto value = Value->GenerateResult(Stringify, use_stack);
+    auto array = Array->GenerateResult(false);
+    auto value = Value->GenerateResult(Stringify);
 
     Assert(
         array.Type == ResultType_Storage,
@@ -162,9 +162,4 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool use_stack) co
                 ResultType_Score,
                 value.Type);
     }
-}
-
-bool mcc::ArrayInstruction::RequireStack() const
-{
-    return Array->RequireStack() || Value->RequireStack();
 }

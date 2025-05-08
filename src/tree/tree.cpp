@@ -6,6 +6,11 @@ mcc::Statement::Statement(SourceLocation where)
 }
 
 mcc::Expression::Expression(SourceLocation where)
-    : Where(std::move(where))
+    : Statement(std::move(where))
 {
+}
+
+void mcc::Expression::Generate(Builder &builder) const
+{
+    (void) Generate(builder, false);
 }

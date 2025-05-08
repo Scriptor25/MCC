@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <mcc/actions.hpp>
+#include <mcc/builder.hpp>
 #include <mcc/context.hpp>
 #include <mcc/error.hpp>
 #include <mcc/package.hpp>
@@ -19,10 +20,13 @@ static void parse_file(
 
     mcc::Context context(package, {});
     mcc::Parser parser(context, stream, path.string());
+    mcc::Builder builder(context);
 
     while (parser)
         if (const auto statement = parser())
-            statement->Generate(context);
+            statement->Generate(builder);
+
+    builder.Generate();
 }
 
 int main(const int argc, const char **argv)

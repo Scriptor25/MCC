@@ -13,11 +13,7 @@ define :sub(x, y) #:math {
 }
 
 define :fib(n) {
-    args = { n: n }
-    return if (n <= 1) n
-    else $:fib_else(args)
-}
-
-define :fib_else(n) {
+    if (n <= 1)
+        return n
     return $:fib({ n: n - 1 }) + $:fib({ n: n - 2 })
 }

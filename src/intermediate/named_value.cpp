@@ -12,25 +12,16 @@ mcc::NamedValue::NamedValue(ResourceLocation location, std::string id)
 {
 }
 
-mcc::CommandT mcc::NamedValue::GenerateInline(const bool use_stack) const
+mcc::CommandT mcc::NamedValue::GenerateInline() const
 {
-    Assert(use_stack, "named value requires stack usage");
-
-    return "data get storage " + Location.String() + " stack[0].var." + ID;
+    return std::format("data get storage {} stack[0].var.{}", Location.String(), ID);
 }
 
-mcc::Result mcc::NamedValue::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::NamedValue::GenerateResult(const bool stringify) const
 {
-    Assert(use_stack, "named value requires stack usage");
-
     return {
         .Type = ResultType_Storage,
         .Location = Location,
         .Path = "stack[0].var." + ID,
     };
-}
-
-bool mcc::NamedValue::RequireStack() const
-{
-    return true;
 }

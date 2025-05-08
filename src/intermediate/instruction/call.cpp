@@ -3,10 +3,9 @@
 
 static void generate_function_call(
     const mcc::CallInstruction &self,
-    mcc::CommandT &command,
-    const bool use_stack)
+    mcc::CommandT &command)
 {
-    auto arguments = self.Arguments[0]->GenerateResult(false, use_stack);
+    auto arguments = self.Arguments[0]->GenerateResult(false);
 
     command += std::format("function {} ", self.Callee);
 
@@ -31,11 +30,10 @@ static void generate_function_call(
 
 static void generate_builtin_print(
     const mcc::CallInstruction &self,
-    mcc::CommandT &command,
-    const bool use_stack)
+    mcc::CommandT &command)
 {
-    auto targets = self.Arguments[0]->GenerateResult(false, use_stack);
-    auto message = self.Arguments[1]->GenerateResult(false, use_stack);
+    auto targets = self.Arguments[0]->GenerateResult(false);
+    auto message = self.Arguments[1]->GenerateResult(false);
 
     command += std::format("tellraw {} ", targets.Value);
 
@@ -92,15 +90,13 @@ mcc::CallInstruction::~CallInstruction()
         argument->Drop();
 }
 
-void mcc::CallInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::CallInstruction::Generate(CommandVector &commands) const
 {
-    Assert(!UseCount || use_stack, "call instruction with result requires stack usage");
-
     CommandT command;
     if (!Builtin)
-        generate_function_call(*this, command, use_stack);
+        generate_function_call(*this, command);
     else if (Callee == "print")
-        generate_builtin_print(*this, command, use_stack);
+        generate_builtin_print(*this, command);
     else
         Error("undefined builtin callee {}", Callee);
 
@@ -110,15 +106,13 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool use_stac
     commands.Append(std::move(command));
 }
 
-mcc::CommandT mcc::CallInstruction::GenerateInline(const bool use_stack) const
+mcc::CommandT mcc::CallInstruction::GenerateInline() const
 {
-    Assert(!UseCount || use_stack, "call instruction with result requires stack usage");
-
     CommandT command;
     if (!Builtin)
-        generate_function_call(*this, command, use_stack);
+        generate_function_call(*this, command);
     else if (Callee == "print")
-        generate_builtin_print(*this, command, use_stack);
+        generate_builtin_print(*this, command);
     else
         Error("undefined builtin callee {}", Callee);
 
@@ -128,7 +122,7 @@ mcc::CommandT mcc::CallInstruction::GenerateInline(const bool use_stack) const
     return std::format("execute store result storage {} {} double 1 run {}", Location, GetStackPath(), command);
 }
 
-mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify) const
 {
     if (!UseCount)
         return {.Type = ResultType_None};
@@ -138,16 +132,4 @@ mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify, const boo
         .Location = Location,
         .Path = GetStackPath(),
     };
-}
-
-bool mcc::CallInstruction::RequireStack() const
-{
-    if (UseCount)
-        return true;
-
-    for (auto &argument: Arguments)
-        if (argument->RequireStack())
-            return true;
-
-    return false;
 }

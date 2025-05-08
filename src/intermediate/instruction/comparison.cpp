@@ -30,12 +30,10 @@ mcc::ComparisonInstruction::~ComparisonInstruction()
     Right->Drop();
 }
 
-void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool use_stack) const
+void mcc::ComparisonInstruction::Generate(CommandVector &commands) const
 {
-    Assert(use_stack, "comparison instruction requires stack usage");
-
-    auto left = Left->GenerateResult(false, use_stack);
-    auto right = Right->GenerateResult(false, use_stack);
+    auto left = Left->GenerateResult(false);
+    auto right = Right->GenerateResult(false);
 
     commands.Append(CreateTmpScore());
 
@@ -139,18 +137,11 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool use_stac
     commands.Append(RemoveTmpScore());
 }
 
-mcc::Result mcc::ComparisonInstruction::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::ComparisonInstruction::GenerateResult(const bool stringify) const
 {
-    Assert(use_stack, "comparison instruction requires stack usage");
-
     return {
         .Type = ResultType_Storage,
         .Location = Location,
         .Path = GetStackPath(),
     };
-}
-
-bool mcc::ComparisonInstruction::RequireStack() const
-{
-    return true;
 }

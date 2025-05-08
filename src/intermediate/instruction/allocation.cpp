@@ -26,10 +26,8 @@ mcc::AllocationInstruction::AllocationInstruction(
 {
 }
 
-void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool use_stack) const
+void mcc::AllocationInstruction::Generate(CommandVector &commands) const
 {
-    Assert(use_stack, "allocation instruction requires stack usage");
-
     std::string value;
     switch (AllocationType)
     {
@@ -49,18 +47,11 @@ void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool us
     commands.Append("data modify storage {} stack[0].val insert {} value {}", Location, Index, value);
 }
 
-mcc::Result mcc::AllocationInstruction::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::AllocationInstruction::GenerateResult(const bool stringify) const
 {
-    Assert(use_stack, "allocation instruction requires stack usage");
-
     return {
         .Type = ResultType_Storage,
         .Location = Location,
         .Path = std::format("stack[0].val[{}]", Index),
     };
-}
-
-bool mcc::AllocationInstruction::RequireStack() const
-{
-    return true;
 }

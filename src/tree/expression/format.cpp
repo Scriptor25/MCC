@@ -44,7 +44,7 @@ mcc::ValuePtr mcc::FormatExpression::Generate(Builder &builder, const bool inlin
     auto array = builder.AllocateArray(inline_);
 
     for (const auto &value: values)
-        builder.CreateAppend(array, value, true, inline_);
+        (void) builder.CreateAppend(array, value, true, inline_);
 
     return array;
 }

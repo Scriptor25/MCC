@@ -33,10 +33,12 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
         }
     }
 
-    Expect(TokenType_Other, "{");
-    while (!At(TokenType_Other, "}") && !At(TokenType_EOF))
-        expressions.emplace_back(ParseExpression());
-    Expect(TokenType_Other, "}");
+    auto body = ParseMultiStatement();
 
-    return std::make_unique<DefineStatement>(where, location, parameters, tags, std::move(expressions));
+    return std::make_unique<DefineStatement>(
+        std::move(where),
+        std::move(location),
+        std::move(parameters),
+        std::move(tags),
+        std::move(body));
 }

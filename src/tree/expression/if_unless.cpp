@@ -1,4 +1,4 @@
-#include <mcc/builder.hpp>
+#include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
@@ -26,8 +26,5 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::IfUnlessExpression::Generate(Builder &builder, const bool inline_) const
 {
-    const auto condition = Condition->Generate(builder, inline_);
-    const auto then = Then->Generate(builder, true);
-    const auto else_ = Else ? Else->Generate(builder, true) : nullptr;
-    return builder.CreateIf(Unless, condition, then, else_, inline_);
+    Error(Where, "TODO");
 }

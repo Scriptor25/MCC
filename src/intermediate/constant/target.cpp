@@ -16,7 +16,7 @@ mcc::ConstantTarget::ConstantTarget(
 {
 }
 
-mcc::Result mcc::ConstantTarget::GenerateResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantTarget::GenerateResult(const bool stringify) const
 {
     std::string result;
     result += '@';

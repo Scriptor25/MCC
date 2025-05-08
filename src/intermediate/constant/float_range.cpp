@@ -21,7 +21,7 @@ mcc::ConstantFloatRange::ConstantFloatRange(const std::optional<FloatT> min, con
 {
 }
 
-mcc::Result mcc::ConstantFloatRange::GenerateResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::ConstantFloatRange::GenerateResult(const bool stringify) const
 {
     if (Min == Max)
     {

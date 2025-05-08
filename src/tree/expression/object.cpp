@@ -51,7 +51,7 @@ mcc::ValuePtr mcc::ObjectExpression::Generate(Builder &builder, const bool inlin
     auto object = builder.AllocateObject(inline_);
 
     for (auto &[key_, value_]: values)
-        builder.CreateInsert(object, value_, key_, inline_);
+        (void) builder.CreateInsert(object, value_, key_, inline_);
 
     return object;
 }

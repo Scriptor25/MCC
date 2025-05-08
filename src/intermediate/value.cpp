@@ -1,17 +1,17 @@
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
-void mcc::Value::Generate(CommandVector &commands, bool use_stack) const
+void mcc::Value::Generate(CommandVector &commands) const
 {
     Error("mcc::Value::Generate");
 }
 
-mcc::CommandT mcc::Value::GenerateInline(bool use_stack) const
+mcc::CommandT mcc::Value::GenerateInline() const
 {
     Error("mcc::Value::GenerateInline");
 }
 
-mcc::Result mcc::Value::GenerateResult(const bool stringify, bool use_stack) const
+mcc::Result mcc::Value::GenerateResult(const bool stringify) const
 {
     Error("mcc::Value::GenerateResult");
 }
@@ -24,6 +24,11 @@ void mcc::Value::Use()
 void mcc::Value::Drop()
 {
     UseCount--;
+}
+
+bool mcc::Instruction::IsTerminator() const
+{
+    return false;
 }
 
 std::string mcc::Instruction::GetStackPath() const
@@ -44,9 +49,4 @@ std::string mcc::Instruction::CreateTmpScore() const
 std::string mcc::Instruction::RemoveTmpScore() const
 {
     return std::format("scoreboard objectives remove tmp.{}", reinterpret_cast<uintptr_t>(this));
-}
-
-bool mcc::Constant::RequireStack() const
-{
-    return false;
 }

@@ -19,7 +19,7 @@ mcc::ConstantArray::~ConstantArray()
         value->Drop();
 }
 
-mcc::Result mcc::ConstantArray::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::ConstantArray::GenerateResult(const bool stringify) const
 {
     std::string result;
     result += '[';
@@ -32,7 +32,7 @@ mcc::Result mcc::ConstantArray::GenerateResult(const bool stringify, const bool 
         else
             result += ',';
 
-        result += value->GenerateResult(Stringify || stringify, use_stack).Value;
+        result += value->GenerateResult(Stringify || stringify).Value;
     }
 
     result += ']';

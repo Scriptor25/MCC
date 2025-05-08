@@ -1,16 +1,20 @@
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
 
-mcc::ExpressionPtr mcc::Parser::ParseIfUnlessExpression()
+mcc::StatementPtr mcc::Parser::ParseIfUnlessStatement()
 {
     auto token = ExpectEnum("if", "unless");
     Expect(TokenType_Other, "(");
     auto condition = ParseExpression();
     Expect(TokenType_Other, ")");
-    auto then = ParseExpression();
-    Expect(TokenType_Symbol, "else");
-    auto else_ = ParseExpression();
-    return std::make_unique<IfUnlessExpression>(
+
+    auto then = ParseStatement();
+
+    StatementPtr else_;
+    if (SkipIf(TokenType_Symbol, "else"))
+        else_ = ParseStatement();
+
+    return std::make_unique<IfUnlessStatement>(
         std::move(token.Where),
         token.Value == "unless",
         std::move(condition),

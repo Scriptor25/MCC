@@ -30,12 +30,10 @@ mcc::OperationInstruction::~OperationInstruction()
     Right->Drop();
 }
 
-void mcc::OperationInstruction::Generate(CommandVector &commands, bool use_stack) const
+void mcc::OperationInstruction::Generate(CommandVector &commands) const
 {
-    Assert(use_stack, "operation instruction requires stack usage");
-
-    auto left = Left->GenerateResult(false, use_stack);
-    auto right = Right->GenerateResult(false, use_stack);
+    auto left = Left->GenerateResult(false);
+    auto right = Right->GenerateResult(false);
 
     commands.Append(CreateTmpScore());
 
@@ -139,18 +137,11 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, bool use_stack
     commands.Append(RemoveTmpScore());
 }
 
-mcc::Result mcc::OperationInstruction::GenerateResult(const bool stringify, const bool use_stack) const
+mcc::Result mcc::OperationInstruction::GenerateResult(const bool stringify) const
 {
-    Assert(use_stack, "operation instruction requires stack usage");
-
     return {
         .Type = ResultType_Storage,
         .Location = Location,
         .Path = GetStackPath(),
     };
-}
-
-bool mcc::OperationInstruction::RequireStack() const
-{
-    return true;
 }
