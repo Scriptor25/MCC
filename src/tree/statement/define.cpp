@@ -70,11 +70,11 @@ void mcc::DefineStatement::Generate(Context &context) const
         if (mut_tag.Namespace.empty())
             mut_tag.Namespace = context.Namespace;
 
-        auto &[replace_, values_] = context.Package.Tags[mut_tag];
+        auto &[replace_, values_] = context.Pkg.Tags[mut_tag];
         values_.emplace_back(mut_location);
     }
 
-    auto &[location_, commands_] = context.Package.Functions[mut_location];
+    auto &[location_, commands_] = context.Pkg.Functions[mut_location];
     location_ = mut_location;
     commands_.clear();
 

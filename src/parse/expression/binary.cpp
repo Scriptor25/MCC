@@ -3,7 +3,6 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(
     ExpressionPtr left,
-    ExpressionPtr (Parser::*next)(),
     const unsigned min_pre)
 {
     static const std::map<std::string, unsigned> pres
@@ -36,9 +35,9 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(
     {
         const auto pre = get_pre();
         auto operator_ = Skip();
-        auto right = (this->*next)();
+        auto right = ParseCallExpression();
         while (At(TokenType_Operator) && has_pre() && (get_pre() > pre || (!get_pre() && !pre)))
-            right = ParseBinaryExpression(std::move(right), next, pre + (get_pre() > pre ? 1 : 0));
+            right = ParseBinaryExpression(std::move(right), pre + (get_pre() > pre ? 1 : 0));
         left = std::make_unique<BinaryExpression>(operator_.Where, operator_.Value, std::move(left), std::move(right));
     }
 

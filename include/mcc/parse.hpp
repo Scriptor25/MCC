@@ -106,7 +106,7 @@ namespace mcc
 
         ExpressionPtr ParsePrimaryExpression();
         ExpressionPtr ParseCallExpression();
-        ExpressionPtr ParseBinaryExpression(ExpressionPtr left, ExpressionPtr (Parser::*next)(), unsigned min_pre);
+        ExpressionPtr ParseBinaryExpression(ExpressionPtr left, unsigned min_pre);
 
         Context &m_Context;
         std::istream &m_Stream;

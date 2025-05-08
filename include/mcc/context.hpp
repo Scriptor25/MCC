@@ -7,7 +7,7 @@ namespace mcc
 {
     struct Context
     {
-        Package &Package;
+        Package &Pkg;
         std::string Namespace;
     };
 }
