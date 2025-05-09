@@ -12,5 +12,5 @@ mcc::Expression::Expression(SourceLocation where)
 
 void mcc::Expression::Generate(Builder &builder) const
 {
-    (void) Generate(builder, false);
+    (void) GenerateValue(builder);
 }

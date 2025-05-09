@@ -27,18 +27,6 @@ void mcc::CommandInstruction::Generate(CommandVector &commands) const
         Command);
 }
 
-mcc::CommandT mcc::CommandInstruction::GenerateInline() const
-{
-    if (!UseCount)
-        return Command;
-
-    return std::format(
-        "execute store result storage {} {} double 1 run {}",
-        Location,
-        GetStackPath(),
-        Command);
-}
-
 mcc::Result mcc::CommandInstruction::GenerateResult(const bool stringify) const
 {
     if (!UseCount)

@@ -3,12 +3,12 @@
 
 mcc::BlockPtr mcc::Block::CreateTopLevel(ResourceLocation location, std::vector<std::string> parameters)
 {
-    return std::make_shared<Block>(location, std::move(parameters));
+    return std::make_shared<Block>(std::move(location), std::move(parameters));
 }
 
 mcc::BlockPtr mcc::Block::Create(const BlockPtr &parent, ResourceLocation location)
 {
-    auto block = std::make_shared<Block>(location, std::vector<std::string>());
+    auto block = std::make_shared<Block>(std::move(location), std::vector<std::string>());
     block->Parent = parent;
     parent->Children.push_back(block);
     return std::move(block);
@@ -35,11 +35,6 @@ void mcc::Block::Generate(CommandVector &commands) const
 
     for (auto &instruction: Instructions)
         instruction->Generate(commands);
-}
-
-mcc::CommandT mcc::Block::GenerateInline() const
-{
-    return std::format("function {}", Location);
 }
 
 mcc::InstructionPtr mcc::Block::GetTerminator() const

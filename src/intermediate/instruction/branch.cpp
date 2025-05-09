@@ -4,8 +4,8 @@
 mcc::InstructionPtr mcc::BranchInstruction::Create(
     ResourceLocation location,
     ValuePtr condition,
-    ValuePtr then_target,
-    ValuePtr else_target)
+    BlockPtr then_target,
+    BlockPtr else_target)
 {
     return std::make_shared<BranchInstruction>(
         std::move(location),
@@ -17,8 +17,8 @@ mcc::InstructionPtr mcc::BranchInstruction::Create(
 mcc::BranchInstruction::BranchInstruction(
     ResourceLocation location,
     ValuePtr condition,
-    ValuePtr then_target,
-    ValuePtr else_target)
+    BlockPtr then_target,
+    BlockPtr else_target)
     : Location(std::move(location)),
       Condition(std::move(condition)),
       ThenTarget(std::move(then_target)),
@@ -40,14 +40,14 @@ void mcc::BranchInstruction::Generate(CommandVector &commands) const
 {
     auto condition = Condition->GenerateResult(false);
 
-    auto then = ThenTarget->GenerateInline();
-    auto else_ = ElseTarget->GenerateInline();
+    auto then = ThenTarget->Location;
+    auto else_ = ElseTarget->Location;
 
     switch (condition.Type)
     {
         case ResultType_Value:
             commands.Append(
-                "return run {}",
+                "return run function {}",
                 condition.Value == "false" || condition.Value == "0"
                     ? else_
                     : then);
@@ -66,17 +66,17 @@ void mcc::BranchInstruction::Generate(CommandVector &commands) const
                 GetTmpName(),
                 Location);
             commands.Append(RemoveTmpScore());
-            commands.Append("execute if data storage {} result run return run {}", Location, then);
-            commands.Append("return run {}", else_);
+            commands.Append("execute if data storage {} result run return run function {}", Location, then);
+            commands.Append("return run function {}", else_);
             break;
 
         case ResultType_Score:
             commands.Append(
-                "execute unless score {} {} matches 0 run return run {}",
+                "execute unless score {} {} matches 0 run return run function {}",
                 condition.Player,
                 condition.Objective,
                 then);
-            commands.Append("return run {}", else_);
+            commands.Append("return run function {}", else_);
             break;
 
         default:
@@ -94,20 +94,20 @@ bool mcc::BranchInstruction::IsTerminator() const
     return true;
 }
 
-mcc::InstructionPtr mcc::DirectInstruction::Create(ValuePtr target)
+mcc::InstructionPtr mcc::DirectInstruction::Create(BlockPtr target)
 {
     return std::make_shared<DirectInstruction>(std::move(target));
 }
 
-mcc::DirectInstruction::DirectInstruction(ValuePtr target)
+mcc::DirectInstruction::DirectInstruction(BlockPtr target)
     : Target(std::move(target))
 {
 }
 
 void mcc::DirectInstruction::Generate(CommandVector &commands) const
 {
-    auto target = Target->GenerateInline();
-    commands.Append("return run {}", target);
+    auto target = Target->Location;
+    commands.Append("return run function {}", target);
 }
 
 bool mcc::DirectInstruction::IsTerminator() const

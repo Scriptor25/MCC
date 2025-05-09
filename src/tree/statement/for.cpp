@@ -29,16 +29,16 @@ void mcc::ForStatement::Generate(Builder &builder) const
 
     Prefix->Generate(builder);
     {
-        const auto condition = Condition->Generate(builder, false);
-        (void) builder.CreateBranch(condition, loop_target, end_target, false);
+        const auto condition = Condition->GenerateValue(builder);
+        (void) builder.CreateBranch(condition, loop_target, end_target);
     }
 
     builder.SetInsertBlock(loop_target);
     Do->Generate(builder);
     Suffix->Generate(builder);
     {
-        const auto condition = Condition->Generate(builder, false);
-        (void) builder.CreateBranch(condition, loop_target, end_target, false);
+        const auto condition = Condition->GenerateValue(builder);
+        (void) builder.CreateBranch(condition, loop_target, end_target);
     }
 
     builder.SetInsertBlock(end_target);

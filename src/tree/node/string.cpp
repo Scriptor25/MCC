@@ -12,7 +12,7 @@ std::ostream &mcc::StringNode::Print(std::ostream &stream) const
     return stream << Value;
 }
 
-mcc::ValuePtr mcc::StringNode::Generate(Builder &builder, bool inline_) const
+mcc::ValuePtr mcc::StringNode::Generate(Builder &builder) const
 {
     return ConstantString::Create(Value);
 }

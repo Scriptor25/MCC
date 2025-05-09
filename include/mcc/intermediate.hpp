@@ -30,7 +30,6 @@ namespace mcc
         virtual ~Value() = default;
 
         virtual void Generate(CommandVector &commands) const;
-        [[nodiscard]] virtual CommandT GenerateInline() const;
         [[nodiscard]] virtual Result GenerateResult(bool stringify) const;
 
         void Use();
@@ -51,9 +50,8 @@ namespace mcc
         Block(ResourceLocation location, std::vector<std::string> parameters);
 
         void Generate(CommandVector &commands) const override;
-        CommandT GenerateInline() const override;
 
-        InstructionPtr GetTerminator() const;
+        [[nodiscard]] InstructionPtr GetTerminator() const;
 
         ResourceLocation Location;
         std::vector<std::string> Parameters;
@@ -207,7 +205,6 @@ namespace mcc
         CommandInstruction(ResourceLocation location, CommandT command);
 
         void Generate(CommandVector &commands) const override;
-        [[nodiscard]] CommandT GenerateInline() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
@@ -234,14 +231,14 @@ namespace mcc
         static InstructionPtr Create(
             ResourceLocation location,
             ValuePtr condition,
-            ValuePtr then_target,
-            ValuePtr else_target);
+            BlockPtr then_target,
+            BlockPtr else_target);
 
         BranchInstruction(
             ResourceLocation location,
             ValuePtr condition,
-            ValuePtr then_target,
-            ValuePtr else_target);
+            BlockPtr then_target,
+            BlockPtr else_target);
         ~BranchInstruction() override;
 
         void Generate(CommandVector &commands) const override;
@@ -250,20 +247,20 @@ namespace mcc
 
         ResourceLocation Location;
         ValuePtr Condition;
-        ValuePtr ThenTarget, ElseTarget;
+        BlockPtr ThenTarget, ElseTarget;
     };
 
     struct DirectInstruction final : Instruction
     {
-        static InstructionPtr Create(ValuePtr target);
+        static InstructionPtr Create(BlockPtr target);
 
-        explicit DirectInstruction(ValuePtr target);
+        explicit DirectInstruction(BlockPtr target);
 
         void Generate(CommandVector &commands) const override;
 
         [[nodiscard]] bool IsTerminator() const override;
 
-        ValuePtr Target;
+        BlockPtr Target;
     };
 
     struct StoreInstruction final : Instruction
@@ -391,7 +388,6 @@ namespace mcc
         ~CallInstruction() override;
 
         void Generate(CommandVector &commands) const override;
-        [[nodiscard]] CommandT GenerateInline() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
@@ -406,7 +402,6 @@ namespace mcc
 
         NamedValue(ResourceLocation location, std::string id);
 
-        [[nodiscard]] CommandT GenerateInline() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;

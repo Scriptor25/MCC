@@ -13,7 +13,7 @@ std::ostream &mcc::CommandExpression::Print(std::ostream &stream) const
     return stream << "?`" << Command << '`';
 }
 
-mcc::ValuePtr mcc::CommandExpression::Generate(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::CommandExpression::GenerateValue(Builder &builder) const
 {
-    return builder.CreateCommand(Command, inline_);
+    return builder.CreateCommand(Command);
 }

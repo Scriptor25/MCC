@@ -13,7 +13,7 @@ std::ostream &mcc::SymbolExpression::Print(std::ostream &stream) const
     return stream << ID;
 }
 
-mcc::ValuePtr mcc::SymbolExpression::Generate(Builder &builder, bool inline_) const
+mcc::ValuePtr mcc::SymbolExpression::GenerateValue(Builder &builder) const
 {
     return NamedValue::Create(builder.GetLocation(), ID);
 }

@@ -13,7 +13,7 @@ std::ostream &mcc::ConstantExpression::Print(std::ostream &stream) const
     return stream << View;
 }
 
-mcc::ValuePtr mcc::ConstantExpression::Generate(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::ConstantExpression::GenerateValue(Builder &builder) const
 {
     return Value;
 }

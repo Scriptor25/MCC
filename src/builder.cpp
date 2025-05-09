@@ -77,150 +77,120 @@ mcc::BlockPtr mcc::Builder::GetInsertParent() const
     return block;
 }
 
-mcc::InstructionPtr mcc::Builder::CreateStore(ValuePtr dst, ValuePtr src, const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateStore(ValuePtr dst, ValuePtr src) const
 {
-    return Insert(StoreInstruction::Create(std::move(dst), std::move(src)), inline_);
+    return Insert(StoreInstruction::Create(std::move(dst), std::move(src)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateComparison(
-    const ComparatorE comparator,
-    ValuePtr left,
-    ValuePtr right,
-    const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateComparison(const ComparatorE comparator, ValuePtr left, ValuePtr right) const
 {
     Assert(!!m_InsertBlock, "no insert block");
     return Insert(
-        ComparisonInstruction::Create(comparator, GetLocation(), std::move(left), std::move(right)),
-        inline_);
+        ComparisonInstruction::Create(comparator, GetLocation(), std::move(left), std::move(right)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateOperation(
-    const OperatorE operator_,
-    ValuePtr left,
-    ValuePtr right,
-    const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateOperation(const OperatorE operator_, ValuePtr left, ValuePtr right) const
 {
     Assert(!!m_InsertBlock, "no insert block");
     return Insert(
-        OperationInstruction::Create(operator_, GetLocation(), std::move(left), std::move(right)),
-        inline_);
+        OperationInstruction::Create(operator_, GetLocation(), std::move(left), std::move(right)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateCommand(CommandT command, const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateCommand(CommandT command) const
 {
     Assert(!!m_InsertBlock, "no insert block");
-    return Insert(CommandInstruction::Create(GetLocation(), std::move(command)), inline_);
+    return Insert(CommandInstruction::Create(GetLocation(), std::move(command)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateReturn(
-    ValuePtr value,
-    const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateReturn(ValuePtr value) const
 {
     Assert(!!m_InsertBlock, "no insert block");
-    return Insert(ReturnInstruction::Create(GetLocation(), std::move(value)), inline_);
+    return Insert(ReturnInstruction::Create(GetLocation(), std::move(value)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateBranch(
-    ValuePtr condition,
-    ValuePtr then_target,
-    ValuePtr else_target,
-    const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateBranch(ValuePtr condition, ValuePtr then_target, ValuePtr else_target) const
 {
     Assert(!!m_InsertBlock, "no insert block");
     Assert(!!condition, "condition must not be null");
     Assert(!!then_target, "then target must not be null");
     Assert(!!else_target, "else target must not be null");
+    auto then_target_block = std::dynamic_pointer_cast<Block>(std::move(then_target));
+    auto else_target_block = std::dynamic_pointer_cast<Block>(std::move(else_target));
+    Assert(!!then_target_block, "then target must be a block");
+    Assert(!!else_target_block, "else target must be a block");
     return Insert(
         BranchInstruction::Create(
             GetLocation(),
             std::move(condition),
-            std::move(then_target),
-            std::move(else_target)),
-        inline_);
+            std::move(then_target_block),
+            std::move(else_target_block)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target, const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target) const
 {
     Assert(!!m_InsertBlock, "no insert block");
     Assert(!!target, "target must not be null");
-    return Insert(DirectInstruction::Create(std::move(target)), inline_);
+    auto target_block = std::dynamic_pointer_cast<Block>(std::move(target));
+    Assert(!!target_block, "target must be a block");
+    return Insert(DirectInstruction::Create(std::move(target_block)));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
     std::string callee,
     const bool builtin,
-    std::vector<ValuePtr> arguments,
-    const bool inline_) const
+    std::vector<ValuePtr> arguments) const
 {
     Assert(!!m_InsertBlock, "no insert block");
     return Insert(
-        CallInstruction::Create(GetLocation(), std::move(callee), builtin, std::move(arguments)),
-        inline_);
+        CallInstruction::Create(GetLocation(), std::move(callee), builtin, std::move(arguments)));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateValue(const bool inline_) const
+mcc::InstructionPtr mcc::Builder::AllocateValue() const
 {
-    Assert(!inline_, "cannot inline allocation instruction");
     Assert(!!m_InsertBlock, "no insert block");
-    return Insert(AllocationInstruction::CreateValue(GetLocation(), m_InsertBlock->StackIndex++), false);
+    return Insert(AllocationInstruction::CreateValue(GetLocation(), m_InsertBlock->StackIndex++));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateArray(const bool inline_) const
+mcc::InstructionPtr mcc::Builder::AllocateArray() const
 {
-    Assert(!inline_, "cannot inline allocation instruction");
     Assert(!!m_InsertBlock, "no insert block");
-    return Insert(AllocationInstruction::CreateArray(GetLocation(), m_InsertBlock->StackIndex++), false);
+    return Insert(AllocationInstruction::CreateArray(GetLocation(), m_InsertBlock->StackIndex++));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateObject(const bool inline_) const
+mcc::InstructionPtr mcc::Builder::AllocateObject() const
 {
-    Assert(!inline_, "cannot inline allocation instruction");
     Assert(!!m_InsertBlock, "no insert block");
-    return Insert(AllocationInstruction::CreateObject(GetLocation(), m_InsertBlock->StackIndex++), false);
+    return Insert(AllocationInstruction::CreateObject(GetLocation(), m_InsertBlock->StackIndex++));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateAppend(
-    ValuePtr array,
-    ValuePtr value,
-    const bool stringify,
-    const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateAppend(ValuePtr array, ValuePtr value, const bool stringify) const
 {
-    Assert(!inline_, "cannot inline array operation instruction");
     Assert(!!m_InsertBlock, "no insert block");
     return Insert(
         ArrayInstruction::CreateAppend(
             GetLocation(),
             std::move(array),
             std::move(value),
-            stringify),
-        false);
+            stringify));
 }
 
-mcc::InstructionPtr mcc::Builder::CreatePrepend(
-    ValuePtr array,
-    ValuePtr value,
-    const bool stringify,
-    const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreatePrepend(ValuePtr array, ValuePtr value, const bool stringify) const
 {
-    Assert(!inline_, "cannot inline array operation");
     Assert(!!m_InsertBlock, "no insert block");
     return Insert(
         ArrayInstruction::CreatePrepend(
             GetLocation(),
             std::move(array),
             std::move(value),
-            stringify),
-        false);
+            stringify));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(
     ValuePtr array,
     ValuePtr value,
     const IndexT index,
-    const bool stringify,
-    const bool inline_) const
+    const bool stringify) const
 {
-    Assert(!inline_, "cannot inline array operation");
     Assert(!!m_InsertBlock, "no insert block");
     return Insert(
         ArrayInstruction::CreateInsert(
@@ -228,32 +198,22 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
             std::move(array),
             std::move(value),
             index,
-            stringify),
-        false);
+            stringify));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateInsert(
-    ValuePtr object,
-    ValuePtr value,
-    std::string key,
-    const bool inline_) const
+mcc::InstructionPtr mcc::Builder::CreateInsert(ValuePtr object, ValuePtr value, std::string key) const
 {
-    Assert(!inline_, "cannot inline object operation");
     Assert(!!m_InsertBlock, "no insert block");
     return Insert(
         ObjectInstruction::CreateInsert(
             GetLocation(),
             std::move(object),
             std::move(value),
-            std::move(key)),
-        false);
+            std::move(key)));
 }
 
-mcc::InstructionPtr mcc::Builder::Insert(InstructionPtr instruction, const bool inline_) const
+mcc::InstructionPtr mcc::Builder::Insert(InstructionPtr instruction) const
 {
-    if (inline_)
-        return instruction;
-
     Assert(!!m_InsertBlock, "no insert block");
     m_InsertBlock->Instructions.emplace_back(instruction);
     return m_InsertBlock->Instructions.back();

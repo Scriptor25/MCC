@@ -33,12 +33,11 @@ void mcc::IfUnlessStatement::Generate(Builder &builder) const
 
     auto require_end = !Else;
 
-    const auto condition = Condition->Generate(builder, false);
+    const auto condition = Condition->GenerateValue(builder);
     (void) builder.CreateBranch(
         condition,
         Unless ? else_target : then_target,
-        Unless ? then_target : else_target,
-        false);
+        Unless ? then_target : else_target);
 
     builder.SetInsertBlock(then_target);
     Then->Generate(builder);
@@ -46,7 +45,7 @@ void mcc::IfUnlessStatement::Generate(Builder &builder) const
     if (!then_target->GetTerminator())
     {
         require_end = true;
-        (void) builder.CreateDirect(end_target, false);
+        (void) builder.CreateDirect(end_target);
     }
 
     if (Else)
@@ -57,7 +56,7 @@ void mcc::IfUnlessStatement::Generate(Builder &builder) const
         if (!else_target->GetTerminator())
         {
             require_end = true;
-            (void) builder.CreateDirect(end_target, false);
+            (void) builder.CreateDirect(end_target);
         }
     }
 

@@ -28,7 +28,7 @@ std::ostream &mcc::ResourceExpression::Print(std::ostream &stream) const
     return stream;
 }
 
-mcc::ValuePtr mcc::ResourceExpression::Generate(Builder &builder, bool inline_) const
+mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder) const
 {
     auto location = Location;
     if (location.Namespace.empty())
@@ -37,14 +37,14 @@ mcc::ValuePtr mcc::ResourceExpression::Generate(Builder &builder, bool inline_) 
     ConstantPtr state;
     if (State)
     {
-        state = std::dynamic_pointer_cast<Constant>(State->Generate(builder, true));
+        state = std::dynamic_pointer_cast<Constant>(State->GenerateValue(builder));
         Assert(!!state, "state must be constant");
     }
 
     ConstantPtr data;
     if (Data)
     {
-        data = std::dynamic_pointer_cast<Constant>(Data->Generate(builder, true));
+        data = std::dynamic_pointer_cast<Constant>(Data->GenerateValue(builder));
         Assert(!!data, "data must be constant");
     }
 

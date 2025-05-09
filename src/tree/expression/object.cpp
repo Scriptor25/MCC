@@ -24,19 +24,17 @@ std::ostream &mcc::ObjectExpression::Print(std::ostream &stream) const
     return stream << " }";
 }
 
-mcc::ValuePtr mcc::ObjectExpression::Generate(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder) const
 {
     std::map<std::string, ValuePtr> values;
 
     auto all_constant = true;
     for (auto &[key_, value_]: Elements)
     {
-        auto value = value_->Generate(builder, inline_);
+        auto value = value_->GenerateValue(builder);
         all_constant &= !!std::dynamic_pointer_cast<Constant>(value);
         values.emplace(key_, value);
     }
-
-    Assert(!inline_ || all_constant, Where, "inline object must only contain constant values");
 
     if (all_constant)
     {
@@ -48,10 +46,10 @@ mcc::ValuePtr mcc::ObjectExpression::Generate(Builder &builder, const bool inlin
         return ConstantObject::Create(constants);
     }
 
-    auto object = builder.AllocateObject(inline_);
+    auto object = builder.AllocateObject();
 
     for (auto &[key_, value_]: values)
-        (void) builder.CreateInsert(object, value_, key_, inline_);
+        (void) builder.CreateInsert(object, value_, key_);
 
     return object;
 }

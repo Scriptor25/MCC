@@ -28,7 +28,7 @@ std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
     return stream << ')';
 }
 
-mcc::ValuePtr mcc::CallExpression::Generate(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder) const
 {
     std::string callee;
     bool builtin;
@@ -53,7 +53,7 @@ mcc::ValuePtr mcc::CallExpression::Generate(Builder &builder, const bool inline_
 
     std::vector<ValuePtr> arguments;
     for (auto &argument: Arguments)
-        arguments.emplace_back(argument->Generate(builder, inline_));
+        arguments.emplace_back(argument->GenerateValue(builder));
 
-    return builder.CreateCall(callee, builtin, std::move(arguments), inline_);
+    return builder.CreateCall(callee, builtin, std::move(arguments));
 }

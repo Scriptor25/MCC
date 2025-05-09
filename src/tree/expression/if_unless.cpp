@@ -24,7 +24,7 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
     return stream;
 }
 
-mcc::ValuePtr mcc::IfUnlessExpression::Generate(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder) const
 {
     Error(Where, "TODO");
 }

@@ -20,13 +20,13 @@ std::ostream &mcc::ArrayExpression::Print(std::ostream &stream) const
     return stream << " ]";
 }
 
-mcc::ValuePtr mcc::ArrayExpression::Generate(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder) const
 {
     std::vector<ConstantPtr> values;
 
     for (auto &element: Elements)
     {
-        auto value = element->Generate(builder, inline_);
+        auto value = element->GenerateValue(builder);
 
         auto constant = std::dynamic_pointer_cast<Constant>(value);
         Assert(!!constant, "inline array must only contain constant values");

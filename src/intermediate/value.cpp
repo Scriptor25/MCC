@@ -6,11 +6,6 @@ void mcc::Value::Generate(CommandVector &commands) const
     Error("mcc::Value::Generate");
 }
 
-mcc::CommandT mcc::Value::GenerateInline() const
-{
-    Error("mcc::Value::GenerateInline");
-}
-
 mcc::Result mcc::Value::GenerateResult(const bool stringify) const
 {
     Error("mcc::Value::GenerateResult");

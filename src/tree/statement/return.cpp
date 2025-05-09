@@ -15,6 +15,6 @@ std::ostream &mcc::ReturnStatement::Print(std::ostream &stream) const
 
 void mcc::ReturnStatement::Generate(Builder &builder) const
 {
-    const auto value = Value->Generate(builder, false);
-    (void) builder.CreateReturn(value, false);
+    const auto value = Value->GenerateValue(builder);
+    (void) builder.CreateReturn(value);
 }

@@ -11,7 +11,7 @@ std::ostream &mcc::ExpressionNode::Print(std::ostream &stream) const
     return Expression->Print(stream << "${") << '}';
 }
 
-mcc::ValuePtr mcc::ExpressionNode::Generate(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::ExpressionNode::Generate(Builder &builder) const
 {
-    return Expression->Generate(builder, inline_);
+    return Expression->GenerateValue(builder);
 }

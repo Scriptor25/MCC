@@ -106,22 +106,6 @@ void mcc::CallInstruction::Generate(CommandVector &commands) const
     commands.Append(std::move(command));
 }
 
-mcc::CommandT mcc::CallInstruction::GenerateInline() const
-{
-    CommandT command;
-    if (!Builtin)
-        generate_function_call(*this, command);
-    else if (Callee == "print")
-        generate_builtin_print(*this, command);
-    else
-        Error("undefined builtin callee {}", Callee);
-
-    if (!UseCount)
-        return command;
-
-    return std::format("execute store result storage {} {} double 1 run {}", Location, GetStackPath(), command);
-}
-
 mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify) const
 {
     if (!UseCount)

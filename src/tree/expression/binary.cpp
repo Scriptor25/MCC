@@ -20,13 +20,13 @@ std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
     return Right->Print(Left->Print(stream) << ' ' << Operator << ' ');
 }
 
-mcc::ValuePtr mcc::BinaryExpression::Generate(Builder &builder, const bool inline_) const
+mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const
 {
-    const auto left = Left->Generate(builder, inline_);
-    const auto right = Right->Generate(builder, inline_);
+    const auto left = Left->GenerateValue(builder);
+    const auto right = Right->GenerateValue(builder);
 
     if (Operator == "=")
-        return builder.CreateStore(left, right, inline_);
+        return builder.CreateStore(left, right);
 
     auto comparator = Comparator_None;
     if (Operator == "<")
@@ -43,7 +43,7 @@ mcc::ValuePtr mcc::BinaryExpression::Generate(Builder &builder, const bool inlin
         comparator = Comparator_NE;
 
     if (comparator)
-        return builder.CreateComparison(comparator, left, right, inline_);
+        return builder.CreateComparison(comparator, left, right);
 
     auto operator_ = Operator_None;
     if (Operator == "+")
@@ -58,7 +58,7 @@ mcc::ValuePtr mcc::BinaryExpression::Generate(Builder &builder, const bool inlin
         operator_ = Operator_Rem;
 
     if (operator_)
-        return builder.CreateOperation(operator_, left, right, inline_);
+        return builder.CreateOperation(operator_, left, right);
 
     Error("undefined operator or comparator {}", Operator);
 }
