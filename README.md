@@ -2,15 +2,58 @@
 
 ## About
 
-TODO
+The MCC (Minecraft command compiler) allows you to write logic in a simple programming language with features like
+control flow, variables etc. without having to think much about how that would look in bare-bones Minecraft commands.
+Those work fine in a small, few command datapack, but for larger applications it gets really messy real fast. So that's
+why I made ... this.
 
-## Build
-
-TODO
+## Building
 
 ### Prerequisites
 
-TODO
+Before you start, make sure you have the following tools installed or available in your development environment:
+
+- cmake (version >= 3.20)
+- a project file generator like ninja or gnu make
+- a toolchain like gcc (version >= 13) or clang
+
+### Getting the Source and Building
+
+To build the project, first get the repository and its dependencies:
+
+```shell
+git clone https://github.com/Scriptor25/MCC.git
+cd MCC
+git submodule update --recursive --init --remote
+```
+
+Next, still inside the repository directory, configure cmake:
+
+```shell
+cmake -S . -B build
+```
+
+If you want to use a different generator or toolchain, please refer to the official cmake documentation for help.
+
+Now you can build the project:
+
+```shell
+cmake --build build
+```
+
+To use multiple threads at once for building in parallel, use the `-j` option:
+
+```shell
+cmake --build build -j 10
+```
+
+This will build and output the executable into the build directory. To test if that worked, run:
+
+```shell
+./build/mcc
+```
+
+You should get a warning that no valid action was specified.
 
 ## Included Example Project
 
@@ -28,7 +71,37 @@ executed instantly, while the one with 20 took about 4 seconds and the 40 block 
 
 ## Usage
 
-TODO
+The tool has a builtin way of telling you how to use it, but anyway, here's how it works: The tool always takes an
+action, multiple flags or options. There are currently four valid actions:
+
+- `help`
+- `init`
+- `compile`
+- `package`
+
+```shell
+mcc help
+```
+
+This prints out a list of all valid actions plus their valid arguments.
+
+```shell
+mcc init
+```
+
+Initializes a new empty project with an empty source directory and prepopulated package info file.
+
+```shell
+mcc compile
+```
+
+Compiles the source files in a project into the target directory.
+
+```shell
+mcc package
+```
+
+Compiles the source files in a project into the target directory and packages this directory as a zip datapack. **WIP**
 
 ## Language Syntax
 
