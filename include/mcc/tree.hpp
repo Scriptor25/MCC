@@ -255,12 +255,11 @@ namespace mcc
 
     struct UnaryExpression final : Expression
     {
-        UnaryExpression(SourceLocation where, bool prefix, std::string operator_, ExpressionPtr operand);
+        UnaryExpression(SourceLocation where, std::string operator_, ExpressionPtr operand);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
-        bool Prefix;
         std::string Operator;
         ExpressionPtr Operand;
     };

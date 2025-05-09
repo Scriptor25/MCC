@@ -60,7 +60,6 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         auto operand = ParseCallExpression();
         return std::make_unique<UnaryExpression>(
             std::move(token.Where),
-            true,
             std::move(token.Value),
             std::move(operand));
     }

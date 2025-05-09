@@ -22,11 +22,11 @@ std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const
 {
-    const auto left = Left->GenerateValue(builder);
-    const auto right = Right->GenerateValue(builder);
+    auto left = Left->GenerateValue(builder);
+    auto right = Right->GenerateValue(builder);
 
     if (Operator == "=")
-        return builder.CreateStore(left, right);
+        return builder.CreateStore(std::move(left), std::move(right));
 
     auto comparator = Comparator_None;
     if (Operator == "<")
@@ -43,9 +43,9 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const
         comparator = Comparator_NE;
 
     if (comparator)
-        return builder.CreateComparison(comparator, left, right);
+        return builder.CreateComparison(comparator, std::move(left), std::move(right));
 
-    auto store = Operator.back() == '=';
+    const auto store = Operator.back() == '=';
     auto operator_string = Operator;
     if (store)
         operator_string.pop_back();
@@ -64,11 +64,11 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const
 
     if (operator_)
     {
-        auto operation = builder.CreateOperation(operator_, left, right);
+        auto operation = builder.CreateOperation(operator_, left, std::move(right));
         if (store)
-            return builder.CreateStore(left, operation);
-        return operation;
+            return builder.CreateStore(std::move(left), std::move(operation));
+        return std::move(operation);
     }
 
-    Error("undefined operator or comparator {}", Operator);
+    Error("undefined binary operator {}", Operator);
 }
