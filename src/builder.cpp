@@ -135,15 +135,20 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target) const
     return Insert(DirectInstruction::Create(GetLocation(), std::move(target_block)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target, ValuePtr result) const
+mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target, ValuePtr result, ValuePtr landing_pad) const
 {
     Assert(!!m_InsertBlock, "no insert block");
     Assert(!!target, "target must not be null");
     Assert(!!result, "result must not be null");
+    Assert(!!landing_pad, "landing pad must not be null");
     auto target_block = std::dynamic_pointer_cast<Block>(std::move(target));
     Assert(!!target_block, "target must be a block");
     return Insert(
-        DirectInstruction::Create(GetLocation(), std::move(target_block), std::move(result)));
+        DirectInstruction::Create(
+            GetLocation(),
+            std::move(target_block),
+            std::move(result),
+            std::move(landing_pad)));
 }
 
 mcc::ValuePtr mcc::Builder::CreateBranchResult() const

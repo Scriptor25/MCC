@@ -75,6 +75,11 @@ namespace mcc
             return (TAG ? "#" : "") + Namespace + ':' + Path;
         }
 
+        bool operator==(const Resource &other) const
+        {
+            return Namespace == other.Namespace && Path == other.Path;
+        }
+
         std::string Namespace;
         std::string Path;
     };

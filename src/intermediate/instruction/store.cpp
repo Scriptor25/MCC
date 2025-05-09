@@ -22,6 +22,9 @@ mcc::StoreInstruction::~StoreInstruction()
 
 void mcc::StoreInstruction::Generate(CommandVector &commands) const
 {
+    if (Dst == Src)
+        return;
+
     auto dst = Dst->GenerateResult(false);
     auto src = Src->GenerateResult(false);
 
@@ -35,6 +38,8 @@ void mcc::StoreInstruction::Generate(CommandVector &commands) const
                     break;
 
                 case ResultType_Storage:
+                    if (dst.Location == src.Location && dst.Path == src.Path)
+                        break;
                     commands.Append(
                         "data modify storage {} {} set from storage {} {}",
                         dst.Location,
@@ -79,6 +84,8 @@ void mcc::StoreInstruction::Generate(CommandVector &commands) const
                     break;
 
                 case ResultType_Score:
+                    if (dst.Player == src.Player && dst.Objective == src.Objective)
+                        break;
                     commands.Append(
                         "scoreboard players operation {} {} = {} {}",
                         dst.Player,
@@ -108,5 +115,5 @@ void mcc::StoreInstruction::Generate(CommandVector &commands) const
 
 mcc::Result mcc::StoreInstruction::GenerateResult(const bool stringify) const
 {
-    return Dst->GenerateResult(false);
+    return Dst->GenerateResult(stringify);
 }

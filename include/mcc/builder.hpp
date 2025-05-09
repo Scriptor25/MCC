@@ -33,7 +33,7 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateReturn(ValuePtr value) const;
         [[nodiscard]] InstructionPtr CreateBranch(ValuePtr condition, ValuePtr then_target, ValuePtr else_target) const;
         [[nodiscard]] InstructionPtr CreateDirect(ValuePtr target) const;
-        [[nodiscard]] InstructionPtr CreateDirect(ValuePtr target, ValuePtr result) const;
+        [[nodiscard]] InstructionPtr CreateDirect(ValuePtr target, ValuePtr result, ValuePtr landing_pad) const;
 
         [[nodiscard]] ValuePtr CreateBranchResult() const;
 

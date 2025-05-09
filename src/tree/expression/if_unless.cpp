@@ -31,14 +31,17 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder) const
     const auto condition = Condition->GenerateValue(builder);
     (void) builder.CreateBranch(condition, then_target, else_target);
 
+    builder.SetInsertBlock(end_target);
+    auto landing_pad = builder.CreateBranchResult();
+
     builder.SetInsertBlock(then_target);
     const auto then_value = Then->GenerateValue(builder);
-    (void) builder.CreateDirect(end_target, then_value);
+    (void) builder.CreateDirect(end_target, then_value, landing_pad);
 
     builder.SetInsertBlock(else_target);
     const auto else_value = Else->GenerateValue(builder);
-    (void) builder.CreateDirect(end_target, else_value);
+    (void) builder.CreateDirect(end_target, else_value, landing_pad);
 
     builder.SetInsertBlock(end_target);
-    return builder.CreateBranchResult();
+    return landing_pad;
 }

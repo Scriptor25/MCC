@@ -253,9 +253,9 @@ namespace mcc
     struct DirectInstruction final : Instruction
     {
         static InstructionPtr Create(ResourceLocation location, BlockPtr target);
-        static InstructionPtr Create(ResourceLocation location, BlockPtr target, ValuePtr result);
+        static InstructionPtr Create(ResourceLocation location, BlockPtr target, ValuePtr result, ValuePtr landing_pad);
 
-        DirectInstruction(ResourceLocation location, BlockPtr target, ValuePtr result);
+        DirectInstruction(ResourceLocation location, BlockPtr target, ValuePtr result, ValuePtr landing_pad);
         ~DirectInstruction() override;
 
         void Generate(CommandVector &commands) const override;
@@ -264,7 +264,7 @@ namespace mcc
 
         ResourceLocation Location;
         BlockPtr Target;
-        ValuePtr Result;
+        ValuePtr Result, LandingPad;
     };
 
     struct StoreInstruction final : Instruction

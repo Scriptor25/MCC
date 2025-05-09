@@ -96,24 +96,31 @@ bool mcc::BranchInstruction::IsTerminator() const
 
 mcc::InstructionPtr mcc::DirectInstruction::Create(ResourceLocation location, BlockPtr target)
 {
-    return std::make_shared<DirectInstruction>(std::move(location), std::move(target), nullptr);
+    return std::make_shared<DirectInstruction>(std::move(location), std::move(target), nullptr, nullptr);
 }
 
 mcc::InstructionPtr mcc::DirectInstruction::Create(
     ResourceLocation location,
     BlockPtr target,
-    ValuePtr result)
+    ValuePtr result,
+    ValuePtr landing_pad)
 {
     return std::make_shared<DirectInstruction>(
         std::move(location),
         std::move(target),
-        std::move(result));
+        std::move(result),
+        std::move(landing_pad));
 }
 
-mcc::DirectInstruction::DirectInstruction(ResourceLocation location, BlockPtr target, ValuePtr result)
+mcc::DirectInstruction::DirectInstruction(
+    ResourceLocation location,
+    BlockPtr target,
+    ValuePtr result,
+    ValuePtr landing_pad)
     : Location(std::move(location)),
       Target(std::move(target)),
-      Result(std::move(result))
+      Result(std::move(result)),
+      LandingPad(std::move(landing_pad))
 {
     Target->Use();
     if (Result)
@@ -132,24 +139,38 @@ void mcc::DirectInstruction::Generate(CommandVector &commands) const
     if (Result)
     {
         auto result = Result->GenerateResult(false);
+        auto landing_pad = LandingPad->GenerateResult(false);
+
+        Assert(
+            landing_pad.Type == ResultType_Storage,
+            "landing pad must be {}, but is {}",
+            ResultType_Storage,
+            landing_pad.Type);
+
         switch (result.Type)
         {
             case ResultType_Value:
-                commands.Append("data modify storage {} result set value {}", Location, result.Value);
+                commands.Append(
+                    "data modify storage {} {} set value {}",
+                    landing_pad.Location,
+                    landing_pad.Path,
+                    result.Value);
                 break;
 
             case ResultType_Storage:
                 commands.Append(
-                    "data modify storage {} result set from storage {} {}",
-                    Location,
+                    "data modify storage {} {} set from storage {} {}",
+                    landing_pad.Location,
+                    landing_pad.Path,
                     result.Location,
                     result.Path);
                 break;
 
             case ResultType_Score:
                 commands.Append(
-                    "execute store result storage {} result double 1 run scoreboard players get {} {}",
-                    Location,
+                    "execute store result storage {} {} double 1 run scoreboard players get {} {}",
+                    landing_pad.Location,
+                    landing_pad.Path,
                     result.Player,
                     result.Objective);
                 break;
