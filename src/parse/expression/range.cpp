@@ -2,34 +2,34 @@
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
 
-mcc::ExpressionPtr mcc::Parser::ParseRangeExpression(const bool negative)
+mcc::ExpressionPtr mcc::Parser::ParseRangeExpression()
 {
     if (At(TokenType_Integer))
     {
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
-            token.Where,
-            ConstantFloat::Create(negative ? -token.Integer : token.Integer),
-            negative ? '-' + token.Value : token.Value);
+            std::move(token.Where),
+            ConstantFloat::Create(token.Integer),
+            std::move(token.Value));
     }
 
     if (At(TokenType_Float))
     {
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
-            token.Where,
-            ConstantFloat::Create(negative ? -token.Float : token.Float),
-            negative ? '-' + token.Value : token.Value);
+            std::move(token.Where),
+            ConstantFloat::Create(token.Float),
+            std::move(token.Value));
     }
 
     auto token = Expect(TokenType_Range);
     auto [beg_, end_] = token.Range;
     return std::make_unique<ConstantExpression>(
-        token.Where,
+        std::move(token.Where),
         beg_.has_value() && end_.has_value()
-            ? ConstantFloatRange::Create(negative ? -*beg_ : *beg_, *end_)
+            ? ConstantFloatRange::Create(*beg_, *end_)
             : beg_.has_value()
-                  ? ConstantFloatRange::CreateMin(negative ? -*beg_ : *beg_)
+                  ? ConstantFloatRange::CreateMin(*beg_)
                   : ConstantFloatRange::CreateMax(*end_),
-        negative ? '-' + token.Value : token.Value);
+        std::move(token.Value));
 }

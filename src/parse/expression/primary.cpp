@@ -54,35 +54,15 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_Other, "{"))
         return ParseObjectExpression();
 
-    if (SkipIf(TokenType_Operator, "-"))
-    {
-        if (At(TokenType_Integer))
-            return ParseIntegerExpression(true);
-        if (At(TokenType_Float))
-            return ParseFloatExpression(true);
-        return ParseRangeExpression(true);
-    }
-
-    if (At(TokenType_Other, "~") || At(TokenType_Other, "^"))
+    if (At(TokenType_Operator))
     {
         auto token = Skip();
-        const auto type = ToOffsetType(token.Value);
-
-        const auto negative = SkipIf(TokenType_Operator, "-");
-
-        ExpressionPtr offset;
-        ConstantExpression *offset_constant = nullptr;
-        if (negative || AtAny(TokenType_Integer, TokenType_Float))
-        {
-            offset = ParseFloatExpression(negative);
-            offset_constant = dynamic_cast<ConstantExpression *>(offset.get());
-            Assert(!!offset_constant, token.Where, "offset must be constant");
-        }
-
-        return std::make_unique<ConstantExpression>(
-            token.Where,
-            ConstantOffset::Create(type, offset_constant ? offset_constant->Value : nullptr),
-            ToString(type) + (offset_constant ? offset_constant->View : ""));
+        auto operand = ParseCallExpression();
+        return std::make_unique<UnaryExpression>(
+            std::move(token.Where),
+            true,
+            std::move(token.Value),
+            std::move(operand));
     }
 
     Error(m_Token.Where, "cannot parse {} '{}'", m_Token.Type, m_Token.Value);

@@ -103,9 +103,9 @@ namespace mcc
 
         ExpressionPtr ParseCommandExpression();
 
-        ExpressionPtr ParseIntegerExpression(bool negative = false);
-        ExpressionPtr ParseFloatExpression(bool negative = false);
-        ExpressionPtr ParseRangeExpression(bool negative = false);
+        ExpressionPtr ParseIntegerExpression();
+        ExpressionPtr ParseFloatExpression();
+        ExpressionPtr ParseRangeExpression();
         ExpressionPtr ParseStringExpression();
         ExpressionPtr ParseSymbolExpression();
 

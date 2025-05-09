@@ -2,11 +2,11 @@
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
 
-mcc::ExpressionPtr mcc::Parser::ParseIntegerExpression(const bool negative)
+mcc::ExpressionPtr mcc::Parser::ParseIntegerExpression()
 {
     auto token = Expect(TokenType_Integer);
     return std::make_unique<ConstantExpression>(
-        token.Where,
-        ConstantInteger::Create(negative ? -token.Integer : token.Integer),
-        negative ? '-' + token.Value : token.Value);
+        std::move(token.Where),
+        ConstantInteger::Create(token.Integer),
+        std::move(token.Value));
 }

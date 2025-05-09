@@ -175,18 +175,6 @@ namespace mcc
         ConstantPtr Data;
     };
 
-    struct ConstantOffset final : Constant
-    {
-        static ConstantPtr Create(OffsetTypeE type, ConstantPtr offset);
-
-        ConstantOffset(OffsetTypeE type, ConstantPtr offset);
-
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        OffsetTypeE Type;
-        ConstantPtr Offset;
-    };
-
     struct Instruction : Value
     {
         [[nodiscard]] virtual bool IsTerminator() const;

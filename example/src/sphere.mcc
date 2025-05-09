@@ -6,15 +6,15 @@ define :setblock(x, y, z, block, mode) {
 
 define :sphere(cx, cy, cz, r) {
     r2 = r * r
-    for (dz = 0 - r, dz <= r, dz = dz + 1) {
+    for (dz = -r, dz <= r, dz += 1) {
         dz2 = dz * dz
         z = cz + dz
 
-        for (dy = 0 - r, dy <= r, dy = dy + 1) {
+        for (dy = -r, dy <= r, dy += 1) {
             dy2 = dy * dy
             y = cy + dy
 
-            for (dx = 0 - r, dx <= r, dx = dx + 1) {
+            for (dx = -r, dx <= r, dx += 1) {
                 dx2 = dx * dx
                 x = cx + dx
 
@@ -28,5 +28,5 @@ define :sphere(cx, cy, cz, r) {
 }
 
 define :test() {
-    $:sphere({ cx: 0, cy: 0 - 30, cz: 0, r: 5 })
+    $:sphere({ cx: 0, cy: -30, cz: 0, r: 5 })
 }

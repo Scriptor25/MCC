@@ -45,20 +45,30 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const
     if (comparator)
         return builder.CreateComparison(comparator, left, right);
 
+    auto store = Operator.back() == '=';
+    auto operator_string = Operator;
+    if (store)
+        operator_string.pop_back();
+
     auto operator_ = Operator_None;
-    if (Operator == "+")
+    if (operator_string == "+")
         operator_ = Operator_Add;
-    if (Operator == "-")
+    if (operator_string == "-")
         operator_ = Operator_Sub;
-    if (Operator == "*")
+    if (operator_string == "*")
         operator_ = Operator_Mul;
-    if (Operator == "/")
+    if (operator_string == "/")
         operator_ = Operator_Div;
-    if (Operator == "%")
+    if (operator_string == "%")
         operator_ = Operator_Rem;
 
     if (operator_)
-        return builder.CreateOperation(operator_, left, right);
+    {
+        auto operation = builder.CreateOperation(operator_, left, right);
+        if (store)
+            return builder.CreateStore(left, operation);
+        return operation;
+    }
 
     Error("undefined operator or comparator {}", Operator);
 }

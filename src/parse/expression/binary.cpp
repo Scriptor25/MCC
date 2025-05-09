@@ -6,6 +6,11 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
     static const std::map<std::string, unsigned> pres
     {
         {"=", 0},
+        {"+=", 0},
+        {"-=", 0},
+        {"*=", 0},
+        {"/=", 0},
+        {"%=", 0},
         {"==", 1},
         {"!=", 1},
         {"<=", 1},
