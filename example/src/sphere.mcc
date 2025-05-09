@@ -20,7 +20,7 @@ define :sphere(cx, cy, cz, r) {
 
                 d2 = dx2 + dy2 + dz2
 
-                if (d2 <     r2)
+                if (d2 < r2)
                     $:setblock({ x, y, z, block: "gold_block", mode: "replace" })
             }
         }
