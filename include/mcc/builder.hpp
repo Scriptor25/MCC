@@ -19,8 +19,8 @@ namespace mcc
         void RemoveBlock(const BlockPtr &block);
 
         void SetInsertBlock(BlockPtr block);
-        BlockPtr GetInsertBlock() const;
-        BlockPtr GetInsertParent() const;
+        [[nodiscard]] BlockPtr GetInsertBlock() const;
+        [[nodiscard]] BlockPtr GetInsertParent() const;
 
         [[nodiscard]] InstructionPtr CreateStore(ValuePtr dst, ValuePtr src) const;
 
@@ -33,6 +33,9 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateReturn(ValuePtr value) const;
         [[nodiscard]] InstructionPtr CreateBranch(ValuePtr condition, ValuePtr then_target, ValuePtr else_target) const;
         [[nodiscard]] InstructionPtr CreateDirect(ValuePtr target) const;
+        [[nodiscard]] InstructionPtr CreateDirect(ValuePtr target, ValuePtr result) const;
+
+        [[nodiscard]] ValuePtr CreateBranchResult() const;
 
         [[nodiscard]] InstructionPtr CreateCall(
             std::string callee,

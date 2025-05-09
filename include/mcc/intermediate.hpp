@@ -252,15 +252,19 @@ namespace mcc
 
     struct DirectInstruction final : Instruction
     {
-        static InstructionPtr Create(BlockPtr target);
+        static InstructionPtr Create(ResourceLocation location, BlockPtr target);
+        static InstructionPtr Create(ResourceLocation location, BlockPtr target, ValuePtr result);
 
-        explicit DirectInstruction(BlockPtr target);
+        DirectInstruction(ResourceLocation location, BlockPtr target, ValuePtr result);
+        ~DirectInstruction() override;
 
         void Generate(CommandVector &commands) const override;
 
         [[nodiscard]] bool IsTerminator() const override;
 
+        ResourceLocation Location;
         BlockPtr Target;
+        ValuePtr Result;
     };
 
     struct StoreInstruction final : Instruction
@@ -406,5 +410,16 @@ namespace mcc
 
         ResourceLocation Location;
         std::string ID;
+    };
+
+    struct BranchResult final : Value
+    {
+        static ValuePtr Create(ResourceLocation location);
+
+        explicit BranchResult(ResourceLocation location);
+
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        ResourceLocation Location;
     };
 }

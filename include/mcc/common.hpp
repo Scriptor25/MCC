@@ -70,7 +70,7 @@ namespace mcc
             return stream << (TAG ? "#" : "") << Namespace << ':' << Path;
         }
 
-        std::string String() const
+        [[nodiscard]] std::string String() const
         {
             return (TAG ? "#" : "") + Namespace + ':' + Path;
         }

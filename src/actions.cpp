@@ -74,19 +74,19 @@ void mcc::Actions::Print() const
                 << action.Description
                 << std::endl;
 
-        size_t width = 0;
+        auto width = 0;
         for (auto &parameter: action.Parameters)
-            width = std::max(width, parameter.Pattern.size());
+            width = std::max(width, static_cast<int>(parameter.Pattern.size()));
 
-        for (unsigned i = 0; i < action.Parameters.size(); ++i)
+        for (const auto &parameter: action.Parameters)
             std::cerr
                     << "   + '"
-                    << action.Parameters[i].Pattern
+                    << parameter.Pattern
                     << "'"
-                    << std::setw(width - action.Parameters[i].Pattern.size())
+                    << std::setw(width - static_cast<int>(parameter.Pattern.size()))
                     << std::left
                     << ""
                     << " - "
-                    << action.Parameters[i].Description << std::endl;
+                    << parameter.Description << std::endl;
     }
 }

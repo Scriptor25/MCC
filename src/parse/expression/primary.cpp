@@ -66,7 +66,7 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_Other, "~") || At(TokenType_Other, "^"))
     {
         auto token = Skip();
-        auto type = ToOffsetType(token.Value);
+        const auto type = ToOffsetType(token.Value);
 
         const auto negative = SkipIf(TokenType_Operator, "-");
 

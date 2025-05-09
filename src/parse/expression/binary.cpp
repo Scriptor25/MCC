@@ -1,9 +1,7 @@
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
 
-mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(
-    ExpressionPtr left,
-    const unsigned min_pre)
+mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const unsigned min_pre)
 {
     static const std::map<std::string, unsigned> pres
     {

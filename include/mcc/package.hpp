@@ -23,7 +23,7 @@ namespace mcc
             return m_Data.at(location.Namespace).at(location.Path);
         }
 
-        void ForEach(std::function<void(const ResourceLocation &, const T &)> consumer) const
+        void ForEach(const std::function<void(const ResourceLocation &, const T &)> &consumer) const
         {
             for (auto &[namespace_, namespace_value_]: m_Data)
                 for (auto &[id_, id_value_]: namespace_value_)

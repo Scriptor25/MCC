@@ -94,18 +94,76 @@ bool mcc::BranchInstruction::IsTerminator() const
     return true;
 }
 
-mcc::InstructionPtr mcc::DirectInstruction::Create(BlockPtr target)
+mcc::InstructionPtr mcc::DirectInstruction::Create(ResourceLocation location, BlockPtr target)
 {
-    return std::make_shared<DirectInstruction>(std::move(target));
+    return std::make_shared<DirectInstruction>(std::move(location), std::move(target), nullptr);
 }
 
-mcc::DirectInstruction::DirectInstruction(BlockPtr target)
-    : Target(std::move(target))
+mcc::InstructionPtr mcc::DirectInstruction::Create(
+    ResourceLocation location,
+    BlockPtr target,
+    ValuePtr result)
 {
+    return std::make_shared<DirectInstruction>(
+        std::move(location),
+        std::move(target),
+        std::move(result));
+}
+
+mcc::DirectInstruction::DirectInstruction(ResourceLocation location, BlockPtr target, ValuePtr result)
+    : Location(std::move(location)),
+      Target(std::move(target)),
+      Result(std::move(result))
+{
+    Target->Use();
+    if (Result)
+        Result->Use();
+}
+
+mcc::DirectInstruction::~DirectInstruction()
+{
+    Target->Drop();
+    if (Result)
+        Result->Drop();
 }
 
 void mcc::DirectInstruction::Generate(CommandVector &commands) const
 {
+    if (Result)
+    {
+        auto result = Result->GenerateResult(false);
+        switch (result.Type)
+        {
+            case ResultType_Value:
+                commands.Append("data modify storage {} result set value {}", Location, result.Value);
+                break;
+
+            case ResultType_Storage:
+                commands.Append(
+                    "data modify storage {} result set from storage {} {}",
+                    Location,
+                    result.Location,
+                    result.Path);
+                break;
+
+            case ResultType_Score:
+                commands.Append(
+                    "execute store result storage {} result double 1 run scoreboard players get {} {}",
+                    Location,
+                    result.Player,
+                    result.Objective);
+                break;
+
+            default:
+                Error(
+                    "result must be {}, {} or {}, but is {}",
+                    ResultType_Value,
+                    ResultType_Storage,
+                    ResultType_Score,
+                    result.Type);
+        }
+    }
+
     auto target = Target->Location;
     commands.Append("return run function {}", target);
 }

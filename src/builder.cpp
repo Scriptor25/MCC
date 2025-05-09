@@ -1,8 +1,8 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/context.hpp>
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
-#include <utility>
 
 mcc::Builder::Builder(Context &context)
     : m_Context(context),
@@ -132,7 +132,24 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target) const
     Assert(!!target, "target must not be null");
     auto target_block = std::dynamic_pointer_cast<Block>(std::move(target));
     Assert(!!target_block, "target must be a block");
-    return Insert(DirectInstruction::Create(std::move(target_block)));
+    return Insert(DirectInstruction::Create(GetLocation(), std::move(target_block)));
+}
+
+mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target, ValuePtr result) const
+{
+    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!target, "target must not be null");
+    Assert(!!result, "result must not be null");
+    auto target_block = std::dynamic_pointer_cast<Block>(std::move(target));
+    Assert(!!target_block, "target must be a block");
+    return Insert(
+        DirectInstruction::Create(GetLocation(), std::move(target_block), std::move(result)));
+}
+
+mcc::ValuePtr mcc::Builder::CreateBranchResult() const
+{
+    Assert(!!m_InsertBlock, "no insert block");
+    return BranchResult::Create(GetLocation());
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
@@ -215,7 +232,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(ValuePtr object, ValuePtr value, 
 mcc::InstructionPtr mcc::Builder::Insert(InstructionPtr instruction) const
 {
     Assert(!!m_InsertBlock, "no insert block");
-    m_InsertBlock->Instructions.emplace_back(instruction);
+    m_InsertBlock->Instructions.emplace_back(std::move(instruction));
     return m_InsertBlock->Instructions.back();
 }
 

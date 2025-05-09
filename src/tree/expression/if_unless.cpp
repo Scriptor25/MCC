@@ -1,4 +1,4 @@
-#include <mcc/error.hpp>
+#include <mcc/builder.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
@@ -18,13 +18,27 @@ mcc::IfUnlessExpression::IfUnlessExpression(
 
 std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 {
-    Then->Print(Condition->Print(stream << "if (") << ") ");
-    if (Else)
-        Else->Print(stream << " else ");
-    return stream;
+    return Else->Print(Then->Print(Condition->Print(stream << "if (") << ") ") << " else ");
 }
 
 mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder) const
 {
-    Error(Where, "TODO");
+    const auto parent = builder.GetInsertParent();
+    const auto then_target = builder.CreateBlock(parent);
+    const auto else_target = builder.CreateBlock(parent);
+    const auto end_target = builder.CreateBlock(parent);
+
+    const auto condition = Condition->GenerateValue(builder);
+    (void) builder.CreateBranch(condition, then_target, else_target);
+
+    builder.SetInsertBlock(then_target);
+    const auto then_value = Then->GenerateValue(builder);
+    (void) builder.CreateDirect(end_target, then_value);
+
+    builder.SetInsertBlock(else_target);
+    const auto else_value = Else->GenerateValue(builder);
+    (void) builder.CreateDirect(end_target, else_value);
+
+    builder.SetInsertBlock(end_target);
+    return builder.CreateBranchResult();
 }
