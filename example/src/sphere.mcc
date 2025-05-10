@@ -32,30 +32,6 @@ define :sphere(cx, cy, cz, r, block, mode) {
     }
 }
 
-/* very hacky: directly set value in example:bubbles stack */
-define :block_lut(index) {
-    block = switch (index) {
-        case 0 -> "white_stained_glass"
-        case 1 -> "light_gray_stained_glass"
-        case 2 -> "gray_stained_glass"
-        case 3 -> "black_stained_glass"
-        case 4 -> "brown_stained_glass"
-        case 5 -> "red_stained_glass"
-        case 6 -> "orange_stained_glass"
-        case 7 -> "yellow_stained_glass"
-        case 8 -> "lime_stained_glass"
-        case 9 -> "green_stained_glass"
-        case 10 -> "cyan_stained_glass"
-        case 11 -> "light_blue_stained_glass"
-        case 12 -> "blue_stained_glass"
-        case 13 -> "purple_stained_glass"
-        case 14 -> "magenta_stained_glass"
-        case 15 -> "pink_stained_glass"
-        default -> "glass"
-    }
-    ?`data modify storage example:bubbles stack[0].var.block set from storage example:block_lut stack[0].var.block`
-}
-
 define :bubbles(x1, y1, z1, x2, y2, z2, n) {
     for (i = 0, i < n, ++i) {
         r = $:random({ min: 3, max: 10 })
@@ -64,7 +40,25 @@ define :bubbles(x1, y1, z1, x2, y2, z2, n) {
         cz = $:random({ min: z1, max: z2 })
         bi = $:random({ min: 0, max: 15 })
 
-        /* block = */$:block_lut({ index: bi })
+        block = switch (bi) {
+            case 0 -> "white_stained_glass"
+            case 1 -> "light_gray_stained_glass"
+            case 2 -> "gray_stained_glass"
+            case 3 -> "black_stained_glass"
+            case 4 -> "brown_stained_glass"
+            case 5 -> "red_stained_glass"
+            case 6 -> "orange_stained_glass"
+            case 7 -> "yellow_stained_glass"
+            case 8 -> "lime_stained_glass"
+            case 9 -> "green_stained_glass"
+            case 10 -> "cyan_stained_glass"
+            case 11 -> "light_blue_stained_glass"
+            case 12 -> "blue_stained_glass"
+            case 13 -> "purple_stained_glass"
+            case 14 -> "magenta_stained_glass"
+            case 15 -> "pink_stained_glass"
+            default -> "glass"
+        }
 
         $:sphere({ cx, cy, cz, r, block, mode: "replace" })
         $:sphere({ cx, cy, cz, r: r - 1, block: "air", mode: "replace" })
