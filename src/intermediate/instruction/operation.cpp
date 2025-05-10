@@ -4,100 +4,34 @@
 mcc::InstructionPtr mcc::OperationInstruction::Create(
     const OperatorE operator_,
     ResourceLocation location,
-    ValuePtr left,
-    ValuePtr right)
+    std::vector<ValuePtr> operands)
 {
-    return std::make_shared<OperationInstruction>(operator_, std::move(location), std::move(left), std::move(right));
+    return std::make_shared<OperationInstruction>(operator_, std::move(location), std::move(operands));
 }
 
 mcc::OperationInstruction::OperationInstruction(
     const OperatorE operator_,
     ResourceLocation location,
-    ValuePtr left,
-    ValuePtr right)
+    std::vector<ValuePtr> operands)
     : Operator(operator_),
       Location(std::move(location)),
-      Left(std::move(left)),
-      Right(std::move(right))
+      Operands(std::move(operands))
 {
-    Left->Use();
-    Right->Use();
+    for (const auto &operand: Operands)
+        operand->Use();
 }
 
 mcc::OperationInstruction::~OperationInstruction()
 {
-    Left->Drop();
-    Right->Drop();
+    for (const auto &operand: Operands)
+        operand->Drop();
 }
 
-void mcc::OperationInstruction::Generate(CommandVector &commands) const
+void mcc::OperationInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    auto left = Left->GenerateResult(false);
-    auto right = Right->GenerateResult(false);
-
     commands.Append(CreateTmpScore());
 
-    switch (left.Type)
-    {
-        case ResultType_Value:
-            commands.Append("scoreboard players set %a {} {}", GetTmpName(), left.Value);
-            break;
-
-        case ResultType_Storage:
-            commands.Append(
-                "execute store result score %a {} run data get storage {} {}",
-                GetTmpName(),
-                left.Location,
-                left.Path);
-            break;
-
-        case ResultType_Score:
-            commands.Append(
-                "scoreboard players operation %a {} = {} {}",
-                GetTmpName(),
-                left.Player,
-                left.Objective);
-            break;
-
-        default:
-            Error(
-                "left must be {}, {} or {}, but is {}",
-                ResultType_Value,
-                ResultType_Storage,
-                ResultType_Score,
-                left.Type);
-    }
-
-    switch (right.Type)
-    {
-        case ResultType_Value:
-            commands.Append("scoreboard players set %b {} {}", GetTmpName(), right.Value);
-            break;
-
-        case ResultType_Storage:
-            commands.Append(
-                "execute store result score %b {} run data get storage {} {}",
-                GetTmpName(),
-                right.Location,
-                right.Path);
-            break;
-
-        case ResultType_Score:
-            commands.Append(
-                "scoreboard players operation %b {} = {} {}",
-                GetTmpName(),
-                right.Player,
-                right.Objective);
-            break;
-
-        default:
-            Error(
-                "right must be {}, {} or {}, but is {}",
-                ResultType_Value,
-                ResultType_Storage,
-                ResultType_Score,
-                right.Type);
-    }
+    auto objective = GetTmpName();
 
     std::string operator_;
     switch (Operator)
@@ -126,15 +60,84 @@ void mcc::OperationInstruction::Generate(CommandVector &commands) const
             Error("undefined operator {}", Operator);
     }
 
-    commands.Append("scoreboard players operation %a {} {} %b {}", GetTmpName(), operator_, GetTmpName());
+    ValuePtr pre_operand_value;
+    Result pre_operand;
 
+    for (unsigned i = 0; i < Operands.size(); ++i)
+    {
+        auto player = i == 0 ? "%a" : "%b";
+
+        auto operand_value = Operands[i];
+        auto operand = operand_value->GenerateResult(false);
+
+        auto require_operand = operand_value != pre_operand_value && operand != pre_operand;
+
+        pre_operand_value = operand_value;
+        pre_operand = operand;
+
+        if (require_operand)
+        {
+            switch (operand.Type)
+            {
+                case ResultType_Value:
+                    commands.Append(
+                        "scoreboard players set {} {} {}",
+                        player,
+                        objective,
+                        operand.Value);
+                    break;
+
+                case ResultType_Storage:
+                    commands.Append(
+                        "execute store result score {} {} run data get storage {} {}",
+                        player,
+                        objective,
+                        operand.Location,
+                        operand.Path);
+                    break;
+
+                case ResultType_Score:
+                    commands.Append(
+                        "scoreboard players operation {} {} = {} {}",
+                        player,
+                        objective,
+                        operand.Player,
+                        operand.Objective);
+                    break;
+
+                default:
+                    Error(
+                        "operand must be {}, {} or {}, but is {}",
+                        ResultType_Value,
+                        ResultType_Storage,
+                        ResultType_Score,
+                        operand.Type);
+            }
+        }
+
+        if (i)
+        {
+            commands.Append(
+                "scoreboard players operation %a {0} {1} {2} {0}",
+                objective,
+                operator_,
+                require_operand ? "%b" : i > 1 ? "%b" : "%a");
+        }
+    }
+
+    Assert(stack, "operation instruction requires stack");
     commands.Append(
         "execute store result storage {} {} double 1 run scoreboard players get %a {}",
         Location,
         GetStackPath(),
-        GetTmpName());
+        objective);
 
     commands.Append(RemoveTmpScore());
+}
+
+bool mcc::OperationInstruction::RequireStack() const
+{
+    return true;
 }
 
 mcc::Result mcc::OperationInstruction::GenerateResult(const bool stringify) const

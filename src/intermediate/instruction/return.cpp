@@ -20,11 +20,12 @@ mcc::ReturnInstruction::~ReturnInstruction()
         Value->Drop();
 }
 
-void mcc::ReturnInstruction::Generate(CommandVector &commands) const
+void mcc::ReturnInstruction::Generate(CommandVector &commands, bool stack) const
 {
     if (!Value)
     {
-        commands.Append("data remove storage {} stack[0]", Location);
+        if (stack)
+            commands.Append("data remove storage {} stack[0]", Location);
         commands.Append("return 0");
         return;
     }
@@ -34,22 +35,29 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands) const
     switch (value.Type)
     {
         case ResultType_Value:
-            commands.Append("data remove storage {} stack[0]", Location);
+            if (stack)
+                commands.Append("data remove storage {} stack[0]", Location);
             commands.Append("return {}", value.Value);
             break;
 
         case ResultType_Storage:
-            commands.Append(
-                "data modify storage {} result set from storage {} {}",
-                Location,
-                value.Location,
-                value.Path);
-            commands.Append("data remove storage {} stack[0]", Location);
-            commands.Append("return run data get storage {} result", Location);
+            if (stack)
+            {
+                commands.Append(
+                    "data modify storage {} result set from storage {} {}",
+                    Location,
+                    value.Location,
+                    value.Path);
+                commands.Append("data remove storage {} stack[0]", Location);
+                commands.Append("return run data get storage {} result", Location);
+                break;
+            }
+            commands.Append("return run data get storage {} {}", value.Location, value.Path);
             break;
 
         case ResultType_Score:
-            commands.Append("data remove storage {} stack[0]", Location);
+            if (stack)
+                commands.Append("data remove storage {} stack[0]", Location);
             commands.Append("return run scoreboard players get {} {}", value.Player, value.Objective);
             break;
 
@@ -61,6 +69,11 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands) const
                 ResultType_Score,
                 value.Type);
     }
+}
+
+bool mcc::ReturnInstruction::RequireStack() const
+{
+    return Value ? Value->RequireStack() : false;
 }
 
 bool mcc::ReturnInstruction::IsTerminator() const

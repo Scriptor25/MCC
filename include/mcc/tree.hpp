@@ -184,9 +184,22 @@ namespace mcc
         std::map<std::string, ExpressionPtr> Elements;
     };
 
+    struct VectorExpression final : Expression
+    {
+        VectorExpression(SourceLocation where, std::string operator_, std::vector<ExpressionPtr> operands);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+
+        std::string Operator;
+        std::vector<ExpressionPtr> Operands;
+    };
+
     struct BinaryExpression final : Expression
     {
         BinaryExpression(SourceLocation where, std::string operator_, ExpressionPtr left, ExpressionPtr right);
+
+        ExpressionPtr Merge();
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
@@ -224,12 +237,12 @@ namespace mcc
 
     struct SymbolExpression final : Expression
     {
-        SymbolExpression(SourceLocation where, std::string id);
+        SymbolExpression(SourceLocation where, std::string name);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
-        std::string ID;
+        std::string Name;
     };
 
     struct CallExpression final : Expression

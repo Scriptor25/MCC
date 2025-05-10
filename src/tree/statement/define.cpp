@@ -58,14 +58,14 @@ void mcc::DefineStatement::Generate(Builder &builder) const
     if (!block->GetTerminator())
     {
         builder.SetInsertBlock(block);
-        (void) builder.CreateReturn(nullptr);
+        (void) builder.CreateReturnVoid();
     }
 
     for (const auto &child: block->Children)
         if (!child->GetTerminator())
         {
             builder.SetInsertBlock(child);
-            (void) builder.CreateReturn(nullptr);
+            (void) builder.CreateReturnVoid();
         }
 
     builder.SetInsertBlock(nullptr);

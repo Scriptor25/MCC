@@ -17,11 +17,7 @@ mcc::Context &mcc::Builder::GetContext() const
 
 const mcc::ResourceLocation &mcc::Builder::GetLocation() const
 {
-    Assert(!!m_InsertBlock, "no insert block");
-    auto block = m_InsertBlock;
-    while (block->Parent)
-        block = block->Parent;
-    return block->Location;
+    return GetInsertParent()->Location;
 }
 
 mcc::BlockPtr mcc::Builder::CreateFunction(ResourceLocation location, std::vector<std::string> parameters)
@@ -44,7 +40,7 @@ mcc::BlockPtr mcc::Builder::CreateBlock(const BlockPtr &parent)
 
 void mcc::Builder::RemoveBlock(const BlockPtr &block)
 {
-    Assert(!!block, "pointer to block must not be null");
+    Assert(!!block, "block must not be null");
 
     for (auto i = m_Blocks.begin(); i != m_Blocks.end(); ++i)
     {
@@ -70,54 +66,90 @@ mcc::BlockPtr mcc::Builder::GetInsertBlock() const
 
 mcc::BlockPtr mcc::Builder::GetInsertParent() const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!m_InsertBlock, "insert block must not be null");
+
     auto block = m_InsertBlock;
     while (block->Parent)
         block = block->Parent;
+
     return block;
+}
+
+mcc::ValuePtr mcc::Builder::GetVariable(const std::string &name) const
+{
+    const auto block = GetInsertParent();
+
+    if (!block->Variables.contains(name))
+        block->Variables.emplace(name, NamedValue::Create(GetLocation(), name));
+
+    return block->Variables.at(name);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateStore(ValuePtr dst, ValuePtr src) const
 {
+    Assert(!!dst, "dst must not be null");
+    Assert(!!src, "src must not be null");
+
     return Insert(StoreInstruction::Create(std::move(dst), std::move(src)));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateComparison(const ComparatorE comparator, ValuePtr left, ValuePtr right) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(comparator, "comparator must not be null");
+    Assert(!!left, "left must not be null");
+    Assert(!!right, "right must not be null");
+
     return Insert(
-        ComparisonInstruction::Create(comparator, GetLocation(), std::move(left), std::move(right)));
+        ComparisonInstruction::Create(
+            comparator,
+            GetLocation(),
+            std::move(left),
+            std::move(right)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateOperation(const OperatorE operator_, ValuePtr left, ValuePtr right) const
+mcc::InstructionPtr mcc::Builder::CreateOperation(const OperatorE operator_, std::vector<ValuePtr> operands) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(operator_, "operator must not be null");
+
+    for (auto &operand: operands)
+        Assert(!!operand, "right must not be null");
+
     return Insert(
-        OperationInstruction::Create(operator_, GetLocation(), std::move(left), std::move(right)));
+        OperationInstruction::Create(
+            operator_,
+            GetLocation(),
+            std::move(operands)));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCommand(CommandT command) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
     return Insert(CommandInstruction::Create(GetLocation(), std::move(command)));
+}
+
+mcc::InstructionPtr mcc::Builder::CreateReturnVoid() const
+{
+    return Insert(ReturnInstruction::Create(GetLocation(), nullptr));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(ValuePtr value) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!value, "value must not be null");
+
     return Insert(ReturnInstruction::Create(GetLocation(), std::move(value)));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateBranch(ValuePtr condition, ValuePtr then_target, ValuePtr else_target) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
     Assert(!!condition, "condition must not be null");
     Assert(!!then_target, "then target must not be null");
     Assert(!!else_target, "else target must not be null");
+
     auto then_target_block = std::dynamic_pointer_cast<Block>(std::move(then_target));
-    auto else_target_block = std::dynamic_pointer_cast<Block>(std::move(else_target));
     Assert(!!then_target_block, "then target must be a block");
+
+    auto else_target_block = std::dynamic_pointer_cast<Block>(std::move(else_target));
     Assert(!!else_target_block, "else target must be a block");
+
     return Insert(
         BranchInstruction::Create(
             GetLocation(),
@@ -128,21 +160,23 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(ValuePtr condition, ValuePtr then
 
 mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
     Assert(!!target, "target must not be null");
+
     auto target_block = std::dynamic_pointer_cast<Block>(std::move(target));
     Assert(!!target_block, "target must be a block");
+
     return Insert(DirectInstruction::Create(GetLocation(), std::move(target_block)));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target, ValuePtr result, ValuePtr landing_pad) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
     Assert(!!target, "target must not be null");
     Assert(!!result, "result must not be null");
     Assert(!!landing_pad, "landing pad must not be null");
+
     auto target_block = std::dynamic_pointer_cast<Block>(std::move(target));
     Assert(!!target_block, "target must be a block");
+
     return Insert(
         DirectInstruction::Create(
             GetLocation(),
@@ -153,7 +187,6 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target, ValuePtr result,
 
 mcc::ValuePtr mcc::Builder::CreateBranchResult() const
 {
-    Assert(!!m_InsertBlock, "no insert block");
     return BranchResult::Create(GetLocation());
 }
 
@@ -162,32 +195,42 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
     const bool builtin,
     std::vector<ValuePtr> arguments) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!callee.empty(), "callee must not be empty");
+
     return Insert(
-        CallInstruction::Create(GetLocation(), std::move(callee), builtin, std::move(arguments)));
+        CallInstruction::Create(
+            GetLocation(),
+            std::move(callee),
+            builtin,
+            std::move(arguments)));
 }
 
 mcc::InstructionPtr mcc::Builder::AllocateValue() const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!m_InsertBlock, "insert block must not be null");
+
     return Insert(AllocationInstruction::CreateValue(GetLocation(), m_InsertBlock->StackIndex++));
 }
 
 mcc::InstructionPtr mcc::Builder::AllocateArray() const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!m_InsertBlock, "insert block must not be null");
+
     return Insert(AllocationInstruction::CreateArray(GetLocation(), m_InsertBlock->StackIndex++));
 }
 
 mcc::InstructionPtr mcc::Builder::AllocateObject() const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!m_InsertBlock, "insert block must not be null");
+
     return Insert(AllocationInstruction::CreateObject(GetLocation(), m_InsertBlock->StackIndex++));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateAppend(ValuePtr array, ValuePtr value, const bool stringify) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!array, "array must not be null");
+    Assert(!!value, "value must not be null");
+
     return Insert(
         ArrayInstruction::CreateAppend(
             GetLocation(),
@@ -198,7 +241,9 @@ mcc::InstructionPtr mcc::Builder::CreateAppend(ValuePtr array, ValuePtr value, c
 
 mcc::InstructionPtr mcc::Builder::CreatePrepend(ValuePtr array, ValuePtr value, const bool stringify) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!array, "array must not be null");
+    Assert(!!value, "value must not be null");
+
     return Insert(
         ArrayInstruction::CreatePrepend(
             GetLocation(),
@@ -213,7 +258,9 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
     const IndexT index,
     const bool stringify) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!array, "array must not be null");
+    Assert(!!value, "value must not be null");
+
     return Insert(
         ArrayInstruction::CreateInsert(
             GetLocation(),
@@ -225,7 +272,10 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(ValuePtr object, ValuePtr value, std::string key) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
+    Assert(!!object, "object must not be null");
+    Assert(!!value, "value must not be null");
+    Assert(!key.empty(), "key must not be empty");
+
     return Insert(
         ObjectInstruction::CreateInsert(
             GetLocation(),
@@ -236,9 +286,10 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(ValuePtr object, ValuePtr value, 
 
 mcc::InstructionPtr mcc::Builder::Insert(InstructionPtr instruction) const
 {
-    Assert(!!m_InsertBlock, "no insert block");
-    m_InsertBlock->Instructions.emplace_back(std::move(instruction));
-    return m_InsertBlock->Instructions.back();
+    Assert(!!m_InsertBlock, "insert block must not be null");
+    Assert(!!instruction, "instruction must not be null");
+
+    return m_InsertBlock->Instructions.emplace_back(std::move(instruction));
 }
 
 void mcc::Builder::Generate() const
@@ -250,6 +301,6 @@ void mcc::Builder::Generate() const
         commands_.clear();
 
         CommandVector commands(commands_);
-        block->Generate(commands);
+        block->Generate(commands, false);
     }
 }

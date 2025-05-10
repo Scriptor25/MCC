@@ -30,7 +30,7 @@ mcc::ObjectInstruction::~ObjectInstruction()
     Value->Drop();
 }
 
-void mcc::ObjectInstruction::Generate(CommandVector &commands) const
+void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
 {
     //
     // object: stack-allocated
@@ -87,4 +87,9 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands) const
                 ResultType_Score,
                 value.Type);
     }
+}
+
+bool mcc::ObjectInstruction::RequireStack() const
+{
+    return Object->RequireStack() || Value->RequireStack();
 }

@@ -2,18 +2,18 @@
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
 
-mcc::SymbolExpression::SymbolExpression(SourceLocation where, std::string id)
+mcc::SymbolExpression::SymbolExpression(SourceLocation where, std::string name)
     : Expression(std::move(where)),
-      ID(std::move(id))
+      Name(std::move(name))
 {
 }
 
 std::ostream &mcc::SymbolExpression::Print(std::ostream &stream) const
 {
-    return stream << ID;
+    return stream << Name;
 }
 
 mcc::ValuePtr mcc::SymbolExpression::GenerateValue(Builder &builder) const
 {
-    return NamedValue::Create(builder.GetLocation(), ID);
+    return builder.GetVariable(Name);
 }

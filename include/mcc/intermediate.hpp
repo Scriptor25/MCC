@@ -11,7 +11,9 @@ namespace mcc
 {
     struct Result
     {
-        ResultTypeE Type;
+        bool operator==(const Result &result) const;
+
+        ResultTypeE Type = ResultType_None;
 
         /* Constant */
         std::string Value;
@@ -29,7 +31,8 @@ namespace mcc
     {
         virtual ~Value() = default;
 
-        virtual void Generate(CommandVector &commands) const;
+        virtual void Generate(CommandVector &commands, bool stack) const;
+        [[nodiscard]] virtual bool RequireStack() const;
         [[nodiscard]] virtual Result GenerateResult(bool stringify) const;
 
         void Use();
@@ -40,6 +43,7 @@ namespace mcc
 
     struct Constant : Value
     {
+        [[nodiscard]] bool RequireStack() const override;
     };
 
     struct Block final : Value
@@ -49,7 +53,8 @@ namespace mcc
 
         Block(ResourceLocation location, std::vector<std::string> parameters);
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
 
         [[nodiscard]] InstructionPtr GetTerminator() const;
 
@@ -57,6 +62,7 @@ namespace mcc
         std::vector<std::string> Parameters;
 
         IndexT StackIndex = 0;
+        std::map<std::string, ValuePtr> Variables;
         std::vector<InstructionPtr> Instructions;
 
         BlockPtr Parent;
@@ -192,7 +198,8 @@ namespace mcc
 
         CommandInstruction(ResourceLocation location, CommandT command);
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
@@ -206,7 +213,8 @@ namespace mcc
         ReturnInstruction(ResourceLocation location, ValuePtr value);
         ~ReturnInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
 
         [[nodiscard]] bool IsTerminator() const override;
 
@@ -229,7 +237,8 @@ namespace mcc
             BlockPtr else_target);
         ~BranchInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
 
         [[nodiscard]] bool IsTerminator() const override;
 
@@ -246,7 +255,8 @@ namespace mcc
         DirectInstruction(ResourceLocation location, BlockPtr target, ValuePtr result, ValuePtr landing_pad);
         ~DirectInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
 
         [[nodiscard]] bool IsTerminator() const override;
 
@@ -262,7 +272,8 @@ namespace mcc
         StoreInstruction(ValuePtr dst, ValuePtr src);
         ~StoreInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ValuePtr Dst, Src;
@@ -275,7 +286,8 @@ namespace mcc
         ComparisonInstruction(ComparatorE comparator, ResourceLocation location, ValuePtr left, ValuePtr right);
         ~ComparisonInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ComparatorE Comparator;
@@ -285,17 +297,18 @@ namespace mcc
 
     struct OperationInstruction final : Instruction
     {
-        static InstructionPtr Create(OperatorE operator_, ResourceLocation location, ValuePtr left, ValuePtr right);
+        static InstructionPtr Create(OperatorE operator_, ResourceLocation location, std::vector<ValuePtr> operands);
 
-        OperationInstruction(OperatorE operator_, ResourceLocation location, ValuePtr left, ValuePtr right);
+        OperationInstruction(OperatorE operator_, ResourceLocation location, std::vector<ValuePtr> operands);
         ~OperationInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         OperatorE Operator;
         ResourceLocation Location;
-        ValuePtr Left, Right;
+        std::vector<ValuePtr> Operands;
     };
 
     struct AllocationInstruction final : Instruction
@@ -309,7 +322,8 @@ namespace mcc
             ResourceLocation location,
             IndexT index);
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         AllocationTypeE AllocationType;
@@ -345,7 +359,8 @@ namespace mcc
             bool stringify);
         ~ArrayInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
 
         ArrayOperationE ArrayOperation;
         ResourceLocation Location;
@@ -361,7 +376,8 @@ namespace mcc
         ObjectInstruction(ResourceLocation location, ValuePtr object, ValuePtr value, std::string key);
         ~ObjectInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
 
         ResourceLocation Location;
         ValuePtr Object, Value;
@@ -379,7 +395,8 @@ namespace mcc
         CallInstruction(ResourceLocation location, std::string callee, bool builtin, std::vector<ValuePtr> arguments);
         ~CallInstruction() override;
 
-        void Generate(CommandVector &commands) const override;
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
@@ -390,14 +407,15 @@ namespace mcc
 
     struct NamedValue final : Value
     {
-        static ValuePtr Create(ResourceLocation location, std::string id);
+        static ValuePtr Create(ResourceLocation location, std::string name);
 
-        NamedValue(ResourceLocation location, std::string id);
+        NamedValue(ResourceLocation location, std::string name);
 
+        [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
-        std::string ID;
+        std::string Name;
     };
 
     struct BranchResult final : Value
@@ -406,6 +424,7 @@ namespace mcc
 
         explicit BranchResult(ResourceLocation location);
 
+        [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;

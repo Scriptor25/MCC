@@ -90,7 +90,7 @@ mcc::CallInstruction::~CallInstruction()
         argument->Drop();
 }
 
-void mcc::CallInstruction::Generate(CommandVector &commands) const
+void mcc::CallInstruction::Generate(CommandVector &commands, bool stack) const
 {
     CommandT command;
     if (!Builtin)
@@ -100,10 +100,25 @@ void mcc::CallInstruction::Generate(CommandVector &commands) const
     else
         Error("undefined builtin callee {}", Callee);
 
-    if (UseCount)
-        command = std::format("execute store result storage {} {} double 1 run {}", Location, GetStackPath(), command);
+    if (!UseCount)
+    {
+        commands.Append(std::move(command));
+        return;
+    }
 
-    commands.Append(std::move(command));
+    Assert(stack, "call instruction with result requires stack");
+    commands.Append("execute store result storage {} {} double 1 run {}", Location, GetStackPath(), command);
+}
+
+bool mcc::CallInstruction::RequireStack() const
+{
+    return UseCount
+           || std::ranges::any_of(
+               Arguments,
+               [](auto &argument)
+               {
+                   return argument->RequireStack();
+               });
 }
 
 mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify) const

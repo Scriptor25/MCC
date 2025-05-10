@@ -20,7 +20,7 @@ mcc::StoreInstruction::~StoreInstruction()
     Src->Drop();
 }
 
-void mcc::StoreInstruction::Generate(CommandVector &commands) const
+void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
 {
     if (Dst == Src)
         return;
@@ -111,6 +111,11 @@ void mcc::StoreInstruction::Generate(CommandVector &commands) const
                 ResultType_Score,
                 dst.Type);
     }
+}
+
+bool mcc::StoreInstruction::RequireStack() const
+{
+    return Dst->RequireStack() || Src->RequireStack();
 }
 
 mcc::Result mcc::StoreInstruction::GenerateResult(const bool stringify) const

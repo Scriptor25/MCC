@@ -22,14 +22,17 @@ namespace mcc
         [[nodiscard]] BlockPtr GetInsertBlock() const;
         [[nodiscard]] BlockPtr GetInsertParent() const;
 
+        [[nodiscard]] ValuePtr GetVariable(const std::string &name) const;
+
         [[nodiscard]] InstructionPtr CreateStore(ValuePtr dst, ValuePtr src) const;
 
         [[nodiscard]] InstructionPtr CreateComparison(ComparatorE comparator, ValuePtr left, ValuePtr right) const;
 
-        [[nodiscard]] InstructionPtr CreateOperation(OperatorE operator_, ValuePtr left, ValuePtr right) const;
+        [[nodiscard]] InstructionPtr CreateOperation(OperatorE operator_, std::vector<ValuePtr> operands) const;
 
         [[nodiscard]] InstructionPtr CreateCommand(CommandT command) const;
 
+        [[nodiscard]] InstructionPtr CreateReturnVoid() const;
         [[nodiscard]] InstructionPtr CreateReturn(ValuePtr value) const;
         [[nodiscard]] InstructionPtr CreateBranch(ValuePtr condition, ValuePtr then_target, ValuePtr else_target) const;
         [[nodiscard]] InstructionPtr CreateDirect(ValuePtr target) const;

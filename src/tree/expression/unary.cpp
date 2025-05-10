@@ -29,19 +29,19 @@ struct UnaryOperator
 static mcc::ValuePtr inc(const mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
     const auto one = mcc::ConstantInteger::Create(1);
-    return builder.CreateOperation(mcc::Operator_Add, operand, one);
+    return builder.CreateOperation(mcc::Operator_Add, {operand, one});
 };
 
 static mcc::ValuePtr dec(const mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
     const auto one = mcc::ConstantInteger::Create(1);
-    return builder.CreateOperation(mcc::Operator_Sub, operand, one);
+    return builder.CreateOperation(mcc::Operator_Sub, {operand, one});
 };
 
 static mcc::ValuePtr neg(const mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
     const auto zero = mcc::ConstantInteger::Create(0);
-    return builder.CreateOperation(mcc::Operator_Sub, zero, operand);
+    return builder.CreateOperation(mcc::Operator_Sub, {zero, operand});
 };
 
 mcc::ValuePtr mcc::UnaryExpression::GenerateValue(Builder &builder) const

@@ -1,9 +1,34 @@
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
-void mcc::Value::Generate(CommandVector &commands) const
+bool mcc::Result::operator==(const Result &result) const
+{
+    if (Type != result.Type)
+        return false;
+
+    switch (Type)
+    {
+        case ResultType_None:
+            return true;
+        case ResultType_Value:
+            return Value == result.Value;
+        case ResultType_Storage:
+            return Location == result.Location && Path == result.Path;
+        case ResultType_Score:
+            return Player == result.Player && Objective == result.Objective;
+    }
+
+    return false;
+}
+
+void mcc::Value::Generate(CommandVector &commands, bool stack) const
 {
     Error("mcc::Value::Generate");
+}
+
+bool mcc::Value::RequireStack() const
+{
+    Error("mcc::Value::RequireStack");
 }
 
 mcc::Result mcc::Value::GenerateResult(const bool stringify) const
@@ -19,6 +44,11 @@ void mcc::Value::Use()
 void mcc::Value::Drop()
 {
     UseCount--;
+}
+
+bool mcc::Constant::RequireStack() const
+{
+    return false;
 }
 
 bool mcc::Instruction::IsTerminator() const

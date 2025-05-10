@@ -30,10 +30,12 @@ mcc::ComparisonInstruction::~ComparisonInstruction()
     Right->Drop();
 }
 
-void mcc::ComparisonInstruction::Generate(CommandVector &commands) const
+void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) const
 {
     auto left = Left->GenerateResult(false);
     auto right = Right->GenerateResult(false);
+
+    auto require_right = Left != Right && left != right;
 
     commands.Append(CreateTmpScore());
 
@@ -68,36 +70,37 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands) const
                 left.Type);
     }
 
-    switch (right.Type)
-    {
-        case ResultType_Value:
-            commands.Append("scoreboard players set %b {} {}", GetTmpName(), right.Value);
-            break;
+    if (require_right)
+        switch (right.Type)
+        {
+            case ResultType_Value:
+                commands.Append("scoreboard players set %b {} {}", GetTmpName(), right.Value);
+                break;
 
-        case ResultType_Storage:
-            commands.Append(
-                "execute store result score %b {} run data get storage {} {}",
-                GetTmpName(),
-                right.Location,
-                right.Path);
-            break;
+            case ResultType_Storage:
+                commands.Append(
+                    "execute store result score %b {} run data get storage {} {}",
+                    GetTmpName(),
+                    right.Location,
+                    right.Path);
+                break;
 
-        case ResultType_Score:
-            commands.Append(
-                "scoreboard players operation %b {} = {} {}",
-                GetTmpName(),
-                right.Player,
-                right.Objective);
-            break;
+            case ResultType_Score:
+                commands.Append(
+                    "scoreboard players operation %b {} = {} {}",
+                    GetTmpName(),
+                    right.Player,
+                    right.Objective);
+                break;
 
-        default:
-            Error(
-                "right must be {}, {} or {}, but is {}",
-                ResultType_Value,
-                ResultType_Storage,
-                ResultType_Score,
-                right.Type);
-    }
+            default:
+                Error(
+                    "right must be {}, {} or {}, but is {}",
+                    ResultType_Value,
+                    ResultType_Storage,
+                    ResultType_Score,
+                    right.Type);
+        }
 
     std::string operator_;
     switch (Comparator)
@@ -126,15 +129,22 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands) const
             Error("undefined comparator {}", Comparator);
     }
 
+    Assert(stack, "comparison instruction requires stack");
     commands.Append(
-        "execute store result storage {} {} byte 1 if score %a {} {} %b {}",
+        "execute store result storage {} {} byte 1 if score %a {} {} {} {}",
         Location,
         GetStackPath(),
         GetTmpName(),
         operator_,
+        require_right ? "%b" : "%a",
         GetTmpName());
 
     commands.Append(RemoveTmpScore());
+}
+
+bool mcc::ComparisonInstruction::RequireStack() const
+{
+    return true;
 }
 
 mcc::Result mcc::ComparisonInstruction::GenerateResult(const bool stringify) const

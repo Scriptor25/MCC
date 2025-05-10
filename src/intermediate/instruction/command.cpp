@@ -12,7 +12,7 @@ mcc::CommandInstruction::CommandInstruction(ResourceLocation location, CommandT 
 {
 }
 
-void mcc::CommandInstruction::Generate(CommandVector &commands) const
+void mcc::CommandInstruction::Generate(CommandVector &commands, bool stack) const
 {
     if (!UseCount)
     {
@@ -20,11 +20,17 @@ void mcc::CommandInstruction::Generate(CommandVector &commands) const
         return;
     }
 
+    Assert(stack, "command instruction with result requires stack");
     commands.Append(
         "execute store result storage {} {} double 1 run {}",
         Location,
         GetStackPath(),
         Command);
+}
+
+bool mcc::CommandInstruction::RequireStack() const
+{
+    return !!UseCount;
 }
 
 mcc::Result mcc::CommandInstruction::GenerateResult(const bool stringify) const

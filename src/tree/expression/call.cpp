@@ -35,7 +35,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder) const
 
     if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
     {
-        callee = symbol->ID;
+        callee = symbol->Name;
         builtin = true;
     }
     else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))

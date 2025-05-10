@@ -26,7 +26,7 @@ mcc::AllocationInstruction::AllocationInstruction(
 {
 }
 
-void mcc::AllocationInstruction::Generate(CommandVector &commands) const
+void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool stack) const
 {
     std::string value;
     switch (AllocationType)
@@ -44,7 +44,13 @@ void mcc::AllocationInstruction::Generate(CommandVector &commands) const
             break;
     }
 
+    Assert(stack, "allocation instruction requires stack");
     commands.Append("data modify storage {} stack[0].val insert {} value {}", Location, Index, value);
+}
+
+bool mcc::AllocationInstruction::RequireStack() const
+{
+    return true;
 }
 
 mcc::Result mcc::AllocationInstruction::GenerateResult(const bool stringify) const

@@ -36,7 +36,7 @@ mcc::BranchInstruction::~BranchInstruction()
     ElseTarget->Drop();
 }
 
-void mcc::BranchInstruction::Generate(CommandVector &commands) const
+void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
 {
     auto condition = Condition->GenerateResult(false);
 
@@ -89,6 +89,11 @@ void mcc::BranchInstruction::Generate(CommandVector &commands) const
     }
 }
 
+bool mcc::BranchInstruction::RequireStack() const
+{
+    return Condition->RequireStack();
+}
+
 bool mcc::BranchInstruction::IsTerminator() const
 {
     return true;
@@ -134,7 +139,7 @@ mcc::DirectInstruction::~DirectInstruction()
         Result->Drop();
 }
 
-void mcc::DirectInstruction::Generate(CommandVector &commands) const
+void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
 {
     if (Result)
     {
@@ -187,6 +192,11 @@ void mcc::DirectInstruction::Generate(CommandVector &commands) const
 
     auto target = Target->Location;
     commands.Append("return run function {}", target);
+}
+
+bool mcc::DirectInstruction::RequireStack() const
+{
+    return Result ? Result->RequireStack() || LandingPad->RequireStack() : false;
 }
 
 bool mcc::DirectInstruction::IsTerminator() const

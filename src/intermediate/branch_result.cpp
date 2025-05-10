@@ -10,6 +10,11 @@ mcc::BranchResult::BranchResult(ResourceLocation location)
 {
 }
 
+bool mcc::BranchResult::RequireStack() const
+{
+    return true;
+}
+
 mcc::Result mcc::BranchResult::GenerateResult(bool stringify) const
 {
     auto stack_path = std::format("stack[0].result.{}", reinterpret_cast<uintptr_t>(this));

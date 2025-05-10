@@ -71,7 +71,7 @@ mcc::ArrayInstruction::~ArrayInstruction()
     Value->Drop();
 }
 
-void mcc::ArrayInstruction::Generate(CommandVector &commands) const
+void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 {
     //
     // array: stack-allocated
@@ -162,4 +162,9 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands) const
                 ResultType_Score,
                 value.Type);
     }
+}
+
+bool mcc::ArrayInstruction::RequireStack() const
+{
+    return Array->RequireStack() || Value->RequireStack();
 }

@@ -1,3 +1,4 @@
+#include <set>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
@@ -13,6 +14,55 @@ mcc::BinaryExpression::BinaryExpression(
       Left(std::move(left)),
       Right(std::move(right))
 {
+}
+
+mcc::ExpressionPtr mcc::BinaryExpression::Merge()
+{
+    static const std::set<std::string_view> mergeable
+    {
+        "+",
+        "-",
+        "*",
+        "/",
+        "%",
+    };
+
+    if (!mergeable.contains(Operator))
+        return nullptr;
+
+    auto merged = false;
+    std::vector<ExpressionPtr> operands;
+
+    if (const auto left = dynamic_cast<BinaryExpression *>(Left.get()); left && left->Operator == Operator)
+    {
+        merged = true;
+        operands.emplace_back(std::move(left->Left));
+        operands.emplace_back(std::move(left->Right));
+    }
+    else
+    {
+        operands.emplace_back(std::move(Left));
+    }
+
+    if (const auto right = dynamic_cast<BinaryExpression *>(Right.get()); right && right->Operator == Operator)
+    {
+        merged = true;
+        operands.emplace_back(std::move(right->Left));
+        operands.emplace_back(std::move(right->Right));
+    }
+    else
+    {
+        operands.emplace_back(std::move(Right));
+    }
+
+    if (!merged)
+    {
+        Left = std::move(operands.front());
+        Right = std::move(operands.back());
+        return nullptr;
+    }
+
+    return std::make_unique<VectorExpression>(std::move(Where), std::move(Operator), std::move(operands));
 }
 
 std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
@@ -64,7 +114,7 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const
 
     if (operator_)
     {
-        auto operation = builder.CreateOperation(operator_, left, std::move(right));
+        auto operation = builder.CreateOperation(operator_, {left, std::move(right)});
         if (store)
             return builder.CreateStore(std::move(left), std::move(operation));
         return std::move(operation);

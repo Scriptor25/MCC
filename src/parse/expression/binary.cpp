@@ -44,5 +44,9 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
         left = std::make_unique<BinaryExpression>(operator_.Where, operator_.Value, std::move(left), std::move(right));
     }
 
+    if (const auto binary = dynamic_cast<BinaryExpression *>(left.get()))
+        if (auto merged = binary->Merge())
+            left = std::move(merged);
+
     return left;
 }
