@@ -141,6 +141,22 @@ namespace mcc
         std::vector<StatementPtr> Statements;
     };
 
+    struct SwitchStatement final : Statement
+    {
+        SwitchStatement(
+            SourceLocation where,
+            ExpressionPtr condition,
+            StatementPtr default_,
+            std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder) const override;
+
+        ExpressionPtr Condition;
+        StatementPtr Default;
+        std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> Cases;
+    };
+
     struct ConstantExpression final : Expression
     {
         ConstantExpression(SourceLocation where, ConstantPtr value, std::string view);
@@ -256,6 +272,16 @@ namespace mcc
         std::vector<ExpressionPtr> Arguments;
     };
 
+    struct SubscriptExpression final : Expression
+    {
+        SubscriptExpression(SourceLocation where, ExpressionPtr array, ExpressionPtr index);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+
+        ExpressionPtr Array, Index;
+    };
+
     struct CommandExpression final : Expression
     {
         CommandExpression(SourceLocation where, CommandT command);
@@ -275,5 +301,20 @@ namespace mcc
 
         std::string Operator;
         ExpressionPtr Operand;
+    };
+
+    struct SwitchExpression final : Expression
+    {
+        SwitchExpression(
+            SourceLocation where,
+            ExpressionPtr condition,
+            ExpressionPtr default_,
+            std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+
+        ExpressionPtr Condition, Default;
+        std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> Cases;
     };
 }

@@ -138,51 +138,61 @@ mcc::InstructionPtr mcc::Builder::CreateReturn(ValuePtr value) const
     return Insert(ReturnInstruction::Create(GetLocation(), std::move(value)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateBranch(ValuePtr condition, ValuePtr then_target, ValuePtr else_target) const
+mcc::InstructionPtr mcc::Builder::CreateBranch(ValuePtr condition, BlockPtr then_target, BlockPtr else_target) const
 {
     Assert(!!condition, "condition must not be null");
     Assert(!!then_target, "then target must not be null");
     Assert(!!else_target, "else target must not be null");
 
-    auto then_target_block = std::dynamic_pointer_cast<Block>(std::move(then_target));
-    Assert(!!then_target_block, "then target must be a block");
-
-    auto else_target_block = std::dynamic_pointer_cast<Block>(std::move(else_target));
-    Assert(!!else_target_block, "else target must be a block");
-
     return Insert(
         BranchInstruction::Create(
             GetLocation(),
             std::move(condition),
-            std::move(then_target_block),
-            std::move(else_target_block)));
+            std::move(then_target),
+            std::move(else_target)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target) const
+mcc::InstructionPtr mcc::Builder::CreateDirect(BlockPtr target) const
 {
     Assert(!!target, "target must not be null");
 
-    auto target_block = std::dynamic_pointer_cast<Block>(std::move(target));
-    Assert(!!target_block, "target must be a block");
-
-    return Insert(DirectInstruction::Create(GetLocation(), std::move(target_block)));
+    return Insert(DirectInstruction::Create(GetLocation(), std::move(target)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateDirect(ValuePtr target, ValuePtr result, ValuePtr landing_pad) const
+mcc::InstructionPtr mcc::Builder::CreateDirect(BlockPtr target, ValuePtr result, ValuePtr landing_pad) const
 {
     Assert(!!target, "target must not be null");
     Assert(!!result, "result must not be null");
     Assert(!!landing_pad, "landing pad must not be null");
 
-    auto target_block = std::dynamic_pointer_cast<Block>(std::move(target));
-    Assert(!!target_block, "target must be a block");
-
     return Insert(
         DirectInstruction::Create(
             GetLocation(),
-            std::move(target_block),
+            std::move(target),
             std::move(result),
             std::move(landing_pad)));
+}
+
+mcc::InstructionPtr mcc::Builder::CreateSwitch(
+    ValuePtr condition,
+    BlockPtr default_target,
+    std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets) const
+{
+    Assert(!!condition, "condition must not be null");
+    Assert(!!default_target, "default target must not be null");
+
+    for (auto &[condition_, target_]: case_targets)
+    {
+        Assert(!!condition_, "case condition must not be null");
+        Assert(!!target_, "case target must not be null");
+    }
+
+    return Insert(
+        SwitchInstruction::Create(
+            GetLocation(),
+            std::move(condition),
+            std::move(default_target),
+            std::move(case_targets)));
 }
 
 mcc::ValuePtr mcc::Builder::CreateBranchResult() const
@@ -268,6 +278,13 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
             std::move(value),
             index,
             stringify));
+}
+
+mcc::InstructionPtr mcc::Builder::CreateExtract(ValuePtr array, const IndexT index) const
+{
+    Assert(!!array, "array must not be null");
+
+    return Insert(ArrayInstruction::CreateExtract(GetLocation(), std::move(array), index));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(ValuePtr object, ValuePtr value, std::string key) const

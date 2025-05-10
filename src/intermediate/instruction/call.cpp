@@ -1,22 +1,19 @@
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 
-static void generate_function_call(
-    const mcc::CallInstruction &self,
-    mcc::CommandT &command)
+static void generate_function_call(const mcc::CallInstruction &self, mcc::CommandVector &commands)
 {
     auto arguments = self.Arguments[0]->GenerateResult(false);
 
-    command += std::format("function {} ", self.Callee);
-
+    std::string arguments_value;
     switch (arguments.Type)
     {
         case mcc::ResultType_Value:
-            command += arguments.Value;
+            arguments_value = arguments.Value;
             break;
 
         case mcc::ResultType_Storage:
-            command += std::format("with storage {} {}", arguments.Location, arguments.Path);
+            arguments_value = std::format("with storage {} {}", arguments.Location, arguments.Path);
             break;
 
         default:
@@ -26,29 +23,45 @@ static void generate_function_call(
                 mcc::ResultType_Storage,
                 arguments.Type);
     }
+
+    if (!self.UseCount)
+    {
+        commands.Append("function {} {}", self.Callee, arguments_value);
+        return;
+    }
+
+    commands.Append(
+        "execute store result storage {} {} double 1 run function {} {}",
+        self.Location,
+        self.GetStackPath(),
+        self.Callee,
+        arguments_value);
 }
 
-static void generate_builtin_print(
-    const mcc::CallInstruction &self,
-    mcc::CommandT &command)
+static void generate_builtin_print(const mcc::CallInstruction &self, mcc::CommandVector &commands)
 {
     auto targets = self.Arguments[0]->GenerateResult(false);
     auto message = self.Arguments[1]->GenerateResult(false);
 
-    command += std::format("tellraw {} ", targets.Value);
-
+    std::string message_value;
     switch (message.Type)
     {
         case mcc::ResultType_Value:
-            command += message.Value;
+            message_value = message.Value;
             break;
 
         case mcc::ResultType_Storage:
-            command += std::format("{{storage:\"{}\",nbt:\"{}\",interpret:true}}", message.Location, message.Path);
+            message_value = std::format(
+                "{{storage:\"{}\",nbt:\"{}\",interpret:true}}",
+                message.Location,
+                message.Path);
             break;
 
         case mcc::ResultType_Score:
-            command += std::format("{{score:{{name:\"{}\",objective:\"{}\"}}}}", message.Player, message.Objective);
+            message_value = std::format(
+                "{{score:{{name:\"{}\",objective:\"{}\"}}}}",
+                message.Player,
+                message.Objective);
             break;
 
         default:
@@ -59,6 +72,148 @@ static void generate_builtin_print(
                 mcc::ResultType_Score,
                 message.Type);
     }
+
+    if (!self.UseCount)
+    {
+        commands.Append("tellraw {} {}", targets.Value, message_value);
+        return;
+    }
+
+    commands.Append(
+        "execute store result storage {} {} double 1 run tellraw {} {}",
+        self.Location,
+        self.GetStackPath(),
+        targets.Value,
+        message_value);
+}
+
+static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::CommandVector &commands)
+{
+    auto value1 = self.Arguments[0]->GenerateResult(false);
+    auto value2 = self.Arguments[1]->GenerateResult(false);
+
+    // store value 1 in tmp
+    // store value 2 in value 1
+    // store tmp in value 2
+
+    auto tmp = self.GetTmpName();
+
+    switch (value1.Type)
+    {
+        case mcc::ResultType_Storage:
+            commands.Append(
+                "data modify storage {} {} set from storage {} {}",
+                self.Location,
+                tmp,
+                value1.Location,
+                value1.Path);
+            switch (value2.Type)
+            {
+                case mcc::ResultType_Storage:
+                    commands.Append(
+                        "data modify storage {} {} set from storage {} {}",
+                        value1.Location,
+                        value1.Path,
+                        value2.Location,
+                        value2.Path);
+                    break;
+
+                case mcc::ResultType_Score:
+                    commands.Append(
+                        "execute store result storage {} {} double 1 run scoreboard players get {} {}",
+                        value1.Location,
+                        value1.Path,
+                        value2.Player,
+                        value2.Objective);
+                    break;
+
+                default:
+                    mcc::Error(
+                        "value 2 must be {} or {}, but is {}",
+                        mcc::ResultType_Storage,
+                        mcc::ResultType_Score,
+                        value2.Type);
+            }
+            break;
+
+        case mcc::ResultType_Score:
+            commands.Append(
+                "execute store result storage {} {} double 1 run scoreboard players get {} {}",
+                self.Location,
+                tmp,
+                value1.Player,
+                value1.Objective);
+            switch (value2.Type)
+            {
+                case mcc::ResultType_Storage:
+                    commands.Append(
+                        "execute store result score {} {} run data get storage {} {}",
+                        value1.Player,
+                        value1.Objective,
+                        value2.Location,
+                        value2.Path);
+                    break;
+
+                case mcc::ResultType_Score:
+                    commands.Append(
+                        "scoreboard players operation {} {} = {} {}",
+                        value1.Player,
+                        value1.Objective,
+                        value2.Player,
+                        value2.Objective);
+                    break;
+
+                default:
+                    mcc::Error(
+                        "value 2 must be {} or {}, but is {}",
+                        mcc::ResultType_Storage,
+                        mcc::ResultType_Score,
+                        value2.Type);
+            }
+            break;
+
+        default:
+            mcc::Error(
+                "value 1 must be {} or {}, but is {}",
+                mcc::ResultType_Storage,
+                mcc::ResultType_Score,
+                value1.Type);
+    }
+
+    switch (value2.Type)
+    {
+        case mcc::ResultType_Storage:
+            commands.Append(
+                "data modify storage {} {} set from storage {} {}",
+                value2.Location,
+                value2.Path,
+                self.Location,
+                tmp);
+            break;
+
+        case mcc::ResultType_Score:
+            commands.Append(
+                "execute store result score {} {} run data get storage {} {}",
+                value2.Player,
+                value2.Objective,
+                self.Location,
+                tmp);
+            break;
+
+        default:
+            mcc::Error(
+                "value 2 must be {} or {}, but is {}",
+                mcc::ResultType_Storage,
+                mcc::ResultType_Score,
+                value2.Type);
+    }
+
+    commands.Append("data remove storage {} {}", self.Location, tmp);
+
+    if (!self.UseCount)
+        return;
+
+    commands.Append("data modify storage {} {} set value 0", self.Location, self.GetStackPath());
 }
 
 mcc::InstructionPtr mcc::CallInstruction::Create(
@@ -90,24 +245,18 @@ mcc::CallInstruction::~CallInstruction()
         argument->Drop();
 }
 
-void mcc::CallInstruction::Generate(CommandVector &commands, bool stack) const
+void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    CommandT command;
+    Assert(!UseCount || stack, "call instruction with result requires stack");
+
     if (!Builtin)
-        generate_function_call(*this, command);
+        generate_function_call(*this, commands);
     else if (Callee == "print")
-        generate_builtin_print(*this, command);
+        generate_builtin_print(*this, commands);
+    else if (Callee == "swap")
+        generate_builtin_swap(*this, commands);
     else
         Error("undefined builtin callee {}", Callee);
-
-    if (!UseCount)
-    {
-        commands.Append(std::move(command));
-        return;
-    }
-
-    Assert(stack, "call instruction with result requires stack");
-    commands.Append("execute store result storage {} {} double 1 run {}", Location, GetStackPath(), command);
 }
 
 bool mcc::CallInstruction::RequireStack() const

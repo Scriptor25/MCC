@@ -1,3 +1,4 @@
+#include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
@@ -22,17 +23,24 @@ std::ostream &mcc::ArrayExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder) const
 {
-    std::vector<ConstantPtr> values;
+    std::vector<ValuePtr> values;
+    std::vector<ConstantPtr> constants;
 
     for (auto &element: Elements)
     {
         auto value = element->GenerateValue(builder);
-
-        auto constant = std::dynamic_pointer_cast<Constant>(value);
-        Assert(!!constant, "inline array must only contain constant values");
-
-        values.emplace_back(constant);
+        if (auto constant = std::dynamic_pointer_cast<Constant>(value))
+            constants.emplace_back(constant);
+        values.emplace_back(value);
     }
 
-    return ConstantArray::Create(values, false);
+    if (values.size() == constants.size())
+        return ConstantArray::Create(std::move(constants), false);
+
+    auto array = builder.AllocateArray();
+
+    for (const auto &value: values)
+        (void) builder.CreateAppend(array, value, false);
+
+    return array;
 }

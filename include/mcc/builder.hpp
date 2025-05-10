@@ -34,9 +34,13 @@ namespace mcc
 
         [[nodiscard]] InstructionPtr CreateReturnVoid() const;
         [[nodiscard]] InstructionPtr CreateReturn(ValuePtr value) const;
-        [[nodiscard]] InstructionPtr CreateBranch(ValuePtr condition, ValuePtr then_target, ValuePtr else_target) const;
-        [[nodiscard]] InstructionPtr CreateDirect(ValuePtr target) const;
-        [[nodiscard]] InstructionPtr CreateDirect(ValuePtr target, ValuePtr result, ValuePtr landing_pad) const;
+        [[nodiscard]] InstructionPtr CreateBranch(ValuePtr condition, BlockPtr then_target, BlockPtr else_target) const;
+        [[nodiscard]] InstructionPtr CreateDirect(BlockPtr target) const;
+        [[nodiscard]] InstructionPtr CreateDirect(BlockPtr target, ValuePtr result, ValuePtr landing_pad) const;
+        [[nodiscard]] InstructionPtr CreateSwitch(
+            ValuePtr condition,
+            BlockPtr default_target,
+            std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets) const;
 
         [[nodiscard]] ValuePtr CreateBranchResult() const;
 
@@ -52,6 +56,7 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateAppend(ValuePtr array, ValuePtr value, bool stringify) const;
         [[nodiscard]] InstructionPtr CreatePrepend(ValuePtr array, ValuePtr value, bool stringify) const;
         [[nodiscard]] InstructionPtr CreateInsert(ValuePtr array, ValuePtr value, IndexT index, bool stringify) const;
+        [[nodiscard]] InstructionPtr CreateExtract(ValuePtr array, IndexT index) const;
 
         [[nodiscard]] InstructionPtr CreateInsert(ValuePtr object, ValuePtr value, std::string key) const;
 

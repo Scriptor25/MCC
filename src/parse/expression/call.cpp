@@ -1,24 +1,39 @@
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
 
-mcc::ExpressionPtr mcc::Parser::ParseCallExpression()
+mcc::ExpressionPtr mcc::Parser::ParseOperandExpression()
 {
-    auto callee = ParsePrimaryExpression();
+    auto operand = ParsePrimaryExpression();
 
-    if (!At(TokenType_Other, "("))
-        return callee;
-
-    auto where = Skip().Where;
-
-    std::vector<ExpressionPtr> arguments;
-    while (!At(TokenType_Other, ")") && !At(TokenType_EOF))
+    while (true)
     {
-        arguments.emplace_back(ParseExpression());
+        auto where = m_Token.Where;
 
-        if (!At(TokenType_Other, ")"))
-            Expect(TokenType_Other, ",");
+        if (SkipIf(TokenType_Other, "("))
+        {
+            std::vector<ExpressionPtr> arguments;
+            while (!At(TokenType_Other, ")") && !At(TokenType_EOF))
+            {
+                arguments.emplace_back(ParseExpression());
+
+                if (!At(TokenType_Other, ")"))
+                    Expect(TokenType_Other, ",");
+            }
+            Expect(TokenType_Other, ")");
+
+            operand = std::make_unique<CallExpression>(std::move(where), std::move(operand), std::move(arguments));
+            continue;
+        }
+
+        if (SkipIf(TokenType_Other, "["))
+        {
+            auto index = ParseExpression();
+            Expect(TokenType_Other, "]");
+
+            operand = std::make_unique<SubscriptExpression>(std::move(where), std::move(operand), std::move(index));
+            continue;
+        }
+
+        return operand;
     }
-    Expect(TokenType_Other, ")");
-
-    return std::make_unique<CallExpression>(std::move(where), std::move(callee), std::move(arguments));
 }

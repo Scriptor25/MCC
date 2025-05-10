@@ -3,5 +3,5 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseExpression()
 {
-    return ParseBinaryExpression(ParseCallExpression(), 0);
+    return ParseBinaryExpression(ParseOperandExpression(), 0);
 }

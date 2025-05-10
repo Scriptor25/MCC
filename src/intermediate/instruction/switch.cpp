@@ -1,0 +1,151 @@
+#include <mcc/error.hpp>
+#include <mcc/intermediate.hpp>
+
+mcc::InstructionPtr mcc::SwitchInstruction::Create(
+    ResourceLocation location,
+    ValuePtr condition,
+    BlockPtr default_target,
+    std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets)
+{
+    return std::make_shared<SwitchInstruction>(
+        std::move(location),
+        std::move(condition),
+        std::move(default_target),
+        std::move(case_targets));
+}
+
+mcc::SwitchInstruction::SwitchInstruction(
+    ResourceLocation location,
+    ValuePtr condition,
+    BlockPtr default_target,
+    std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets)
+    : Location(std::move(location)),
+      Condition(std::move(condition)),
+      DefaultTarget(std::move(default_target)),
+      CaseTargets(std::move(case_targets))
+{
+    Condition->Use();
+    DefaultTarget->Use();
+    for (auto &[case_, target_]: CaseTargets)
+    {
+        case_->Use();
+        target_->Use();
+    }
+}
+
+mcc::SwitchInstruction::~SwitchInstruction()
+{
+    Condition->Drop();
+    DefaultTarget->Drop();
+    for (auto &[case_, target_]: CaseTargets)
+    {
+        case_->Drop();
+        target_->Drop();
+    }
+}
+
+void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
+{
+    auto tmp = GetTmpName();
+
+    auto condition = Condition->GenerateResult(false);
+
+    std::string arguments;
+    std::string prefix;
+
+    if (auto &parameters = (DefaultTarget ? DefaultTarget : CaseTargets.front().second)->Parent->Parameters;
+        !parameters.empty())
+    {
+        prefix = "$";
+        arguments += " {";
+        for (unsigned i = 0; i < parameters.size(); ++i)
+        {
+            if (i)
+                arguments += ',';
+            arguments += std::format("{0}:$({0})", parameters[i]);
+        }
+        arguments += '}';
+    }
+
+    switch (condition.Type)
+    {
+        case ResultType_Value:
+            for (auto &[case_, target_]: CaseTargets)
+                if (auto case_value = case_->GenerateResult(false);
+                    case_value.Value == condition.Value)
+                    commands.Append(
+                        "{}return run function {}{}",
+                        prefix,
+                        target_->Location,
+                        arguments);
+            break;
+
+        case ResultType_Storage:
+            for (auto &[case_, target_]: CaseTargets)
+            {
+                auto case_value = case_->GenerateResult(false);
+                commands.Append(CreateTmpScore());
+                commands.Append(
+                    "execute store result score %c {} run data get storage {} {}",
+                    tmp,
+                    condition.Location,
+                    condition.Path);
+                commands.Append("data remove storage {} result", Location);
+                commands.Append(
+                    "execute if score %c {} matches {} run data modify storage {} result set value 1",
+                    tmp,
+                    case_value.Value,
+                    Location);
+                commands.Append(RemoveTmpScore());
+                commands.Append(
+                    "{}execute if data storage {} result run return run function {}{}",
+                    prefix,
+                    Location,
+                    target_->Location,
+                    arguments);
+            }
+            commands.Append("{}return run function {}{}", prefix, DefaultTarget->Location, arguments);
+            break;
+
+        case ResultType_Score:
+            for (auto &[case_, target_]: CaseTargets)
+            {
+                auto case_value = case_->GenerateResult(false);
+                commands.Append(
+                    "{}execute if score {} {} matches {} run return run function {}{}",
+                    prefix,
+                    condition.Player,
+                    condition.Objective,
+                    case_value.Value,
+                    target_->Location,
+                    arguments);
+            }
+            commands.Append("{}return run function {}{}", prefix, DefaultTarget->Location, arguments);
+            break;
+
+        default:
+            Error(
+                "condition must be {}, {} or {}, but is {}",
+                ResultType_Value,
+                ResultType_Storage,
+                ResultType_Score,
+                condition.Type);
+    }
+}
+
+bool mcc::SwitchInstruction::RequireStack() const
+{
+    return Condition->RequireStack()
+           || DefaultTarget->RequireStack()
+           || std::ranges::any_of(
+               CaseTargets,
+               [](auto &case_target)
+               {
+                   return case_target.second->RequireStack();
+               });
+}
+
+bool mcc::SwitchInstruction::IsTerminator() const
+{
+    return true;
+}

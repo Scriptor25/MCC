@@ -27,24 +27,18 @@ std::ostream &mcc::ObjectExpression::Print(std::ostream &stream) const
 mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder) const
 {
     std::map<std::string, ValuePtr> values;
+    std::map<std::string, ConstantPtr> constants;
 
-    auto all_constant = true;
     for (auto &[key_, value_]: Elements)
     {
         auto value = value_->GenerateValue(builder);
-        all_constant &= !!std::dynamic_pointer_cast<Constant>(value);
+        if (auto constant = std::dynamic_pointer_cast<Constant>(value))
+            constants.emplace(key_, constant);
         values.emplace(key_, value);
     }
 
-    if (all_constant)
-    {
-        std::map<std::string, ConstantPtr> constants;
-
-        for (auto &[key_, value_]: values)
-            constants.emplace(key_, std::dynamic_pointer_cast<Constant>(value_));
-
-        return ConstantObject::Create(constants);
-    }
+    if (values.size() == constants.size())
+        return ConstantObject::Create(std::move(constants));
 
     auto object = builder.AllocateObject();
 

@@ -9,6 +9,9 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (AtEnum("if", "unless"))
         return ParseIfUnlessExpression();
 
+    if (At(TokenType_Symbol, "switch"))
+        return ParseSwitchExpression();
+
     if (AtEnum("true", "false"))
     {
         auto token = Skip();
@@ -57,7 +60,7 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_Operator))
     {
         auto token = Skip();
-        auto operand = ParseCallExpression();
+        auto operand = ParseOperandExpression();
         return std::make_unique<UnaryExpression>(
             std::move(token.Where),
             std::move(token.Value),

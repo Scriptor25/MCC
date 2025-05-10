@@ -86,31 +86,26 @@ namespace mcc
         StatementPtr ParseStatement();
         StatementPtr ParseMultiStatement();
         StatementPtr ParseIfUnlessStatement();
+        StatementPtr ParseSwitchStatement();
         StatementPtr ParseForStatement();
         StatementPtr ParseReturnStatement();
 
         ExpressionPtr ParseExpression();
-
         ExpressionPtr ParseResourceExpression();
         ExpressionPtr ParseTargetExpression(bool with_attributes);
-
         ExpressionPtr ParseArrayExpression();
         ExpressionPtr ParseObjectExpression();
-
         ExpressionPtr ParseFormatExpression();
-
         ExpressionPtr ParseIfUnlessExpression();
-
+        ExpressionPtr ParseSwitchExpression();
         ExpressionPtr ParseCommandExpression();
-
         ExpressionPtr ParseIntegerExpression();
         ExpressionPtr ParseFloatExpression();
         ExpressionPtr ParseRangeExpression();
         ExpressionPtr ParseStringExpression();
         ExpressionPtr ParseSymbolExpression();
-
         ExpressionPtr ParsePrimaryExpression();
-        ExpressionPtr ParseCallExpression();
+        ExpressionPtr ParseOperandExpression();
         ExpressionPtr ParseBinaryExpression(ExpressionPtr left, unsigned min_pre);
 
         Context &m_Context;

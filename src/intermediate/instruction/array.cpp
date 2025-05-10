@@ -47,6 +47,17 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
         stringify);
 }
 
+mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(ResourceLocation location, ValuePtr array, IndexT index)
+{
+    return std::make_shared<ArrayInstruction>(
+        ArrayOperation_Extract,
+        std::move(location),
+        std::move(array),
+        nullptr,
+        index,
+        false);
+}
+
 mcc::ArrayInstruction::ArrayInstruction(
     const ArrayOperationE array_operation,
     ResourceLocation location,
@@ -62,13 +73,15 @@ mcc::ArrayInstruction::ArrayInstruction(
       Stringify(stringify)
 {
     Array->Use();
-    Value->Use();
+    if (Value)
+        Value->Use();
 }
 
 mcc::ArrayInstruction::~ArrayInstruction()
 {
     Array->Drop();
-    Value->Drop();
+    if (Value)
+        Value->Drop();
 }
 
 void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
@@ -86,6 +99,9 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
     //      data modify storage <location> stack[0].values[<array.index>] (append|prepend|insert <index>) value 0
     //      execute store result storage <location> stack[0].values[<array.index>][(<back>|0|<index>)] double 1 run scoreboard players get <value.player> <value.objective>
     //
+
+    if (ArrayOperation == ArrayOperation_Extract)
+        return;
 
     auto array = Array->GenerateResult(false);
     auto value = Value->GenerateResult(Stringify);
@@ -110,6 +126,9 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
         case ArrayOperation_Insert:
             operation = std::format("insert {}", Index);
             break;
+
+        default:
+            Error("TODO");
     }
 
     auto conversion = Stringify ? "string" : "from";
@@ -167,4 +186,23 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 bool mcc::ArrayInstruction::RequireStack() const
 {
     return Array->RequireStack() || Value->RequireStack();
+}
+
+mcc::Result mcc::ArrayInstruction::GenerateResult(bool stringify) const
+{
+    Assert(ArrayOperation == ArrayOperation_Extract, "only the extract array operation produces a result");
+
+    auto array = Array->GenerateResult(false);
+
+    Assert(
+        array.Type == ResultType_Storage,
+        "array must be {}, but is {}",
+        ResultType_Storage,
+        array.Type);
+
+    return {
+        .Type = ResultType_Storage,
+        .Location = array.Location,
+        .Path = std::format("{}[{}]", array.Path, Index),
+    };
 }

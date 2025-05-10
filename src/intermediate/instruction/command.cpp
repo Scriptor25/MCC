@@ -20,12 +20,18 @@ void mcc::CommandInstruction::Generate(CommandVector &commands, bool stack) cons
         return;
     }
 
+    auto command = Command;
+    const auto macro = command.front() == '$';
+    if (macro)
+        command.erase(command.begin());
+
     Assert(stack, "command instruction with result requires stack");
     commands.Append(
-        "execute store result storage {} {} double 1 run {}",
+        "{}execute store result storage {} {} double 1 run {}",
+        macro ? "$" : "",
         Location,
         GetStackPath(),
-        Command);
+        command);
 }
 
 bool mcc::CommandInstruction::RequireStack() const

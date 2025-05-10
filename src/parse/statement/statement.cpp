@@ -26,6 +26,8 @@ mcc::StatementPtr mcc::Parser::ParseStatement()
         return ParseMultiStatement();
     if (AtEnum("if", "unless"))
         return ParseIfUnlessStatement();
+    if (At(TokenType_Symbol, "switch"))
+        return ParseSwitchStatement();
     if (At(TokenType_Symbol, "for"))
         return ParseForStatement();
     if (At(TokenType_Symbol, "return"))

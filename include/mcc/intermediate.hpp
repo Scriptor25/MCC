@@ -265,6 +265,32 @@ namespace mcc
         ValuePtr Result, LandingPad;
     };
 
+    struct SwitchInstruction final : Instruction
+    {
+        static InstructionPtr Create(
+            ResourceLocation location,
+            ValuePtr condition,
+            BlockPtr default_target,
+            std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets);
+
+        SwitchInstruction(
+            ResourceLocation location,
+            ValuePtr condition,
+            BlockPtr default_target,
+            std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets);
+        ~SwitchInstruction() override;
+
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
+
+        [[nodiscard]] bool IsTerminator() const override;
+
+        ResourceLocation Location;
+        ValuePtr Condition;
+        BlockPtr DefaultTarget;
+        std::vector<std::pair<ConstantPtr, BlockPtr>> CaseTargets;
+    };
+
     struct StoreInstruction final : Instruction
     {
         static InstructionPtr Create(ValuePtr dst, ValuePtr src);
@@ -349,6 +375,10 @@ namespace mcc
             ValuePtr value,
             IndexT index,
             bool stringify);
+        static InstructionPtr CreateExtract(
+            ResourceLocation location,
+            ValuePtr array,
+            IndexT index);
 
         ArrayInstruction(
             ArrayOperationE array_operation,
@@ -361,6 +391,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ArrayOperationE ArrayOperation;
         ResourceLocation Location;
