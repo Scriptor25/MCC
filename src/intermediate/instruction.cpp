@@ -1,5 +1,10 @@
 #include <mcc/instruction.hpp>
 
+mcc::Instruction::Instruction(const SourceLocation &where)
+    : Value(where)
+{
+}
+
 bool mcc::Instruction::IsTerminator() const
 {
     return false;

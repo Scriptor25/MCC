@@ -2,23 +2,31 @@
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
-    ResourceLocation location,
-    ValuePtr object,
-    ValuePtr value,
-    std::string key)
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &object,
+    const ValuePtr &value,
+    const std::string &key)
 {
     return std::make_shared<ObjectInstruction>(
-        std::move(location),
-        std::move(object),
-        std::move(value),
-        std::move(key));
+        where,
+        location,
+        object,
+        value,
+        key);
 }
 
-mcc::ObjectInstruction::ObjectInstruction(ResourceLocation location, ValuePtr object, ValuePtr value, std::string key)
-    : Location(std::move(location)),
-      Object(std::move(object)),
-      Value(std::move(value)),
-      Key(std::move(key))
+mcc::ObjectInstruction::ObjectInstruction(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &object,
+    const ValuePtr &value,
+    const std::string &key)
+    : Instruction(where),
+      Location(location),
+      Object(object),
+      Value(value),
+      Key(key)
 {
     Object->Use();
     Value->Use();
@@ -32,19 +40,6 @@ mcc::ObjectInstruction::~ObjectInstruction()
 
 void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    //
-    // object: stack-allocated
-    //
-    //      data modify storage <location> stack[0].values[<object.index>].<key> set ...
-    //
-    // value -> constant:           ... value <value>
-    //       -> stack-allocated:    ... from storage <location> stack[0].values[<value.index>]
-    //
-    // value -> register:
-    //
-    //      execute store result storage <location> stack[0].values[<object.index>].<key> double 1 run scoreboard players get <value.player> <value.objective>
-    //
-
     auto object = Object->GenerateResult(false);
     auto value = Value->GenerateResult(false);
 
@@ -81,6 +76,7 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
 
         default:
             Error(
+                Where,
                 "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,

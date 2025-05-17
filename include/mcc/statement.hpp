@@ -10,27 +10,43 @@ namespace mcc
 {
     struct Statement
     {
-        explicit Statement(SourceLocation where);
+        explicit Statement(const SourceLocation &where);
 
         virtual ~Statement() = default;
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
-        virtual void Generate(Builder &builder, BlockPtr landing_pad) const = 0;
+        virtual void Generate(Builder &builder, const Frame &frame) const = 0;
 
         SourceLocation Where;
+    };
+
+    struct BreakStatement final : Statement
+    {
+        explicit BreakStatement(const SourceLocation &where);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
+    };
+
+    struct ContinueStatement final : Statement
+    {
+        explicit ContinueStatement(const SourceLocation &where);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
     };
 
     struct DefineStatement final : Statement
     {
         DefineStatement(
-            SourceLocation where,
-            ResourceLocation location,
-            ParameterList parameters,
-            std::vector<ResourceLocation> tags,
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            const ParameterList &parameters,
+            const std::vector<ResourceLocation> &tags,
             StatementPtr body);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         ResourceLocation Location;
         ParameterList Parameters;
@@ -41,14 +57,14 @@ namespace mcc
     struct ForStatement final : Statement
     {
         ForStatement(
-            SourceLocation where,
+            const SourceLocation &where,
             StatementPtr prefix,
             ExpressionPtr condition,
             StatementPtr suffix,
             StatementPtr do_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         ExpressionPtr Condition;
         StatementPtr Prefix, Suffix, Do;
@@ -57,14 +73,14 @@ namespace mcc
     struct IfUnlessStatement final : Statement
     {
         IfUnlessStatement(
-            SourceLocation where,
+            const SourceLocation &where,
             bool unless,
             ExpressionPtr condition,
             StatementPtr then,
             StatementPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         bool Unless;
         ExpressionPtr Condition;
@@ -73,30 +89,30 @@ namespace mcc
 
     struct MultiStatement final : Statement
     {
-        MultiStatement(SourceLocation where, std::vector<StatementPtr> statements);
+        MultiStatement(const SourceLocation &where, std::vector<StatementPtr> statements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         std::vector<StatementPtr> Statements;
     };
 
     struct NamespaceStatement final : Statement
     {
-        NamespaceStatement(SourceLocation where, std::string namespace_);
+        NamespaceStatement(const SourceLocation &where, const std::string &namespace_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         std::string Namespace;
     };
 
     struct ReturnStatement final : Statement
     {
-        ReturnStatement(SourceLocation where, ExpressionPtr value);
+        ReturnStatement(const SourceLocation &where, ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         ExpressionPtr Value;
     };
@@ -104,13 +120,13 @@ namespace mcc
     struct SwitchStatement final : Statement
     {
         SwitchStatement(
-            SourceLocation where,
+            const SourceLocation &where,
             ExpressionPtr condition,
             StatementPtr default_,
             std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         ExpressionPtr Condition;
         StatementPtr Default;
@@ -119,20 +135,20 @@ namespace mcc
 
     struct ThrowStatement final : Statement
     {
-        ThrowStatement(SourceLocation where, ExpressionPtr value);
+        ThrowStatement(const SourceLocation &where, ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         ExpressionPtr Value;
     };
 
     struct TryCatchStatement final : Statement
     {
-        TryCatchStatement(SourceLocation where, StatementPtr try_, StatementPtr catch_, std::string variable);
+        TryCatchStatement(const SourceLocation &where, StatementPtr try_, StatementPtr catch_, const std::string &variable);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, BlockPtr landing_pad) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
 
         StatementPtr Try, Catch;
         std::string Variable;

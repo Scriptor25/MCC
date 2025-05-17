@@ -2,27 +2,31 @@
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::BranchInstruction::Create(
-    ResourceLocation location,
-    ValuePtr condition,
-    BlockPtr then_target,
-    BlockPtr else_target)
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &condition,
+    const BlockPtr &then_target,
+    const BlockPtr &else_target)
 {
     return std::make_shared<BranchInstruction>(
-        std::move(location),
-        std::move(condition),
-        std::move(then_target),
-        std::move(else_target));
+        where,
+        location,
+        condition,
+        then_target,
+        else_target);
 }
 
 mcc::BranchInstruction::BranchInstruction(
-    ResourceLocation location,
-    ValuePtr condition,
-    BlockPtr then_target,
-    BlockPtr else_target)
-    : Location(std::move(location)),
-      Condition(std::move(condition)),
-      ThenTarget(std::move(then_target)),
-      ElseTarget(std::move(else_target))
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &condition,
+    const BlockPtr &then_target,
+    const BlockPtr &else_target)
+    : Instruction(where),
+      Location(location),
+      Condition(condition),
+      ThenTarget(then_target),
+      ElseTarget(else_target)
 {
     Condition->Use();
     ThenTarget->Use();
@@ -107,6 +111,7 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
 
         default:
             Error(
+                Where,
                 "condition must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,

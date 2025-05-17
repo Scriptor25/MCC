@@ -4,15 +4,15 @@
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
 
-mcc::Parser::Parser(Context &context, std::istream &stream, std::string filename)
-    : Parser(context, stream, SourceLocation(std::move(filename), 1, 0))
+mcc::Parser::Parser(Context &context, std::istream &stream, const std::string &filename)
+    : Parser(context, stream, SourceLocation(filename, 1, 0))
 {
 }
 
-mcc::Parser::Parser(Context &context, std::istream &stream, SourceLocation location)
+mcc::Parser::Parser(Context &context, std::istream &stream, const SourceLocation &location)
     : m_Context(context),
       m_Stream(stream),
-      m_Location(std::move(location))
+      m_Where(location)
 {
     Get();
     Next();
@@ -39,12 +39,12 @@ void mcc::Parser::Get()
     m_Count++;
     if (m_Buf == '\n')
     {
-        m_Location.Col = 0;
-        m_Location.Row++;
+        m_Where.Col = 0;
+        m_Where.Row++;
     }
     else
     {
-        m_Location.Col++;
+        m_Where.Col++;
     }
 }
 

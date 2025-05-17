@@ -1,12 +1,15 @@
 #include <mcc/constant.hpp>
 
-mcc::ConstantPtr mcc::ConstantObject::Create(std::map<std::string, ConstantPtr> values)
+mcc::ConstantPtr mcc::ConstantObject::Create(
+    const SourceLocation &where,
+    const std::map<std::string, ConstantPtr> &values)
 {
-    return std::make_shared<ConstantObject>(std::move(values));
+    return std::make_shared<ConstantObject>(where, values);
 }
 
-mcc::ConstantObject::ConstantObject(std::map<std::string, ConstantPtr> values)
-    : Values(std::move(values))
+mcc::ConstantObject::ConstantObject(const SourceLocation &where, const std::map<std::string, ConstantPtr> &values)
+    : Constant(where),
+      Values(values)
 {
     for (const auto &value: Values | std::views::values)
         value->Use();

@@ -2,16 +2,19 @@
 #include <mcc/constant.hpp>
 
 mcc::ConstantPtr mcc::ConstantTarget::Create(
-    TargetSelectorE selector,
+    const SourceLocation &where,
+    const TargetSelectorE selector,
     std::map<std::string, std::vector<TargetAttributePtr>> attributes)
 {
-    return std::make_shared<ConstantTarget>(selector, std::move(attributes));
+    return std::make_shared<ConstantTarget>(where, selector, std::move(attributes));
 }
 
 mcc::ConstantTarget::ConstantTarget(
+    const SourceLocation &where,
     const TargetSelectorE selector,
     std::map<std::string, std::vector<TargetAttributePtr>> attributes)
-    : Selector(selector),
+    : Constant(where),
+      Selector(selector),
       Attributes(std::move(attributes))
 {
 }

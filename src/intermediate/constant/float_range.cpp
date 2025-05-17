@@ -1,22 +1,26 @@
 #include <mcc/constant.hpp>
 
-mcc::ConstantPtr mcc::ConstantFloatRange::Create(FloatT min, FloatT max)
+mcc::ConstantPtr mcc::ConstantFloatRange::Create(const SourceLocation &where, const FloatT min, const FloatT max)
 {
-    return std::make_shared<ConstantFloatRange>(min, max);
+    return std::make_shared<ConstantFloatRange>(where, min, max);
 }
 
-mcc::ConstantPtr mcc::ConstantFloatRange::CreateMin(FloatT min)
+mcc::ConstantPtr mcc::ConstantFloatRange::CreateMin(const SourceLocation &where, const FloatT min)
 {
-    return std::make_shared<ConstantFloatRange>(min, std::nullopt);
+    return std::make_shared<ConstantFloatRange>(where, min, std::nullopt);
 }
 
-mcc::ConstantPtr mcc::ConstantFloatRange::CreateMax(FloatT max)
+mcc::ConstantPtr mcc::ConstantFloatRange::CreateMax(const SourceLocation &where, const FloatT max)
 {
-    return std::make_shared<ConstantFloatRange>(std::nullopt, max);
+    return std::make_shared<ConstantFloatRange>(where, std::nullopt, max);
 }
 
-mcc::ConstantFloatRange::ConstantFloatRange(const std::optional<FloatT> min, const std::optional<FloatT> max)
-    : Min(min),
+mcc::ConstantFloatRange::ConstantFloatRange(
+    const SourceLocation &where,
+    const std::optional<FloatT> min,
+    const std::optional<FloatT> max)
+    : Constant(where),
+      Min(min),
       Max(max)
 {
 }

@@ -5,10 +5,10 @@
 #include <mcc/value.hpp>
 
 mcc::CallExpression::CallExpression(
-    SourceLocation where,
+    const SourceLocation &where,
     ExpressionPtr callee,
     std::vector<ExpressionPtr> arguments)
-    : Expression(std::move(where)),
+    : Expression(where),
       Callee(std::move(callee)),
       Arguments(std::move(arguments))
 {
@@ -29,9 +29,13 @@ std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
     return stream << ')';
 }
 
-mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
+mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     ResourceLocation callee;
+
+    std::vector<ValuePtr> arguments;
+    for (auto &argument: Arguments)
+        arguments.emplace_back(argument->GenerateValue(builder, frame));
 
     if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
     {
@@ -39,19 +43,14 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const BlockPt
     }
     else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))
     {
-        auto location = resource->Location;
-        if (location.Namespace.empty())
-            location.Namespace = builder.GetLocation().Namespace;
-        callee = std::move(location);
+        callee = resource->Location;
+        if (callee.Namespace.empty())
+            callee.Namespace = builder.GetLocation(Callee->Where).Namespace;
     }
     else
     {
-        Error(Where, "invalid callee expression, must be a builtin symbol or function resource");
+        Error(Callee->Where, "invalid callee, must be a symbol or resource");
     }
 
-    std::vector<ValuePtr> arguments;
-    for (auto &argument: Arguments)
-        arguments.emplace_back(argument->GenerateValue(builder, landing_pad));
-
-    return builder.CreateCall(std::move(callee), std::move(arguments), landing_pad);
+    return builder.CreateCall(Where, callee, arguments, frame.LandingPad);
 }

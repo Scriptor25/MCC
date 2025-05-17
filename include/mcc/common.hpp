@@ -33,6 +33,22 @@ namespace mcc
 
     using ParameterList = std::vector<Parameter>;
 
+    struct Frame
+    {
+        BlockPtr Head;
+        BlockPtr Tail;
+        BlockPtr LandingPad;
+
+        unsigned Flags = 0;
+    };
+
+    struct SourceLocation
+    {
+        std::string Filename;
+        unsigned Row = 0;
+        unsigned Col = 0;
+    };
+
     struct Context;
     class Parser;
     class Builder;

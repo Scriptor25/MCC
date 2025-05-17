@@ -40,10 +40,5 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
 
     auto body = ParseMultiStatement();
 
-    return std::make_unique<DefineStatement>(
-        std::move(where),
-        std::move(location),
-        std::move(parameters),
-        std::move(tags),
-        std::move(body));
+    return std::make_unique<DefineStatement>(where, location, parameters, tags, std::move(body));
 }

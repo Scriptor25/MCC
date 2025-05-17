@@ -1,7 +1,7 @@
 #include <mcc/statement.hpp>
 
-mcc::MultiStatement::MultiStatement(SourceLocation where, std::vector<StatementPtr> statements)
-    : Statement(std::move(where)),
+mcc::MultiStatement::MultiStatement(const SourceLocation &where, std::vector<StatementPtr> statements)
+    : Statement(where),
       Statements(std::move(statements))
 {
 }
@@ -18,8 +18,8 @@ std::ostream &mcc::MultiStatement::Print(std::ostream &stream) const
     return stream << indentation << '}';
 }
 
-void mcc::MultiStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
+void mcc::MultiStatement::Generate(Builder &builder, const Frame &frame) const
 {
     for (auto &statement: Statements)
-        statement->Generate(builder, landing_pad);
+        statement->Generate(builder, frame);
 }

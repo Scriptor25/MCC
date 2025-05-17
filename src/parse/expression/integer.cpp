@@ -7,7 +7,7 @@ mcc::ExpressionPtr mcc::Parser::ParseIntegerExpression()
 {
     auto token = Expect(TokenType_Integer);
     return std::make_unique<ConstantExpression>(
-        std::move(token.Where),
-        ConstantInteger::Create(token.Integer),
-        std::move(token.Value));
+        token.Where,
+        ConstantInteger::Create(token.Where, token.Integer),
+        token.Value);
 }

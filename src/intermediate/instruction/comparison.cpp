@@ -2,23 +2,26 @@
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::ComparisonInstruction::Create(
-    ComparatorE comparator,
-    ResourceLocation location,
-    ValuePtr left,
-    ValuePtr right)
+    const SourceLocation &where,
+    const ComparatorE &comparator,
+    const ResourceLocation &location,
+    const ValuePtr &left,
+    const ValuePtr &right)
 {
-    return std::make_shared<ComparisonInstruction>(comparator, std::move(location), std::move(left), std::move(right));
+    return std::make_shared<ComparisonInstruction>(where, comparator, location, left, right);
 }
 
 mcc::ComparisonInstruction::ComparisonInstruction(
+    const SourceLocation &where,
     const ComparatorE comparator,
-    ResourceLocation location,
-    ValuePtr left,
-    ValuePtr right)
-    : Comparator(comparator),
-      Location(std::move(location)),
-      Left(std::move(left)),
-      Right(std::move(right))
+    const ResourceLocation &location,
+    const ValuePtr &left,
+    const ValuePtr &right)
+    : Instruction(where),
+      Comparator(comparator),
+      Location(location),
+      Left(left),
+      Right(right)
 {
     Left->Use();
     Right->Use();
@@ -63,6 +66,7 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
 
         default:
             Error(
+                Where,
                 "left must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
@@ -95,6 +99,7 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
 
             default:
                 Error(
+                    Where,
                     "right must be {}, {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Storage,
@@ -126,10 +131,10 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
             break;
 
         default:
-            Error("undefined comparator {}", Comparator);
+            Error(Where, "undefined comparator {}", Comparator);
     }
 
-    Assert(stack, "comparison instruction requires stack");
+    Assert(stack, Where, "comparison instruction requires stack");
     commands.Append(
         "execute store result storage {} {} byte 1 if score %a {} {} {} {}",
         Location,

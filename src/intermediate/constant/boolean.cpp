@@ -1,12 +1,13 @@
 #include <mcc/constant.hpp>
 
-mcc::ConstantPtr mcc::ConstantBoolean::Create(const bool value)
+mcc::ConstantPtr mcc::ConstantBoolean::Create(const SourceLocation &where, const bool value)
 {
-    return std::make_shared<ConstantBoolean>(value);
+    return std::make_shared<ConstantBoolean>(where, value);
 }
 
-mcc::ConstantBoolean::ConstantBoolean(const bool value)
-    : Value(value)
+mcc::ConstantBoolean::ConstantBoolean(const SourceLocation &where, const bool value)
+    : Constant(where),
+      Value(value)
 {
 }
 

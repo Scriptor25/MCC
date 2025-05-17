@@ -5,12 +5,12 @@
 #include <mcc/value.hpp>
 
 mcc::ResourceExpression::ResourceExpression(
-    SourceLocation where,
-    ResourceLocation location,
+    const SourceLocation &where,
+    const ResourceLocation &location,
     ExpressionPtr state,
     ExpressionPtr data)
-    : Expression(std::move(where)),
-      Location(std::move(location)),
+    : Expression(where),
+      Location(location),
       State(std::move(state)),
       Data(std::move(data))
 {
@@ -29,25 +29,25 @@ std::ostream &mcc::ResourceExpression::Print(std::ostream &stream) const
     return stream;
 }
 
-mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
+mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     auto location = Location;
     if (location.Namespace.empty())
-        location.Namespace = builder.GetLocation().Namespace;
+        location.Namespace = builder.GetLocation(Where).Namespace;
 
     ConstantPtr state;
     if (State)
     {
-        state = std::dynamic_pointer_cast<Constant>(State->GenerateValue(builder, landing_pad));
-        Assert(!!state, "state must be constant");
+        state = std::dynamic_pointer_cast<Constant>(State->GenerateValue(builder, frame));
+        Assert(!!state, Where, "state must be constant");
     }
 
     ConstantPtr data;
     if (Data)
     {
-        data = std::dynamic_pointer_cast<Constant>(Data->GenerateValue(builder, landing_pad));
-        Assert(!!data, "data must be constant");
+        data = std::dynamic_pointer_cast<Constant>(Data->GenerateValue(builder, frame));
+        Assert(!!data, Where, "data must be constant");
     }
 
-    return ConstantResource::Create(std::move(location), std::move(state), std::move(data));
+    return ConstantResource::Create(Where, location, state, data);
 }

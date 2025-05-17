@@ -1,15 +1,24 @@
 #include <mcc/error.hpp>
 #include <mcc/constant.hpp>
 
-mcc::ConstantPtr mcc::ConstantResource::Create(ResourceLocation location, ConstantPtr state, ConstantPtr data)
+mcc::ConstantPtr mcc::ConstantResource::Create(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ConstantPtr &state,
+    const ConstantPtr &data)
 {
-    return std::make_shared<ConstantResource>(std::move(location), std::move(state), std::move(data));
+    return std::make_shared<ConstantResource>(where, location, state, data);
 }
 
-mcc::ConstantResource::ConstantResource(ResourceLocation location, ConstantPtr state, ConstantPtr data)
-    : Location(std::move(location)),
-      State(std::move(state)),
-      Data(std::move(data))
+mcc::ConstantResource::ConstantResource(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ConstantPtr &state,
+    const ConstantPtr &data)
+    : Constant(where),
+      Location(location),
+      State(state),
+      Data(data)
 {
 }
 
@@ -20,14 +29,14 @@ mcc::Result mcc::ConstantResource::GenerateResult(const bool stringify) const
     if (State)
     {
         auto state = State->GenerateResult(stringify);
-        Assert(state.Type == ResultType_Value, "state must be {}, but is {}", ResultType_Value, state.Type);
+        Assert(state.Type == ResultType_Value, Where, "state must be {}, but is {}", ResultType_Value, state.Type);
         value += state.Value;
     }
 
     if (Data)
     {
         auto data = Data->GenerateResult(stringify);
-        Assert(data.Type == ResultType_Value, "data must be {}, but is {}", ResultType_Value, data.Type);
+        Assert(data.Type == ResultType_Value, Where, "data must be {}, but is {}", ResultType_Value, data.Type);
         value += data.Value;
     }
 

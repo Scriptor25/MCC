@@ -18,8 +18,8 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
             token.Where,
-            ConstantBoolean::Create(token.Value == "true"),
-            std::move(token.Value));
+            ConstantBoolean::Create(token.Where, token.Value == "true"),
+            token.Value);
     }
 
     if (At(TokenType_Integer))
@@ -62,10 +62,7 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     {
         auto token = Skip();
         auto operand = ParseOperandExpression();
-        return std::make_unique<UnaryExpression>(
-            std::move(token.Where),
-            std::move(token.Value),
-            std::move(operand));
+        return std::make_unique<UnaryExpression>(token.Where, token.Value, std::move(operand));
     }
 
     Error(m_Token.Where, "cannot parse {} '{}'", m_Token.Type, m_Token.Value);

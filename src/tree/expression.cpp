@@ -1,12 +1,12 @@
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 
-mcc::Expression::Expression(SourceLocation where)
-    : Statement(std::move(where))
+mcc::Expression::Expression(const SourceLocation &where)
+    : Statement(where)
 {
 }
 
-void mcc::Expression::Generate(Builder &builder, const BlockPtr landing_pad) const
+void mcc::Expression::Generate(Builder &builder, const Frame &frame) const
 {
-    (void) GenerateValue(builder, landing_pad);
+    (void) GenerateValue(builder, frame);
 }

@@ -4,15 +4,15 @@
 #include <mcc/value.hpp>
 
 mcc::DefineStatement::DefineStatement(
-    SourceLocation where,
-    ResourceLocation location,
-    ParameterList parameters,
-    std::vector<ResourceLocation> tags,
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ParameterList &parameters,
+    const std::vector<ResourceLocation> &tags,
     StatementPtr body)
-    : Statement(std::move(where)),
-      Location(std::move(location)),
-      Parameters(std::move(parameters)),
-      Tags(std::move(tags)),
+    : Statement(where),
+      Location(location),
+      Parameters(parameters),
+      Tags(tags),
       Body(std::move(body))
 {
 }
@@ -38,9 +38,9 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
     return Body->Print(stream);
 }
 
-void mcc::DefineStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
+void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto block = builder.CreateFunction(Location, Parameters);
+    const auto block = builder.CreateFunction(Where, Location, Parameters);
 
     const auto &[pkg_, namespace_] = builder.GetContext();
     for (auto tag: Tags)
@@ -53,19 +53,19 @@ void mcc::DefineStatement::Generate(Builder &builder, const BlockPtr landing_pad
     }
 
     builder.SetInsertBlock(block);
-    Body->Generate(builder, landing_pad);
+    Body->Generate(builder, {});
 
     if (!block->GetTerminator())
     {
         builder.SetInsertBlock(block);
-        (void) builder.CreateReturnVoid();
+        (void) builder.CreateReturnVoid(Where);
     }
 
     for (const auto &child: block->Children)
         if (!child->GetTerminator())
         {
             builder.SetInsertBlock(child);
-            (void) builder.CreateReturnVoid();
+            (void) builder.CreateReturnVoid(Where);
         }
 
     builder.SetInsertBlock(nullptr);

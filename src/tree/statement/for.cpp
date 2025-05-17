@@ -4,14 +4,14 @@
 #include <mcc/value.hpp>
 
 mcc::ForStatement::ForStatement(
-    SourceLocation where,
+    const SourceLocation &where,
     StatementPtr prefix,
     ExpressionPtr condition,
     StatementPtr suffix,
     StatementPtr do_)
-    : Statement(std::move(where)),
-      Prefix(std::move(prefix)),
+    : Statement(where),
       Condition(std::move(condition)),
+      Prefix(std::move(prefix)),
       Suffix(std::move(suffix)),
       Do(std::move(do_))
 {
@@ -22,25 +22,48 @@ std::ostream &mcc::ForStatement::Print(std::ostream &stream) const
     return Do->Print(Suffix->Print(Condition->Print(Prefix->Print(stream << "for (") << ", ") << ", ") << ") ");
 }
 
-void mcc::ForStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
+void mcc::ForStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent();
-    const auto loop_target = builder.CreateBlock(parent);
-    const auto end_target = builder.CreateBlock(parent);
+    const auto parent = builder.GetInsertParent(Where);
+    const auto head_target = builder.CreateBlock(Where, parent);
+    const auto loop_target = builder.CreateBlock(Do->Where, parent);
+    const auto tail_target = builder.CreateBlock(Where, parent);
 
-    Prefix->Generate(builder, landing_pad);
+    auto target_frame = frame;
+    target_frame.Head = head_target;
+    target_frame.Tail = tail_target;
+
+    if (Prefix)
+        Prefix->Generate(builder, frame);
+    (void) builder.CreateDirect(Where, head_target);
+
+    builder.SetInsertBlock(head_target);
+    if (Condition)
     {
-        const auto condition = Condition->GenerateValue(builder, landing_pad);
-        (void) builder.CreateBranch(condition, loop_target, end_target);
+        const auto condition = Condition->GenerateValue(builder, frame);
+        (void) builder.CreateBranch(Condition->Where, condition, loop_target, tail_target);
+    }
+    else
+    {
+        (void) builder.CreateDirect(Where, loop_target);
     }
 
     builder.SetInsertBlock(loop_target);
-    Do->Generate(builder, landing_pad);
-    Suffix->Generate(builder, landing_pad);
+    Do->Generate(builder, target_frame);
+    if (!builder.GetInsertBlock()->GetTerminator())
     {
-        const auto condition = Condition->GenerateValue(builder, landing_pad);
-        (void) builder.CreateBranch(condition, loop_target, end_target);
+        if (Suffix)
+            Suffix->Generate(builder, frame);
+        (void) builder.CreateDirect(Do->Where, head_target);
     }
 
-    builder.SetInsertBlock(end_target);
+    if (!Condition && !(target_frame.Flags & FrameFlag_RequireTail))
+    {
+        builder.RemoveBlock(Where, tail_target);
+        builder.SetInsertBlock(nullptr);
+    }
+    else
+    {
+        builder.SetInsertBlock(tail_target);
+    }
 }

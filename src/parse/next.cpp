@@ -28,7 +28,7 @@ mcc::Token &mcc::Parser::Next()
     };
 
     auto state = LexState_None;
-    auto token_location = m_Location;
+    auto where = m_Where;
 
     std::string raw;
     std::string value;
@@ -57,13 +57,13 @@ mcc::Token &mcc::Parser::Next()
                     case '#':
                     case '$':
                     case '?':
-                        token_location = m_Location;
+                        where = m_Where;
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         Get();
                         return m_Token = {
                                    .Type = TokenType_Other,
-                                   .Where = std::move(token_location),
+                                   .Where = std::move(where),
                                    .Raw = std::move(raw),
                                    .Value = std::move(value),
                                };
@@ -77,7 +77,7 @@ mcc::Token &mcc::Parser::Next()
                     case '*':
                     case '/':
                     case '%':
-                        token_location = m_Location;
+                        where = m_Where;
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         state = LexState_Operator;
@@ -85,7 +85,7 @@ mcc::Token &mcc::Parser::Next()
                         break;
 
                     case '@':
-                        token_location = m_Location;
+                        where = m_Where;
                         raw += static_cast<char>(m_Buf);
                         Get();
                         raw += static_cast<char>(m_Buf);
@@ -97,14 +97,14 @@ mcc::Token &mcc::Parser::Next()
                             Get();
                             return m_Token = {
                                        .Type = TokenType_TargetAttributes,
-                                       .Where = std::move(token_location),
+                                       .Where = std::move(where),
                                        .Raw = std::move(raw),
                                        .Value = std::move(value),
                                    };
                         }
                         return m_Token = {
                                    .Type = TokenType_Target,
-                                   .Where = std::move(token_location),
+                                   .Where = std::move(where),
                                    .Raw = std::move(raw),
                                    .Value = std::move(value),
                                };
@@ -113,7 +113,7 @@ mcc::Token &mcc::Parser::Next()
                         formatted = true;
                     case '"':
                         raw += static_cast<char>(m_Buf);
-                        token_location = m_Location;
+                        where = m_Where;
                         state = LexState_String;
                         Get();
                         break;
@@ -128,25 +128,25 @@ mcc::Token &mcc::Parser::Next()
 
                         if (std::isdigit(m_Buf) || m_Buf == '.')
                         {
-                            token_location = m_Location;
+                            where = m_Where;
                             state = LexState_Number;
                             break;
                         }
 
                         if (std::isalpha(m_Buf) || m_Buf == '_')
                         {
-                            token_location = m_Location;
+                            where = m_Where;
                             state = LexState_Symbol;
                             break;
                         }
 
-                        token_location = m_Location;
+                        where = m_Where;
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         Get();
                         return m_Token = {
                                    .Type = TokenType_Undefined,
-                                   .Where = std::move(token_location),
+                                   .Where = std::move(where),
                                    .Raw = std::move(raw),
                                    .Value = std::move(value),
                                };
@@ -157,7 +157,7 @@ mcc::Token &mcc::Parser::Next()
                 if (!std::isalnum(m_Buf) && m_Buf != '.' && m_Buf != '_')
                     return m_Token = {
                                .Type = TokenType_Symbol,
-                               .Where = std::move(token_location),
+                               .Where = std::move(where),
                                .Raw = std::move(raw),
                                .Value = std::move(value),
                            };
@@ -181,7 +181,7 @@ mcc::Token &mcc::Parser::Next()
                             auto integer = std::stoll(value);
                             return m_Token = {
                                        .Type = TokenType_Integer,
-                                       .Where = std::move(token_location),
+                                       .Where = std::move(where),
                                        .Raw = std::move(raw),
                                        .Value = std::move(value),
                                        .Integer = integer,
@@ -193,7 +193,7 @@ mcc::Token &mcc::Parser::Next()
                             auto float_ = std::stold(value);
                             return m_Token = {
                                        .Type = TokenType_Float,
-                                       .Where = std::move(token_location),
+                                       .Where = std::move(where),
                                        .Raw = std::move(raw),
                                        .Value = std::move(value),
                                        .Float = float_,
@@ -209,7 +209,7 @@ mcc::Token &mcc::Parser::Next()
                             auto end = end_string.empty() ? std::nullopt : std::optional(std::stoll(end_string));
                             return m_Token = {
                                        .Type = TokenType_Range,
-                                       .Where = std::move(token_location),
+                                       .Where = std::move(where),
                                        .Raw = std::move(raw),
                                        .Value = std::move(value),
                                        .Range = {beg, end},
@@ -218,6 +218,7 @@ mcc::Token &mcc::Parser::Next()
 
                         default:
                             Error(
+                                m_Where,
                                 "invalid number of decimal points in range token, must be either 0, 1 or 2, but is {}",
                                 decimals);
                     }
@@ -237,7 +238,7 @@ mcc::Token &mcc::Parser::Next()
                                .Type = formatted
                                            ? TokenType_FormatString
                                            : TokenType_String,
-                               .Where = std::move(token_location),
+                               .Where = std::move(where),
                                .Raw = std::move(raw),
                                .Value = std::move(value),
                            };
@@ -260,7 +261,7 @@ mcc::Token &mcc::Parser::Next()
                 if (!operator_map.contains(value) || !operator_map.at(value).contains(m_Buf))
                     return m_Token = {
                                .Type = TokenType_Operator,
-                               .Where = std::move(token_location),
+                               .Where = std::move(where),
                                .Raw = std::move(raw),
                                .Value = std::move(value),
                            };
@@ -295,6 +296,6 @@ mcc::Token &mcc::Parser::Next()
 
     return m_Token = {
                .Type = TokenType_EOF,
-               .Where = std::move(token_location),
+               .Where = std::move(where),
            };
 }

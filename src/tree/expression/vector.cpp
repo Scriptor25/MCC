@@ -5,11 +5,11 @@
 #include <mcc/value.hpp>
 
 mcc::VectorExpression::VectorExpression(
-    SourceLocation where,
-    std::string operator_,
+    const SourceLocation &where,
+    const std::string &operator_,
     std::vector<ExpressionPtr> operands)
-    : Expression(std::move(where)),
-      Operator(std::move(operator_)),
+    : Expression(where),
+      Operator(operator_),
       Operands(std::move(operands))
 {
 }
@@ -28,11 +28,11 @@ std::ostream &mcc::VectorExpression::Print(std::ostream &stream) const
     return stream;
 }
 
-mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
+mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     std::vector<ValuePtr> operands;
     for (auto &operand: Operands)
-        operands.emplace_back(operand->GenerateValue(builder, landing_pad));
+        operands.emplace_back(operand->GenerateValue(builder, frame));
 
     auto operator_ = Operator_None;
     if (Operator == "+")
@@ -47,7 +47,7 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Block
         operator_ = Operator_Rem;
 
     if (operator_)
-        return builder.CreateOperation(operator_, std::move(operands));
+        return builder.CreateOperation(Where, operator_, operands);
 
-    Error("undefined binary operator {}", Operator);
+    Error(Where, "undefined binary operator {}", Operator);
 }

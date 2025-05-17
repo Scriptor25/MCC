@@ -1,14 +1,15 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
-mcc::InstructionPtr mcc::StoreInstruction::Create(ValuePtr dst, ValuePtr src)
+mcc::InstructionPtr mcc::StoreInstruction::Create(const SourceLocation &where, const ValuePtr &dst, const ValuePtr &src)
 {
-    return std::make_shared<StoreInstruction>(std::move(dst), std::move(src));
+    return std::make_shared<StoreInstruction>(where, dst, src);
 }
 
-mcc::StoreInstruction::StoreInstruction(ValuePtr dst, ValuePtr src)
-    : Dst(std::move(dst)),
-      Src(std::move(src))
+mcc::StoreInstruction::StoreInstruction(const SourceLocation &where, const ValuePtr &dst, const ValuePtr &src)
+    : Instruction(where),
+      Dst(dst),
+      Src(src)
 {
     Dst->Use();
     Src->Use();
@@ -59,6 +60,7 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
 
                 default:
                     Error(
+                        Where,
                         "src must be {}, {} or {}, but is {}",
                         ResultType_Value,
                         ResultType_Storage,
@@ -96,6 +98,7 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
 
                 default:
                     Error(
+                        Where,
                         "src must be {}, {} or {}, but is {}",
                         ResultType_Value,
                         ResultType_Storage,
@@ -106,6 +109,7 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
 
         default:
             Error(
+                Where,
                 "dst must be {} or {}, but is {}",
                 ResultType_Storage,
                 ResultType_Score,

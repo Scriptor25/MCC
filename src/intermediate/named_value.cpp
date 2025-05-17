@@ -1,14 +1,17 @@
-#include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
-mcc::ValuePtr mcc::NamedValue::Create(ResourceLocation location, std::string name)
+mcc::ValuePtr mcc::NamedValue::Create(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const std::string &name)
 {
-    return std::make_shared<NamedValue>(std::move(location), std::move(name));
+    return std::make_shared<NamedValue>(where, location, name);
 }
 
-mcc::NamedValue::NamedValue(ResourceLocation location, std::string name)
-    : Location(std::move(location)),
-      Name(std::move(name))
+mcc::NamedValue::NamedValue(const SourceLocation &where, const ResourceLocation &location, const std::string &name)
+    : Value(where),
+      Location(location),
+      Name(name)
 {
 }
 

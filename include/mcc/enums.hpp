@@ -16,6 +16,13 @@ namespace mcc
         TypeID_Object,
     };
 
+    enum FrameFlagE
+    {
+        FrameFlag_RequireHead = 0b001,
+        FrameFlag_RequireTail = 0b010,
+        FrameFlag_RequireLandingPad = 0b100,
+    };
+
     enum ResultTypeE
     {
         ResultType_None,

@@ -1,14 +1,21 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
-mcc::InstructionPtr mcc::ReturnInstruction::Create(ResourceLocation location, ValuePtr value)
+mcc::InstructionPtr mcc::ReturnInstruction::Create(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &value)
 {
-    return std::make_shared<ReturnInstruction>(std::move(location), std::move(value));
+    return std::make_shared<ReturnInstruction>(where, location, value);
 }
 
-mcc::ReturnInstruction::ReturnInstruction(ResourceLocation location, ValuePtr value)
-    : Location(std::move(location)),
-      Value(std::move(value))
+mcc::ReturnInstruction::ReturnInstruction(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &value)
+    : Instruction(where),
+      Location(location),
+      Value(value)
 {
     if (Value)
         Value->Use();
@@ -50,6 +57,7 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
 
             default:
                 Error(
+                    Where,
                     "value must be {}, {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Storage,

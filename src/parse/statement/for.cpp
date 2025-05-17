@@ -14,7 +14,7 @@ mcc::StatementPtr mcc::Parser::ParseForStatement()
     Expect(TokenType_Other, ")");
     auto do_ = ParseStatement();
     return std::make_unique<ForStatement>(
-        std::move(where),
+        where,
         std::move(prefix),
         std::move(condition),
         std::move(suffix),

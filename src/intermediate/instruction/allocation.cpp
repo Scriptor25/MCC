@@ -1,27 +1,38 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
-mcc::InstructionPtr mcc::AllocationInstruction::CreateValue(ResourceLocation location, IndexT index)
+mcc::InstructionPtr mcc::AllocationInstruction::CreateValue(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const IndexT index)
 {
-    return std::make_shared<AllocationInstruction>(AllocationType_Value, std::move(location), index);
+    return std::make_shared<AllocationInstruction>(where, AllocationType_Value, location, index);
 }
 
-mcc::InstructionPtr mcc::AllocationInstruction::CreateArray(ResourceLocation location, IndexT index)
+mcc::InstructionPtr mcc::AllocationInstruction::CreateArray(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const IndexT index)
 {
-    return std::make_shared<AllocationInstruction>(AllocationType_Array, std::move(location), index);
+    return std::make_shared<AllocationInstruction>(where, AllocationType_Array, location, index);
 }
 
-mcc::InstructionPtr mcc::AllocationInstruction::CreateObject(ResourceLocation location, IndexT index)
+mcc::InstructionPtr mcc::AllocationInstruction::CreateObject(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const IndexT index)
 {
-    return std::make_shared<AllocationInstruction>(AllocationType_Object, std::move(location), index);
+    return std::make_shared<AllocationInstruction>(where, AllocationType_Object, location, index);
 }
 
 mcc::AllocationInstruction::AllocationInstruction(
+    const SourceLocation &where,
     const AllocationTypeE allocation_type,
-    ResourceLocation location,
+    const ResourceLocation &location,
     const IndexT index)
-    : AllocationType(allocation_type),
-      Location(std::move(location)),
+    : Instruction(where),
+      AllocationType(allocation_type),
+      Location(location),
       Index(index)
 {
 }
@@ -44,7 +55,7 @@ void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool st
             break;
     }
 
-    Assert(stack, "allocation instruction requires stack");
+    Assert(stack, Where, "allocation instruction requires stack");
     commands.Append("data modify storage {} stack[0].val insert {} value {}", Location, Index, value);
 }
 

@@ -1,12 +1,14 @@
 #pragma once
 
 #include <mcc/common.hpp>
+#include <mcc/lex.hpp>
 #include <mcc/package.hpp>
 
 namespace mcc
 {
     struct Value
     {
+        explicit Value(const SourceLocation &where);
         virtual ~Value() = default;
 
         virtual void Generate(CommandVector &commands, bool stack) const;
@@ -16,14 +18,15 @@ namespace mcc
         void Use();
         void Drop();
 
+        SourceLocation Where;
         IndexT UseCount = 0;
     };
 
     struct NamedValue final : Value
     {
-        static ValuePtr Create(ResourceLocation location, std::string name);
+        static ValuePtr Create(const SourceLocation &where, const ResourceLocation &location, const std::string &name);
 
-        NamedValue(ResourceLocation location, std::string name);
+        NamedValue(const SourceLocation &where, const ResourceLocation &location, const std::string &name);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -34,9 +37,9 @@ namespace mcc
 
     struct BranchResult final : Value
     {
-        static ValuePtr Create(ResourceLocation location);
+        static ValuePtr Create(const SourceLocation &where, const ResourceLocation &location);
 
-        explicit BranchResult(ResourceLocation location);
+        BranchResult(const SourceLocation &where, const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -47,11 +50,18 @@ namespace mcc
     struct Block final : Value
     {
         static BlockPtr CreateTopLevel(
-            ResourceLocation location,
-            ParameterList parameters);
-        static BlockPtr Create(const BlockPtr &parent, ResourceLocation location);
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            const ParameterList &parameters);
+        static BlockPtr Create(
+            const SourceLocation &where,
+            const BlockPtr &parent,
+            const ResourceLocation &location);
 
-        Block(ResourceLocation location, ParameterList parameters);
+        Block(
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            const ParameterList &parameters);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
@@ -74,9 +84,9 @@ namespace mcc
 
     struct FunctionResult final : Value
     {
-        static ValuePtr Create(ResourceLocation location);
+        static ValuePtr Create(const SourceLocation &where, const ResourceLocation &location);
 
-        explicit FunctionResult(ResourceLocation location);
+        FunctionResult(const SourceLocation &where, const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
         Result GenerateResult(bool stringify) const override;

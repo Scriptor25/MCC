@@ -22,7 +22,7 @@ static void parse_file(mcc::Package &package, const std::filesystem::path &path)
 
     while (parser)
         if (const auto statement = parser())
-            statement->Generate(builder, nullptr);
+            statement->Generate(builder, {});
 
     builder.Generate();
 }
@@ -126,7 +126,7 @@ int main(const int argc, const char **argv)
             auto info = mcc::PackageInfo::Deserialize(pkg);
             mcc::Package package(info);
 
-            mcc::Assert(std::filesystem::exists("src"), "failed to open source directory");
+            mcc::Assert(std::filesystem::exists("src"), "source directory does not exist");
 
             parse_directory(package, "src");
 

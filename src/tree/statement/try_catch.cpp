@@ -3,14 +3,14 @@
 #include <mcc/value.hpp>
 
 mcc::TryCatchStatement::TryCatchStatement(
-    SourceLocation where,
+    const SourceLocation &where,
     StatementPtr try_,
     StatementPtr catch_,
-    std::string variable)
-    : Statement(std::move(where)),
+    const std::string &variable)
+    : Statement(where),
       Try(std::move(try_)),
       Catch(std::move(catch_)),
-      Variable(std::move(variable))
+      Variable(variable)
 {
 }
 
@@ -27,20 +27,23 @@ std::ostream &mcc::TryCatchStatement::Print(std::ostream &stream) const
     return stream;
 }
 
-void mcc::TryCatchStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
+void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent();
-    const auto end_target = builder.CreateBlock(parent);
-    const auto catch_target = Catch ? builder.CreateBlock(parent) : end_target;
+    const auto parent = builder.GetInsertParent(Where);
+    const auto tail_target = builder.CreateBlock(Where, parent);
+    const auto catch_target = Catch ? builder.CreateBlock(Catch->Where, parent) : tail_target;
 
-    auto require_end = !Catch;
+    auto require_tail = !Catch;
 
-    Try->Generate(builder, catch_target);
+    auto target_frame = frame;
+    target_frame.LandingPad = catch_target;
+
+    Try->Generate(builder, target_frame);
 
     if (!builder.GetInsertBlock()->GetTerminator())
     {
-        require_end = true;
-        (void) builder.CreateDirect(end_target);
+        require_tail = true;
+        (void) builder.CreateDirect(Try->Where, tail_target);
     }
 
     if (Catch)
@@ -48,24 +51,24 @@ void mcc::TryCatchStatement::Generate(Builder &builder, const BlockPtr landing_p
         builder.SetInsertBlock(catch_target);
 
         if (!Variable.empty())
-            (void) builder.CreateStoreResult(Variable);
+            (void) builder.CreateStoreResult(Catch->Where, Variable);
 
-        Catch->Generate(builder, landing_pad);
+        Catch->Generate(builder, frame);
 
         if (!builder.GetInsertBlock()->GetTerminator())
         {
-            require_end = true;
-            (void) builder.CreateDirect(end_target);
+            require_tail = true;
+            (void) builder.CreateDirect(Catch->Where, tail_target);
         }
     }
 
-    if (!require_end)
+    if (!require_tail)
     {
-        builder.RemoveBlock(end_target);
+        builder.RemoveBlock(Where, tail_target);
         builder.SetInsertBlock(nullptr);
     }
     else
     {
-        builder.SetInsertBlock(end_target);
+        builder.SetInsertBlock(tail_target);
     }
 }

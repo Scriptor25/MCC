@@ -17,7 +17,7 @@ namespace mcc
 
     struct EnumAttribute final : TargetAttribute
     {
-        EnumAttribute(bool invert, std::string value);
+        EnumAttribute(bool invert, const std::string &value);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] std::string String() const override;
@@ -57,7 +57,7 @@ namespace mcc
 
     struct NameAttribute final : TargetAttribute
     {
-        NameAttribute(bool invert, std::string value);
+        NameAttribute(bool invert, const std::string &value);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] std::string String() const override;
@@ -87,7 +87,7 @@ namespace mcc
 
     struct ResourceAttribute final : TargetAttribute
     {
-        ResourceAttribute(bool invert, ResourceLocation value);
+        ResourceAttribute(bool invert, const ResourceLocation &value);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] std::string String() const override;
@@ -107,7 +107,7 @@ namespace mcc
 
     struct StringAttribute final : TargetAttribute
     {
-        StringAttribute(bool invert, std::string value);
+        StringAttribute(bool invert, const std::string &value);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] std::string String() const override;

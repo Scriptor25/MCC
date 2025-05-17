@@ -1,12 +1,19 @@
 #include <mcc/constant.hpp>
 
-mcc::ConstantPtr mcc::ConstantArray::Create(std::vector<ConstantPtr> values, bool stringify)
+mcc::ConstantPtr mcc::ConstantArray::Create(
+    const SourceLocation &where,
+    const std::vector<ConstantPtr> &values,
+    const bool stringify)
 {
-    return std::make_shared<ConstantArray>(std::move(values), stringify);
+    return std::make_shared<ConstantArray>(where, values, stringify);
 }
 
-mcc::ConstantArray::ConstantArray(std::vector<ConstantPtr> values, const bool stringify)
-    : Values(std::move(values)),
+mcc::ConstantArray::ConstantArray(
+    const SourceLocation &where,
+    const std::vector<ConstantPtr> &values,
+    const bool stringify)
+    : Constant(where),
+      Values(values),
       Stringify(stringify)
 {
     for (const auto &value: Values)

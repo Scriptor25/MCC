@@ -1,12 +1,13 @@
 #include <mcc/constant.hpp>
 
-mcc::ConstantPtr mcc::ConstantFloat::Create(const FloatT value)
+mcc::ConstantPtr mcc::ConstantFloat::Create(const SourceLocation &where, const FloatT value)
 {
-    return std::make_shared<ConstantFloat>(value);
+    return std::make_shared<ConstantFloat>(where, value);
 }
 
-mcc::ConstantFloat::ConstantFloat(const FloatT value)
-    : Value(value)
+mcc::ConstantFloat::ConstantFloat(const SourceLocation &where, const FloatT value)
+    : Constant(where),
+      Value(value)
 {
 }
 

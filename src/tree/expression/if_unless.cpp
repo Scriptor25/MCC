@@ -3,12 +3,12 @@
 #include <mcc/value.hpp>
 
 mcc::IfUnlessExpression::IfUnlessExpression(
-    SourceLocation where,
+    const SourceLocation &where,
     const bool unless,
     ExpressionPtr condition,
     ExpressionPtr then,
     ExpressionPtr else_)
-    : Expression(std::move(where)),
+    : Expression(where),
       Unless(unless),
       Condition(std::move(condition)),
       Then(std::move(then)),
@@ -21,27 +21,27 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
     return Else->Print(Then->Print(Condition->Print(stream << "if (") << ") ") << " else ");
 }
 
-mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
+mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent();
-    const auto then_target = builder.CreateBlock(parent);
-    const auto else_target = builder.CreateBlock(parent);
-    const auto end_target = builder.CreateBlock(parent);
+    const auto parent = builder.GetInsertParent(Where);
+    const auto then_target = builder.CreateBlock(Then->Where, parent);
+    const auto else_target = builder.CreateBlock(Else->Where, parent);
+    const auto tail_target = builder.CreateBlock(Where, parent);
 
-    const auto condition = Condition->GenerateValue(builder, landing_pad);
-    (void) builder.CreateBranch(condition, then_target, else_target);
+    const auto condition = Condition->GenerateValue(builder, frame);
+    (void) builder.CreateBranch(Where, condition, then_target, else_target);
 
-    builder.SetInsertBlock(end_target);
-    auto branch_result = builder.CreateBranchResult();
+    builder.SetInsertBlock(tail_target);
+    auto branch_result = builder.CreateBranchResult(Where);
 
     builder.SetInsertBlock(then_target);
-    const auto then_value = Then->GenerateValue(builder, landing_pad);
-    (void) builder.CreateDirect(end_target, then_value, branch_result);
+    const auto then_value = Then->GenerateValue(builder, frame);
+    (void) builder.CreateDirect(Then->Where, tail_target, then_value, branch_result);
 
     builder.SetInsertBlock(else_target);
-    const auto else_value = Else->GenerateValue(builder, landing_pad);
-    (void) builder.CreateDirect(end_target, else_value, branch_result);
+    const auto else_value = Else->GenerateValue(builder, frame);
+    (void) builder.CreateDirect(Else->Where, tail_target, else_value, branch_result);
 
-    builder.SetInsertBlock(end_target);
+    builder.SetInsertBlock(tail_target);
     return branch_result;
 }

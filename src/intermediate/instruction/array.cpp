@@ -2,73 +2,86 @@
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
-    ResourceLocation location,
-    ValuePtr array,
-    ValuePtr value,
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &array,
+    const ValuePtr &value,
     const bool stringify)
 {
     return std::make_shared<ArrayInstruction>(
+        where,
         ArrayOperation_Append,
-        std::move(location),
-        std::move(array),
-        std::move(value),
+        location,
+        array,
+        value,
         ~0,
         stringify);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
-    ResourceLocation location,
-    ValuePtr array,
-    ValuePtr value,
-    bool stringify)
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &array,
+    const ValuePtr &value,
+    const bool stringify)
 {
     return std::make_shared<ArrayInstruction>(
+        where,
         ArrayOperation_Prepend,
-        std::move(location),
-        std::move(array),
-        std::move(value),
+        location,
+        array,
+        value,
         ~0,
         stringify);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
-    ResourceLocation location,
-    ValuePtr array,
-    ValuePtr value,
-    IndexT index,
-    bool stringify)
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &array,
+    const ValuePtr &value,
+    const IndexT index,
+    const bool stringify)
 {
     return std::make_shared<ArrayInstruction>(
+        where,
         ArrayOperation_Insert,
-        std::move(location),
-        std::move(array),
-        std::move(value),
+        location,
+        array,
+        value,
         index,
         stringify);
 }
 
-mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(ResourceLocation location, ValuePtr array, IndexT index)
+mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &array,
+    const IndexT index)
 {
     return std::make_shared<ArrayInstruction>(
+        where,
         ArrayOperation_Extract,
-        std::move(location),
-        std::move(array),
+        location,
+        array,
         nullptr,
         index,
         false);
 }
 
 mcc::ArrayInstruction::ArrayInstruction(
+    const SourceLocation &where,
     const ArrayOperationE array_operation,
-    ResourceLocation location,
-    ValuePtr array,
-    ValuePtr value,
+    const ResourceLocation &location,
+    const ValuePtr &array,
+    const ValuePtr &value,
     const IndexT index,
     const bool stringify)
-    : ArrayOperation(array_operation),
-      Location(std::move(location)),
-      Array(std::move(array)),
-      Value(std::move(value)),
+    : Instruction(where),
+      ArrayOperation(array_operation),
+      Location(location),
+      Array(array),
+      Value(value),
       Index(index),
       Stringify(stringify)
 {
@@ -86,20 +99,6 @@ mcc::ArrayInstruction::~ArrayInstruction()
 
 void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    //
-    // array: stack-allocated
-    //
-    //      data modify storage <location> stack[0].values[<array.index>] (append|prepend|insert <index>) ...
-    //
-    // value -> constant:           ... value <value>
-    //       -> stack-allocated:    ... from storage <location> stack[0].values[<value.index>]
-    //
-    // value -> register:
-    //
-    //      data modify storage <location> stack[0].values[<array.index>] (append|prepend|insert <index>) value 0
-    //      execute store result storage <location> stack[0].values[<array.index>][(<back>|0|<index>)] double 1 run scoreboard players get <value.player> <value.objective>
-    //
-
     if (ArrayOperation == ArrayOperation_Extract)
         return;
 
@@ -108,6 +107,7 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 
     Assert(
         array.Type == ResultType_Storage,
+        Where,
         "array must be {}, but is {}",
         ResultType_Storage,
         array.Type);
@@ -128,7 +128,7 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
             break;
 
         default:
-            Error("TODO");
+            Error(Where, "TODO");
     }
 
     auto conversion = Stringify ? "string" : "from";
@@ -175,6 +175,7 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 
         default:
             Error(
+                Where,
                 "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
@@ -190,12 +191,13 @@ bool mcc::ArrayInstruction::RequireStack() const
 
 mcc::Result mcc::ArrayInstruction::GenerateResult(bool stringify) const
 {
-    Assert(ArrayOperation == ArrayOperation_Extract, "only the extract array operation produces a result");
+    Assert(ArrayOperation == ArrayOperation_Extract, Where, "only the extract array operation produces a result");
 
     auto array = Array->GenerateResult(false);
 
     Assert(
         array.Type == ResultType_Storage,
+        Where,
         "array must be {}, but is {}",
         ResultType_Storage,
         array.Type);

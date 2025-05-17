@@ -1,12 +1,13 @@
 #include <mcc/constant.hpp>
 
-mcc::ConstantPtr mcc::ConstantString::Create(std::string value)
+mcc::ConstantPtr mcc::ConstantString::Create(const SourceLocation &where, const std::string &value)
 {
-    return std::make_shared<ConstantString>(std::move(value));
+    return std::make_shared<ConstantString>(where, value);
 }
 
-mcc::ConstantString::ConstantString(std::string value)
-    : Value(std::move(value))
+mcc::ConstantString::ConstantString(const SourceLocation &where, const std::string &value)
+    : Constant(where),
+      Value(value)
 {
 }
 

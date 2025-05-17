@@ -22,13 +22,6 @@ namespace mcc
         TokenType_Undefined,
     };
 
-    struct SourceLocation
-    {
-        std::string Filename;
-        unsigned Row;
-        unsigned Col;
-    };
-
     struct Token
     {
         TokenType Type;

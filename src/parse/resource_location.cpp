@@ -10,12 +10,12 @@ mcc::ResourceLocation mcc::Parser::ParseResourceLocation()
 
     if (!namespace_.empty() && SkipIf(TokenType_Other, ":"))
     {
-        namespace_ = std::move(path);
+        namespace_ = path;
 
         path = Expect(TokenType_Symbol).Value;
         while (SkipIf(TokenType_Operator, "/"))
             path += '/' + Expect(TokenType_Symbol).Value;
     }
 
-    return {std::move(namespace_), std::move(path)};
+    return {namespace_, path};
 }

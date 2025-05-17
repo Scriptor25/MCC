@@ -21,8 +21,8 @@ mcc::StatementPtr mcc::Parser::ParseTryCatchStatement()
     }
 
     return std::make_unique<TryCatchStatement>(
-        std::move(where),
+        where,
         std::move(try_),
         std::move(catch_),
-        std::move(variable));
+        variable);
 }

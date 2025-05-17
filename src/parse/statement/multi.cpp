@@ -10,5 +10,5 @@ mcc::StatementPtr mcc::Parser::ParseMultiStatement()
         statements.emplace_back(ParseStatement());
     Expect(TokenType_Other, "}");
 
-    return std::make_unique<MultiStatement>(std::move(where), std::move(statements));
+    return std::make_unique<MultiStatement>(where, std::move(statements));
 }

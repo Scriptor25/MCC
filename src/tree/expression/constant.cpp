@@ -2,10 +2,13 @@
 #include <mcc/expression.hpp>
 #include <mcc/value.hpp>
 
-mcc::ConstantExpression::ConstantExpression(SourceLocation where, ConstantPtr value, std::string view)
-    : Expression(std::move(where)),
-      Value(std::move(value)),
-      View(std::move(view))
+mcc::ConstantExpression::ConstantExpression(
+    const SourceLocation &where,
+    const ConstantPtr &value,
+    const std::string &view)
+    : Expression(where),
+      Value(value),
+      View(view)
 {
 }
 
@@ -14,7 +17,7 @@ std::ostream &mcc::ConstantExpression::Print(std::ostream &stream) const
     return stream << View;
 }
 
-mcc::ValuePtr mcc::ConstantExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
+mcc::ValuePtr mcc::ConstantExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     return Value;
 }

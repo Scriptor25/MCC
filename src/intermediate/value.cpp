@@ -1,19 +1,24 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
+mcc::Value::Value(const SourceLocation &where)
+    : Where(where)
+{
+}
+
 void mcc::Value::Generate(CommandVector &commands, bool stack) const
 {
-    Error("mcc::Value::Generate");
+    Error(Where, "mcc::Value::Generate");
 }
 
 bool mcc::Value::RequireStack() const
 {
-    Error("mcc::Value::RequireStack");
+    Error(Where, "mcc::Value::RequireStack");
 }
 
 mcc::Result mcc::Value::GenerateResult(const bool stringify) const
 {
-    Error("mcc::Value::GenerateResult");
+    Error(Where, "mcc::Value::GenerateResult");
 }
 
 void mcc::Value::Use()

@@ -1,33 +1,45 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
-mcc::InstructionPtr mcc::DirectInstruction::Create(ResourceLocation location, BlockPtr target)
+mcc::InstructionPtr mcc::DirectInstruction::Create(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const BlockPtr &target)
 {
-    return std::make_shared<DirectInstruction>(std::move(location), std::move(target), nullptr, nullptr);
+    return std::make_shared<DirectInstruction>(
+        where,
+        location,
+        target,
+        nullptr,
+        nullptr);
 }
 
 mcc::InstructionPtr mcc::DirectInstruction::Create(
-    ResourceLocation location,
-    BlockPtr target,
-    ValuePtr result,
-    ValuePtr branch_result)
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const BlockPtr &target,
+    const ValuePtr &result,
+    const ValuePtr &branch_result)
 {
     return std::make_shared<DirectInstruction>(
-        std::move(location),
-        std::move(target),
-        std::move(result),
-        std::move(branch_result));
+        where,
+        location,
+        target,
+        result,
+        branch_result);
 }
 
 mcc::DirectInstruction::DirectInstruction(
-    ResourceLocation location,
-    BlockPtr target,
-    ValuePtr result,
-    ValuePtr branch_result)
-    : Location(std::move(location)),
-      Target(std::move(target)),
-      Result(std::move(result)),
-      BranchResult(std::move(branch_result))
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const BlockPtr &target,
+    const ValuePtr &result,
+    const ValuePtr &branch_result)
+    : Instruction(where),
+      Location(location),
+      Target(target),
+      Result(result),
+      BranchResult(branch_result)
 {
     Target->Use();
     if (Result)
@@ -49,6 +61,7 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
 
         Assert(
             branch_result.Type == ResultType_Storage,
+            Where,
             "branch result must be {}, but is {}",
             ResultType_Storage,
             branch_result.Type);
@@ -83,6 +96,7 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
 
             default:
                 Error(
+                    Where,
                     "result must be {}, {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Storage,

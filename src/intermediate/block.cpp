@@ -3,23 +3,31 @@
 #include <mcc/value.hpp>
 
 mcc::BlockPtr mcc::Block::CreateTopLevel(
-    ResourceLocation location,
-    ParameterList parameters)
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ParameterList &parameters)
 {
-    return std::make_shared<Block>(std::move(location), std::move(parameters));
+    return std::make_shared<Block>(where, location, parameters);
 }
 
-mcc::BlockPtr mcc::Block::Create(const BlockPtr &parent, ResourceLocation location)
+mcc::BlockPtr mcc::Block::Create(
+    const SourceLocation &where,
+    const BlockPtr &parent,
+    const ResourceLocation &location)
 {
-    auto block = std::make_shared<Block>(std::move(location), ParameterList());
+    auto block = std::make_shared<Block>(where, location, ParameterList());
     block->Parent = parent;
     parent->Children.push_back(block);
-    return std::move(block);
+    return block;
 }
 
-mcc::Block::Block(ResourceLocation location, ParameterList parameters)
-    : Location(std::move(location)),
-      Parameters(std::move(parameters))
+mcc::Block::Block(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ParameterList &parameters)
+    : Value(where),
+      Location(location),
+      Parameters(parameters)
 {
 }
 
@@ -39,21 +47,21 @@ void mcc::Block::Generate(CommandVector &commands, const bool stack) const
     {
         commands.Append("data modify storage {} stack prepend value {{}}", Location);
 
-        for (auto &parameter: Parameters)
+        for (auto &[name_, type_]: Parameters)
         {
-            if (!Variables.contains(parameter.Name))
+            if (!Variables.contains(name_))
                 continue;
 
-            if (parameter.Type == TypeID_String)
+            if (type_ == TypeID_String)
                 commands.Append(
                     "$data modify storage {0} stack[0].var.{1} set value \"$({1})\"",
                     Location,
-                    parameter.Name);
+                    name_);
             else
                 commands.Append(
                     "$data modify storage {0} stack[0].var.{1} set value $({1})",
                     Location,
-                    parameter.Name);
+                    name_);
         }
     }
 
@@ -86,7 +94,7 @@ mcc::InstructionPtr mcc::Block::GetTerminator() const
 
 bool mcc::Block::MayThrow() const
 {
-    Assert(!Parent, "top level block required");
+    Assert(!Parent, Where, "top level block required");
     if (const auto terminator = GetTerminator();
         terminator && !!std::dynamic_pointer_cast<ThrowInstruction>(terminator))
         return true;

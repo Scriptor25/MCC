@@ -7,5 +7,5 @@ mcc::ExpressionPtr mcc::Parser::ParseCommandExpression()
     auto where = Expect(TokenType_Other, "?").Where;
     auto command = Expect(TokenType_FormatString).Value;
 
-    return std::make_unique<CommandExpression>(std::move(where), std::move(command));
+    return std::make_unique<CommandExpression>(where, command);
 }

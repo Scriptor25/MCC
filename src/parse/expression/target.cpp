@@ -52,19 +52,19 @@ mcc::TargetAttributePtr mcc::Parser::ParseFloatRangeAttribute(bool invert)
 mcc::TargetAttributePtr mcc::Parser::ParseStringAttribute(bool invert)
 {
     auto value = Expect(TokenType_String).Value;
-    return std::make_unique<StringAttribute>(invert, std::move(value));
+    return std::make_unique<StringAttribute>(invert, value);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseEnumAttribute(bool invert, const std::vector<const char *> &values)
 {
     auto value = ExpectEnum(values).Value;
-    return std::make_unique<EnumAttribute>(invert, std::move(value));
+    return std::make_unique<EnumAttribute>(invert, value);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseNameAttribute(bool invert)
 {
     auto value = Expect(TokenType_Symbol).Value;
-    return std::make_unique<NameAttribute>(invert, std::move(value));
+    return std::make_unique<NameAttribute>(invert, value);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseMapAttribute(bool invert, const Parse &parse)
@@ -95,7 +95,7 @@ mcc::TargetAttributePtr mcc::Parser::ParseResourceMapAttribute(bool invert, cons
         auto key = ParseResourceLocation();
         Expect(TokenType_Operator, "=");
         auto value = parse(*this, SkipIf(TokenType_Operator, "!"));
-        values.emplace_back(std::move(key), std::move(value));
+        values.emplace_back(key, std::move(value));
         if (!At(TokenType_Other, "}"))
             Expect(TokenType_Other, ",");
     }
@@ -112,7 +112,7 @@ mcc::TargetAttributePtr mcc::Parser::ParseNBTAttribute(bool invert)
 mcc::TargetAttributePtr mcc::Parser::ParseResourceAttribute(bool invert)
 {
     auto value = ParseResourceLocation();
-    return std::make_unique<ResourceAttribute>(invert, std::move(value));
+    return std::make_unique<ResourceAttribute>(invert, value);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseTagAttribute(bool invert)
@@ -262,5 +262,8 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression(const bool with_attributes
         view += ']';
     }
 
-    return std::make_unique<ConstantExpression>(where, ConstantTarget::Create(selector, std::move(attributes)), view);
+    return std::make_unique<ConstantExpression>(
+        where,
+        ConstantTarget::Create(where, selector, std::move(attributes)),
+        view);
 }

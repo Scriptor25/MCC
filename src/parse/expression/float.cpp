@@ -9,14 +9,14 @@ mcc::ExpressionPtr mcc::Parser::ParseFloatExpression()
     {
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
-            std::move(token.Where),
-            ConstantFloat::Create(token.Integer),
-            std::move(token.Value));
+            token.Where,
+            ConstantFloat::Create(token.Where, token.Integer),
+            token.Value);
     }
 
     auto token = Expect(TokenType_Float);
     return std::make_unique<ConstantExpression>(
-        std::move(token.Where),
-        ConstantFloat::Create(token.Float),
-        std::move(token.Value));
+        token.Where,
+        ConstantFloat::Create(token.Where, token.Float),
+        token.Value);
 }

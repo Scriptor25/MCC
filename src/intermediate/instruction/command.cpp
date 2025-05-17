@@ -1,14 +1,21 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
-mcc::InstructionPtr mcc::CommandInstruction::Create(ResourceLocation location, CommandT command)
+mcc::InstructionPtr mcc::CommandInstruction::Create(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const CommandT &command)
 {
-    return std::make_shared<CommandInstruction>(std::move(location), std::move(command));
+    return std::make_shared<CommandInstruction>(where, location, command);
 }
 
-mcc::CommandInstruction::CommandInstruction(ResourceLocation location, CommandT command)
-    : Location(std::move(location)),
-      Command(std::move(command))
+mcc::CommandInstruction::CommandInstruction(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const CommandT &command)
+    : Instruction(where),
+      Location(location),
+      Command(command)
 {
 }
 
@@ -25,7 +32,7 @@ void mcc::CommandInstruction::Generate(CommandVector &commands, bool stack) cons
     if (macro)
         command.erase(command.begin());
 
-    Assert(stack, "command instruction with result requires stack");
+    Assert(stack, Where, "command instruction with result requires stack");
     commands.Append(
         "{}execute store result storage {} {} double 1 run {}",
         macro ? "$" : "",

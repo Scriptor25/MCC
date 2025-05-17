@@ -3,8 +3,8 @@
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
-mcc::ReturnStatement::ReturnStatement(SourceLocation where, ExpressionPtr value)
-    : Statement(std::move(where)),
+mcc::ReturnStatement::ReturnStatement(const SourceLocation &where, ExpressionPtr value)
+    : Statement(where),
       Value(std::move(value))
 {
 }
@@ -14,14 +14,14 @@ std::ostream &mcc::ReturnStatement::Print(std::ostream &stream) const
     return Value->Print(stream << "return ");
 }
 
-void mcc::ReturnStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
+void mcc::ReturnStatement::Generate(Builder &builder, const Frame &frame) const
 {
     if (!Value)
     {
-        (void) builder.CreateReturnVoid();
+        (void) builder.CreateReturnVoid(Where);
         return;
     }
 
-    const auto value = Value->GenerateValue(builder, landing_pad);
-    (void) builder.CreateReturn(value);
+    const auto value = Value->GenerateValue(builder, frame);
+    (void) builder.CreateReturn(Where, value);
 }

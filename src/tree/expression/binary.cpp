@@ -6,12 +6,12 @@
 #include <mcc/value.hpp>
 
 mcc::BinaryExpression::BinaryExpression(
-    SourceLocation where,
-    std::string operator_,
+    const SourceLocation &where,
+    const std::string &operator_,
     ExpressionPtr left,
     ExpressionPtr right)
-    : Expression(std::move(where)),
-      Operator(std::move(operator_)),
+    : Expression(where),
+      Operator(operator_),
       Left(std::move(left)),
       Right(std::move(right))
 {
@@ -63,7 +63,7 @@ mcc::ExpressionPtr mcc::BinaryExpression::Merge()
         return nullptr;
     }
 
-    return std::make_unique<VectorExpression>(std::move(Where), std::move(Operator), std::move(operands));
+    return std::make_unique<VectorExpression>(Where, Operator, std::move(operands));
 }
 
 std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
@@ -71,13 +71,13 @@ std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
     return Right->Print(Left->Print(stream) << ' ' << Operator << ' ');
 }
 
-mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
+mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    auto left = Left->GenerateValue(builder, landing_pad);
-    auto right = Right->GenerateValue(builder, landing_pad);
+    auto left = Left->GenerateValue(builder, frame);
+    auto right = Right->GenerateValue(builder, frame);
 
     if (Operator == "=")
-        return builder.CreateStore(std::move(left), std::move(right));
+        return builder.CreateStore(Where, left, right);
 
     auto comparator = Comparator_None;
     if (Operator == "<")
@@ -92,7 +92,7 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Block
         comparator = Comparator_EQ;
 
     if (comparator)
-        return builder.CreateComparison(comparator, std::move(left), std::move(right));
+        return builder.CreateComparison(Where, comparator, left, right);
 
     const auto store = Operator.back() == '=';
     auto operator_string = Operator;
@@ -113,10 +113,10 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Block
 
     if (operator_)
     {
-        auto operation = builder.CreateOperation(operator_, {left, std::move(right)});
+        auto operation = builder.CreateOperation(Where, operator_, {left, right});
         if (store)
-            return builder.CreateStore(std::move(left), std::move(operation));
-        return std::move(operation);
+            return builder.CreateStore(Where, left, operation);
+        return operation;
     }
 
     Error(Where, "undefined binary operator {}", Operator);

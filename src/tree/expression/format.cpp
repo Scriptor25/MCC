@@ -5,8 +5,8 @@
 #include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
 
-mcc::FormatExpression::FormatExpression(SourceLocation where, std::vector<FormatNodePtr> nodes)
-    : Expression(std::move(where)),
+mcc::FormatExpression::FormatExpression(const SourceLocation &where, std::vector<FormatNodePtr> nodes)
+    : Expression(where),
       Nodes(std::move(nodes))
 {
 }
@@ -19,26 +19,26 @@ std::ostream &mcc::FormatExpression::Print(std::ostream &stream) const
     return stream << '`';
 }
 
-mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
+mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     std::vector<ValuePtr> values;
     std::vector<ConstantPtr> constants;
 
     for (auto &node: Nodes)
     {
-        auto value = node->Generate(builder, landing_pad);
+        auto value = node->Generate(builder, frame);
         if (auto constant = std::dynamic_pointer_cast<Constant>(value))
             constants.emplace_back(constant);
         values.emplace_back(value);
     }
 
     if (values.size() == constants.size())
-        return ConstantArray::Create(constants, true);
+        return ConstantArray::Create(Where, constants, true);
 
-    auto array = builder.AllocateArray();
+    auto array = builder.AllocateArray(Where);
 
     for (const auto &value: values)
-        (void) builder.CreateAppend(array, value, true);
+        (void) builder.CreateAppend(Where, array, value, true);
 
     return array;
 }

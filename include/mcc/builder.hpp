@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mcc/common.hpp>
+#include <mcc/lex.hpp>
 #include <mcc/package.hpp>
 
 namespace mcc
@@ -11,59 +12,109 @@ namespace mcc
         explicit Builder(Context &context);
 
         [[nodiscard]] Context &GetContext() const;
-        [[nodiscard]] const ResourceLocation &GetLocation() const;
+        [[nodiscard]] const ResourceLocation &GetLocation(const SourceLocation &where) const;
 
-        BlockPtr CreateFunction(ResourceLocation location, ParameterList parameters);
-        BlockPtr CreateBlock(const BlockPtr &parent);
+        BlockPtr CreateFunction(
+            const SourceLocation &where,
+            ResourceLocation location,
+            const ParameterList &parameters);
+        BlockPtr CreateBlock(const SourceLocation &where, const BlockPtr &parent);
         BlockPtr FindBlock(const ResourceLocation &location) const;
-        void RemoveBlock(const BlockPtr &block);
+        void RemoveBlock(const SourceLocation &where, const BlockPtr &block);
 
-        void SetInsertBlock(BlockPtr block);
+        void SetInsertBlock(const BlockPtr &block);
         [[nodiscard]] BlockPtr GetInsertBlock() const;
-        [[nodiscard]] BlockPtr GetInsertParent() const;
+        [[nodiscard]] BlockPtr GetInsertParent(const SourceLocation &where) const;
 
-        [[nodiscard]] ValuePtr GetVariable(const std::string &name) const;
+        [[nodiscard]] ValuePtr GetVariable(const SourceLocation &where, const std::string &name) const;
 
-        [[nodiscard]] InstructionPtr CreateStore(ValuePtr dst, ValuePtr src) const;
+        [[nodiscard]] InstructionPtr CreateStore(
+            const SourceLocation &where,
+            const ValuePtr &dst,
+            const ValuePtr &src) const;
 
-        [[nodiscard]] InstructionPtr CreateComparison(ComparatorE comparator, ValuePtr left, ValuePtr right) const;
+        [[nodiscard]] InstructionPtr CreateComparison(
+            const SourceLocation &where,
+            ComparatorE comparator,
+            const ValuePtr &left,
+            const ValuePtr &right) const;
 
-        [[nodiscard]] InstructionPtr CreateOperation(OperatorE operator_, std::vector<ValuePtr> operands) const;
+        [[nodiscard]] InstructionPtr CreateOperation(
+            const SourceLocation &where,
+            OperatorE operator_,
+            const std::vector<ValuePtr> &operands) const;
 
-        [[nodiscard]] InstructionPtr CreateCommand(CommandT command) const;
+        [[nodiscard]] InstructionPtr CreateCommand(const SourceLocation &where, const CommandT &command) const;
 
-        [[nodiscard]] InstructionPtr CreateReturnVoid() const;
-        [[nodiscard]] InstructionPtr CreateReturn(ValuePtr value) const;
-        [[nodiscard]] InstructionPtr CreateBranch(ValuePtr condition, BlockPtr then_target, BlockPtr else_target) const;
-        [[nodiscard]] InstructionPtr CreateDirect(BlockPtr target) const;
-        [[nodiscard]] InstructionPtr CreateDirect(BlockPtr target, ValuePtr result, ValuePtr branch_result) const;
+        [[nodiscard]] InstructionPtr CreateReturnVoid(const SourceLocation &where) const;
+        [[nodiscard]] InstructionPtr CreateReturn(const SourceLocation &where, const ValuePtr &value) const;
+
+        [[nodiscard]] InstructionPtr CreateBranch(
+            const SourceLocation &where,
+            const ValuePtr &condition,
+            const BlockPtr &then_target,
+            const BlockPtr &else_target) const;
+
+        [[nodiscard]] InstructionPtr CreateDirect(const SourceLocation &where, const BlockPtr &target) const;
+        [[nodiscard]] InstructionPtr CreateDirect(
+            const SourceLocation &where,
+            const BlockPtr &target,
+            const ValuePtr &result,
+            const ValuePtr &branch_result) const;
+
         [[nodiscard]] InstructionPtr CreateSwitch(
-            ValuePtr condition,
-            BlockPtr default_target,
-            std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets) const;
-        [[nodiscard]] InstructionPtr CreateThrow(ValuePtr value, BlockPtr landing_pad) const;
+            const SourceLocation &where,
+            const ValuePtr &condition,
+            const BlockPtr &default_target,
+            const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets) const;
 
-        [[nodiscard]] ValuePtr CreateBranchResult() const;
+        [[nodiscard]] InstructionPtr CreateThrow(
+            const SourceLocation &where,
+            const ValuePtr &value,
+            const BlockPtr &landing_pad) const;
+
+        [[nodiscard]] ValuePtr CreateBranchResult(const SourceLocation &where) const;
 
         [[nodiscard]] InstructionPtr CreateCall(
-            ResourceLocation callee,
-            std::vector<ValuePtr> arguments,
-            BlockPtr landing_pad) const;
+            const SourceLocation &where,
+            const ResourceLocation &callee,
+            const std::vector<ValuePtr> &arguments,
+            const BlockPtr &landing_pad) const;
 
-        [[nodiscard]] InstructionPtr AllocateValue() const;
-        [[nodiscard]] InstructionPtr AllocateArray() const;
-        [[nodiscard]] InstructionPtr AllocateObject() const;
+        [[nodiscard]] InstructionPtr AllocateValue(const SourceLocation &where) const;
+        [[nodiscard]] InstructionPtr AllocateArray(const SourceLocation &where) const;
+        [[nodiscard]] InstructionPtr AllocateObject(const SourceLocation &where) const;
 
-        [[nodiscard]] InstructionPtr CreateAppend(ValuePtr array, ValuePtr value, bool stringify) const;
-        [[nodiscard]] InstructionPtr CreatePrepend(ValuePtr array, ValuePtr value, bool stringify) const;
-        [[nodiscard]] InstructionPtr CreateInsert(ValuePtr array, ValuePtr value, IndexT index, bool stringify) const;
-        [[nodiscard]] InstructionPtr CreateExtract(ValuePtr array, IndexT index) const;
+        [[nodiscard]] InstructionPtr CreateAppend(
+            const SourceLocation &where,
+            const ValuePtr &array,
+            const ValuePtr &value,
+            bool stringify) const;
+        [[nodiscard]] InstructionPtr CreatePrepend(
+            const SourceLocation &where,
+            const ValuePtr &array,
+            const ValuePtr &value,
+            bool stringify) const;
+        [[nodiscard]] InstructionPtr CreateInsert(
+            const ValuePtr &array,
+            const SourceLocation &where,
+            const ValuePtr &value,
+            IndexT index,
+            bool stringify) const;
+        [[nodiscard]] InstructionPtr CreateExtract(
+            const SourceLocation &where,
+            const ValuePtr &array,
+            IndexT index) const;
 
-        [[nodiscard]] InstructionPtr CreateInsert(ValuePtr object, ValuePtr value, std::string key) const;
+        [[nodiscard]] InstructionPtr CreateInsert(
+            const SourceLocation &where,
+            const ValuePtr &object,
+            const ValuePtr &value,
+            const std::string &key) const;
 
-        [[nodiscard]] ValuePtr CreateStoreResult(std::string variable) const;
+        [[nodiscard]] ValuePtr CreateStoreResult(const SourceLocation &where, const std::string &variable) const;
 
-        [[nodiscard]] InstructionPtr Insert(InstructionPtr instruction) const;
+        [[nodiscard]] InstructionPtr Insert(const SourceLocation &where, InstructionPtr instruction) const;
 
         void Generate() const;
 

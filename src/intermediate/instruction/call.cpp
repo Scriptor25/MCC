@@ -16,6 +16,7 @@ static void generate_function_call(const mcc::CallInstruction &self, mcc::Comman
 
         default:
             mcc::Error(
+                self.Where,
                 "arguments must be {} or {}, but is {}",
                 mcc::ResultType_Value,
                 mcc::ResultType_Storage,
@@ -118,6 +119,7 @@ static void generate_builtin_print(const mcc::CallInstruction &self, mcc::Comman
 
         default:
             mcc::Error(
+                self.Where,
                 "message must be {}, {} or {}, but is {}",
                 mcc::ResultType_Value,
                 mcc::ResultType_Storage,
@@ -180,6 +182,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
 
                 default:
                     mcc::Error(
+                        self.Where,
                         "value 2 must be {} or {}, but is {}",
                         mcc::ResultType_Storage,
                         mcc::ResultType_Score,
@@ -216,6 +219,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
 
                 default:
                     mcc::Error(
+                        self.Where,
                         "value 2 must be {} or {}, but is {}",
                         mcc::ResultType_Storage,
                         mcc::ResultType_Score,
@@ -225,6 +229,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
 
         default:
             mcc::Error(
+                self.Where,
                 "value 1 must be {} or {}, but is {}",
                 mcc::ResultType_Storage,
                 mcc::ResultType_Score,
@@ -253,6 +258,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
 
         default:
             mcc::Error(
+                self.Where,
                 "value 2 must be {} or {}, but is {}",
                 mcc::ResultType_Storage,
                 mcc::ResultType_Score,
@@ -274,31 +280,35 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
 }
 
 mcc::InstructionPtr mcc::CallInstruction::Create(
-    ResourceLocation location,
-    ResourceLocation callee,
-    std::vector<ValuePtr> arguments,
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ResourceLocation &callee,
+    const std::vector<ValuePtr> &arguments,
     const bool may_throw,
-    BlockPtr landing_pad)
+    const BlockPtr &landing_pad)
 {
     return std::make_shared<CallInstruction>(
-        std::move(location),
-        std::move(callee),
-        std::move(arguments),
+        where,
+        location,
+        callee,
+        arguments,
         may_throw,
-        std::move(landing_pad));
+        landing_pad);
 }
 
 mcc::CallInstruction::CallInstruction(
-    ResourceLocation location,
-    ResourceLocation callee,
-    std::vector<ValuePtr> arguments,
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ResourceLocation &callee,
+    const std::vector<ValuePtr> &arguments,
     const bool may_throw,
-    BlockPtr landing_pad)
-    : Location(std::move(location)),
-      Callee(std::move(callee)),
-      Arguments(std::move(arguments)),
+    const BlockPtr &landing_pad)
+    : Instruction(where),
+      Location(location),
+      Callee(callee),
+      Arguments(arguments),
       MayThrow(may_throw),
-      LandingPad(std::move(landing_pad))
+      LandingPad(landing_pad)
 {
     for (const auto &argument: Arguments)
         argument->Use();
@@ -316,7 +326,7 @@ mcc::CallInstruction::~CallInstruction()
 
 void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    Assert(!UseCount || stack, "call instruction with result requires stack");
+    Assert(!UseCount || stack, Where, "call instruction with result requires stack");
 
     if (!Callee.Namespace.empty())
         generate_function_call(*this, commands);
@@ -325,7 +335,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
     else if (Callee.Path == "swap")
         generate_builtin_swap(*this, commands);
     else
-        Error("undefined builtin callee {}", Callee);
+        Error(Where, "undefined builtin callee {}", Callee);
 }
 
 bool mcc::CallInstruction::RequireStack() const

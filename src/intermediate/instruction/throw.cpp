@@ -1,15 +1,28 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
-mcc::InstructionPtr mcc::ThrowInstruction::Create(ResourceLocation location, ValuePtr value, const BlockPtr landing_pad)
+mcc::InstructionPtr mcc::ThrowInstruction::Create(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &value,
+    const BlockPtr &landing_pad)
 {
-    return std::make_shared<ThrowInstruction>(std::move(location), std::move(value), std::move(landing_pad));
+    return std::make_shared<ThrowInstruction>(
+        where,
+        location,
+        value,
+        landing_pad);
 }
 
-mcc::ThrowInstruction::ThrowInstruction(ResourceLocation location, ValuePtr value, const BlockPtr landing_pad)
-    : Location(std::move(location)),
-      Value(std::move(value)),
-      LandingPad(std::move(landing_pad))
+mcc::ThrowInstruction::ThrowInstruction(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &value,
+    const BlockPtr &landing_pad)
+    : Instruction(where),
+      Location(location),
+      Value(value),
+      LandingPad(landing_pad)
 {
     Value->Use();
 }
@@ -48,6 +61,7 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
 
         default:
             Error(
+                Where,
                 "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,

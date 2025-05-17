@@ -2,20 +2,23 @@
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::OperationInstruction::Create(
+    const SourceLocation &where,
     const OperatorE operator_,
-    ResourceLocation location,
-    std::vector<ValuePtr> operands)
+    const ResourceLocation &location,
+    const std::vector<ValuePtr> &operands)
 {
-    return std::make_shared<OperationInstruction>(operator_, std::move(location), std::move(operands));
+    return std::make_shared<OperationInstruction>(where, operator_, location, operands);
 }
 
 mcc::OperationInstruction::OperationInstruction(
+    const SourceLocation &where,
     const OperatorE operator_,
-    ResourceLocation location,
-    std::vector<ValuePtr> operands)
-    : Operator(operator_),
-      Location(std::move(location)),
-      Operands(std::move(operands))
+    const ResourceLocation &location,
+    const std::vector<ValuePtr> &operands)
+    : Instruction(where),
+      Operator(operator_),
+      Location(location),
+      Operands(operands)
 {
     for (const auto &operand: Operands)
         operand->Use();
@@ -57,7 +60,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
             break;
 
         default:
-            Error("undefined operator {}", Operator);
+            Error(Where, "undefined operator {}", Operator);
     }
 
     ValuePtr pre_operand_value;
@@ -107,6 +110,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
 
                 default:
                     Error(
+                        Where,
                         "operand must be {}, {} or {}, but is {}",
                         ResultType_Value,
                         ResultType_Storage,
@@ -125,7 +129,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
         }
     }
 
-    Assert(stack, "operation instruction requires stack");
+    Assert(stack, Where, "operation instruction requires stack");
     commands.Append(
         "execute store result storage {} {} double 1 run scoreboard players get %a {}",
         Location,

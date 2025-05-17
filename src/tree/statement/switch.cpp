@@ -6,11 +6,11 @@
 #include <mcc/value.hpp>
 
 mcc::SwitchStatement::SwitchStatement(
-    SourceLocation where,
+    const SourceLocation &where,
     ExpressionPtr condition,
     StatementPtr default_,
     std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases)
-    : Statement(std::move(where)),
+    : Statement(where),
       Condition(std::move(condition)),
       Default(std::move(default_)),
       Cases(std::move(cases))
@@ -42,25 +42,27 @@ std::ostream &mcc::SwitchStatement::Print(std::ostream &stream) const
     return stream << '}';
 }
 
-void mcc::SwitchStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
+void mcc::SwitchStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent();
     const auto start_target = builder.GetInsertBlock();
-    const auto end_target = builder.CreateBlock(parent);
-    const auto default_target = Default ? builder.CreateBlock(parent) : end_target;
 
-    auto require_end = !Default;
+    const auto parent = builder.GetInsertParent(Where);
+    const auto tail_target = builder.CreateBlock(Where, parent);
+    const auto default_target = Default ? builder.CreateBlock(Default->Where, parent) : tail_target;
 
-    auto condition = Condition->GenerateValue(builder, landing_pad);
+    auto require_tail = !Default;
+
+    auto target_frame = frame;
+    target_frame.Tail = tail_target;
 
     if (Default)
     {
         builder.SetInsertBlock(default_target);
-        Default->Generate(builder, landing_pad);
+        Default->Generate(builder, target_frame);
         if (!builder.GetInsertBlock()->GetTerminator())
         {
-            require_end = true;
-            (void) builder.CreateDirect(end_target);
+            require_tail = true;
+            (void) builder.CreateDirect(Default->Where, tail_target);
         }
     }
 
@@ -68,33 +70,38 @@ void mcc::SwitchStatement::Generate(Builder &builder, const BlockPtr landing_pad
 
     for (auto &[cases_, value_]: Cases)
     {
-        auto case_target = builder.CreateBlock(parent);
+        auto case_target = builder.CreateBlock(value_->Where, parent);
         builder.SetInsertBlock(case_target);
         for (auto &case_: cases_)
         {
-            auto value = case_->GenerateValue(builder, landing_pad);
+            auto value = case_->GenerateValue(builder, frame);
             auto constant = std::dynamic_pointer_cast<Constant>(value);
-            Assert(!!constant, "case entry must be constant");
+            Assert(!!constant, case_->Where, "case entry must be constant");
             case_targets.emplace_back(constant, case_target);
         }
-        value_->Generate(builder, landing_pad);
+        value_->Generate(builder, target_frame);
         if (!builder.GetInsertBlock()->GetTerminator())
         {
-            require_end = true;
-            (void) builder.CreateDirect(end_target);
+            require_tail = true;
+            (void) builder.CreateDirect(value_->Where, tail_target);
         }
     }
 
     builder.SetInsertBlock(start_target);
-    (void) builder.CreateSwitch(std::move(condition), std::move(default_target), std::move(case_targets));
+    const auto condition = Condition->GenerateValue(builder, frame);
+    (void) builder.CreateSwitch(
+        Condition->Where,
+        condition,
+        default_target,
+        case_targets);
 
-    if (!require_end)
+    if (!require_tail && !(target_frame.Flags & FrameFlag_RequireTail))
     {
-        builder.RemoveBlock(end_target);
+        builder.RemoveBlock(Where, tail_target);
         builder.SetInsertBlock(nullptr);
     }
     else
     {
-        builder.SetInsertBlock(end_target);
+        builder.SetInsertBlock(tail_target);
     }
 }

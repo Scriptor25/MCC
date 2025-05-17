@@ -22,6 +22,10 @@ mcc::StatementPtr mcc::Parser::ParseTopLevel()
 
 mcc::StatementPtr mcc::Parser::ParseStatement()
 {
+    if (At(TokenType_Symbol, "break"))
+        return ParseBreakStatement();
+    if (At(TokenType_Symbol, "continue"))
+        return ParseContinueStatement();
     if (At(TokenType_Symbol, "for"))
         return ParseForStatement();
     if (AtEnum("if", "unless"))

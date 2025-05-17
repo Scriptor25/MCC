@@ -3,27 +3,31 @@
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::SwitchInstruction::Create(
-    ResourceLocation location,
-    ValuePtr condition,
-    BlockPtr default_target,
-    std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets)
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &condition,
+    const BlockPtr &default_target,
+    const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets)
 {
     return std::make_shared<SwitchInstruction>(
-        std::move(location),
-        std::move(condition),
-        std::move(default_target),
-        std::move(case_targets));
+        where,
+        location,
+        condition,
+        default_target,
+        case_targets);
 }
 
 mcc::SwitchInstruction::SwitchInstruction(
-    ResourceLocation location,
-    ValuePtr condition,
-    BlockPtr default_target,
-    std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets)
-    : Location(std::move(location)),
-      Condition(std::move(condition)),
-      DefaultTarget(std::move(default_target)),
-      CaseTargets(std::move(case_targets))
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const ValuePtr &condition,
+    const BlockPtr &default_target,
+    const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets)
+    : Instruction(where),
+      Location(location),
+      Condition(condition),
+      DefaultTarget(default_target),
+      CaseTargets(case_targets)
 {
     Condition->Use();
     DefaultTarget->Use();
@@ -113,6 +117,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
 
         default:
             Error(
+                Where,
                 "condition must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,

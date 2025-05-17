@@ -9,14 +9,16 @@ namespace mcc
 {
     struct Constant : Value
     {
+        explicit Constant(const SourceLocation &where);
+
         [[nodiscard]] bool RequireStack() const override;
     };
 
     struct ConstantBoolean final : Constant
     {
-        static ConstantPtr Create(bool value);
+        static ConstantPtr Create(const SourceLocation &where, bool value);
 
-        explicit ConstantBoolean(bool value);
+        ConstantBoolean(const SourceLocation &where, bool value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
@@ -25,9 +27,9 @@ namespace mcc
 
     struct ConstantInteger final : Constant
     {
-        static ConstantPtr Create(IntegerT value);
+        static ConstantPtr Create(const SourceLocation &where, IntegerT value);
 
-        explicit ConstantInteger(IntegerT value);
+        ConstantInteger(const SourceLocation &where, IntegerT value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
@@ -36,9 +38,9 @@ namespace mcc
 
     struct ConstantFloat final : Constant
     {
-        static ConstantPtr Create(FloatT value);
+        static ConstantPtr Create(const SourceLocation &where, FloatT value);
 
-        explicit ConstantFloat(FloatT value);
+        ConstantFloat(const SourceLocation &where, FloatT value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
@@ -47,11 +49,11 @@ namespace mcc
 
     struct ConstantFloatRange final : Constant
     {
-        static ConstantPtr Create(FloatT min, FloatT max);
-        static ConstantPtr CreateMin(FloatT min);
-        static ConstantPtr CreateMax(FloatT max);
+        static ConstantPtr Create(const SourceLocation &where, FloatT min, FloatT max);
+        static ConstantPtr CreateMin(const SourceLocation &where, FloatT min);
+        static ConstantPtr CreateMax(const SourceLocation &where, FloatT max);
 
-        ConstantFloatRange(std::optional<FloatT> min, std::optional<FloatT> max);
+        ConstantFloatRange(const SourceLocation &where, std::optional<FloatT> min, std::optional<FloatT> max);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
@@ -61,9 +63,9 @@ namespace mcc
 
     struct ConstantString final : Constant
     {
-        static ConstantPtr Create(std::string value);
+        static ConstantPtr Create(const SourceLocation &where, const std::string &value);
 
-        explicit ConstantString(std::string value);
+        ConstantString(const SourceLocation &where, const std::string &value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
@@ -72,9 +74,9 @@ namespace mcc
 
     struct ConstantArray final : Constant
     {
-        static ConstantPtr Create(std::vector<ConstantPtr> values, bool stringify);
+        static ConstantPtr Create(const SourceLocation &where, const std::vector<ConstantPtr> &values, bool stringify);
 
-        ConstantArray(std::vector<ConstantPtr> values, bool stringify);
+        ConstantArray(const SourceLocation &where, const std::vector<ConstantPtr> &values, bool stringify);
         ~ConstantArray() override;
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -85,9 +87,9 @@ namespace mcc
 
     struct ConstantObject final : Constant
     {
-        static ConstantPtr Create(std::map<std::string, ConstantPtr> values);
+        static ConstantPtr Create(const SourceLocation &where, const std::map<std::string, ConstantPtr> &values);
 
-        explicit ConstantObject(std::map<std::string, ConstantPtr> values);
+        ConstantObject(const SourceLocation &where, const std::map<std::string, ConstantPtr> &values);
         ~ConstantObject() override;
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -98,10 +100,12 @@ namespace mcc
     struct ConstantTarget final : Constant
     {
         static ConstantPtr Create(
+            const SourceLocation &where,
             TargetSelectorE selector,
             std::map<std::string, std::vector<TargetAttributePtr>> attributes);
 
         ConstantTarget(
+            const SourceLocation &where,
             TargetSelectorE selector,
             std::map<std::string, std::vector<TargetAttributePtr>> attributes);
 
@@ -113,9 +117,9 @@ namespace mcc
 
     struct ConstantResource final : Constant
     {
-        static ConstantPtr Create(ResourceLocation location, ConstantPtr state, ConstantPtr data);
+        static ConstantPtr Create(const SourceLocation &where, const ResourceLocation &location, const ConstantPtr &state, const ConstantPtr &data);
 
-        ConstantResource(ResourceLocation location, ConstantPtr state, ConstantPtr data);
+        ConstantResource(const SourceLocation &where, const ResourceLocation &location, const ConstantPtr &state, const ConstantPtr &data);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 

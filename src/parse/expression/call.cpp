@@ -21,7 +21,7 @@ mcc::ExpressionPtr mcc::Parser::ParseOperandExpression()
             }
             Expect(TokenType_Other, ")");
 
-            operand = std::make_unique<CallExpression>(std::move(where), std::move(operand), std::move(arguments));
+            operand = std::make_unique<CallExpression>(where, std::move(operand), std::move(arguments));
             continue;
         }
 
@@ -30,7 +30,7 @@ mcc::ExpressionPtr mcc::Parser::ParseOperandExpression()
             auto index = ParseExpression();
             Expect(TokenType_Other, "]");
 
-            operand = std::make_unique<SubscriptExpression>(std::move(where), std::move(operand), std::move(index));
+            operand = std::make_unique<SubscriptExpression>(where, std::move(operand), std::move(index));
             continue;
         }
 

@@ -68,9 +68,9 @@ std::string mcc::RangeAttribute::String() const
            + (End.has_value() ? std::to_string(End.value()) : "");
 }
 
-mcc::StringAttribute::StringAttribute(const bool invert, std::string value)
+mcc::StringAttribute::StringAttribute(const bool invert, const std::string &value)
     : TargetAttribute(invert),
-      Value(std::move(value))
+      Value(value)
 {
 }
 
@@ -84,9 +84,9 @@ std::string mcc::StringAttribute::String() const
     return (Invert ? "!" : "") + '"' + Value + '"';
 }
 
-mcc::EnumAttribute::EnumAttribute(const bool invert, std::string value)
+mcc::EnumAttribute::EnumAttribute(const bool invert, const std::string &value)
     : TargetAttribute(invert),
-      Value(std::move(value))
+      Value(value)
 {
 }
 
@@ -100,9 +100,9 @@ std::string mcc::EnumAttribute::String() const
     return (Invert ? "!" : "") + Value;
 }
 
-mcc::NameAttribute::NameAttribute(const bool invert, std::string value)
+mcc::NameAttribute::NameAttribute(const bool invert, const std::string &value)
     : TargetAttribute(invert),
-      Value(std::move(value))
+      Value(value)
 {
 }
 
@@ -212,9 +212,9 @@ std::string mcc::NBTAttribute::String() const
     return (Invert ? "!" : "") + stream.str();
 }
 
-mcc::ResourceAttribute::ResourceAttribute(const bool invert, ResourceLocation value)
+mcc::ResourceAttribute::ResourceAttribute(const bool invert, const ResourceLocation &value)
     : TargetAttribute(invert),
-      Value(std::move(value))
+      Value(value)
 {
 }
 

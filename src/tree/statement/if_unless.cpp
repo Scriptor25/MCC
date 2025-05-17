@@ -4,12 +4,12 @@
 #include <mcc/value.hpp>
 
 mcc::IfUnlessStatement::IfUnlessStatement(
-    SourceLocation where,
+    const SourceLocation &where,
     const bool unless,
     ExpressionPtr condition,
     StatementPtr then,
     StatementPtr else_)
-    : Statement(std::move(where)),
+    : Statement(where),
       Unless(unless),
       Condition(std::move(condition)),
       Then(std::move(then)),
@@ -25,47 +25,48 @@ std::ostream &mcc::IfUnlessStatement::Print(std::ostream &stream) const
     return stream;
 }
 
-void mcc::IfUnlessStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
+void mcc::IfUnlessStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent();
-    const auto end_target = builder.CreateBlock(parent);
-    const auto then_target = builder.CreateBlock(parent);
-    const auto else_target = Else ? builder.CreateBlock(parent) : end_target;
+    const auto parent = builder.GetInsertParent(Where);
+    const auto tail_target = builder.CreateBlock(Where, parent);
+    const auto then_target = builder.CreateBlock(Where, parent);
+    const auto else_target = Else ? builder.CreateBlock(Where, parent) : tail_target;
 
-    auto require_end = !Else;
+    auto require_tail = !Else;
 
-    const auto condition = Condition->GenerateValue(builder, landing_pad);
+    const auto condition = Condition->GenerateValue(builder, frame);
     (void) builder.CreateBranch(
+        Where,
         condition,
         Unless ? else_target : then_target,
         Unless ? then_target : else_target);
 
     builder.SetInsertBlock(then_target);
-    Then->Generate(builder, landing_pad);
+    Then->Generate(builder, frame);
     if (!builder.GetInsertBlock()->GetTerminator())
     {
-        require_end = true;
-        (void) builder.CreateDirect(end_target);
+        require_tail = true;
+        (void) builder.CreateDirect(Where, tail_target);
     }
 
     if (Else)
     {
         builder.SetInsertBlock(else_target);
-        Else->Generate(builder, landing_pad);
+        Else->Generate(builder, frame);
         if (!builder.GetInsertBlock()->GetTerminator())
         {
-            require_end = true;
-            (void) builder.CreateDirect(end_target);
+            require_tail = true;
+            (void) builder.CreateDirect(Where, tail_target);
         }
     }
 
-    if (!require_end)
+    if (!require_tail)
     {
-        builder.RemoveBlock(end_target);
+        builder.RemoveBlock(Where, tail_target);
         builder.SetInsertBlock(nullptr);
     }
     else
     {
-        builder.SetInsertBlock(end_target);
+        builder.SetInsertBlock(tail_target);
     }
 }

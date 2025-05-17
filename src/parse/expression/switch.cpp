@@ -31,7 +31,7 @@ mcc::ExpressionPtr mcc::Parser::ParseSwitchExpression()
     Expect(TokenType_Other, "}");
 
     return std::make_unique<SwitchExpression>(
-        std::move(where),
+        where,
         std::move(condition),
         std::move(default_),
         std::move(cases));

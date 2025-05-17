@@ -5,8 +5,8 @@
 #include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
 
-mcc::SubscriptExpression::SubscriptExpression(SourceLocation where, ExpressionPtr array, ExpressionPtr index)
-    : Expression(std::move(where)),
+mcc::SubscriptExpression::SubscriptExpression(const SourceLocation &where, ExpressionPtr array, ExpressionPtr index)
+    : Expression(where),
       Array(std::move(array)),
       Index(std::move(index))
 {
@@ -17,13 +17,13 @@ std::ostream &mcc::SubscriptExpression::Print(std::ostream &stream) const
     return Index->Print(Array->Print(stream) << '[') << ']';
 }
 
-mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
+mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    const auto array = Array->GenerateValue(builder, landing_pad);
-    const auto index = Index->GenerateValue(builder, landing_pad);
+    const auto array = Array->GenerateValue(builder, frame);
+    const auto index = Index->GenerateValue(builder, frame);
 
     const auto constant_index = std::dynamic_pointer_cast<ConstantInteger>(index);
-    Assert(!!constant_index, Where, "index must be constant integer");
+    Assert(!!constant_index, Index->Where, "index must be constant integer");
 
-    return builder.CreateExtract(array, constant_index->Value);
+    return builder.CreateExtract(Where, array, constant_index->Value);
 }
