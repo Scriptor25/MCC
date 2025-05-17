@@ -1,5 +1,15 @@
 # MCC - A Minecraft Command Compiler
 
+## TODOs
+
+- [ ] merge / pre-evaluate constant expressions for better performance and smaller code size
+- [ ] update readme with new typed syntax
+- [ ] add more examples
+- [ ] implement package command
+- [ ] use new type system for more strict type checking (currently only used for command-macro expansion of strings)
+- [ ] clean up project
+- [ ] add missing control flow elements (e.g. while)
+
 ## About
 
 The MCC (Minecraft command compiler) allows you to write logic in a simple programming language with features like
