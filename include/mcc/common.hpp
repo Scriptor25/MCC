@@ -25,6 +25,14 @@ namespace mcc
     using InstructionPtr = std::shared_ptr<struct Instruction>;
     using BlockPtr = std::shared_ptr<struct Block>;
 
+    struct Parameter
+    {
+        std::string Name;
+        TypeID Type;
+    };
+
+    using ParameterList = std::vector<Parameter>;
+
     struct Context;
     class Parser;
     class Builder;

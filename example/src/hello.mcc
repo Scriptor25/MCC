@@ -8,7 +8,7 @@ define :hello_all() {
     print(@s, `Hello ${@s}! Hello to all of ${@e[type=!player]}!`)
 }
 
-define :hello_rec(d) {
+define :hello_rec(d: number) {
     print(@s, `Hello ${d}`)
     if (d <= 0)
         print(@s, "reached end of recursive loop")

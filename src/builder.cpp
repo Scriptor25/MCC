@@ -21,7 +21,9 @@ const mcc::ResourceLocation &mcc::Builder::GetLocation() const
     return GetInsertParent()->Location;
 }
 
-mcc::BlockPtr mcc::Builder::CreateFunction(ResourceLocation location, std::vector<std::string> parameters)
+mcc::BlockPtr mcc::Builder::CreateFunction(
+    ResourceLocation location,
+    ParameterList parameters)
 {
     if (location.Namespace.empty())
         location.Namespace = m_Context.Namespace;

@@ -45,7 +45,6 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
 {
     if (Result)
     {
-        auto result = Result->GenerateResult(false);
         auto branch_result = BranchResult->GenerateResult(false);
 
         Assert(
@@ -54,7 +53,7 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
             ResultType_Storage,
             branch_result.Type);
 
-        switch (result.Type)
+        switch (auto result = Result->GenerateResult(false); result.Type)
         {
             case ResultType_Value:
                 commands.Append(
@@ -92,24 +91,10 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
         }
     }
 
-    std::string arguments;
-    std::string prefix;
+    std::string prefix, arguments;
+    Target->ForwardArguments(prefix, arguments);
 
-    if (auto &parameters = Target->Parent->Parameters; !parameters.empty())
-    {
-        prefix = "$";
-        arguments += " {";
-        for (unsigned i = 0; i < parameters.size(); ++i)
-        {
-            if (i)
-                arguments += ',';
-            arguments += std::format("{0}:$({0})", parameters[i]);
-        }
-        arguments += '}';
-    }
-
-    auto target = Target->Location;
-    commands.Append("{}return run function {}{}", prefix, target, arguments);
+    commands.Append("{}return run function {}{}", prefix, Target->Location, arguments);
 }
 
 bool mcc::DirectInstruction::RequireStack() const

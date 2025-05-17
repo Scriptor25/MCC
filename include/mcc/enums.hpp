@@ -7,6 +7,15 @@
 
 namespace mcc
 {
+    enum TypeID
+    {
+        TypeID_Boolean,
+        TypeID_Number,
+        TypeID_String,
+        TypeID_Array,
+        TypeID_Object,
+    };
+
     enum ResultTypeE
     {
         ResultType_None,

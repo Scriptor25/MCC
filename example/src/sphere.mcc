@@ -1,15 +1,15 @@
 namespace example
 
-define :setblock(x, y, z, block, mode) {
+define :setblock(x: number, y: number, z: number, block: string, mode: string) {
     ?`$setblock $(x) $(y) $(z) $(block) $(mode)`
 }
 
-define :random(min, max) {
+define :random(min: number, max: number) {
     if (min > max) swap(min, max)
     return ?`$random value $(min)..$(max)`
 }
 
-define :sphere(cx, cy, cz, r, block, mode) {
+define :sphere(cx: number, cy: number, cz: number, r: number, block: string, mode: string) {
     r2 = r * r
     for (dz = -r, dz <= r, ++dz) {
         dz2 = dz * dz
@@ -32,7 +32,29 @@ define :sphere(cx, cy, cz, r, block, mode) {
     }
 }
 
-define :bubbles(x1, y1, z1, x2, y2, z2, n) {
+define :block_lut(index: number) {
+    return switch (index) {
+        case 0 -> "white_stained_glass"
+        case 1 -> "light_gray_stained_glass"
+        case 2 -> "gray_stained_glass"
+        case 3 -> "black_stained_glass"
+        case 4 -> "brown_stained_glass"
+        case 5 -> "red_stained_glass"
+        case 6 -> "orange_stained_glass"
+        case 7 -> "yellow_stained_glass"
+        case 8 -> "lime_stained_glass"
+        case 9 -> "green_stained_glass"
+        case 10 -> "cyan_stained_glass"
+        case 11 -> "light_blue_stained_glass"
+        case 12 -> "blue_stained_glass"
+        case 13 -> "purple_stained_glass"
+        case 14 -> "magenta_stained_glass"
+        case 15 -> "pink_stained_glass"
+        default -> "glass"
+    }
+}
+
+define :bubbles(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, n: number) {
     for (i = 0, i < n, ++i) {
         r = $:random({ min: 3, max: 10 })
         cx = $:random({ min: x1, max: x2 })
@@ -40,25 +62,7 @@ define :bubbles(x1, y1, z1, x2, y2, z2, n) {
         cz = $:random({ min: z1, max: z2 })
         bi = $:random({ min: 0, max: 15 })
 
-        block = switch (bi) {
-            case 0 -> "white_stained_glass"
-            case 1 -> "light_gray_stained_glass"
-            case 2 -> "gray_stained_glass"
-            case 3 -> "black_stained_glass"
-            case 4 -> "brown_stained_glass"
-            case 5 -> "red_stained_glass"
-            case 6 -> "orange_stained_glass"
-            case 7 -> "yellow_stained_glass"
-            case 8 -> "lime_stained_glass"
-            case 9 -> "green_stained_glass"
-            case 10 -> "cyan_stained_glass"
-            case 11 -> "light_blue_stained_glass"
-            case 12 -> "blue_stained_glass"
-            case 13 -> "purple_stained_glass"
-            case 14 -> "magenta_stained_glass"
-            case 15 -> "pink_stained_glass"
-            default -> "glass"
-        }
+        block = $:block_lut({ index: bi })
 
         $:sphere({ cx, cy, cz, r, block, mode: "replace" })
         $:sphere({ cx, cy, cz, r: r - 1, block: "air", mode: "replace" })
@@ -66,5 +70,5 @@ define :bubbles(x1, y1, z1, x2, y2, z2, n) {
 }
 
 define :test() {
-    $:bubbles({x1:-300,y1:-20,z1:-300,x2:300,y2:20,z2:300,n:50})
+    $:bubbles({ x1: -300, y1: -20, z1: -300, x2: 300, y2: 20, z2: 300, n: 50 })
 }

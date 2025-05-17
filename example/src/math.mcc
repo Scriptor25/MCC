@@ -1,18 +1,18 @@
 namespace example
 
-define :add(x, y) #:math {
+define :add(x: number, y: number) #:math {
     result = x + y
     print(@s, `${x} + ${y} = ${result}`)
     return result
 }
 
-define :sub(x, y) #:math {
+define :sub(x: number, y: number) #:math {
     result = x - y
     print(@s, `${x} - ${y} = ${result}`)
     return result
 }
 
-define :fib(n) {
+define :fib(n: number) {
     if (n <= 1)
         return n
     return $:fib({ n: n - 1 }) + $:fib({ n: n - 2 })

@@ -2,20 +2,22 @@
 #include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
 
-mcc::BlockPtr mcc::Block::CreateTopLevel(ResourceLocation location, std::vector<std::string> parameters)
+mcc::BlockPtr mcc::Block::CreateTopLevel(
+    ResourceLocation location,
+    ParameterList parameters)
 {
     return std::make_shared<Block>(std::move(location), std::move(parameters));
 }
 
 mcc::BlockPtr mcc::Block::Create(const BlockPtr &parent, ResourceLocation location)
 {
-    auto block = std::make_shared<Block>(std::move(location), std::vector<std::string>());
+    auto block = std::make_shared<Block>(std::move(location), ParameterList());
     block->Parent = parent;
     parent->Children.push_back(block);
     return std::move(block);
 }
 
-mcc::Block::Block(ResourceLocation location, std::vector<std::string> parameters)
+mcc::Block::Block(ResourceLocation location, ParameterList parameters)
     : Location(std::move(location)),
       Parameters(std::move(parameters))
 {
@@ -39,13 +41,19 @@ void mcc::Block::Generate(CommandVector &commands, const bool stack) const
 
         for (auto &parameter: Parameters)
         {
-            if (!Variables.contains(parameter))
+            if (!Variables.contains(parameter.Name))
                 continue;
 
-            commands.Append(
-                "$data modify storage {0} stack[0].var.{1} set value $({1})",
-                Location,
-                parameter);
+            if (parameter.Type == TypeID_String)
+                commands.Append(
+                    "$data modify storage {0} stack[0].var.{1} set value \"$({1})\"",
+                    Location,
+                    parameter.Name);
+            else
+                commands.Append(
+                    "$data modify storage {0} stack[0].var.{1} set value $({1})",
+                    Location,
+                    parameter.Name);
         }
     }
 
@@ -79,11 +87,31 @@ mcc::InstructionPtr mcc::Block::GetTerminator() const
 bool mcc::Block::MayThrow() const
 {
     Assert(!Parent, "top level block required");
-    if (const auto terminator = GetTerminator())
-        return !!std::dynamic_pointer_cast<ThrowInstruction>(terminator);
+    if (const auto terminator = GetTerminator();
+        terminator && !!std::dynamic_pointer_cast<ThrowInstruction>(terminator))
+        return true;
     for (auto &child: Children)
         if (const auto terminator = child->GetTerminator();
             terminator && !!std::dynamic_pointer_cast<ThrowInstruction>(terminator))
             return true;
     return false;
+}
+
+void mcc::Block::ForwardArguments(std::string &prefix, std::string &arguments) const
+{
+    if (auto &parameters = Parent ? Parent->Parameters : Parameters; !parameters.empty())
+    {
+        prefix = "$";
+        arguments += " {";
+        for (unsigned i = 0; i < parameters.size(); ++i)
+        {
+            if (i)
+                arguments += ',';
+            if (parameters[i].Type == TypeID_String)
+                arguments += std::format("{0}:\"$({0})\"", parameters[i].Name);
+            else
+                arguments += std::format("{0}:$({0})", parameters[i].Name);
+        }
+        arguments += '}';
+    }
 }

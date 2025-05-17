@@ -8,14 +8,18 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
 
     auto location = ParseResourceLocation();
 
-    std::vector<std::string> parameters;
+    ParameterList parameters;
     std::vector<ResourceLocation> tags;
     std::vector<ExpressionPtr> expressions;
 
     Expect(TokenType_Other, "(");
     while (!At(TokenType_Other, ")") && !At(TokenType_EOF))
     {
-        parameters.emplace_back(Expect(TokenType_Symbol).Value);
+        auto name = Expect(TokenType_Symbol).Value;
+        Expect(TokenType_Other, ":");
+        auto type = ParseType();
+
+        parameters.emplace_back(name, type);
 
         if (!At(TokenType_Other, ")"))
             Expect(TokenType_Other, ",");

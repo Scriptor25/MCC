@@ -25,7 +25,7 @@ namespace mcc
         DefineStatement(
             SourceLocation where,
             ResourceLocation location,
-            std::vector<std::string> parameters,
+            ParameterList parameters,
             std::vector<ResourceLocation> tags,
             StatementPtr body);
 
@@ -33,7 +33,7 @@ namespace mcc
         void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         ResourceLocation Location;
-        std::vector<std::string> Parameters;
+        ParameterList Parameters;
         std::vector<ResourceLocation> Tags;
         StatementPtr Body;
     };

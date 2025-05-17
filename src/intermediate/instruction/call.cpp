@@ -23,18 +23,20 @@ static void generate_function_call(const mcc::CallInstruction &self, mcc::Comman
     }
 
     auto stack_path = self.GetStackPath();
+    auto tmp_name = self.GetTmpName();
 
     if (self.MayThrow)
     {
-        auto tmp_name = self.GetTmpName();
-
         commands.Append(self.CreateTmpScore());
         commands.Append(
             "execute store result score %c {} run function {} {}",
             tmp_name,
             self.Callee,
             arguments_value);
-        commands.Append("data remove storage {} {}", self.Location, stack_path);
+        commands.Append(
+            "data remove storage {} {}",
+            self.Location,
+            stack_path);
         commands.Append(
             "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
             tmp_name,
@@ -42,7 +44,9 @@ static void generate_function_call(const mcc::CallInstruction &self, mcc::Comman
             stack_path);
         commands.Append(self.RemoveTmpScore());
 
-        commands.Append("data remove storage {} result", self.Location);
+        commands.Append(
+            "data remove storage {} result",
+            self.Location);
         commands.Append(
             "execute if data storage {0} {1} run data modify storage {0} result set from storage {2} result",
             self.Location,
@@ -51,38 +55,32 @@ static void generate_function_call(const mcc::CallInstruction &self, mcc::Comman
 
         if (self.LandingPad)
         {
-            auto landing_pad = self.LandingPad->Location;
-
             std::string prefix, arguments;
-            if (auto &parameters = self.LandingPad->Parent->Parameters; !parameters.empty())
-            {
-                prefix = "$";
-                arguments += " {";
-                for (unsigned i = 0; i < parameters.size(); ++i)
-                {
-                    if (i)
-                        arguments += ',';
-                    arguments += std::format("{0}:$({0})", parameters[i]);
-                }
-                arguments += '}';
-            }
+            self.LandingPad->ForwardArguments(prefix, arguments);
 
             commands.Append(
                 "{}execute if data storage {} result run return run function {}{}",
                 prefix,
                 self.Location,
-                landing_pad,
+                self.LandingPad->Location,
                 arguments);
         }
         else
         {
-            commands.Append("execute if data storage {0} result run data remove storage {0} stack[0]", self.Location);
-            commands.Append("execute if data storage {} result run return 1", self.Location);
+            commands.Append(
+                "execute if data storage {0} result run data remove storage {0} stack[0]",
+                self.Location);
+            commands.Append(
+                "execute if data storage {} result run return 1",
+                self.Location);
         }
     }
     else
     {
-        commands.Append("run function {} {}", self.Callee, arguments_value);
+        commands.Append(
+            "function {} {}",
+            self.Callee,
+            arguments_value);
     }
 
     if (self.UseCount)
@@ -96,10 +94,9 @@ static void generate_function_call(const mcc::CallInstruction &self, mcc::Comman
 static void generate_builtin_print(const mcc::CallInstruction &self, mcc::CommandVector &commands)
 {
     auto targets = self.Arguments[0]->GenerateResult(false);
-    auto message = self.Arguments[1]->GenerateResult(false);
 
     std::string message_value;
-    switch (message.Type)
+    switch (auto message = self.Arguments[1]->GenerateResult(false); message.Type)
     {
         case mcc::ResultType_Value:
             message_value = message.Value;
@@ -130,7 +127,10 @@ static void generate_builtin_print(const mcc::CallInstruction &self, mcc::Comman
 
     if (!self.UseCount)
     {
-        commands.Append("tellraw {} {}", targets.Value, message_value);
+        commands.Append(
+            "tellraw {} {}",
+            targets.Value,
+            message_value);
         return;
     }
 
@@ -147,11 +147,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
     auto value1 = self.Arguments[0]->GenerateResult(false);
     auto value2 = self.Arguments[1]->GenerateResult(false);
 
-    // store value 1 in tmp
-    // store value 2 in value 1
-    // store tmp in value 2
-
-    auto tmp = self.GetTmpName();
+    auto tmp_name = self.GetTmpName();
 
     switch (value1.Type)
     {
@@ -159,7 +155,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
             commands.Append(
                 "data modify storage {} {} set from storage {} {}",
                 self.Location,
-                tmp,
+                tmp_name,
                 value1.Location,
                 value1.Path);
             switch (value2.Type)
@@ -195,7 +191,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
             commands.Append(
                 "execute store result storage {} {} double 1 run scoreboard players get {} {}",
                 self.Location,
-                tmp,
+                tmp_name,
                 value1.Player,
                 value1.Objective);
             switch (value2.Type)
@@ -243,7 +239,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
                 value2.Location,
                 value2.Path,
                 self.Location,
-                tmp);
+                tmp_name);
             break;
 
         case mcc::ResultType_Score:
@@ -252,7 +248,7 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
                 value2.Player,
                 value2.Objective,
                 self.Location,
-                tmp);
+                tmp_name);
             break;
 
         default:
@@ -263,12 +259,18 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
                 value2.Type);
     }
 
-    commands.Append("data remove storage {} {}", self.Location, tmp);
+    commands.Append(
+        "data remove storage {} {}",
+        self.Location,
+        tmp_name);
 
     if (!self.UseCount)
         return;
 
-    commands.Append("data modify storage {} {} set value 0", self.Location, self.GetStackPath());
+    commands.Append(
+        "data modify storage {} {} set value 0",
+        self.Location,
+        self.GetStackPath());
 }
 
 mcc::InstructionPtr mcc::CallInstruction::Create(

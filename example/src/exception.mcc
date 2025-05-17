@@ -1,12 +1,12 @@
 namespace example
 
-define :assert(x, message) {
+define :assert(x: boolean, message: string) {
     unless (x)
         throw message
 }
 
 define :test_assert() {
-    a = 1
+    a = 2
     b = 2
     c = a + b
     $:assert({ x: c == 3, message: "c must be equal to 3" })

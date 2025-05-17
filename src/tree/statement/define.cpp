@@ -6,7 +6,7 @@
 mcc::DefineStatement::DefineStatement(
     SourceLocation where,
     ResourceLocation location,
-    std::vector<std::string> parameters,
+    ParameterList parameters,
     std::vector<ResourceLocation> tags,
     StatementPtr body)
     : Statement(std::move(where)),
@@ -24,7 +24,7 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
     {
         if (i > 0)
             stream << ", ";
-        stream << Parameters[i];
+        stream << Parameters[i].Name << ": " << Parameters[i].Type;
     }
     stream << ") ";
     for (unsigned i = 0; i < Tags.size(); ++i)

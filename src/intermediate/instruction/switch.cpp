@@ -47,30 +47,13 @@ mcc::SwitchInstruction::~SwitchInstruction()
 
 void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    auto tmp = GetTmpName();
-
-    auto condition = Condition->GenerateResult(false);
-
-    std::string arguments;
-    std::string prefix;
-
-    if (auto &parameters = (DefaultTarget ? DefaultTarget : CaseTargets.front().second)->Parent->Parameters;
-        !parameters.empty())
-    {
-        prefix = "$";
-        arguments += " {";
-        for (unsigned i = 0; i < parameters.size(); ++i)
-        {
-            if (i)
-                arguments += ',';
-            arguments += std::format("{0}:$({0})", parameters[i]);
-        }
-        arguments += '}';
-    }
+    std::string prefix, arguments;
+    (DefaultTarget ? DefaultTarget : CaseTargets.front().second)->ForwardArguments(prefix, arguments);
 
     auto stack_path = GetStackPath();
+    auto tmp_name = GetTmpName();
 
-    switch (condition.Type)
+    switch (auto condition = Condition->GenerateResult(false); condition.Type)
     {
         case ResultType_Value:
             for (auto &[case_, target_]: CaseTargets)
@@ -90,13 +73,13 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                 commands.Append(CreateTmpScore());
                 commands.Append(
                     "execute store result score %c {} run data get storage {} {}",
-                    tmp,
+                    tmp_name,
                     condition.Location,
                     condition.Path);
                 commands.Append("data remove storage {} {}", Location, stack_path);
                 commands.Append(
                     "execute if score %c {} matches {} run data modify storage {} {} set value 1",
-                    tmp,
+                    tmp_name,
                     case_value.Value,
                     Location,
                     stack_path);

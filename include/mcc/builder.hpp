@@ -13,7 +13,7 @@ namespace mcc
         [[nodiscard]] Context &GetContext() const;
         [[nodiscard]] const ResourceLocation &GetLocation() const;
 
-        BlockPtr CreateFunction(ResourceLocation location, std::vector<std::string> parameters);
+        BlockPtr CreateFunction(ResourceLocation location, ParameterList parameters);
         BlockPtr CreateBlock(const BlockPtr &parent);
         BlockPtr FindBlock(const ResourceLocation &location) const;
         void RemoveBlock(const BlockPtr &block);

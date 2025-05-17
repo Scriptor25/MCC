@@ -38,32 +38,16 @@ mcc::BranchInstruction::~BranchInstruction()
 
 void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    auto tmp = GetTmpName();
+    std::string prefix, arguments;
+    ThenTarget->ForwardArguments(prefix, arguments);
 
-    auto condition = Condition->GenerateResult(false);
+    auto stack_path = GetStackPath();
+    auto tmp_name = GetTmpName();
 
     auto then = ThenTarget->Location;
     auto else_ = ElseTarget->Location;
 
-    std::string arguments;
-    std::string prefix;
-
-    if (auto &parameters = ThenTarget->Parent->Parameters; !parameters.empty())
-    {
-        prefix = "$";
-        arguments += " {";
-        for (unsigned i = 0; i < parameters.size(); ++i)
-        {
-            if (i)
-                arguments += ',';
-            arguments += std::format("{0}:$({0})", parameters[i]);
-        }
-        arguments += '}';
-    }
-
-    auto stack_path = GetStackPath();
-
-    switch (condition.Type)
+    switch (auto condition = Condition->GenerateResult(false); condition.Type)
     {
         case ResultType_Value:
             commands.Append(
@@ -79,16 +63,20 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
             commands.Append(CreateTmpScore());
             commands.Append(
                 "execute store result score %c {} run data get storage {} {}",
-                tmp,
+                tmp_name,
                 condition.Location,
                 condition.Path);
-            commands.Append("data remove storage {} {}", Location, stack_path);
+            commands.Append(
+                "data remove storage {} {}",
+                Location,
+                stack_path);
             commands.Append(
                 "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
-                tmp,
+                tmp_name,
                 Location,
                 stack_path);
             commands.Append(RemoveTmpScore());
+
             commands.Append(
                 "{}execute if data storage {} {} run return run function {}{}",
                 prefix,
@@ -96,7 +84,11 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
                 stack_path,
                 then,
                 arguments);
-            commands.Append("{}return run function {}{}", prefix, else_, arguments);
+            commands.Append(
+                "{}return run function {}{}",
+                prefix,
+                else_,
+                arguments);
             break;
 
         case ResultType_Score:
@@ -106,7 +98,11 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
                 condition.Objective,
                 then,
                 arguments);
-            commands.Append("{}return run function {}{}", prefix, else_, arguments);
+            commands.Append(
+                "{}return run function {}{}",
+                prefix,
+                else_,
+                arguments);
             break;
 
         default:

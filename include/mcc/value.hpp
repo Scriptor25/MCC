@@ -46,10 +46,12 @@ namespace mcc
 
     struct Block final : Value
     {
-        static BlockPtr CreateTopLevel(ResourceLocation location, std::vector<std::string> parameters);
+        static BlockPtr CreateTopLevel(
+            ResourceLocation location,
+            ParameterList parameters);
         static BlockPtr Create(const BlockPtr &parent, ResourceLocation location);
 
-        Block(ResourceLocation location, std::vector<std::string> parameters);
+        Block(ResourceLocation location, ParameterList parameters);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
@@ -57,8 +59,10 @@ namespace mcc
         [[nodiscard]] InstructionPtr GetTerminator() const;
         [[nodiscard]] bool MayThrow() const;
 
+        void ForwardArguments(std::string &prefix, std::string &arguments) const;
+
         ResourceLocation Location;
-        std::vector<std::string> Parameters;
+        ParameterList Parameters;
 
         IndexT StackIndex = 0;
         std::map<std::string, ValuePtr> Variables;

@@ -57,23 +57,10 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
 
     if (LandingPad)
     {
-        auto landing_pad = LandingPad->Location;
-
         std::string prefix, arguments;
-        if (auto &parameters = LandingPad->Parent->Parameters; !parameters.empty())
-        {
-            prefix = "$";
-            arguments += " {";
-            for (unsigned i = 0; i < parameters.size(); ++i)
-            {
-                if (i)
-                    arguments += ',';
-                arguments += std::format("{0}:$({0})", parameters[i]);
-            }
-            arguments += '}';
-        }
+        LandingPad->ForwardArguments(prefix, arguments);
 
-        commands.Append("{}return run function {}{}", prefix, landing_pad, arguments);
+        commands.Append("{}return run function {}{}", prefix, LandingPad->Location, arguments);
         return;
     }
 
