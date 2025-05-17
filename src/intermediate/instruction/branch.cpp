@@ -61,6 +61,8 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
         arguments += '}';
     }
 
+    auto stack_path = GetStackPath();
+
     switch (condition.Type)
     {
         case ResultType_Value:
@@ -80,16 +82,18 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
                 tmp,
                 condition.Location,
                 condition.Path);
-            commands.Append("data remove storage {} result", Location);
+            commands.Append("data remove storage {} {}", Location, stack_path);
             commands.Append(
-                "execute unless score %c {} matches 0 run data modify storage {} result set value 1",
+                "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
                 tmp,
-                Location);
+                Location,
+                stack_path);
             commands.Append(RemoveTmpScore());
             commands.Append(
-                "{}execute if data storage {} result run return run function {}{}",
+                "{}execute if data storage {} {} run return run function {}{}",
                 prefix,
                 Location,
+                stack_path,
                 then,
                 arguments);
             commands.Append("{}return run function {}{}", prefix, else_, arguments);
@@ -117,7 +121,7 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
 
 bool mcc::BranchInstruction::RequireStack() const
 {
-    return Condition->RequireStack();
+    return true;
 }
 
 bool mcc::BranchInstruction::IsTerminator() const

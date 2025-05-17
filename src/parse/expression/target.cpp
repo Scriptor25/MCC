@@ -1,9 +1,9 @@
 #include <functional>
 #include <mcc/attribute.hpp>
 #include <mcc/constant.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/value.hpp>
 #include <mcc/parse.hpp>
-#include <mcc/tree.hpp>
 
 mcc::TargetAttributePtr mcc::Parser::ParseIntegerAttribute(bool invert)
 {

@@ -1,8 +1,8 @@
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/format.hpp>
 #include <mcc/instruction.hpp>
-#include <mcc/tree.hpp>
 #include <mcc/value.hpp>
 
 mcc::FormatExpression::FormatExpression(SourceLocation where, std::vector<FormatNodePtr> nodes)
@@ -17,21 +17,6 @@ std::ostream &mcc::FormatExpression::Print(std::ostream &stream) const
     for (auto &node: Nodes)
         node->Print(stream);
     return stream << '`';
-}
-
-bool mcc::FormatExpression::IsConstant() const
-{
-    for (auto &node: Nodes)
-        if (!node->IsConstant())
-            return false;
-    return true;
-}
-
-bool mcc::FormatExpression::IsNull() const
-{
-    if (IsConstant())
-        return false;
-    return Expression::IsNull();
 }
 
 mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder) const

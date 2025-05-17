@@ -1,7 +1,7 @@
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
-#include <mcc/tree.hpp>
 #include <mcc/value.hpp>
 
 mcc::CallExpression::CallExpression(
@@ -27,11 +27,6 @@ std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
         argument->Print(stream);
     }
     return stream << ')';
-}
-
-bool mcc::CallExpression::IsConstant() const
-{
-    return false;
 }
 
 mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder) const

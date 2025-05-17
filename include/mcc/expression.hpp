@@ -1,131 +1,21 @@
 #pragma once
 
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
 #include <mcc/common.hpp>
 #include <mcc/lex.hpp>
+#include <mcc/statement.hpp>
 
 namespace mcc
 {
-    struct Statement
-    {
-        explicit Statement(SourceLocation where);
-
-        virtual ~Statement() = default;
-
-        virtual std::ostream &Print(std::ostream &stream) const = 0;
-        virtual void Generate(Builder &builder) const = 0;
-
-        SourceLocation Where;
-    };
-
-    struct DefineStatement final : Statement
-    {
-        DefineStatement(
-            SourceLocation where,
-            ResourceLocation location,
-            std::vector<std::string> parameters,
-            std::vector<ResourceLocation> tags,
-            StatementPtr body);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
-
-        ResourceLocation Location;
-        std::vector<std::string> Parameters;
-        std::vector<ResourceLocation> Tags;
-        StatementPtr Body;
-    };
-
-    struct ForStatement final : Statement
-    {
-        ForStatement(
-            SourceLocation where,
-            StatementPtr prefix,
-            ExpressionPtr condition,
-            StatementPtr suffix,
-            StatementPtr do_);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
-
-        StatementPtr Prefix;
-        ExpressionPtr Condition;
-        StatementPtr Suffix;
-        StatementPtr Do;
-    };
-
-    struct IfUnlessStatement final : Statement
-    {
-        IfUnlessStatement(
-            SourceLocation where,
-            bool unless,
-            ExpressionPtr condition,
-            StatementPtr then,
-            StatementPtr else_);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
-
-        bool Unless;
-        ExpressionPtr Condition;
-        StatementPtr Then, Else;
-    };
-
-    struct MultiStatement final : Statement
-    {
-        MultiStatement(SourceLocation where, std::vector<StatementPtr> statements);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
-
-        std::vector<StatementPtr> Statements;
-    };
-
-    struct NamespaceStatement final : Statement
-    {
-        NamespaceStatement(SourceLocation where, std::string namespace_);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
-
-        std::string Namespace;
-    };
-
-    struct ReturnStatement final : Statement
-    {
-        ReturnStatement(SourceLocation where, ExpressionPtr value);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
-
-        ExpressionPtr Value;
-    };
-
-    struct SwitchStatement final : Statement
-    {
-        SwitchStatement(
-            SourceLocation where,
-            ExpressionPtr condition,
-            StatementPtr default_,
-            std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
-
-        ExpressionPtr Condition;
-        StatementPtr Default;
-        std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> Cases;
-    };
-
     struct Expression : Statement
     {
         explicit Expression(SourceLocation where);
 
         void Generate(Builder &builder) const override;
 
-        [[nodiscard]] virtual bool IsConstant() const = 0;
-        [[nodiscard]] virtual bool IsNull() const;
-        [[nodiscard]] virtual bool IsEqual(const ExpressionPtr &other) const;
-        [[nodiscard]] virtual FloatT Evaluate() const;
         [[nodiscard]] virtual ValuePtr GenerateValue(Builder &builder) const = 0;
     };
 
@@ -134,8 +24,6 @@ namespace mcc
         ArrayExpression(SourceLocation where, std::vector<ExpressionPtr> elements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         std::vector<ExpressionPtr> Elements;
@@ -148,9 +36,6 @@ namespace mcc
         ExpressionPtr Merge();
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
-        [[nodiscard]] FloatT Evaluate() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         std::string Operator;
@@ -163,7 +48,6 @@ namespace mcc
         CallExpression(SourceLocation where, ExpressionPtr callee, std::vector<ExpressionPtr> arguments);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         ExpressionPtr Callee;
@@ -175,7 +59,6 @@ namespace mcc
         CommandExpression(SourceLocation where, CommandT command);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         CommandT Command;
@@ -186,8 +69,6 @@ namespace mcc
         ConstantExpression(SourceLocation where, ConstantPtr value, std::string view);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         ConstantPtr Value;
@@ -199,8 +80,6 @@ namespace mcc
         FormatExpression(SourceLocation where, std::vector<FormatNodePtr> nodes);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         std::vector<FormatNodePtr> Nodes;
@@ -216,8 +95,6 @@ namespace mcc
             ExpressionPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         bool Unless;
@@ -229,8 +106,6 @@ namespace mcc
         ResourceExpression(SourceLocation where, ResourceLocation location, ExpressionPtr state, ExpressionPtr data);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         ResourceLocation Location;
@@ -243,8 +118,6 @@ namespace mcc
         ObjectExpression(SourceLocation where, std::map<std::string, ExpressionPtr> elements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         std::map<std::string, ExpressionPtr> Elements;
@@ -255,8 +128,6 @@ namespace mcc
         SubscriptExpression(SourceLocation where, ExpressionPtr array, ExpressionPtr index);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         ExpressionPtr Array, Index;
@@ -271,8 +142,6 @@ namespace mcc
             std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         ExpressionPtr Condition, Default;
@@ -284,7 +153,6 @@ namespace mcc
         SymbolExpression(SourceLocation where, std::string name);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         std::string Name;
@@ -295,8 +163,6 @@ namespace mcc
         UnaryExpression(SourceLocation where, std::string operator_, ExpressionPtr operand);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         std::string Operator;
@@ -308,8 +174,6 @@ namespace mcc
         VectorExpression(SourceLocation where, std::string operator_, std::vector<ExpressionPtr> operands);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] bool IsConstant() const override;
-        [[nodiscard]] bool IsNull() const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
 
         std::string Operator;

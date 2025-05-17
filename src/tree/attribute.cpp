@@ -1,6 +1,6 @@
 #include <sstream>
 #include <mcc/attribute.hpp>
-#include <mcc/tree.hpp>
+#include <mcc/expression.hpp>
 
 mcc::TargetAttribute::TargetAttribute(const bool invert)
     : Invert(invert)

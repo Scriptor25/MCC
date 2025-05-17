@@ -1,7 +1,7 @@
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
-#include <mcc/tree.hpp>
 #include <mcc/value.hpp>
 
 mcc::VectorExpression::VectorExpression(
@@ -26,21 +26,6 @@ std::ostream &mcc::VectorExpression::Print(std::ostream &stream) const
         operand->Print(stream);
     }
     return stream;
-}
-
-bool mcc::VectorExpression::IsConstant() const
-{
-    for (auto &operand: Operands)
-        if (!operand->IsConstant())
-            return false;
-    return true;
-}
-
-bool mcc::VectorExpression::IsNull() const
-{
-    if (IsConstant())
-        return Evaluate() == 0.0;
-    return Expression::IsNull();
 }
 
 mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder) const

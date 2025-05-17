@@ -1,0 +1,33 @@
+namespace example
+
+define :assert(x, message) {
+    unless (x)
+        throw message
+}
+
+define :test_assert() {
+    a = 1
+    b = 2
+    c = a + b
+    $:assert({ x: c == 3, message: "c must be equal to 3" })
+}
+
+define :test_try_catch() {
+    try {
+        a = 1
+        b = 2
+        c = a + b
+        $:assert({ x: c == 3, message: "c must be equal to 3" })
+    } catch (e) {
+        print(@s, `catched error: ${e}`)
+    }
+
+    try {
+        a = 1
+        b = 2
+        c = a + b
+        $:assert({ x: c != 3, message: "c must not be equal to 3" })
+    } catch (e) {
+        print(@s, `catched error: ${e}`)
+    }
+}

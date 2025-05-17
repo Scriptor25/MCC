@@ -9,11 +9,9 @@
 #include <mcc/error.hpp>
 #include <mcc/package.hpp>
 #include <mcc/parse.hpp>
-#include <mcc/tree.hpp>
+#include <mcc/statement.hpp>
 
-static void parse_file(
-    mcc::Package &package,
-    const std::filesystem::path &path)
+static void parse_file(mcc::Package &package, const std::filesystem::path &path)
 {
     std::ifstream stream(path);
     mcc::Assert(stream.is_open(), "failed to open source file {}", path.string());
@@ -27,6 +25,23 @@ static void parse_file(
             statement->Generate(builder);
 
     builder.Generate();
+}
+
+static void parse_directory(mcc::Package &package, const std::filesystem::path &path)
+{
+    for (auto &entry: std::filesystem::directory_iterator(path))
+    {
+        if (entry.is_directory())
+        {
+            parse_directory(package, entry.path());
+            continue;
+        }
+
+        if (entry.path().extension() != ".mcc")
+            continue;
+
+        parse_file(package, entry.path());
+    }
 }
 
 int main(const int argc, const char **argv)
@@ -113,16 +128,7 @@ int main(const int argc, const char **argv)
 
             mcc::Assert(std::filesystem::exists("src"), "failed to open source directory");
 
-            for (auto &entry: std::filesystem::directory_iterator("src"))
-            {
-                if (entry.is_directory())
-                    continue;
-
-                if (entry.path().extension() != ".mcc")
-                    continue;
-
-                parse_file(package, entry.path());
-            }
+            parse_directory(package, "src");
 
             package.Write(target);
 

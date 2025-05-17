@@ -1,4 +1,4 @@
-#include <mcc/tree.hpp>
+#include <mcc/statement.hpp>
 
 mcc::MultiStatement::MultiStatement(SourceLocation where, std::vector<StatementPtr> statements)
     : Statement(std::move(where)),

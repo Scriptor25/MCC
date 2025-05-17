@@ -1,6 +1,7 @@
 #include <mcc/builder.hpp>
+#include <mcc/expression.hpp>
+#include <mcc/statement.hpp>
 #include <mcc/value.hpp>
-#include <mcc/tree.hpp>
 
 mcc::ReturnStatement::ReturnStatement(SourceLocation where, ExpressionPtr value)
     : Statement(std::move(where)),
@@ -15,6 +16,12 @@ std::ostream &mcc::ReturnStatement::Print(std::ostream &stream) const
 
 void mcc::ReturnStatement::Generate(Builder &builder) const
 {
+    if (!Value)
+    {
+        (void) builder.CreateReturnVoid();
+        return;
+    }
+
     const auto value = Value->GenerateValue(builder);
     (void) builder.CreateReturn(value);
 }

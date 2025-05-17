@@ -1,6 +1,6 @@
 #include <mcc/builder.hpp>
 #include <mcc/context.hpp>
-#include <mcc/tree.hpp>
+#include <mcc/statement.hpp>
 
 mcc::NamespaceStatement::NamespaceStatement(SourceLocation where, std::string namespace_)
     : Statement(std::move(where)),

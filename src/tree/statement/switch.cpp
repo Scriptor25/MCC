@@ -1,7 +1,8 @@
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
-#include <mcc/tree.hpp>
+#include <mcc/expression.hpp>
+#include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
 mcc::SwitchStatement::SwitchStatement(

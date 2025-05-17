@@ -1,6 +1,5 @@
 #include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
-#include <mcc/tree.hpp>
 
 mcc::BlockPtr mcc::Block::CreateTopLevel(ResourceLocation location, std::vector<std::string> parameters)
 {

@@ -60,29 +60,31 @@ namespace mcc
 
         ResourceLocation ParseResourceLocation();
 
-        TargetAttributePtr ParseIntegerAttribute(bool invert);
-        TargetAttributePtr ParseFloatAttribute(bool invert);
-        TargetAttributePtr ParseIntegerRangeAttribute(bool invert);
-        TargetAttributePtr ParseFloatRangeAttribute(bool invert);
-        TargetAttributePtr ParseStringAttribute(bool invert);
         TargetAttributePtr ParseEnumAttribute(bool invert, const std::vector<const char *> &values);
-        TargetAttributePtr ParseNameAttribute(bool invert);
+        TargetAttributePtr ParseFloatAttribute(bool invert);
+        TargetAttributePtr ParseFloatRangeAttribute(bool invert);
+        TargetAttributePtr ParseIntegerAttribute(bool invert);
+        TargetAttributePtr ParseIntegerRangeAttribute(bool invert);
         TargetAttributePtr ParseMapAttribute(bool invert, const Parse &parse);
-        TargetAttributePtr ParseResourceMapAttribute(bool invert, const Parse &parse);
+        TargetAttributePtr ParseNameAttribute(bool invert);
         TargetAttributePtr ParseNBTAttribute(bool invert);
         TargetAttributePtr ParseResourceAttribute(bool invert);
+        TargetAttributePtr ParseResourceMapAttribute(bool invert, const Parse &parse);
+        TargetAttributePtr ParseStringAttribute(bool invert);
         TargetAttributePtr ParseTagAttribute(bool invert);
 
         StatementPtr ParseTopLevel();
-        StatementPtr ParseNamespaceStatement();
         StatementPtr ParseDefineStatement();
+        StatementPtr ParseNamespaceStatement();
 
         StatementPtr ParseStatement();
-        StatementPtr ParseMultiStatement();
-        StatementPtr ParseIfUnlessStatement();
-        StatementPtr ParseSwitchStatement();
         StatementPtr ParseForStatement();
+        StatementPtr ParseIfUnlessStatement();
+        StatementPtr ParseMultiStatement();
         StatementPtr ParseReturnStatement();
+        StatementPtr ParseSwitchStatement();
+        StatementPtr ParseThrowStatement();
+        StatementPtr ParseTryCatchStatement();
 
         ExpressionPtr ParseExpression();
         ExpressionPtr ParseResourceExpression();

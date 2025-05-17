@@ -1,7 +1,7 @@
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
-#include <mcc/tree.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/value.hpp>
 
 mcc::ResourceExpression::ResourceExpression(
@@ -27,16 +27,6 @@ std::ostream &mcc::ResourceExpression::Print(std::ostream &stream) const
         Data->Print(stream);
 
     return stream;
-}
-
-bool mcc::ResourceExpression::IsConstant() const
-{
-    return true;
-}
-
-bool mcc::ResourceExpression::IsNull() const
-{
-    return false;
 }
 
 mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder) const

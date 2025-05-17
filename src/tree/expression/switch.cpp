@@ -1,7 +1,7 @@
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
-#include <mcc/tree.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/value.hpp>
 
 mcc::SwitchExpression::SwitchExpression(
@@ -41,25 +41,6 @@ std::ostream &mcc::SwitchExpression::Print(std::ostream &stream) const
     return stream << '}';
 }
 
-bool mcc::SwitchExpression::IsConstant() const
-{
-    if (!Condition->IsConstant())
-        return false;
-
-    for (auto &[conditions_, case_]: Cases)
-        for (auto &condition: conditions_)
-            if (Condition->IsEqual(condition))
-                return case_->IsConstant();
-    return Default->IsConstant();
-}
-
-bool mcc::SwitchExpression::IsNull() const
-{
-    if (IsConstant())
-        return Evaluate() == 0.0;
-    return Expression::IsNull();
-}
-
 mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder) const
 {
     const auto parent = builder.GetInsertParent();
@@ -70,11 +51,11 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder) const
     auto condition = Condition->GenerateValue(builder);
 
     builder.SetInsertBlock(end_target);
-    const auto landing_pad = builder.CreateBranchResult();
+    const auto branch_result = builder.CreateBranchResult();
 
     builder.SetInsertBlock(default_target);
     auto default_value = Default->GenerateValue(builder);
-    (void) builder.CreateDirect(end_target, std::move(default_value), landing_pad);
+    (void) builder.CreateDirect(end_target, std::move(default_value), branch_result);
 
     std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets;
     for (auto &[cases_, value_]: Cases)
@@ -89,12 +70,12 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder) const
             case_targets.emplace_back(constant, case_target);
         }
         auto case_value = value_->GenerateValue(builder);
-        (void) builder.CreateDirect(end_target, std::move(case_value), landing_pad);
+        (void) builder.CreateDirect(end_target, std::move(case_value), branch_result);
     }
 
     builder.SetInsertBlock(start_target);
     (void) builder.CreateSwitch(std::move(condition), std::move(default_target), std::move(case_targets));
 
     builder.SetInsertBlock(end_target);
-    return landing_pad;
+    return branch_result;
 }

@@ -10,7 +10,6 @@ namespace mcc
     struct Constant : Value
     {
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] virtual bool IsNull() const = 0;
     };
 
     struct ConstantBoolean final : Constant
@@ -20,7 +19,6 @@ namespace mcc
         explicit ConstantBoolean(bool value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         bool Value;
     };
@@ -32,7 +30,6 @@ namespace mcc
         explicit ConstantInteger(IntegerT value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         IntegerT Value;
     };
@@ -44,7 +41,6 @@ namespace mcc
         explicit ConstantFloat(FloatT value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         FloatT Value;
     };
@@ -58,7 +54,6 @@ namespace mcc
         ConstantFloatRange(std::optional<FloatT> min, std::optional<FloatT> max);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         std::optional<FloatT> Min;
         std::optional<FloatT> Max;
@@ -71,7 +66,6 @@ namespace mcc
         explicit ConstantString(std::string value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         std::string Value;
     };
@@ -84,7 +78,6 @@ namespace mcc
         ~ConstantArray() override;
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         std::vector<ConstantPtr> Values;
         bool Stringify;
@@ -98,7 +91,6 @@ namespace mcc
         ~ConstantObject() override;
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         std::map<std::string, ConstantPtr> Values;
     };
@@ -114,7 +106,6 @@ namespace mcc
             std::map<std::string, std::vector<TargetAttributePtr>> attributes);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         TargetSelectorE Selector;
         std::map<std::string, std::vector<TargetAttributePtr>> Attributes;
@@ -127,7 +118,6 @@ namespace mcc
         ConstantResource(ResourceLocation location, ConstantPtr state, ConstantPtr data);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-        [[nodiscard]] bool IsNull() const override;
 
         ResourceLocation Location;
         ConstantPtr State;

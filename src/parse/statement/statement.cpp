@@ -1,7 +1,7 @@
 #include <format>
 #include <mcc/error.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/parse.hpp>
-#include <mcc/tree.hpp>
 
 mcc::StatementPtr mcc::Parser::ParseTopLevel()
 {
@@ -22,16 +22,20 @@ mcc::StatementPtr mcc::Parser::ParseTopLevel()
 
 mcc::StatementPtr mcc::Parser::ParseStatement()
 {
-    if (At(TokenType_Other, "{"))
-        return ParseMultiStatement();
-    if (AtEnum("if", "unless"))
-        return ParseIfUnlessStatement();
-    if (At(TokenType_Symbol, "switch"))
-        return ParseSwitchStatement();
     if (At(TokenType_Symbol, "for"))
         return ParseForStatement();
+    if (AtEnum("if", "unless"))
+        return ParseIfUnlessStatement();
+    if (At(TokenType_Other, "{"))
+        return ParseMultiStatement();
     if (At(TokenType_Symbol, "return"))
         return ParseReturnStatement();
+    if (At(TokenType_Symbol, "switch"))
+        return ParseSwitchStatement();
+    if (At(TokenType_Symbol, "throw"))
+        return ParseThrowStatement();
+    if (At(TokenType_Symbol, "try"))
+        return ParseTryCatchStatement();
 
     return ParseExpression();
 }

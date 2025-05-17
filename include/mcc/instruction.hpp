@@ -158,9 +158,13 @@ namespace mcc
     struct DirectInstruction final : Instruction
     {
         static InstructionPtr Create(ResourceLocation location, BlockPtr target);
-        static InstructionPtr Create(ResourceLocation location, BlockPtr target, ValuePtr result, ValuePtr landing_pad);
+        static InstructionPtr Create(
+            ResourceLocation location,
+            BlockPtr target,
+            ValuePtr result,
+            ValuePtr branch_result);
 
-        DirectInstruction(ResourceLocation location, BlockPtr target, ValuePtr result, ValuePtr landing_pad);
+        DirectInstruction(ResourceLocation location, BlockPtr target, ValuePtr result, ValuePtr branch_result);
         ~DirectInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -170,7 +174,7 @@ namespace mcc
 
         ResourceLocation Location;
         BlockPtr Target;
-        ValuePtr Result, LandingPad;
+        ValuePtr Result, BranchResult;
     };
 
     struct ObjectInstruction final : Instruction
@@ -258,5 +262,21 @@ namespace mcc
         ValuePtr Condition;
         BlockPtr DefaultTarget;
         std::vector<std::pair<ConstantPtr, BlockPtr>> CaseTargets;
+    };
+
+    struct ThrowInstruction final : Instruction
+    {
+        static InstructionPtr Create(ResourceLocation location, ValuePtr value);
+
+        ThrowInstruction(ResourceLocation location, ValuePtr value);
+        ~ThrowInstruction() override;
+
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
+
+        [[nodiscard]] bool IsTerminator() const override;
+
+        ResourceLocation Location;
+        ValuePtr Value;
     };
 }

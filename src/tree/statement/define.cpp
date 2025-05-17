@@ -1,7 +1,7 @@
 #include <mcc/builder.hpp>
 #include <mcc/context.hpp>
+#include <mcc/statement.hpp>
 #include <mcc/value.hpp>
-#include <mcc/tree.hpp>
 
 mcc::DefineStatement::DefineStatement(
     SourceLocation where,

@@ -1,5 +1,5 @@
 #include <mcc/parse.hpp>
-#include <mcc/tree.hpp>
+#include <mcc/statement.hpp>
 
 mcc::StatementPtr mcc::Parser::ParseMultiStatement()
 {

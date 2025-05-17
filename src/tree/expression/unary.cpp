@@ -1,8 +1,8 @@
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
-#include <mcc/tree.hpp>
 #include <mcc/value.hpp>
 
 mcc::UnaryExpression::UnaryExpression(
@@ -18,18 +18,6 @@ mcc::UnaryExpression::UnaryExpression(
 std::ostream &mcc::UnaryExpression::Print(std::ostream &stream) const
 {
     return Operand->Print(stream << Operator);
-}
-
-bool mcc::UnaryExpression::IsConstant() const
-{
-    return Operand->IsConstant();
-}
-
-bool mcc::UnaryExpression::IsNull() const
-{
-    if (IsConstant())
-        return Evaluate() == 0.0;
-    return Expression::IsNull();
 }
 
 using UnaryOperation = std::function<mcc::ValuePtr(const mcc::Builder &builder, const mcc::ValuePtr &operand)>;

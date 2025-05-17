@@ -1,5 +1,5 @@
+#include <mcc/expression.hpp>
 #include <mcc/parse.hpp>
-#include <mcc/tree.hpp>
 
 mcc::ExpressionPtr mcc::Parser::ParseSwitchExpression()
 {

@@ -160,18 +160,18 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(BlockPtr target) const
     return Insert(DirectInstruction::Create(GetLocation(), std::move(target)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateDirect(BlockPtr target, ValuePtr result, ValuePtr landing_pad) const
+mcc::InstructionPtr mcc::Builder::CreateDirect(BlockPtr target, ValuePtr result, ValuePtr branch_result) const
 {
     Assert(!!target, "target must not be null");
     Assert(!!result, "result must not be null");
-    Assert(!!landing_pad, "landing pad must not be null");
+    Assert(!!branch_result, "branch result must not be null");
 
     return Insert(
         DirectInstruction::Create(
             GetLocation(),
             std::move(target),
             std::move(result),
-            std::move(landing_pad)));
+            std::move(branch_result)));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateSwitch(
@@ -194,6 +194,13 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
             std::move(condition),
             std::move(default_target),
             std::move(case_targets)));
+}
+
+mcc::InstructionPtr mcc::Builder::CreateThrow(ValuePtr value) const
+{
+    Assert(!!value, "value must not be null");
+
+    return Insert(ThrowInstruction::Create(GetLocation(), std::move(value)));
 }
 
 mcc::ValuePtr mcc::Builder::CreateBranchResult() const

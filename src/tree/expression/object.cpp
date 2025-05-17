@@ -1,7 +1,7 @@
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
-#include <mcc/tree.hpp>
 #include <mcc/value.hpp>
 
 mcc::ObjectExpression::ObjectExpression(SourceLocation where, std::map<std::string, ExpressionPtr> elements)
@@ -23,21 +23,6 @@ std::ostream &mcc::ObjectExpression::Print(std::ostream &stream) const
         value_->Print(stream << key_ << ": ");
     }
     return stream << " }";
-}
-
-bool mcc::ObjectExpression::IsConstant() const
-{
-    for (auto &value_: Elements | std::views::values)
-        if (!value_->IsConstant())
-            return false;
-    return true;
-}
-
-bool mcc::ObjectExpression::IsNull() const
-{
-    if (IsConstant())
-        return false;
-    return Expression::IsNull();
 }
 
 mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder) const

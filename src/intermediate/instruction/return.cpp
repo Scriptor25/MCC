@@ -20,55 +20,49 @@ mcc::ReturnInstruction::~ReturnInstruction()
         Value->Drop();
 }
 
-void mcc::ReturnInstruction::Generate(CommandVector &commands, bool stack) const
+void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    if (!Value)
-    {
-        if (stack)
-            commands.Append("data remove storage {} stack[0]", Location);
-        commands.Append("return 0");
-        return;
-    }
+    if (Value)
+        switch (auto value = Value->GenerateResult(false); value.Type)
+        {
+            case ResultType_Value:
+                commands.Append(
+                    "data modify storage {} result set value {}",
+                    Location,
+                    value.Value);
+                break;
 
-    auto value = Value->GenerateResult(false);
-
-    switch (value.Type)
-    {
-        case ResultType_Value:
-            if (stack)
-                commands.Append("data remove storage {} stack[0]", Location);
-            commands.Append("return {}", value.Value);
-            break;
-
-        case ResultType_Storage:
-            if (stack)
-            {
+            case ResultType_Storage:
                 commands.Append(
                     "data modify storage {} result set from storage {} {}",
                     Location,
                     value.Location,
                     value.Path);
-                commands.Append("data remove storage {} stack[0]", Location);
-                commands.Append("return run data get storage {} result", Location);
                 break;
-            }
-            commands.Append("return run data get storage {} {}", value.Location, value.Path);
-            break;
 
-        case ResultType_Score:
-            if (stack)
-                commands.Append("data remove storage {} stack[0]", Location);
-            commands.Append("return run scoreboard players get {} {}", value.Player, value.Objective);
-            break;
+            case ResultType_Score:
+                commands.Append(
+                    "execute store result storage {} result double 1 run scoreboard players get {} {}",
+                    Location,
+                    value.Player,
+                    value.Objective);
+                break;
 
-        default:
-            Error(
-                "value must be {}, {} or {}, but is {}",
-                ResultType_Value,
-                ResultType_Storage,
-                ResultType_Score,
-                value.Type);
-    }
+            default:
+                Error(
+                    "value must be {}, {} or {}, but is {}",
+                    ResultType_Value,
+                    ResultType_Storage,
+                    ResultType_Score,
+                    value.Type);
+        }
+    else
+        commands.Append("data remove storage {} result", Location);
+
+    if (stack)
+        commands.Append("data remove storage {} stack[0]", Location);
+
+    commands.Append("return 0");
 }
 
 bool mcc::ReturnInstruction::RequireStack() const

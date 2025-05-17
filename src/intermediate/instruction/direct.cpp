@@ -10,24 +10,24 @@ mcc::InstructionPtr mcc::DirectInstruction::Create(
     ResourceLocation location,
     BlockPtr target,
     ValuePtr result,
-    ValuePtr landing_pad)
+    ValuePtr branch_result)
 {
     return std::make_shared<DirectInstruction>(
         std::move(location),
         std::move(target),
         std::move(result),
-        std::move(landing_pad));
+        std::move(branch_result));
 }
 
 mcc::DirectInstruction::DirectInstruction(
     ResourceLocation location,
     BlockPtr target,
     ValuePtr result,
-    ValuePtr landing_pad)
+    ValuePtr branch_result)
     : Location(std::move(location)),
       Target(std::move(target)),
       Result(std::move(result)),
-      LandingPad(std::move(landing_pad))
+      BranchResult(std::move(branch_result))
 {
     Target->Use();
     if (Result)
@@ -46,29 +46,29 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
     if (Result)
     {
         auto result = Result->GenerateResult(false);
-        auto landing_pad = LandingPad->GenerateResult(false);
+        auto branch_result = BranchResult->GenerateResult(false);
 
         Assert(
-            landing_pad.Type == ResultType_Storage,
-            "landing pad must be {}, but is {}",
+            branch_result.Type == ResultType_Storage,
+            "branch result must be {}, but is {}",
             ResultType_Storage,
-            landing_pad.Type);
+            branch_result.Type);
 
         switch (result.Type)
         {
             case ResultType_Value:
                 commands.Append(
                     "data modify storage {} {} set value {}",
-                    landing_pad.Location,
-                    landing_pad.Path,
+                    branch_result.Location,
+                    branch_result.Path,
                     result.Value);
                 break;
 
             case ResultType_Storage:
                 commands.Append(
                     "data modify storage {} {} set from storage {} {}",
-                    landing_pad.Location,
-                    landing_pad.Path,
+                    branch_result.Location,
+                    branch_result.Path,
                     result.Location,
                     result.Path);
                 break;
@@ -76,8 +76,8 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
             case ResultType_Score:
                 commands.Append(
                     "execute store result storage {} {} double 1 run scoreboard players get {} {}",
-                    landing_pad.Location,
-                    landing_pad.Path,
+                    branch_result.Location,
+                    branch_result.Path,
                     result.Player,
                     result.Objective);
                 break;
@@ -114,7 +114,7 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
 
 bool mcc::DirectInstruction::RequireStack() const
 {
-    return Result ? Result->RequireStack() || LandingPad->RequireStack() : false;
+    return Result ? Result->RequireStack() || BranchResult->RequireStack() : false;
 }
 
 bool mcc::DirectInstruction::IsTerminator() const

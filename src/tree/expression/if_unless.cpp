@@ -1,6 +1,6 @@
 #include <mcc/builder.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/value.hpp>
-#include <mcc/tree.hpp>
 
 mcc::IfUnlessExpression::IfUnlessExpression(
     SourceLocation where,
@@ -21,22 +21,6 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
     return Else->Print(Then->Print(Condition->Print(stream << "if (") << ") ") << " else ");
 }
 
-bool mcc::IfUnlessExpression::IsConstant() const
-{
-    if (!Condition->IsConstant())
-        return false;
-    if (Unless == Condition->IsNull())
-        return Then->IsConstant();
-    return Else->IsConstant();
-}
-
-bool mcc::IfUnlessExpression::IsNull() const
-{
-    if (IsConstant())
-        return Evaluate() == 0.0;
-    return Expression::IsNull();
-}
-
 mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder) const
 {
     const auto parent = builder.GetInsertParent();
@@ -48,16 +32,16 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder) const
     (void) builder.CreateBranch(condition, then_target, else_target);
 
     builder.SetInsertBlock(end_target);
-    auto landing_pad = builder.CreateBranchResult();
+    auto branch_result = builder.CreateBranchResult();
 
     builder.SetInsertBlock(then_target);
     const auto then_value = Then->GenerateValue(builder);
-    (void) builder.CreateDirect(end_target, then_value, landing_pad);
+    (void) builder.CreateDirect(end_target, then_value, branch_result);
 
     builder.SetInsertBlock(else_target);
     const auto else_value = Else->GenerateValue(builder);
-    (void) builder.CreateDirect(end_target, else_value, landing_pad);
+    (void) builder.CreateDirect(end_target, else_value, branch_result);
 
     builder.SetInsertBlock(end_target);
-    return landing_pad;
+    return branch_result;
 }

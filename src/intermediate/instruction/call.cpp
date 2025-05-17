@@ -24,18 +24,22 @@ static void generate_function_call(const mcc::CallInstruction &self, mcc::Comman
                 arguments.Type);
     }
 
-    if (!self.UseCount)
-    {
-        commands.Append("function {} {}", self.Callee, arguments_value);
-        return;
-    }
-
+    commands.Append(self.CreateTmpScore());
+    auto tmp_name = self.GetTmpName();
     commands.Append(
-        "execute store result storage {} {} double 1 run function {} {}",
-        self.Location,
-        self.GetStackPath(),
+        "execute store result score %c {} run function {} {}",
+        tmp_name,
         self.Callee,
         arguments_value);
+    commands.Append("execute unless score %c {0} matches 0 run return run scoreboard players get %c {0}", tmp_name);
+    commands.Append(self.RemoveTmpScore());
+
+    if (self.UseCount)
+        commands.Append(
+            "data modify storage {} {} set from storage {} result",
+            self.Location,
+            self.GetStackPath(),
+            self.Callee);
 }
 
 static void generate_builtin_print(const mcc::CallInstruction &self, mcc::CommandVector &commands)

@@ -1,6 +1,7 @@
 #include <mcc/builder.hpp>
+#include <mcc/expression.hpp>
+#include <mcc/statement.hpp>
 #include <mcc/value.hpp>
-#include <mcc/tree.hpp>
 
 mcc::ForStatement::ForStatement(
     SourceLocation where,

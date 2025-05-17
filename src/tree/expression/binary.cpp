@@ -1,8 +1,8 @@
 #include <set>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
+#include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
-#include <mcc/tree.hpp>
 #include <mcc/value.hpp>
 
 mcc::BinaryExpression::BinaryExpression(
@@ -69,49 +69,6 @@ mcc::ExpressionPtr mcc::BinaryExpression::Merge()
 std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
 {
     return Right->Print(Left->Print(stream) << ' ' << Operator << ' ');
-}
-
-bool mcc::BinaryExpression::IsConstant() const
-{
-    return Left->IsConstant() && Right->IsConstant();
-}
-
-bool mcc::BinaryExpression::IsNull() const
-{
-    if (IsConstant())
-        return Evaluate() == 0.0;
-    return Expression::IsNull();
-}
-
-mcc::FloatT mcc::BinaryExpression::Evaluate() const
-{
-    const auto left = Left->Evaluate();
-    const auto right = Right->Evaluate();
-
-    if (Operator == "<")
-        return left < right;
-    if (Operator == ">")
-        return left > right;
-    if (Operator == "<=")
-        return left <= right;
-    if (Operator == ">=")
-        return left >= right;
-    if (Operator == "==")
-        return left == right;
-    if (Operator == "!=")
-        return left != right;
-    if (Operator == "+")
-        return left + right;
-    if (Operator == "-")
-        return left - right;
-    if (Operator == "*")
-        return left * right;
-    if (Operator == "/")
-        return left / right;
-    if (Operator == "%")
-        return fmodl(left, right);
-
-    Error(Where, "undefined binary operator {}", Operator);
 }
 
 mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const

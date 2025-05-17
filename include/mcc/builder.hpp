@@ -35,11 +35,12 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateReturn(ValuePtr value) const;
         [[nodiscard]] InstructionPtr CreateBranch(ValuePtr condition, BlockPtr then_target, BlockPtr else_target) const;
         [[nodiscard]] InstructionPtr CreateDirect(BlockPtr target) const;
-        [[nodiscard]] InstructionPtr CreateDirect(BlockPtr target, ValuePtr result, ValuePtr landing_pad) const;
+        [[nodiscard]] InstructionPtr CreateDirect(BlockPtr target, ValuePtr result, ValuePtr branch_result) const;
         [[nodiscard]] InstructionPtr CreateSwitch(
             ValuePtr condition,
             BlockPtr default_target,
             std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets) const;
+        [[nodiscard]] InstructionPtr CreateThrow(ValuePtr value) const;
 
         [[nodiscard]] ValuePtr CreateBranchResult() const;
 
