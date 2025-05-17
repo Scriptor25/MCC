@@ -21,15 +21,12 @@ const mcc::ResourceLocation &mcc::Builder::GetLocation(const SourceLocation &whe
     return GetInsertParent(where)->Location;
 }
 
-mcc::BlockPtr mcc::Builder::CreateFunction(
-    const SourceLocation &where,
-    ResourceLocation location,
-    const ParameterList &parameters)
+mcc::BlockPtr mcc::Builder::CreateFunction(const SourceLocation &where, TypePtr type, ResourceLocation location)
 {
     if (location.Namespace.empty())
         location.Namespace = m_Context.Namespace;
 
-    return m_Blocks.emplace_back(Block::CreateTopLevel(where, location, parameters));
+    return m_Blocks.emplace_back(Block::CreateTopLevel(where, type, location));
 }
 
 mcc::BlockPtr mcc::Builder::CreateBlock(const SourceLocation &where, const BlockPtr &parent)
@@ -87,14 +84,34 @@ mcc::BlockPtr mcc::Builder::GetInsertParent(const SourceLocation &where) const
     return block;
 }
 
+void mcc::Builder::PushVariables()
+{
+    m_Variables.emplace_back();
+}
+
+void mcc::Builder::PopVariables()
+{
+    m_Variables.pop_back();
+}
+
+mcc::ValuePtr mcc::Builder::CreateVariable(
+    const SourceLocation &where,
+    TypePtr type,
+    const std::string &name)
+{
+    Assert(!m_Variables.empty(), where, "TODO");
+    auto &variables = m_Variables.back();
+    Assert(!variables.contains(name), where, "already defined variable {}", name);
+    return variables[name] = NamedValue::Create(where, type, GetLocation(where), name);
+}
+
 mcc::ValuePtr mcc::Builder::GetVariable(const SourceLocation &where, const std::string &name) const
 {
-    const auto block = GetInsertParent(where);
-
-    if (!block->Variables.contains(name))
-        block->Variables.emplace(name, NamedValue::Create(where, GetLocation(where), name));
-
-    return block->Variables.at(name);
+    Assert(!m_Variables.empty(), where, "TODO");
+    for (auto variables = m_Variables.rbegin(); variables != m_Variables.rend(); ++variables)
+        if (variables->contains(name))
+            return variables->at(name);
+    Error(where, "undefined variable {}", name);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateStore(
@@ -147,9 +164,12 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
             operands));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateCommand(const SourceLocation &where, const CommandT &command) const
+mcc::InstructionPtr mcc::Builder::CreateCommand(
+    const SourceLocation &where,
+    TypePtr type,
+    const CommandT &command) const
 {
-    return Insert(where, CommandInstruction::Create(where, GetLocation(where), command));
+    return Insert(where, CommandInstruction::Create(where, type, GetLocation(where), command));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturnVoid(const SourceLocation &where) const
@@ -246,7 +266,7 @@ mcc::InstructionPtr mcc::Builder::CreateThrow(
     return Insert(where, ThrowInstruction::Create(where, GetLocation(where), value, landing_pad));
 }
 
-mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where, const TypeID type) const
+mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where, TypePtr type) const
 {
     return BranchResult::Create(where, type, GetLocation(where));
 }
@@ -257,11 +277,19 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
     const std::vector<ValuePtr> &arguments,
     const BlockPtr &landing_pad) const
 {
-    auto may_throw = !callee.Namespace.empty();
-    if (may_throw)
+    TypePtr type;
+    bool may_throw;
+
+    if (callee.Namespace.empty())
+    {
+        type = nullptr;
+        may_throw = false;
+    }
+    else
     {
         const auto block = FindBlock(callee);
         Assert(!!block, where, "undefined function {}", callee);
+        type = block->Type;
         may_throw = block->MayThrow();
     }
 
@@ -269,6 +297,7 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
         where,
         CallInstruction::Create(
             where,
+            type,
             GetLocation(where),
             callee,
             arguments,
@@ -276,7 +305,7 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
             landing_pad));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateValue(const SourceLocation &where) const
+mcc::InstructionPtr mcc::Builder::AllocateValue(const SourceLocation &where, TypePtr type) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
@@ -284,22 +313,35 @@ mcc::InstructionPtr mcc::Builder::AllocateValue(const SourceLocation &where) con
         where,
         AllocationInstruction::CreateValue(
             where,
+            type,
             GetLocation(where),
             m_InsertBlock->StackIndex++));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateArray(const SourceLocation &where) const
+mcc::InstructionPtr mcc::Builder::AllocateArray(const SourceLocation &where, TypePtr type) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    return Insert(where, AllocationInstruction::CreateArray(where, GetLocation(where), m_InsertBlock->StackIndex++));
+    return Insert(
+        where,
+        AllocationInstruction::CreateArray(
+            where,
+            type,
+            GetLocation(where),
+            m_InsertBlock->StackIndex++));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateObject(const SourceLocation &where) const
+mcc::InstructionPtr mcc::Builder::AllocateObject(const SourceLocation &where, TypePtr type) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    return Insert(where, AllocationInstruction::CreateObject(where, GetLocation(where), m_InsertBlock->StackIndex++));
+    return Insert(
+        where,
+        AllocationInstruction::CreateObject(
+            where,
+            type,
+            GetLocation(where),
+            m_InsertBlock->StackIndex++));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateAppend(
@@ -393,12 +435,12 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 
 mcc::ValuePtr mcc::Builder::CreateStoreResult(
     const SourceLocation &where,
-    const TypeID type,
-    const std::string &variable) const
+    TypePtr type,
+    const std::string &variable)
 {
     Assert(!variable.empty(), where, "variable name must not be empty");
 
-    const auto dst = GetVariable(where, variable);
+    const auto dst = CreateVariable(where, type, variable);
     const auto src = FunctionResult::Create(where, type, GetLocation(where));
     return CreateStore(where, dst, src);
 }

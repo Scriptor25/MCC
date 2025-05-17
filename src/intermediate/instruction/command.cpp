@@ -3,17 +3,19 @@
 
 mcc::InstructionPtr mcc::CommandInstruction::Create(
     const SourceLocation &where,
+    TypePtr type,
     const ResourceLocation &location,
     const CommandT &command)
 {
-    return std::make_shared<CommandInstruction>(where, location, command);
+    return std::make_shared<CommandInstruction>(where, type, location, command);
 }
 
 mcc::CommandInstruction::CommandInstruction(
     const SourceLocation &where,
+    TypePtr type,
     const ResourceLocation &location,
     const CommandT &command)
-    : Instruction(where, TypeID_Any),
+    : Instruction(where, type),
       Location(location),
       Command(command)
 {

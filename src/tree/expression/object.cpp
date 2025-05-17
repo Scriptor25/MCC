@@ -2,6 +2,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::ObjectExpression::ObjectExpression(const SourceLocation &where, std::map<std::string, ExpressionPtr> elements)
@@ -30,18 +31,23 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame
     std::map<std::string, ValuePtr> values;
     std::map<std::string, ConstantPtr> constants;
 
+    std::map<std::string, TypePtr> elements;
+
     for (auto &[key_, value_]: Elements)
     {
-        auto value = value_->GenerateValue(builder, frame);
-        if (auto constant = std::dynamic_pointer_cast<Constant>(value))
-            constants.emplace(key_, constant);
-        values.emplace(key_, value);
+        const auto value = value_->GenerateValue(builder, frame);
+        if (const auto constant = std::dynamic_pointer_cast<Constant>(value))
+            constants[key_] = constant;
+        values[key_] = value;
+        elements[key_] = value->Type;
     }
 
-    if (values.size() == constants.size())
-        return ConstantObject::Create(Where, constants);
+    const auto type = TypeContext::GetStruct(elements);
 
-    auto object = builder.AllocateObject(Where);
+    if (values.size() == constants.size())
+        return ConstantObject::Create(Where, type, constants);
+
+    auto object = builder.AllocateObject(Where, type);
 
     for (auto &[key_, value_]: values)
         (void) builder.CreateInsert(Where, object, value_, key_);

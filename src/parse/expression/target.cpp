@@ -76,8 +76,7 @@ mcc::TargetAttributePtr mcc::Parser::ParseMapAttribute(bool invert, const Parse 
     {
         auto key = Expect(TokenType_Symbol).Value;
         Expect(TokenType_Operator, "=");
-        auto value = parse(*this, SkipIf(TokenType_Operator, "!"));
-        values.emplace(key, std::move(value));
+        values[key] = parse(*this, SkipIf(TokenType_Operator, "!"));
         if (!At(TokenType_Other, "}"))
             Expect(TokenType_Other, ",");
     }

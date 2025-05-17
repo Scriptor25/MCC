@@ -1,5 +1,6 @@
 #include <mcc/attribute.hpp>
 #include <mcc/constant.hpp>
+#include <mcc/type.hpp>
 
 mcc::ConstantPtr mcc::ConstantTarget::Create(
     const SourceLocation &where,
@@ -13,7 +14,7 @@ mcc::ConstantTarget::ConstantTarget(
     const SourceLocation &where,
     const TargetSelectorE selector,
     std::map<std::string, std::vector<TargetAttributePtr>> attributes)
-    : Constant(where, TypeID_Null),
+    : Constant(where, TypeContext::GetNull()),
       Selector(selector),
       Attributes(std::move(attributes))
 {

@@ -1,4 +1,5 @@
 #include <mcc/constant.hpp>
+#include <mcc/type.hpp>
 
 mcc::ConstantPtr mcc::ConstantInteger::Create(const SourceLocation &where, const IntegerT value)
 {
@@ -6,7 +7,7 @@ mcc::ConstantPtr mcc::ConstantInteger::Create(const SourceLocation &where, const
 }
 
 mcc::ConstantInteger::ConstantInteger(const SourceLocation &where, const IntegerT value)
-    : Constant(where, TypeID_Number),
+    : Constant(where, TypeContext::GetNumber()),
       Value(value)
 {
 }

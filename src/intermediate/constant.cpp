@@ -1,6 +1,6 @@
 #include <mcc/constant.hpp>
 
-mcc::Constant::Constant(const SourceLocation &where, const TypeID type)
+mcc::Constant::Constant(const SourceLocation &where, TypePtr type)
     : Value(where, type)
 {
 }

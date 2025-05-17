@@ -2,6 +2,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::SwitchExpression::SwitchExpression(
@@ -52,18 +53,19 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     auto target_frame = frame;
     target_frame.Tail = tail_target;
 
-    builder.SetInsertBlock(tail_target);
-    const auto branch_result = builder.CreateBranchResult(Where, TypeID_Any);
+    std::set<TypePtr> elements;
+    std::vector<std::pair<BlockPtr, ValuePtr>> case_values;
 
     builder.SetInsertBlock(default_target);
     const auto default_value = Default->GenerateValue(builder, target_frame);
-    (void) builder.CreateDirect(Default->Where, tail_target, default_value, branch_result);
+    elements.emplace(default_value->Type);
+    case_values.emplace_back(default_target, default_value);
 
     std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets;
     for (auto &[cases_, value_]: Cases)
     {
         auto case_target = builder.CreateBlock(value_->Where, parent);
-        builder.SetInsertBlock(case_target);
+
         for (auto &case_: cases_)
         {
             auto value = case_->GenerateValue(builder, frame);
@@ -71,13 +73,28 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
             Assert(!!constant, case_->Where, "case entry must be constant");
             case_targets.emplace_back(constant, case_target);
         }
-        auto case_value = value_->GenerateValue(builder, target_frame);
-        (void) builder.CreateDirect(value_->Where, tail_target, case_value, branch_result);
+
+        builder.SetInsertBlock(case_target);
+        const auto case_value = value_->GenerateValue(builder, target_frame);
+        elements.emplace(case_value->Type);
+        case_values.emplace_back(case_target, case_value);
     }
 
     builder.SetInsertBlock(start_target);
     const auto condition = Condition->GenerateValue(builder, frame);
     (void) builder.CreateSwitch(Where, condition, default_target, case_targets);
+
+    builder.SetInsertBlock(tail_target);
+    const auto type = (elements.size() == 1)
+                          ? *elements.begin()
+                          : TypeContext::GetUnion(elements);
+    const auto branch_result = builder.CreateBranchResult(Where, type);
+
+    for (auto &[target_, value_]: case_values)
+    {
+        builder.SetInsertBlock(target_);
+        (void) builder.CreateDirect(value_->Where, tail_target, value_, branch_result);
+    }
 
     builder.SetInsertBlock(tail_target);
     return branch_result;

@@ -31,7 +31,11 @@ namespace mcc
 
     struct BinaryExpression final : Expression
     {
-        BinaryExpression(const SourceLocation &where, const std::string &operator_, ExpressionPtr left, ExpressionPtr right);
+        BinaryExpression(
+            const SourceLocation &where,
+            const std::string &operator_,
+            ExpressionPtr left,
+            ExpressionPtr right);
 
         ExpressionPtr Merge();
 
@@ -56,11 +60,12 @@ namespace mcc
 
     struct CommandExpression final : Expression
     {
-        CommandExpression(const SourceLocation &where, const CommandT &command);
+        CommandExpression(const SourceLocation &where, TypePtr type, const CommandT &command);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
 
+        TypePtr Type;
         CommandT Command;
     };
 
@@ -103,7 +108,11 @@ namespace mcc
 
     struct ResourceExpression final : Expression
     {
-        ResourceExpression(const SourceLocation &where, const ResourceLocation &location, ExpressionPtr state, ExpressionPtr data);
+        ResourceExpression(
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            ExpressionPtr state,
+            ExpressionPtr data);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -171,7 +180,10 @@ namespace mcc
 
     struct VectorExpression final : Expression
     {
-        VectorExpression(const SourceLocation &where, const std::string &operator_, std::vector<ExpressionPtr> operands);
+        VectorExpression(
+            const SourceLocation &where,
+            const std::string &operator_,
+            std::vector<ExpressionPtr> operands);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;

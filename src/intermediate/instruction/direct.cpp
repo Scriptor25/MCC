@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::DirectInstruction::Create(
     const SourceLocation &where,
@@ -35,7 +36,7 @@ mcc::DirectInstruction::DirectInstruction(
     const BlockPtr &target,
     const ValuePtr &result,
     const ValuePtr &branch_result)
-    : Instruction(where, TypeID_Void),
+    : Instruction(where, TypeContext::GetVoid()),
       Location(location),
       Target(target),
       Result(result),
@@ -44,6 +45,8 @@ mcc::DirectInstruction::DirectInstruction(
     Target->Use();
     if (Result)
         Result->Use();
+    if (BranchResult)
+        BranchResult->Use();
 }
 
 mcc::DirectInstruction::~DirectInstruction()
@@ -51,6 +54,8 @@ mcc::DirectInstruction::~DirectInstruction()
     Target->Drop();
     if (Result)
         Result->Drop();
+    if (BranchResult)
+        BranchResult->Drop();
 }
 
 void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const

@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::OperationInstruction::Create(
     const SourceLocation &where,
@@ -15,7 +16,7 @@ mcc::OperationInstruction::OperationInstruction(
     const OperatorE operator_,
     const ResourceLocation &location,
     const std::vector<ValuePtr> &operands)
-    : Instruction(where, TypeID_Number),
+    : Instruction(where, TypeContext::GetNumber()),
       Operator(operator_),
       Location(location),
       Operands(operands)

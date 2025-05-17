@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ReturnInstruction::Create(
     const SourceLocation &where,
@@ -13,7 +14,7 @@ mcc::ReturnInstruction::ReturnInstruction(
     const SourceLocation &where,
     const ResourceLocation &location,
     const ValuePtr &value)
-    : Instruction(where, TypeID_Void),
+    : Instruction(where, TypeContext::GetVoid()),
       Location(location),
       Value(value)
 {

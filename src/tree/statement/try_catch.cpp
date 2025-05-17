@@ -6,11 +6,13 @@ mcc::TryCatchStatement::TryCatchStatement(
     const SourceLocation &where,
     StatementPtr try_,
     StatementPtr catch_,
-    const std::string &variable)
+    const std::string &variable,
+    TypePtr error_type)
     : Statement(where),
       Try(std::move(try_)),
       Catch(std::move(catch_)),
-      Variable(variable)
+      Variable(variable),
+      ErrorType(error_type)
 {
 }
 
@@ -48,10 +50,11 @@ void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) cons
 
     if (Catch)
     {
+        builder.PushVariables();
         builder.SetInsertBlock(catch_target);
 
         if (!Variable.empty())
-            (void) builder.CreateStoreResult(Catch->Where, TypeID_Any, Variable);
+            (void) builder.CreateStoreResult(Catch->Where, ErrorType, Variable);
 
         Catch->Generate(builder, frame);
 
@@ -60,6 +63,8 @@ void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) cons
             require_tail = true;
             (void) builder.CreateDirect(Catch->Where, tail_target);
         }
+
+        builder.PopVariables();
     }
 
     if (!require_tail)

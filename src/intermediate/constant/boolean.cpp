@@ -1,4 +1,5 @@
 #include <mcc/constant.hpp>
+#include <mcc/type.hpp>
 
 mcc::ConstantPtr mcc::ConstantBoolean::Create(const SourceLocation &where, const bool value)
 {
@@ -6,7 +7,7 @@ mcc::ConstantPtr mcc::ConstantBoolean::Create(const SourceLocation &where, const
 }
 
 mcc::ConstantBoolean::ConstantBoolean(const SourceLocation &where, const bool value)
-    : Constant(where, TypeID_Boolean),
+    : Constant(where, TypeContext::GetBoolean()),
       Value(value)
 {
 }

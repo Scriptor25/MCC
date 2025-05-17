@@ -42,6 +42,7 @@ namespace mcc
             const SourceLocation &where,
             const ResourceLocation &location,
             const ParameterList &parameters,
+            TypePtr type,
             const std::vector<ResourceLocation> &tags,
             StatementPtr body);
 
@@ -50,6 +51,7 @@ namespace mcc
 
         ResourceLocation Location;
         ParameterList Parameters;
+        TypePtr Type;
         std::vector<ResourceLocation> Tags;
         StatementPtr Body;
     };
@@ -145,12 +147,30 @@ namespace mcc
 
     struct TryCatchStatement final : Statement
     {
-        TryCatchStatement(const SourceLocation &where, StatementPtr try_, StatementPtr catch_, const std::string &variable);
+        TryCatchStatement(
+            const SourceLocation &where,
+            StatementPtr try_,
+            StatementPtr catch_,
+            const std::string &variable,
+            TypePtr error_type);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, const Frame &frame) const override;
 
         StatementPtr Try, Catch;
         std::string Variable;
+        TypePtr ErrorType;
+    };
+
+    struct VariableStatement final : Statement
+    {
+        VariableStatement(const SourceLocation &where, bool constant, const std::string &name, ExpressionPtr value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
+
+        bool Constant;
+        std::string Name;
+        ExpressionPtr Value;
     };
 }

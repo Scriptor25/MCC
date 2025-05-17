@@ -7,7 +7,7 @@ namespace mcc
 {
     struct Value
     {
-        Value(const SourceLocation &where, TypeID type);
+        Value(const SourceLocation &where, TypePtr type);
         virtual ~Value() = default;
 
         virtual void Generate(CommandVector &commands, bool stack) const;
@@ -18,7 +18,7 @@ namespace mcc
         void Drop();
 
         SourceLocation Where;
-        TypeID Type;
+        TypePtr Type;
         IndexT UseCount = 0;
     };
 
@@ -26,10 +26,15 @@ namespace mcc
     {
         static ValuePtr Create(
             const SourceLocation &where,
+            TypePtr type,
             const ResourceLocation &location,
             const std::string &name);
 
-        NamedValue(const SourceLocation &where, const ResourceLocation &location, const std::string &name);
+        NamedValue(
+            const SourceLocation &where,
+            TypePtr type,
+            const ResourceLocation &location,
+            const std::string &name);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -40,9 +45,9 @@ namespace mcc
 
     struct BranchResult final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, TypeID type, const ResourceLocation &location);
+        static ValuePtr Create(const SourceLocation &where, TypePtr type, const ResourceLocation &location);
 
-        BranchResult(const SourceLocation &where, TypeID type, const ResourceLocation &location);
+        BranchResult(const SourceLocation &where, TypePtr type, const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -54,17 +59,14 @@ namespace mcc
     {
         static BlockPtr CreateTopLevel(
             const SourceLocation &where,
-            const ResourceLocation &location,
-            const ParameterList &parameters);
+            TypePtr type,
+            const ResourceLocation &location);
         static BlockPtr Create(
             const SourceLocation &where,
             const BlockPtr &parent,
             const ResourceLocation &location);
 
-        Block(
-            const SourceLocation &where,
-            const ResourceLocation &location,
-            const ParameterList &parameters);
+        Block(const SourceLocation &where, TypePtr type, const ResourceLocation &location);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
@@ -75,10 +77,9 @@ namespace mcc
         void ForwardArguments(std::string &prefix, std::string &arguments) const;
 
         ResourceLocation Location;
-        ParameterList Parameters;
+        std::vector<std::pair<std::string, ValuePtr>> Parameters;
 
         IndexT StackIndex = 0;
-        std::map<std::string, ValuePtr> Variables;
         std::vector<InstructionPtr> Instructions;
 
         BlockPtr Parent;
@@ -87,9 +88,9 @@ namespace mcc
 
     struct FunctionResult final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, TypeID type, const ResourceLocation &location);
+        static ValuePtr Create(const SourceLocation &where, TypePtr type, const ResourceLocation &location);
 
-        FunctionResult(const SourceLocation &where, TypeID type, const ResourceLocation &location);
+        FunctionResult(const SourceLocation &where, TypePtr type, const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
         Result GenerateResult(bool stringify) const override;

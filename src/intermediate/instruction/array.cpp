@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
     const SourceLocation &where,
@@ -10,6 +11,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
 {
     return std::make_shared<ArrayInstruction>(
         where,
+        TypeContext::GetVoid(),
         ArrayOperation_Append,
         location,
         array,
@@ -27,6 +29,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
 {
     return std::make_shared<ArrayInstruction>(
         where,
+        TypeContext::GetVoid(),
         ArrayOperation_Prepend,
         location,
         array,
@@ -45,6 +48,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
 {
     return std::make_shared<ArrayInstruction>(
         where,
+        TypeContext::GetVoid(),
         ArrayOperation_Insert,
         location,
         array,
@@ -59,8 +63,11 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
     const ValuePtr &array,
     const IndexT index)
 {
+    auto type = dynamic_cast<ArrayType const *>(array->Type)->Elements;
+
     return std::make_shared<ArrayInstruction>(
         where,
+        type,
         ArrayOperation_Extract,
         location,
         array,
@@ -71,13 +78,14 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
 
 mcc::ArrayInstruction::ArrayInstruction(
     const SourceLocation &where,
+    TypePtr type,
     const ArrayOperationE array_operation,
     const ResourceLocation &location,
     const ValuePtr &array,
     const ValuePtr &value,
     const IndexT index,
     const bool stringify)
-    : Instruction(where, array_operation == ArrayOperation_Extract ? TypeID_Any : TypeID_Void),
+    : Instruction(where, type),
       ArrayOperation(array_operation),
       Location(location),
       Array(array),

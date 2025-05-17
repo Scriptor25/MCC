@@ -1,7 +1,7 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
-mcc::Value::Value(const SourceLocation &where, const TypeID type)
+mcc::Value::Value(const SourceLocation &where, TypePtr type)
     : Where(where),
       Type(type)
 {

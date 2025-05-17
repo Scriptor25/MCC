@@ -73,7 +73,10 @@ namespace mcc
         TargetAttributePtr ParseStringAttribute(bool invert);
         TargetAttributePtr ParseTagAttribute(bool invert);
 
-        TypeID ParseType();
+        TypePtr ParseType();
+        TypePtr ParseBaseType();
+        TypePtr ParseArrayType();
+        TypePtr ParseUnionType();
 
         StatementPtr ParseTopLevel();
         StatementPtr ParseDefineStatement();
@@ -89,6 +92,7 @@ namespace mcc
         StatementPtr ParseSwitchStatement();
         StatementPtr ParseThrowStatement();
         StatementPtr ParseTryCatchStatement();
+        StatementPtr ParseVariableStatement();
 
         ExpressionPtr ParseExpression();
         ExpressionPtr ParseResourceExpression();

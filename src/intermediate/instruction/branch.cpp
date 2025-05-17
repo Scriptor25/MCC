@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::BranchInstruction::Create(
     const SourceLocation &where,
@@ -22,7 +23,7 @@ mcc::BranchInstruction::BranchInstruction(
     const ValuePtr &condition,
     const BlockPtr &then_target,
     const BlockPtr &else_target)
-    : Instruction(where, TypeID_Void),
+    : Instruction(where, TypeContext::GetVoid()),
       Location(location),
       Condition(condition),
       ThenTarget(then_target),

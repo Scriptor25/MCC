@@ -6,28 +6,28 @@ define :assert(x: boolean, message: string) {
 }
 
 define :test_assert() {
-    a = 2
-    b = 2
-    c = a + b
+    const a = 2
+    const b = 2
+    const c = a + b
     $:assert({ x: c == 3, message: "c must be equal to 3" })
 }
 
 define :test_try_catch() {
     try {
-        a = 1
-        b = 2
-        c = a + b
+        const a = 1
+        const b = 2
+        const c = a + b
         $:assert({ x: c == 3, message: "c must be equal to 3" })
-    } catch (e) {
+    } catch (e: string) {
         print(@s, `catched error: ${e}`)
     }
 
     try {
-        a = 1
-        b = 2
-        c = a + b
+        const a = 1
+        const b = 2
+        const c = a + b
         $:assert({ x: c == 4, message: "c must be equal to 4" })
-    } catch (e) {
+    } catch (e: string) {
         print(@s, `catched error: ${e}`)
     }
 }

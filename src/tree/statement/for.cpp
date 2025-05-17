@@ -33,6 +33,8 @@ void mcc::ForStatement::Generate(Builder &builder, const Frame &frame) const
     target_frame.Head = head_target;
     target_frame.Tail = tail_target;
 
+    builder.PushVariables();
+
     if (Prefix)
         Prefix->Generate(builder, frame);
     (void) builder.CreateDirect(Where, head_target);
@@ -56,6 +58,8 @@ void mcc::ForStatement::Generate(Builder &builder, const Frame &frame) const
             Suffix->Generate(builder, frame);
         (void) builder.CreateDirect(Do->Where, head_target);
     }
+
+    builder.PopVariables();
 
     if (!Condition && !(target_frame.Flags & FrameFlag_RequireTail))
     {

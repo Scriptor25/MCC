@@ -26,6 +26,10 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
     }
     Expect(TokenType_Other, ")");
 
+    TypePtr type;
+    if (SkipIf(TokenType_Other, ":"))
+        type = ParseType();
+
     if (At(TokenType_Other, "#"))
     {
         while (!At(TokenType_Other, "{") && !At(TokenType_EOF))
@@ -40,5 +44,5 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
 
     auto body = ParseMultiStatement();
 
-    return std::make_unique<DefineStatement>(where, location, parameters, tags, std::move(body));
+    return std::make_unique<DefineStatement>(where, location, parameters, type, tags, std::move(body));
 }

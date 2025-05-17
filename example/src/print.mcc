@@ -5,6 +5,8 @@ define :print(targets: string, message: string) {
 }
 
 define :test_print(builtin: boolean) {
-    return if (builtin) print(@s, "Hello World!")
-    else $:print({ targets: "@s", message: "Hello World!" })
+    if (builtin)
+        print(@s, "Hello World!")
+    else
+        $:print({ targets: "@s", message: "Hello World!" })
 }

@@ -14,10 +14,7 @@ namespace mcc
         [[nodiscard]] Context &GetContext() const;
         [[nodiscard]] const ResourceLocation &GetLocation(const SourceLocation &where) const;
 
-        BlockPtr CreateFunction(
-            const SourceLocation &where,
-            ResourceLocation location,
-            const ParameterList &parameters);
+        BlockPtr CreateFunction(const SourceLocation &where, TypePtr type, ResourceLocation location);
         BlockPtr CreateBlock(const SourceLocation &where, const BlockPtr &parent);
         BlockPtr FindBlock(const ResourceLocation &location) const;
         void RemoveBlock(const SourceLocation &where, const BlockPtr &block);
@@ -26,6 +23,13 @@ namespace mcc
         [[nodiscard]] BlockPtr GetInsertBlock() const;
         [[nodiscard]] BlockPtr GetInsertParent(const SourceLocation &where) const;
 
+        void PushVariables();
+        void PopVariables();
+
+        ValuePtr CreateVariable(
+            const SourceLocation &where,
+            TypePtr type,
+            const std::string &name);
         [[nodiscard]] ValuePtr GetVariable(const SourceLocation &where, const std::string &name) const;
 
         [[nodiscard]] InstructionPtr CreateStore(
@@ -44,7 +48,10 @@ namespace mcc
             OperatorE operator_,
             const std::vector<ValuePtr> &operands) const;
 
-        [[nodiscard]] InstructionPtr CreateCommand(const SourceLocation &where, const CommandT &command) const;
+        [[nodiscard]] InstructionPtr CreateCommand(
+            const SourceLocation &where,
+            TypePtr type,
+            const CommandT &command) const;
 
         [[nodiscard]] InstructionPtr CreateReturnVoid(const SourceLocation &where) const;
         [[nodiscard]] InstructionPtr CreateReturn(const SourceLocation &where, const ValuePtr &value) const;
@@ -73,7 +80,7 @@ namespace mcc
             const ValuePtr &value,
             const BlockPtr &landing_pad) const;
 
-        [[nodiscard]] ValuePtr CreateBranchResult(const SourceLocation &where, TypeID type) const;
+        [[nodiscard]] ValuePtr CreateBranchResult(const SourceLocation &where, TypePtr type) const;
 
         [[nodiscard]] InstructionPtr CreateCall(
             const SourceLocation &where,
@@ -81,9 +88,9 @@ namespace mcc
             const std::vector<ValuePtr> &arguments,
             const BlockPtr &landing_pad) const;
 
-        [[nodiscard]] InstructionPtr AllocateValue(const SourceLocation &where) const;
-        [[nodiscard]] InstructionPtr AllocateArray(const SourceLocation &where) const;
-        [[nodiscard]] InstructionPtr AllocateObject(const SourceLocation &where) const;
+        [[nodiscard]] InstructionPtr AllocateValue(const SourceLocation &where, TypePtr type) const;
+        [[nodiscard]] InstructionPtr AllocateArray(const SourceLocation &where, TypePtr type) const;
+        [[nodiscard]] InstructionPtr AllocateObject(const SourceLocation &where, TypePtr type) const;
 
         [[nodiscard]] InstructionPtr CreateAppend(
             const SourceLocation &where,
@@ -112,7 +119,10 @@ namespace mcc
             const ValuePtr &value,
             const std::string &key) const;
 
-        [[nodiscard]] ValuePtr CreateStoreResult(const SourceLocation &where, TypeID type, const std::string &variable) const;
+        ValuePtr CreateStoreResult(
+            const SourceLocation &where,
+            TypePtr type,
+            const std::string &variable);
 
         [[nodiscard]] InstructionPtr Insert(const SourceLocation &where, InstructionPtr instruction) const;
 
@@ -123,5 +133,7 @@ namespace mcc
 
         std::vector<BlockPtr> m_Blocks;
         BlockPtr m_InsertBlock;
+
+        std::vector<std::map<std::string, ValuePtr>> m_Variables;
     };
 }

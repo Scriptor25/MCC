@@ -1,4 +1,5 @@
 #include <mcc/constant.hpp>
+#include <mcc/type.hpp>
 
 mcc::ConstantPtr mcc::ConstantFloatRange::Create(const SourceLocation &where, const FloatT min, const FloatT max)
 {
@@ -19,7 +20,7 @@ mcc::ConstantFloatRange::ConstantFloatRange(
     const SourceLocation &where,
     const std::optional<FloatT> min,
     const std::optional<FloatT> max)
-    : Constant(where, TypeID_Null),
+    : Constant(where, TypeContext::GetNull()),
       Min(min),
       Max(max)
 {

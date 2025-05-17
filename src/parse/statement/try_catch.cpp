@@ -9,11 +9,14 @@ mcc::StatementPtr mcc::Parser::ParseTryCatchStatement()
 
     StatementPtr catch_;
     std::string variable;
+    TypePtr error_type;
     if (SkipIf(TokenType_Symbol, "catch"))
     {
         if (SkipIf(TokenType_Other, "("))
         {
             variable = Expect(TokenType_Symbol).Value;
+            Expect(TokenType_Other, ":");
+            error_type = ParseType();
             Expect(TokenType_Other, ")");
         }
 
@@ -24,5 +27,6 @@ mcc::StatementPtr mcc::Parser::ParseTryCatchStatement()
         where,
         std::move(try_),
         std::move(catch_),
-        variable);
+        variable,
+        error_type);
 }

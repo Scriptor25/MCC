@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ThrowInstruction::Create(
     const SourceLocation &where,
@@ -19,17 +20,21 @@ mcc::ThrowInstruction::ThrowInstruction(
     const ResourceLocation &location,
     const ValuePtr &value,
     const BlockPtr &landing_pad)
-    : Instruction(where, TypeID_Void),
+    : Instruction(where, TypeContext::GetVoid()),
       Location(location),
       Value(value),
       LandingPad(landing_pad)
 {
     Value->Use();
+    if (LandingPad)
+        LandingPad->Use();
 }
 
 mcc::ThrowInstruction::~ThrowInstruction()
 {
     Value->Drop();
+    if (LandingPad)
+        LandingPad->Drop();
 }
 
 void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) const

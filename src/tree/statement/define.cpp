@@ -1,17 +1,20 @@
 #include <mcc/builder.hpp>
 #include <mcc/context.hpp>
 #include <mcc/statement.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::DefineStatement::DefineStatement(
     const SourceLocation &where,
     const ResourceLocation &location,
     const ParameterList &parameters,
+    TypePtr type,
     const std::vector<ResourceLocation> &tags,
     StatementPtr body)
     : Statement(where),
       Location(location),
       Parameters(parameters),
+      Type(type),
       Tags(tags),
       Body(std::move(body))
 {
@@ -26,7 +29,10 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
             stream << ", ";
         stream << Parameters[i].Name << ": " << Parameters[i].Type;
     }
-    stream << ") ";
+    stream << ')';
+    if (Type)
+        stream << ": " << Type;
+    stream << ' ';
     for (unsigned i = 0; i < Tags.size(); ++i)
     {
         if (i > 0)
@@ -40,7 +46,7 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
 
 void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto block = builder.CreateFunction(Where, Location, Parameters);
+    const auto block = builder.CreateFunction(Where, Type ? Type : TypeContext::GetVoid(), Location);
 
     const auto &[pkg_, namespace_] = builder.GetContext();
     for (auto tag: Tags)
@@ -53,7 +59,12 @@ void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
     }
 
     builder.SetInsertBlock(block);
+
+    builder.PushVariables();
+    for (const auto &[name_, type_]: Parameters)
+        block->Parameters.emplace_back(name_, builder.CreateVariable(Where, type_, name_));
     Body->Generate(builder, {});
+    builder.PopVariables();
 
     if (!block->GetTerminator())
     {

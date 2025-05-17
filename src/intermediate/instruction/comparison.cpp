@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ComparisonInstruction::Create(
     const SourceLocation &where,
@@ -17,7 +18,7 @@ mcc::ComparisonInstruction::ComparisonInstruction(
     const ResourceLocation &location,
     const ValuePtr &left,
     const ValuePtr &right)
-    : Instruction(where, TypeID_Boolean),
+    : Instruction(where, TypeContext::GetBoolean()),
       Comparator(comparator),
       Location(location),
       Left(left),

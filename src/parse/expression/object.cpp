@@ -17,7 +17,7 @@ mcc::ExpressionPtr mcc::Parser::ParseObjectExpression()
         else
             value = std::make_unique<SymbolExpression>(key.Where, key.Value);
 
-        elements.emplace(key.Value, std::move(value));
+        elements[key.Value] = std::move(value);
 
         if (!At(TokenType_Other, "}"))
             Expect(TokenType_Other, ",");

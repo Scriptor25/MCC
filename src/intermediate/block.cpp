@@ -1,13 +1,14 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::BlockPtr mcc::Block::CreateTopLevel(
     const SourceLocation &where,
-    const ResourceLocation &location,
-    const ParameterList &parameters)
+    TypePtr type,
+    const ResourceLocation &location)
 {
-    return std::make_shared<Block>(where, location, parameters);
+    return std::make_shared<Block>(where, type, location);
 }
 
 mcc::BlockPtr mcc::Block::Create(
@@ -15,19 +16,15 @@ mcc::BlockPtr mcc::Block::Create(
     const BlockPtr &parent,
     const ResourceLocation &location)
 {
-    auto block = std::make_shared<Block>(where, location, ParameterList());
+    auto block = std::make_shared<Block>(where, parent->Type, location);
     block->Parent = parent;
     parent->Children.push_back(block);
     return block;
 }
 
-mcc::Block::Block(
-    const SourceLocation &where,
-    const ResourceLocation &location,
-    const ParameterList &parameters)
-    : Value(where, TypeID_Void),
-      Location(location),
-      Parameters(parameters)
+mcc::Block::Block(const SourceLocation &where, TypePtr type, const ResourceLocation &location)
+    : Value(where, type),
+      Location(location)
 {
 }
 
@@ -47,12 +44,12 @@ void mcc::Block::Generate(CommandVector &commands, const bool stack) const
     {
         commands.Append("data modify storage {} stack prepend value {{}}", Location);
 
-        for (auto &[name_, type_]: Parameters)
+        for (auto &[name_, value_]: Parameters)
         {
-            if (!Variables.contains(name_))
+            if (!value_->UseCount)
                 continue;
 
-            if (type_ == TypeID_String)
+            if (value_->Type == TypeContext::GetString())
                 commands.Append(
                     "$data modify storage {0} stack[0].var.{1} set value \"$({1})\"",
                     Location,
@@ -75,14 +72,18 @@ bool mcc::Block::RequireStack() const
         return true;
     if (StackIndex)
         return true;
-    if (!Variables.empty())
-        return true;
     return std::ranges::any_of(
-        Instructions,
-        [](auto &instruction)
-        {
-            return instruction->RequireStack();
-        });
+               Parameters,
+               [](auto &parameter)
+               {
+                   return parameter.second->UseCount;
+               })
+           || std::ranges::any_of(
+               Instructions,
+               [](auto &instruction)
+               {
+                   return instruction->RequireStack();
+               });
 }
 
 mcc::InstructionPtr mcc::Block::GetTerminator() const
@@ -115,10 +116,10 @@ void mcc::Block::ForwardArguments(std::string &prefix, std::string &arguments) c
         {
             if (i)
                 arguments += ',';
-            if (parameters[i].Type == TypeID_String)
-                arguments += std::format("{0}:\"$({0})\"", parameters[i].Name);
+            if (parameters[i].second->Type == TypeContext::GetString())
+                arguments += std::format("{0}:\"$({0})\"", parameters[i].first);
             else
-                arguments += std::format("{0}:$({0})", parameters[i].Name);
+                arguments += std::format("{0}:$({0})", parameters[i].first);
         }
         arguments += '}';
     }

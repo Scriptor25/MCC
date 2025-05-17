@@ -1,4 +1,5 @@
 #include <mcc/constant.hpp>
+#include <mcc/type.hpp>
 
 mcc::ConstantPtr mcc::ConstantString::Create(const SourceLocation &where, const std::string &value)
 {
@@ -6,7 +7,7 @@ mcc::ConstantPtr mcc::ConstantString::Create(const SourceLocation &where, const 
 }
 
 mcc::ConstantString::ConstantString(const SourceLocation &where, const std::string &value)
-    : Constant(where, TypeID_String),
+    : Constant(where, TypeContext::GetString()),
       Value(value)
 {
 }

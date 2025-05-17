@@ -4,27 +4,27 @@ define :setblock(x: number, y: number, z: number, block: string, mode: string) {
     ?`$setblock $(x) $(y) $(z) $(block) $(mode)`
 }
 
-define :random(min: number, max: number) {
+define :random(min: number, max: number): number {
     if (min > max)
         swap(min, max)
     return ?`$random value $(min)..$(max)`
 }
 
 define :sphere(cx: number, cy: number, cz: number, r: number, block: string, mode: string) {
-    r2 = r * r
-    for (dz = -r, dz <= r, ++dz) {
-        dz2 = dz * dz
-        z = cz + dz
+    const r2 = r * r
+    for (let dz = -r, dz <= r, ++dz) {
+        const dz2 = dz * dz
+        const z = cz + dz
 
-        for (dy = -r, dy <= r, ++dy) {
-            dy2 = dy * dy
-            y = cy + dy
+        for (let dy = -r, dy <= r, ++dy) {
+            const dy2 = dy * dy
+            const y = cy + dy
 
-            for (dx = -r, dx <= r, ++dx) {
-                dx2 = dx * dx
-                x = cx + dx
+            for (let dx = -r, dx <= r, ++dx) {
+                const dx2 = dx * dx
+                const x = cx + dx
 
-                d2 = dx2 + dy2 + dz2
+                const d2 = dx2 + dy2 + dz2
 
                 if (d2 < r2)
                     $:setblock({ x, y, z, block, mode })
@@ -33,7 +33,7 @@ define :sphere(cx: number, cy: number, cz: number, r: number, block: string, mod
     }
 }
 
-define :block_lut(index: number) {
+define :block_lut(index: number): string {
     return switch (index) {
         case 0 -> "white_stained_glass"
         case 1 -> "light_gray_stained_glass"
@@ -56,14 +56,14 @@ define :block_lut(index: number) {
 }
 
 define :bubbles(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, n: number) {
-    for (i = 0, i < n, ++i) {
-        r = $:random({ min: 3, max: 10 })
-        cx = $:random({ min: x1, max: x2 })
-        cy = $:random({ min: y1, max: y2 })
-        cz = $:random({ min: z1, max: z2 })
-        bi = $:random({ min: 0, max: 15 })
+    for (let i = 0, i < n, ++i) {
+        const r = $:random({ min: 3, max: 10 })
+        const cx = $:random({ min: x1, max: x2 })
+        const cy = $:random({ min: y1, max: y2 })
+        const cz = $:random({ min: z1, max: z2 })
+        const bi = $:random({ min: 0, max: 15 })
 
-        block = $:block_lut({ index: bi })
+        const block = $:block_lut({ index: bi })
 
         $:sphere({ cx, cy, cz, r, block, mode: "replace" })
         $:sphere({ cx, cy, cz, r: r - 1, block: "air", mode: "replace" })

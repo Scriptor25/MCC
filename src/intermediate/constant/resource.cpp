@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/constant.hpp>
+#include <mcc/type.hpp>
 
 mcc::ConstantPtr mcc::ConstantResource::Create(
     const SourceLocation &where,
@@ -15,7 +16,7 @@ mcc::ConstantResource::ConstantResource(
     const ResourceLocation &location,
     const ConstantPtr &state,
     const ConstantPtr &data)
-    : Constant(where, TypeID_Null),
+    : Constant(where, TypeContext::GetNull()),
       Location(location),
       State(state),
       Data(data)

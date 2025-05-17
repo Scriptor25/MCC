@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mcc/package.hpp>
+#include <mcc/type.hpp>
 
 namespace mcc
 {

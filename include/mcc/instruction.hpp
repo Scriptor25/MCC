@@ -8,7 +8,7 @@ namespace mcc
 {
     struct Instruction : Value
     {
-        Instruction(const SourceLocation &where, TypeID type);
+        Instruction(const SourceLocation &where, TypePtr type);
 
         [[nodiscard]] virtual bool IsTerminator() const;
 
@@ -23,14 +23,23 @@ namespace mcc
     {
         static InstructionPtr CreateValue(
             const SourceLocation &where,
+            TypePtr type,
             const ResourceLocation &location,
             IndexT index);
-        static InstructionPtr CreateArray(const SourceLocation &where, const ResourceLocation &location, IndexT index);
-        static InstructionPtr CreateObject(const SourceLocation &where, const ResourceLocation &location, IndexT index);
+        static InstructionPtr CreateArray(
+            const SourceLocation &where,
+            TypePtr type,
+            const ResourceLocation &location,
+            IndexT index);
+        static InstructionPtr CreateObject(
+            const SourceLocation &where,
+            TypePtr type,
+            const ResourceLocation &location,
+            IndexT index);
 
         AllocationInstruction(
             const SourceLocation &where,
-            TypeID type,
+            TypePtr type,
             AllocationTypeE allocation_type,
             const ResourceLocation &location,
             IndexT index);
@@ -73,6 +82,7 @@ namespace mcc
 
         ArrayInstruction(
             const SourceLocation &where,
+            TypePtr type,
             ArrayOperationE array_operation,
             const ResourceLocation &location,
             const ValuePtr &array,
@@ -123,6 +133,7 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypePtr type,
             const ResourceLocation &location,
             const ResourceLocation &callee,
             const std::vector<ValuePtr> &arguments,
@@ -131,6 +142,7 @@ namespace mcc
 
         CallInstruction(
             const SourceLocation &where,
+            TypePtr type,
             const ResourceLocation &location,
             const ResourceLocation &callee,
             const std::vector<ValuePtr> &arguments,
@@ -153,10 +165,15 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypePtr type,
             const ResourceLocation &location,
             const CommandT &command);
 
-        CommandInstruction(const SourceLocation &where, const ResourceLocation &location, const CommandT &command);
+        CommandInstruction(
+            const SourceLocation &where,
+            TypePtr type,
+            const ResourceLocation &location,
+            const CommandT &command);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;

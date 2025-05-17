@@ -2,6 +2,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::ArrayExpression::ArrayExpression(const SourceLocation &where, std::vector<ExpressionPtr> elements)
@@ -27,18 +28,27 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
     std::vector<ValuePtr> values;
     std::vector<ConstantPtr> constants;
 
+    std::set<TypePtr> elements;
+
     for (auto &element: Elements)
     {
         auto value = element->GenerateValue(builder, frame);
         if (auto constant = std::dynamic_pointer_cast<Constant>(value))
             constants.emplace_back(constant);
         values.emplace_back(value);
+
+        elements.emplace(value->Type);
     }
 
-    if (values.size() == constants.size())
-        return ConstantArray::Create(Where, constants, false);
+    const auto type = TypeContext::GetArray(
+        (elements.size() == 1)
+            ? *elements.begin()
+            : TypeContext::GetUnion(elements));
 
-    auto array = builder.AllocateArray(Where);
+    if (values.size() == constants.size())
+        return ConstantArray::Create(Where, type, constants, false);
+
+    auto array = builder.AllocateArray(Where, type);
 
     for (const auto &value: values)
         (void) builder.CreateAppend(Where, array, value, false);

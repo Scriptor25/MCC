@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
     const SourceLocation &where,
@@ -22,7 +23,7 @@ mcc::ObjectInstruction::ObjectInstruction(
     const ValuePtr &object,
     const ValuePtr &value,
     const std::string &key)
-    : Instruction(where, TypeID_Void),
+    : Instruction(where, TypeContext::GetVoid()),
       Location(location),
       Object(object),
       Value(value),

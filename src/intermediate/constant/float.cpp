@@ -1,4 +1,5 @@
 #include <mcc/constant.hpp>
+#include <mcc/type.hpp>
 
 mcc::ConstantPtr mcc::ConstantFloat::Create(const SourceLocation &where, const FloatT value)
 {
@@ -6,7 +7,7 @@ mcc::ConstantPtr mcc::ConstantFloat::Create(const SourceLocation &where, const F
 }
 
 mcc::ConstantFloat::ConstantFloat(const SourceLocation &where, const FloatT value)
-    : Constant(where, TypeID_Number),
+    : Constant(where, TypeContext::GetNumber()),
       Value(value)
 {
 }

@@ -1,3 +1,4 @@
+#include <mcc/builder.hpp>
 #include <mcc/statement.hpp>
 
 mcc::MultiStatement::MultiStatement(const SourceLocation &where, std::vector<StatementPtr> statements)
@@ -20,6 +21,10 @@ std::ostream &mcc::MultiStatement::Print(std::ostream &stream) const
 
 void mcc::MultiStatement::Generate(Builder &builder, const Frame &frame) const
 {
+    builder.PushVariables();
+
     for (auto &statement: Statements)
         statement->Generate(builder, frame);
+
+    builder.PopVariables();
 }

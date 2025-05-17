@@ -6,7 +6,7 @@
 mcc::Actions::Actions(const std::vector<Action> &actions)
 {
     for (auto &action: actions)
-        m_Actions.emplace(action.Pattern, action);
+        m_Actions[action.Pattern] = action;
 }
 
 void mcc::Actions::operator()(const int argc, const char **argv)
@@ -33,7 +33,7 @@ void mcc::Actions::operator()(const int argc, const char **argv)
             if (parameter.IsFlag)
                 m_Flags.emplace(j);
             else
-                m_Strings.emplace(j, argv[++i]);
+                m_Strings[j] = argv[++i];
 
             break;
         }

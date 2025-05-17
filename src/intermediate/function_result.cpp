@@ -2,13 +2,13 @@
 
 mcc::ValuePtr mcc::FunctionResult::Create(
     const SourceLocation &where,
-    const TypeID type,
+    TypePtr type,
     const ResourceLocation &location)
 {
     return std::make_shared<FunctionResult>(where, type, location);
 }
 
-mcc::FunctionResult::FunctionResult(const SourceLocation &where, const TypeID type, const ResourceLocation &location)
+mcc::FunctionResult::FunctionResult(const SourceLocation &where, TypePtr type, const ResourceLocation &location)
     : Value(where, type),
       Location(location)
 {

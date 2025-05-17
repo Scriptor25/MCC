@@ -25,10 +25,12 @@ namespace mcc
     using InstructionPtr = std::shared_ptr<struct Instruction>;
     using BlockPtr = std::shared_ptr<struct Block>;
 
+    using TypePtr = struct Type const *;
+
     struct Parameter
     {
         std::string Name;
-        TypeID Type;
+        TypePtr Type;
     };
 
     using ParameterList = std::vector<Parameter>;

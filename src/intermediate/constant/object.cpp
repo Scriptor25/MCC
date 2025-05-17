@@ -1,14 +1,30 @@
 #include <mcc/constant.hpp>
+#include <mcc/type.hpp>
+
+mcc::ConstantPtr mcc::ConstantObject::Create(
+    const SourceLocation &where,
+    TypePtr type,
+    const std::map<std::string, ConstantPtr> &values)
+{
+    return std::make_shared<ConstantObject>(where, type, values);
+}
 
 mcc::ConstantPtr mcc::ConstantObject::Create(
     const SourceLocation &where,
     const std::map<std::string, ConstantPtr> &values)
 {
-    return std::make_shared<ConstantObject>(where, values);
+    std::map<std::string, TypePtr> elements;
+    for (const auto &[name_, value_]: values)
+        elements[name_] = value_->Type;
+
+    return std::make_shared<ConstantObject>(where, TypeContext::GetStruct(elements), values);
 }
 
-mcc::ConstantObject::ConstantObject(const SourceLocation &where, const std::map<std::string, ConstantPtr> &values)
-    : Constant(where, TypeID_Object),
+mcc::ConstantObject::ConstantObject(
+    const SourceLocation &where,
+    TypePtr type,
+    const std::map<std::string, ConstantPtr> &values)
+    : Constant(where, type),
       Values(values)
 {
     for (const auto &value: Values | std::views::values)
