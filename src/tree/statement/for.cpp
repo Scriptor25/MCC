@@ -22,23 +22,23 @@ std::ostream &mcc::ForStatement::Print(std::ostream &stream) const
     return Do->Print(Suffix->Print(Condition->Print(Prefix->Print(stream << "for (") << ", ") << ", ") << ") ");
 }
 
-void mcc::ForStatement::Generate(Builder &builder) const
+void mcc::ForStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
     const auto parent = builder.GetInsertParent();
     const auto loop_target = builder.CreateBlock(parent);
     const auto end_target = builder.CreateBlock(parent);
 
-    Prefix->Generate(builder);
+    Prefix->Generate(builder, landing_pad);
     {
-        const auto condition = Condition->GenerateValue(builder);
+        const auto condition = Condition->GenerateValue(builder, landing_pad);
         (void) builder.CreateBranch(condition, loop_target, end_target);
     }
 
     builder.SetInsertBlock(loop_target);
-    Do->Generate(builder);
-    Suffix->Generate(builder);
+    Do->Generate(builder, landing_pad);
+    Suffix->Generate(builder, landing_pad);
     {
-        const auto condition = Condition->GenerateValue(builder);
+        const auto condition = Condition->GenerateValue(builder, landing_pad);
         (void) builder.CreateBranch(condition, loop_target, end_target);
     }
 

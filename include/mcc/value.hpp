@@ -55,6 +55,7 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
 
         [[nodiscard]] InstructionPtr GetTerminator() const;
+        [[nodiscard]] bool MayThrow() const;
 
         ResourceLocation Location;
         std::vector<std::string> Parameters;
@@ -65,5 +66,17 @@ namespace mcc
 
         BlockPtr Parent;
         std::vector<BlockPtr> Children;
+    };
+
+    struct FunctionResult final : Value
+    {
+        static ValuePtr Create(ResourceLocation location);
+
+        explicit FunctionResult(ResourceLocation location);
+
+        [[nodiscard]] bool RequireStack() const override;
+        Result GenerateResult(bool stringify) const override;
+
+        ResourceLocation Location;
     };
 }

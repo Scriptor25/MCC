@@ -42,7 +42,7 @@ std::ostream &mcc::SwitchStatement::Print(std::ostream &stream) const
     return stream << '}';
 }
 
-void mcc::SwitchStatement::Generate(Builder &builder) const
+void mcc::SwitchStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
     const auto parent = builder.GetInsertParent();
     const auto start_target = builder.GetInsertBlock();
@@ -51,12 +51,12 @@ void mcc::SwitchStatement::Generate(Builder &builder) const
 
     auto require_end = !Default;
 
-    auto condition = Condition->GenerateValue(builder);
+    auto condition = Condition->GenerateValue(builder, landing_pad);
 
     if (Default)
     {
         builder.SetInsertBlock(default_target);
-        Default->Generate(builder);
+        Default->Generate(builder, landing_pad);
         if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_end = true;
@@ -72,12 +72,12 @@ void mcc::SwitchStatement::Generate(Builder &builder) const
         builder.SetInsertBlock(case_target);
         for (auto &case_: cases_)
         {
-            auto value = case_->GenerateValue(builder);
+            auto value = case_->GenerateValue(builder, landing_pad);
             auto constant = std::dynamic_pointer_cast<Constant>(value);
             Assert(!!constant, "case entry must be constant");
             case_targets.emplace_back(constant, case_target);
         }
-        value_->Generate(builder);
+        value_->Generate(builder, landing_pad);
         if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_end = true;

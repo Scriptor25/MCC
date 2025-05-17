@@ -71,10 +71,10 @@ std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
     return Right->Print(Left->Print(stream) << ' ' << Operator << ' ');
 }
 
-mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
-    auto left = Left->GenerateValue(builder);
-    auto right = Right->GenerateValue(builder);
+    auto left = Left->GenerateValue(builder, landing_pad);
+    auto right = Right->GenerateValue(builder, landing_pad);
 
     if (Operator == "=")
         return builder.CreateStore(std::move(left), std::move(right));
@@ -90,8 +90,6 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder) const
         comparator = Comparator_GE;
     if (Operator == "==")
         comparator = Comparator_EQ;
-    if (Operator == "!=")
-        comparator = Comparator_NE;
 
     if (comparator)
         return builder.CreateComparison(comparator, std::move(left), std::move(right));

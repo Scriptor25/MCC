@@ -13,7 +13,7 @@ std::ostream &mcc::NamespaceStatement::Print(std::ostream &stream) const
     return stream << "namespace " << Namespace;
 }
 
-void mcc::NamespaceStatement::Generate(Builder &builder) const
+void mcc::NamespaceStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
     builder.GetContext().Namespace = Namespace;
 }

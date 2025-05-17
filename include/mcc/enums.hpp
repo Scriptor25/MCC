@@ -51,7 +51,6 @@ namespace mcc
         Comparator_LE,
         Comparator_GE,
         Comparator_EQ,
-        Comparator_NE,
     };
 
     enum OperatorE
@@ -147,7 +146,6 @@ namespace mcc
             {Comparator_LE, "le"},
             {Comparator_GE, "ge"},
             {Comparator_EQ, "eq"},
-            {Comparator_NE, "ne"},
         };
 
         return map.at(enum_);

@@ -108,11 +108,17 @@ namespace mcc
     {
         static InstructionPtr Create(
             ResourceLocation location,
-            std::string callee,
-            bool builtin,
-            std::vector<ValuePtr> arguments);
+            ResourceLocation callee,
+            std::vector<ValuePtr> arguments,
+            bool may_throw,
+            BlockPtr landing_pad);
 
-        CallInstruction(ResourceLocation location, std::string callee, bool builtin, std::vector<ValuePtr> arguments);
+        CallInstruction(
+            ResourceLocation location,
+            ResourceLocation callee,
+            std::vector<ValuePtr> arguments,
+            bool may_throw,
+            BlockPtr landing_pad);
         ~CallInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -120,9 +126,10 @@ namespace mcc
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
-        std::string Callee;
-        bool Builtin;
+        ResourceLocation Callee;
         std::vector<ValuePtr> Arguments;
+        bool MayThrow;
+        BlockPtr LandingPad;
     };
 
     struct CommandInstruction final : Instruction
@@ -266,9 +273,9 @@ namespace mcc
 
     struct ThrowInstruction final : Instruction
     {
-        static InstructionPtr Create(ResourceLocation location, ValuePtr value);
+        static InstructionPtr Create(ResourceLocation location, ValuePtr value, BlockPtr landing_pad);
 
-        ThrowInstruction(ResourceLocation location, ValuePtr value);
+        ThrowInstruction(ResourceLocation location, ValuePtr value, BlockPtr landing_pad);
         ~ThrowInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -278,5 +285,6 @@ namespace mcc
 
         ResourceLocation Location;
         ValuePtr Value;
+        BlockPtr LandingPad;
     };
 }

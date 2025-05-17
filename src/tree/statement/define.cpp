@@ -38,7 +38,7 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
     return Body->Print(stream);
 }
 
-void mcc::DefineStatement::Generate(Builder &builder) const
+void mcc::DefineStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
     const auto block = builder.CreateFunction(Location, Parameters);
 
@@ -53,7 +53,7 @@ void mcc::DefineStatement::Generate(Builder &builder) const
     }
 
     builder.SetInsertBlock(block);
-    Body->Generate(builder);
+    Body->Generate(builder, landing_pad);
 
     if (!block->GetTerminator())
     {

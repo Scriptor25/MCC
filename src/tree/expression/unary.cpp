@@ -46,7 +46,7 @@ static mcc::ValuePtr neg(const mcc::Builder &builder, const mcc::ValuePtr &opera
     return builder.CreateOperation(mcc::Operator_Sub, {zero, operand});
 };
 
-mcc::ValuePtr mcc::UnaryExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::UnaryExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
     static const std::map<std::string_view, UnaryOperator> operators
     {
@@ -58,7 +58,7 @@ mcc::ValuePtr mcc::UnaryExpression::GenerateValue(Builder &builder) const
     Assert(operators.contains(Operator), "undefined unary operator {}", Operator);
     const auto &[store_, operation_] = operators.at(Operator);
 
-    auto operand = Operand->GenerateValue(builder);
+    auto operand = Operand->GenerateValue(builder, landing_pad);
     auto value = operation_(builder, operand);
 
     if (store_)

@@ -15,6 +15,7 @@ namespace mcc
 
         BlockPtr CreateFunction(ResourceLocation location, std::vector<std::string> parameters);
         BlockPtr CreateBlock(const BlockPtr &parent);
+        BlockPtr FindBlock(const ResourceLocation &location) const;
         void RemoveBlock(const BlockPtr &block);
 
         void SetInsertBlock(BlockPtr block);
@@ -40,14 +41,14 @@ namespace mcc
             ValuePtr condition,
             BlockPtr default_target,
             std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets) const;
-        [[nodiscard]] InstructionPtr CreateThrow(ValuePtr value) const;
+        [[nodiscard]] InstructionPtr CreateThrow(ValuePtr value, BlockPtr landing_pad) const;
 
         [[nodiscard]] ValuePtr CreateBranchResult() const;
 
         [[nodiscard]] InstructionPtr CreateCall(
-            std::string callee,
-            bool builtin,
-            std::vector<ValuePtr> arguments) const;
+            ResourceLocation callee,
+            std::vector<ValuePtr> arguments,
+            BlockPtr landing_pad) const;
 
         [[nodiscard]] InstructionPtr AllocateValue() const;
         [[nodiscard]] InstructionPtr AllocateArray() const;
@@ -59,6 +60,8 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateExtract(ValuePtr array, IndexT index) const;
 
         [[nodiscard]] InstructionPtr CreateInsert(ValuePtr object, ValuePtr value, std::string key) const;
+
+        [[nodiscard]] ValuePtr CreateStoreResult(std::string variable) const;
 
         [[nodiscard]] InstructionPtr Insert(InstructionPtr instruction) const;
 

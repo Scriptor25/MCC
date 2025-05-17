@@ -25,25 +25,24 @@ std::ostream &mcc::IfUnlessStatement::Print(std::ostream &stream) const
     return stream;
 }
 
-void mcc::IfUnlessStatement::Generate(Builder &builder) const
+void mcc::IfUnlessStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
     const auto parent = builder.GetInsertParent();
     const auto end_target = builder.CreateBlock(parent);
-    auto then_target = builder.CreateBlock(parent);
-    auto else_target = Else ? builder.CreateBlock(parent) : end_target;
+    const auto then_target = builder.CreateBlock(parent);
+    const auto else_target = Else ? builder.CreateBlock(parent) : end_target;
 
     auto require_end = !Else;
 
-    const auto condition = Condition->GenerateValue(builder);
+    const auto condition = Condition->GenerateValue(builder, landing_pad);
     (void) builder.CreateBranch(
         condition,
         Unless ? else_target : then_target,
         Unless ? then_target : else_target);
 
     builder.SetInsertBlock(then_target);
-    Then->Generate(builder);
-    then_target = builder.GetInsertBlock();
-    if (!then_target->GetTerminator())
+    Then->Generate(builder, landing_pad);
+    if (!builder.GetInsertBlock()->GetTerminator())
     {
         require_end = true;
         (void) builder.CreateDirect(end_target);
@@ -52,9 +51,8 @@ void mcc::IfUnlessStatement::Generate(Builder &builder) const
     if (Else)
     {
         builder.SetInsertBlock(else_target);
-        Else->Generate(builder);
-        else_target = builder.GetInsertBlock();
-        if (!else_target->GetTerminator())
+        Else->Generate(builder, landing_pad);
+        if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_end = true;
             (void) builder.CreateDirect(end_target);

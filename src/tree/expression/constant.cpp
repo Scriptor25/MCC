@@ -14,7 +14,7 @@ std::ostream &mcc::ConstantExpression::Print(std::ostream &stream) const
     return stream << View;
 }
 
-mcc::ValuePtr mcc::ConstantExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::ConstantExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
     return Value;
 }

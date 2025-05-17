@@ -14,9 +14,9 @@ namespace mcc
     {
         explicit Expression(SourceLocation where);
 
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
-        [[nodiscard]] virtual ValuePtr GenerateValue(Builder &builder) const = 0;
+        [[nodiscard]] virtual ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const = 0;
     };
 
     struct ArrayExpression final : Expression
@@ -24,7 +24,7 @@ namespace mcc
         ArrayExpression(SourceLocation where, std::vector<ExpressionPtr> elements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         std::vector<ExpressionPtr> Elements;
     };
@@ -36,7 +36,7 @@ namespace mcc
         ExpressionPtr Merge();
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         std::string Operator;
         ExpressionPtr Left;
@@ -48,7 +48,7 @@ namespace mcc
         CallExpression(SourceLocation where, ExpressionPtr callee, std::vector<ExpressionPtr> arguments);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         ExpressionPtr Callee;
         std::vector<ExpressionPtr> Arguments;
@@ -59,7 +59,7 @@ namespace mcc
         CommandExpression(SourceLocation where, CommandT command);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         CommandT Command;
     };
@@ -69,7 +69,7 @@ namespace mcc
         ConstantExpression(SourceLocation where, ConstantPtr value, std::string view);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         ConstantPtr Value;
         std::string View;
@@ -80,7 +80,7 @@ namespace mcc
         FormatExpression(SourceLocation where, std::vector<FormatNodePtr> nodes);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         std::vector<FormatNodePtr> Nodes;
     };
@@ -95,7 +95,7 @@ namespace mcc
             ExpressionPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         bool Unless;
         ExpressionPtr Condition, Then, Else;
@@ -106,7 +106,7 @@ namespace mcc
         ResourceExpression(SourceLocation where, ResourceLocation location, ExpressionPtr state, ExpressionPtr data);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         ResourceLocation Location;
         ExpressionPtr State;
@@ -118,7 +118,7 @@ namespace mcc
         ObjectExpression(SourceLocation where, std::map<std::string, ExpressionPtr> elements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         std::map<std::string, ExpressionPtr> Elements;
     };
@@ -128,7 +128,7 @@ namespace mcc
         SubscriptExpression(SourceLocation where, ExpressionPtr array, ExpressionPtr index);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         ExpressionPtr Array, Index;
     };
@@ -142,7 +142,7 @@ namespace mcc
             std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         ExpressionPtr Condition, Default;
         std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> Cases;
@@ -153,7 +153,7 @@ namespace mcc
         SymbolExpression(SourceLocation where, std::string name);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         std::string Name;
     };
@@ -163,7 +163,7 @@ namespace mcc
         UnaryExpression(SourceLocation where, std::string operator_, ExpressionPtr operand);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         std::string Operator;
         ExpressionPtr Operand;
@@ -174,7 +174,7 @@ namespace mcc
         VectorExpression(SourceLocation where, std::string operator_, std::vector<ExpressionPtr> operands);
 
         std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] ValuePtr GenerateValue(Builder &builder) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, BlockPtr landing_pad) const override;
 
         std::string Operator;
         std::vector<ExpressionPtr> Operands;

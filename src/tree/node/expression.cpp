@@ -12,7 +12,7 @@ std::ostream &mcc::ExpressionNode::Print(std::ostream &stream) const
     return Expression->Print(stream << "${") << '}';
 }
 
-mcc::ValuePtr mcc::ExpressionNode::Generate(Builder &builder) const
+mcc::ValuePtr mcc::ExpressionNode::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
-    return Expression->GenerateValue(builder);
+    return Expression->GenerateValue(builder, landing_pad);
 }

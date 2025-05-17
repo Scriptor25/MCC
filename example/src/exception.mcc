@@ -26,7 +26,7 @@ define :test_try_catch() {
         a = 1
         b = 2
         c = a + b
-        $:assert({ x: c != 3, message: "c must not be equal to 3" })
+        $:assert({ x: c == 4, message: "c must be equal to 4" })
     } catch (e) {
         print(@s, `catched error: ${e}`)
     }

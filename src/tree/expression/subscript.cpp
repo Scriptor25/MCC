@@ -17,10 +17,10 @@ std::ostream &mcc::SubscriptExpression::Print(std::ostream &stream) const
     return Index->Print(Array->Print(stream) << '[') << ']';
 }
 
-mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
-    const auto array = Array->GenerateValue(builder);
-    const auto index = Index->GenerateValue(builder);
+    const auto array = Array->GenerateValue(builder, landing_pad);
+    const auto index = Index->GenerateValue(builder, landing_pad);
 
     const auto constant_index = std::dynamic_pointer_cast<ConstantInteger>(index);
     Assert(!!constant_index, Where, "index must be constant integer");

@@ -22,14 +22,14 @@ std::ostream &mcc::ArrayExpression::Print(std::ostream &stream) const
     return stream << " ]";
 }
 
-mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
     std::vector<ValuePtr> values;
     std::vector<ConstantPtr> constants;
 
     for (auto &element: Elements)
     {
-        auto value = element->GenerateValue(builder);
+        auto value = element->GenerateValue(builder, landing_pad);
         if (auto constant = std::dynamic_pointer_cast<Constant>(value))
             constants.emplace_back(constant);
         values.emplace_back(value);

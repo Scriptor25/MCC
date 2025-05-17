@@ -6,7 +6,7 @@ mcc::Expression::Expression(SourceLocation where)
 {
 }
 
-void mcc::Expression::Generate(Builder &builder) const
+void mcc::Expression::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
-    (void) GenerateValue(builder);
+    (void) GenerateValue(builder, landing_pad);
 }

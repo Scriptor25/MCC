@@ -28,11 +28,11 @@ std::ostream &mcc::VectorExpression::Print(std::ostream &stream) const
     return stream;
 }
 
-mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
     std::vector<ValuePtr> operands;
     for (auto &operand: Operands)
-        operands.emplace_back(operand->GenerateValue(builder));
+        operands.emplace_back(operand->GenerateValue(builder, landing_pad));
 
     auto operator_ = Operator_None;
     if (Operator == "+")

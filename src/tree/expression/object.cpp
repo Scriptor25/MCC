@@ -25,14 +25,14 @@ std::ostream &mcc::ObjectExpression::Print(std::ostream &stream) const
     return stream << " }";
 }
 
-mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
     std::map<std::string, ValuePtr> values;
     std::map<std::string, ConstantPtr> constants;
 
     for (auto &[key_, value_]: Elements)
     {
-        auto value = value_->GenerateValue(builder);
+        auto value = value_->GenerateValue(builder, landing_pad);
         if (auto constant = std::dynamic_pointer_cast<Constant>(value))
             constants.emplace(key_, constant);
         values.emplace(key_, value);

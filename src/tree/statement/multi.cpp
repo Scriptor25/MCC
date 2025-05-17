@@ -18,8 +18,8 @@ std::ostream &mcc::MultiStatement::Print(std::ostream &stream) const
     return stream << indentation << '}';
 }
 
-void mcc::MultiStatement::Generate(Builder &builder) const
+void mcc::MultiStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
     for (auto &statement: Statements)
-        statement->Generate(builder);
+        statement->Generate(builder, landing_pad);
 }

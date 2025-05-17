@@ -39,6 +39,14 @@ mcc::BlockPtr mcc::Builder::CreateBlock(const BlockPtr &parent)
     return m_Blocks.emplace_back(Block::Create(parent, std::move(location)));
 }
 
+mcc::BlockPtr mcc::Builder::FindBlock(const ResourceLocation &location) const
+{
+    for (auto &block: m_Blocks)
+        if (block->Location == location)
+            return block;
+    return nullptr;
+}
+
 void mcc::Builder::RemoveBlock(const BlockPtr &block)
 {
     Assert(!!block, "block must not be null");
@@ -196,11 +204,11 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
             std::move(case_targets)));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateThrow(ValuePtr value) const
+mcc::InstructionPtr mcc::Builder::CreateThrow(ValuePtr value, BlockPtr landing_pad) const
 {
     Assert(!!value, "value must not be null");
 
-    return Insert(ThrowInstruction::Create(GetLocation(), std::move(value)));
+    return Insert(ThrowInstruction::Create(GetLocation(), std::move(value), std::move(landing_pad)));
 }
 
 mcc::ValuePtr mcc::Builder::CreateBranchResult() const
@@ -209,18 +217,25 @@ mcc::ValuePtr mcc::Builder::CreateBranchResult() const
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
-    std::string callee,
-    const bool builtin,
-    std::vector<ValuePtr> arguments) const
+    ResourceLocation callee,
+    std::vector<ValuePtr> arguments,
+    BlockPtr landing_pad) const
 {
-    Assert(!callee.empty(), "callee must not be empty");
+    auto may_throw = !callee.Namespace.empty();
+    if (may_throw)
+    {
+        const auto block = FindBlock(callee);
+        Assert(!!block, "undefined function {}", callee);
+        may_throw = block->MayThrow();
+    }
 
     return Insert(
         CallInstruction::Create(
             GetLocation(),
             std::move(callee),
-            builtin,
-            std::move(arguments)));
+            std::move(arguments),
+            may_throw,
+            std::move(landing_pad)));
 }
 
 mcc::InstructionPtr mcc::Builder::AllocateValue() const
@@ -307,6 +322,15 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(ValuePtr object, ValuePtr value, 
             std::move(object),
             std::move(value),
             std::move(key)));
+}
+
+mcc::ValuePtr mcc::Builder::CreateStoreResult(std::string variable) const
+{
+    Assert(!variable.empty(), "variable name must not be empty");
+
+    auto dst = NamedValue::Create(GetLocation(), std::move(variable));
+    auto src = FunctionResult::Create(GetLocation());
+    return CreateStore(std::move(dst), std::move(src));
 }
 
 mcc::InstructionPtr mcc::Builder::Insert(InstructionPtr instruction) const

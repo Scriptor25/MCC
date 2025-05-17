@@ -22,7 +22,7 @@ static void parse_file(mcc::Package &package, const std::filesystem::path &path)
 
     while (parser)
         if (const auto statement = parser())
-            statement->Generate(builder);
+            statement->Generate(builder, nullptr);
 
     builder.Generate();
 }

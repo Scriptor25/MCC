@@ -15,7 +15,7 @@ namespace mcc
         virtual ~Statement() = default;
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
-        virtual void Generate(Builder &builder) const = 0;
+        virtual void Generate(Builder &builder, BlockPtr landing_pad) const = 0;
 
         SourceLocation Where;
     };
@@ -30,7 +30,7 @@ namespace mcc
             StatementPtr body);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         ResourceLocation Location;
         std::vector<std::string> Parameters;
@@ -48,7 +48,7 @@ namespace mcc
             StatementPtr do_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         ExpressionPtr Condition;
         StatementPtr Prefix, Suffix, Do;
@@ -64,7 +64,7 @@ namespace mcc
             StatementPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         bool Unless;
         ExpressionPtr Condition;
@@ -76,7 +76,7 @@ namespace mcc
         MultiStatement(SourceLocation where, std::vector<StatementPtr> statements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         std::vector<StatementPtr> Statements;
     };
@@ -86,7 +86,7 @@ namespace mcc
         NamespaceStatement(SourceLocation where, std::string namespace_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         std::string Namespace;
     };
@@ -96,7 +96,7 @@ namespace mcc
         ReturnStatement(SourceLocation where, ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         ExpressionPtr Value;
     };
@@ -110,7 +110,7 @@ namespace mcc
             std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         ExpressionPtr Condition;
         StatementPtr Default;
@@ -122,7 +122,7 @@ namespace mcc
         ThrowStatement(SourceLocation where, ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         ExpressionPtr Value;
     };
@@ -132,7 +132,7 @@ namespace mcc
         TryCatchStatement(SourceLocation where, StatementPtr try_, StatementPtr catch_, std::string variable);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder) const override;
+        void Generate(Builder &builder, BlockPtr landing_pad) const override;
 
         StatementPtr Try, Catch;
         std::string Variable;

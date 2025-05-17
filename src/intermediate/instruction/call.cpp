@@ -3,10 +3,8 @@
 
 static void generate_function_call(const mcc::CallInstruction &self, mcc::CommandVector &commands)
 {
-    auto arguments = self.Arguments[0]->GenerateResult(false);
-
     std::string arguments_value;
-    switch (arguments.Type)
+    switch (auto arguments = self.Arguments[0]->GenerateResult(false); arguments.Type)
     {
         case mcc::ResultType_Value:
             arguments_value = arguments.Value;
@@ -24,21 +22,74 @@ static void generate_function_call(const mcc::CallInstruction &self, mcc::Comman
                 arguments.Type);
     }
 
-    commands.Append(self.CreateTmpScore());
-    auto tmp_name = self.GetTmpName();
-    commands.Append(
-        "execute store result score %c {} run function {} {}",
-        tmp_name,
-        self.Callee,
-        arguments_value);
-    commands.Append("execute unless score %c {0} matches 0 run return run scoreboard players get %c {0}", tmp_name);
-    commands.Append(self.RemoveTmpScore());
+    auto stack_path = self.GetStackPath();
+
+    if (self.MayThrow)
+    {
+        auto tmp_name = self.GetTmpName();
+
+        commands.Append(self.CreateTmpScore());
+        commands.Append(
+            "execute store result score %c {} run function {} {}",
+            tmp_name,
+            self.Callee,
+            arguments_value);
+        commands.Append("data remove storage {} {}", self.Location, stack_path);
+        commands.Append(
+            "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
+            tmp_name,
+            self.Location,
+            stack_path);
+        commands.Append(self.RemoveTmpScore());
+
+        commands.Append("data remove storage {} result", self.Location);
+        commands.Append(
+            "execute if data storage {0} {1} run data modify storage {0} result set from storage {2} result",
+            self.Location,
+            stack_path,
+            self.Callee);
+
+        if (self.LandingPad)
+        {
+            auto landing_pad = self.LandingPad->Location;
+
+            std::string prefix, arguments;
+            if (auto &parameters = self.LandingPad->Parent->Parameters; !parameters.empty())
+            {
+                prefix = "$";
+                arguments += " {";
+                for (unsigned i = 0; i < parameters.size(); ++i)
+                {
+                    if (i)
+                        arguments += ',';
+                    arguments += std::format("{0}:$({0})", parameters[i]);
+                }
+                arguments += '}';
+            }
+
+            commands.Append(
+                "{}execute if data storage {} result run return run function {}{}",
+                prefix,
+                self.Location,
+                landing_pad,
+                arguments);
+        }
+        else
+        {
+            commands.Append("execute if data storage {0} result run data remove storage {0} stack[0]", self.Location);
+            commands.Append("execute if data storage {} result run return 1", self.Location);
+        }
+    }
+    else
+    {
+        commands.Append("run function {} {}", self.Callee, arguments_value);
+    }
 
     if (self.UseCount)
         commands.Append(
             "data modify storage {} {} set from storage {} result",
             self.Location,
-            self.GetStackPath(),
+            stack_path,
             self.Callee);
 }
 
@@ -222,42 +273,54 @@ static void generate_builtin_swap(const mcc::CallInstruction &self, mcc::Command
 
 mcc::InstructionPtr mcc::CallInstruction::Create(
     ResourceLocation location,
-    std::string callee,
-    const bool builtin,
-    std::vector<ValuePtr> arguments)
+    ResourceLocation callee,
+    std::vector<ValuePtr> arguments,
+    const bool may_throw,
+    BlockPtr landing_pad)
 {
-    return std::make_shared<CallInstruction>(std::move(location), std::move(callee), builtin, std::move(arguments));
+    return std::make_shared<CallInstruction>(
+        std::move(location),
+        std::move(callee),
+        std::move(arguments),
+        may_throw,
+        std::move(landing_pad));
 }
 
 mcc::CallInstruction::CallInstruction(
     ResourceLocation location,
-    std::string callee,
-    const bool builtin,
-    std::vector<ValuePtr> arguments)
+    ResourceLocation callee,
+    std::vector<ValuePtr> arguments,
+    const bool may_throw,
+    BlockPtr landing_pad)
     : Location(std::move(location)),
       Callee(std::move(callee)),
-      Builtin(builtin),
-      Arguments(std::move(arguments))
+      Arguments(std::move(arguments)),
+      MayThrow(may_throw),
+      LandingPad(std::move(landing_pad))
 {
     for (const auto &argument: Arguments)
         argument->Use();
+    if (LandingPad)
+        LandingPad->Use();
 }
 
 mcc::CallInstruction::~CallInstruction()
 {
     for (const auto &argument: Arguments)
         argument->Drop();
+    if (LandingPad)
+        LandingPad->Drop();
 }
 
 void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) const
 {
     Assert(!UseCount || stack, "call instruction with result requires stack");
 
-    if (!Builtin)
+    if (!Callee.Namespace.empty())
         generate_function_call(*this, commands);
-    else if (Callee == "print")
+    else if (Callee.Path == "print")
         generate_builtin_print(*this, commands);
-    else if (Callee == "swap")
+    else if (Callee.Path == "swap")
         generate_builtin_swap(*this, commands);
     else
         Error("undefined builtin callee {}", Callee);

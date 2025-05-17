@@ -14,7 +14,7 @@ std::ostream &mcc::ReturnStatement::Print(std::ostream &stream) const
     return Value->Print(stream << "return ");
 }
 
-void mcc::ReturnStatement::Generate(Builder &builder) const
+void mcc::ReturnStatement::Generate(Builder &builder, const BlockPtr landing_pad) const
 {
     if (!Value)
     {
@@ -22,6 +22,6 @@ void mcc::ReturnStatement::Generate(Builder &builder) const
         return;
     }
 
-    const auto value = Value->GenerateValue(builder);
+    const auto value = Value->GenerateValue(builder, landing_pad);
     (void) builder.CreateReturn(value);
 }

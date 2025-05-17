@@ -41,20 +41,20 @@ std::ostream &mcc::SwitchExpression::Print(std::ostream &stream) const
     return stream << '}';
 }
 
-mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
     const auto parent = builder.GetInsertParent();
     const auto start_target = builder.GetInsertBlock();
     const auto end_target = builder.CreateBlock(parent);
     const auto default_target = builder.CreateBlock(parent);
 
-    auto condition = Condition->GenerateValue(builder);
+    auto condition = Condition->GenerateValue(builder, landing_pad);
 
     builder.SetInsertBlock(end_target);
     const auto branch_result = builder.CreateBranchResult();
 
     builder.SetInsertBlock(default_target);
-    auto default_value = Default->GenerateValue(builder);
+    auto default_value = Default->GenerateValue(builder, landing_pad);
     (void) builder.CreateDirect(end_target, std::move(default_value), branch_result);
 
     std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets;
@@ -64,12 +64,12 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder) const
         builder.SetInsertBlock(case_target);
         for (auto &case_: cases_)
         {
-            auto value = case_->GenerateValue(builder);
+            auto value = case_->GenerateValue(builder, landing_pad);
             auto constant = std::dynamic_pointer_cast<Constant>(value);
             Assert(!!constant, "case entry must be constant");
             case_targets.emplace_back(constant, case_target);
         }
-        auto case_value = value_->GenerateValue(builder);
+        auto case_value = value_->GenerateValue(builder, landing_pad);
         (void) builder.CreateDirect(end_target, std::move(case_value), branch_result);
     }
 

@@ -14,7 +14,7 @@ std::ostream &mcc::CommandExpression::Print(std::ostream &stream) const
     return stream << "?`" << Command << '`';
 }
 
-mcc::ValuePtr mcc::CommandExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::CommandExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
     return builder.CreateCommand(Command);
 }

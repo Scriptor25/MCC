@@ -29,23 +29,20 @@ std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
     return stream << ')';
 }
 
-mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
-    std::string callee;
-    bool builtin;
+    ResourceLocation callee;
 
     if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
     {
-        callee = symbol->Name;
-        builtin = true;
+        callee = {.Path = symbol->Name};
     }
     else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))
     {
         auto location = resource->Location;
         if (location.Namespace.empty())
             location.Namespace = builder.GetLocation().Namespace;
-        callee = location.String();
-        builtin = false;
+        callee = std::move(location);
     }
     else
     {
@@ -54,7 +51,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder) const
 
     std::vector<ValuePtr> arguments;
     for (auto &argument: Arguments)
-        arguments.emplace_back(argument->GenerateValue(builder));
+        arguments.emplace_back(argument->GenerateValue(builder, landing_pad));
 
-    return builder.CreateCall(callee, builtin, std::move(arguments));
+    return builder.CreateCall(std::move(callee), std::move(arguments), landing_pad);
 }

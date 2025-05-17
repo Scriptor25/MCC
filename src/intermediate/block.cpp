@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
 
@@ -73,4 +74,16 @@ mcc::InstructionPtr mcc::Block::GetTerminator() const
     if (Instructions.empty() || !Instructions.back()->IsTerminator())
         return nullptr;
     return Instructions.back();
+}
+
+bool mcc::Block::MayThrow() const
+{
+    Assert(!Parent, "top level block required");
+    if (const auto terminator = GetTerminator())
+        return !!std::dynamic_pointer_cast<ThrowInstruction>(terminator);
+    for (auto &child: Children)
+        if (const auto terminator = child->GetTerminator();
+            terminator && !!std::dynamic_pointer_cast<ThrowInstruction>(terminator))
+            return true;
+    return false;
 }

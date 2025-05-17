@@ -19,14 +19,14 @@ std::ostream &mcc::FormatExpression::Print(std::ostream &stream) const
     return stream << '`';
 }
 
-mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder) const
+mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const BlockPtr landing_pad) const
 {
     std::vector<ValuePtr> values;
     std::vector<ConstantPtr> constants;
 
     for (auto &node: Nodes)
     {
-        auto value = node->Generate(builder);
+        auto value = node->Generate(builder, landing_pad);
         if (auto constant = std::dynamic_pointer_cast<Constant>(value))
             constants.emplace_back(constant);
         values.emplace_back(value);
