@@ -15,14 +15,14 @@ namespace mcc
         bool Invert;
     };
 
-    struct IntegerAttribute final : TargetAttribute
+    struct EnumAttribute final : TargetAttribute
     {
-        IntegerAttribute(bool invert, IntegerT value);
+        EnumAttribute(bool invert, std::string value);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] std::string String() const override;
 
-        IntegerT Value;
+        std::string Value;
     };
 
     struct FloatAttribute final : TargetAttribute
@@ -35,44 +35,14 @@ namespace mcc
         FloatT Value;
     };
 
-    struct RangeAttribute final : TargetAttribute
+    struct IntegerAttribute final : TargetAttribute
     {
-        RangeAttribute(bool invert, std::optional<IntegerT> beg, std::optional<IntegerT> end);
+        IntegerAttribute(bool invert, IntegerT value);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] std::string String() const override;
 
-        std::optional<IntegerT> Beg, End;
-    };
-
-    struct StringAttribute final : TargetAttribute
-    {
-        StringAttribute(bool invert, std::string value);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] std::string String() const override;
-
-        std::string Value;
-    };
-
-    struct EnumAttribute final : TargetAttribute
-    {
-        EnumAttribute(bool invert, std::string value);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] std::string String() const override;
-
-        std::string Value;
-    };
-
-    struct NameAttribute final : TargetAttribute
-    {
-        NameAttribute(bool invert, std::string value);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        [[nodiscard]] std::string String() const override;
-
-        std::string Value;
+        IntegerT Value;
     };
 
     struct MapAttribute final : TargetAttribute
@@ -85,14 +55,14 @@ namespace mcc
         std::map<std::string, TargetAttributePtr> Values;
     };
 
-    struct ResourceMapAttribute final : TargetAttribute
+    struct NameAttribute final : TargetAttribute
     {
-        ResourceMapAttribute(bool invert, std::vector<std::pair<ResourceLocation, TargetAttributePtr>> values);
+        NameAttribute(bool invert, std::string value);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] std::string String() const override;
 
-        std::vector<std::pair<ResourceLocation, TargetAttributePtr>> Values;
+        std::string Value;
     };
 
     struct NBTAttribute final : TargetAttribute
@@ -105,6 +75,16 @@ namespace mcc
         ExpressionPtr Value;
     };
 
+    struct RangeAttribute final : TargetAttribute
+    {
+        RangeAttribute(bool invert, std::optional<IntegerT> beg, std::optional<IntegerT> end);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] std::string String() const override;
+
+        std::optional<IntegerT> Beg, End;
+    };
+
     struct ResourceAttribute final : TargetAttribute
     {
         ResourceAttribute(bool invert, ResourceLocation value);
@@ -113,6 +93,26 @@ namespace mcc
         [[nodiscard]] std::string String() const override;
 
         ResourceLocation Value;
+    };
+
+    struct ResourceMapAttribute final : TargetAttribute
+    {
+        ResourceMapAttribute(bool invert, std::vector<std::pair<ResourceLocation, TargetAttributePtr>> values);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] std::string String() const override;
+
+        std::vector<std::pair<ResourceLocation, TargetAttributePtr>> Values;
+    };
+
+    struct StringAttribute final : TargetAttribute
+    {
+        StringAttribute(bool invert, std::string value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] std::string String() const override;
+
+        std::string Value;
     };
 
     struct TagAttribute final : TargetAttribute

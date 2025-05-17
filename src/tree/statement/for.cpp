@@ -1,5 +1,5 @@
 #include <mcc/builder.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/value.hpp>
 #include <mcc/tree.hpp>
 
 mcc::ForStatement::ForStatement(

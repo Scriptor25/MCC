@@ -1,5 +1,5 @@
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::NamedValue::Create(ResourceLocation location, std::string name)
 {

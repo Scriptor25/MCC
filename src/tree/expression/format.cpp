@@ -1,6 +1,9 @@
 #include <mcc/builder.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
+#include <mcc/format.hpp>
+#include <mcc/instruction.hpp>
 #include <mcc/tree.hpp>
+#include <mcc/value.hpp>
 
 mcc::FormatExpression::FormatExpression(SourceLocation where, std::vector<FormatNodePtr> nodes)
     : Expression(std::move(where)),
@@ -16,27 +19,36 @@ std::ostream &mcc::FormatExpression::Print(std::ostream &stream) const
     return stream << '`';
 }
 
+bool mcc::FormatExpression::IsConstant() const
+{
+    for (auto &node: Nodes)
+        if (!node->IsConstant())
+            return false;
+    return true;
+}
+
+bool mcc::FormatExpression::IsNull() const
+{
+    if (IsConstant())
+        return false;
+    return Expression::IsNull();
+}
+
 mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder) const
 {
     std::vector<ValuePtr> values;
+    std::vector<ConstantPtr> constants;
 
-    auto all_constant = true;
     for (auto &node: Nodes)
     {
         auto value = node->Generate(builder);
-        all_constant &= !!std::dynamic_pointer_cast<Constant>(value);
+        if (auto constant = std::dynamic_pointer_cast<Constant>(value))
+            constants.emplace_back(constant);
         values.emplace_back(value);
     }
 
-    if (all_constant)
-    {
-        std::vector<ConstantPtr> constants;
-
-        for (auto &value: values)
-            constants.emplace_back(std::dynamic_pointer_cast<Constant>(value));
-
+    if (values.size() == constants.size())
         return ConstantArray::Create(constants, true);
-    }
 
     auto array = builder.AllocateArray();
 

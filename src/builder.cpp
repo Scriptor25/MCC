@@ -2,7 +2,8 @@
 #include <mcc/builder.hpp>
 #include <mcc/context.hpp>
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/instruction.hpp>
+#include <mcc/value.hpp>
 
 mcc::Builder::Builder(Context &context)
     : m_Context(context),

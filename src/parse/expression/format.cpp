@@ -1,4 +1,5 @@
 #include <sstream>
+#include <mcc/format.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
 

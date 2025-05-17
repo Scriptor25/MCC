@@ -1,6 +1,7 @@
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
+#include <mcc/value.hpp>
 
 mcc::ExpressionPtr mcc::Parser::ParseIntegerExpression()
 {

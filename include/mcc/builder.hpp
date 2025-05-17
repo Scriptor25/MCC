@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <mcc/common.hpp>
 #include <mcc/package.hpp>
 

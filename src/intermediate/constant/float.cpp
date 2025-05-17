@@ -1,4 +1,4 @@
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
 
 mcc::ConstantPtr mcc::ConstantFloat::Create(const FloatT value)
 {

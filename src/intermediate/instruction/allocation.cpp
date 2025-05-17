@@ -1,5 +1,5 @@
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::AllocationInstruction::CreateValue(ResourceLocation location, IndexT index)
 {

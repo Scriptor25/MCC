@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <memory>
 #include <mcc/common.hpp>
 #include <mcc/lex.hpp>
 
@@ -11,11 +10,6 @@ namespace mcc
 
     class Parser
     {
-        friend FixedNode;
-        friend SwitchNode;
-        friend ValueNode;
-        friend GreedyNode;
-
     public:
         Parser(Context &context, std::istream &stream, std::string filename);
         Parser(Context &context, std::istream &stream, SourceLocation location);

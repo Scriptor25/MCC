@@ -1,4 +1,4 @@
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
 
 mcc::ConstantPtr mcc::ConstantObject::Create(std::map<std::string, ConstantPtr> values)
 {

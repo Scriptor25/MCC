@@ -1,5 +1,5 @@
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/instruction.hpp>
 
 static void generate_function_call(const mcc::CallInstruction &self, mcc::CommandVector &commands)
 {

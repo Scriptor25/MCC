@@ -1,7 +1,9 @@
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/instruction.hpp>
 #include <mcc/tree.hpp>
+#include <mcc/value.hpp>
 
 mcc::SubscriptExpression::SubscriptExpression(SourceLocation where, ExpressionPtr array, ExpressionPtr index)
     : Expression(std::move(where)),
@@ -13,6 +15,18 @@ mcc::SubscriptExpression::SubscriptExpression(SourceLocation where, ExpressionPt
 std::ostream &mcc::SubscriptExpression::Print(std::ostream &stream) const
 {
     return Index->Print(Array->Print(stream) << '[') << ']';
+}
+
+bool mcc::SubscriptExpression::IsConstant() const
+{
+    return Array->IsConstant();
+}
+
+bool mcc::SubscriptExpression::IsNull() const
+{
+    if (IsConstant())
+        return Evaluate() == 0.0;
+    return Expression::IsNull();
 }
 
 mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder) const

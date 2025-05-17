@@ -1,5 +1,5 @@
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
 
 mcc::ConstantPtr mcc::ConstantResource::Create(ResourceLocation location, ConstantPtr state, ConstantPtr data)
 {

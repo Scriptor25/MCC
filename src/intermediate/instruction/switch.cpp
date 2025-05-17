@@ -1,5 +1,6 @@
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::SwitchInstruction::Create(
     ResourceLocation location,

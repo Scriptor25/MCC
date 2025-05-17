@@ -1,4 +1,4 @@
-#include <mcc/intermediate.hpp>
+#include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::BranchResult::Create(ResourceLocation location)
 {

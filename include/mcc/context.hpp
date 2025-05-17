@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <mcc/package.hpp>
 
 namespace mcc

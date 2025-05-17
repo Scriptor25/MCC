@@ -1,4 +1,4 @@
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
 
 mcc::ConstantPtr mcc::ConstantBoolean::Create(const bool value)
 {

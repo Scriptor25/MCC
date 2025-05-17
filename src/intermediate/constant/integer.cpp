@@ -1,4 +1,4 @@
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
 
 mcc::ConstantPtr mcc::ConstantInteger::Create(const IntegerT value)
 {

@@ -1,7 +1,8 @@
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
+#include <mcc/value.hpp>
 
 mcc::SwitchExpression::SwitchExpression(
     SourceLocation where,
@@ -38,6 +39,25 @@ std::ostream &mcc::SwitchExpression::Print(std::ostream &stream) const
         Default->Print(stream << "default -> ") << std::endl;
 
     return stream << '}';
+}
+
+bool mcc::SwitchExpression::IsConstant() const
+{
+    if (!Condition->IsConstant())
+        return false;
+
+    for (auto &[conditions_, case_]: Cases)
+        for (auto &condition: conditions_)
+            if (Condition->IsEqual(condition))
+                return case_->IsConstant();
+    return Default->IsConstant();
+}
+
+bool mcc::SwitchExpression::IsNull() const
+{
+    if (IsConstant())
+        return Evaluate() == 0.0;
+    return Expression::IsNull();
 }
 
 mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder) const

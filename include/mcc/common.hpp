@@ -15,6 +15,7 @@ namespace mcc
 
     using StatementPtr = std::unique_ptr<struct Statement>;
     using ExpressionPtr = std::unique_ptr<struct Expression>;
+
     using FormatNodePtr = std::unique_ptr<struct FormatNode>;
 
     using TargetAttributePtr = std::unique_ptr<struct TargetAttribute>;
@@ -27,16 +28,6 @@ namespace mcc
     struct Context;
     class Parser;
     class Builder;
-
-    struct Block;
-
-    struct CommandNode;
-    struct FixedNode;
-    struct EnumNode;
-    struct SwitchNode;
-    struct ValueNode;
-    struct RuleNode;
-    struct GreedyNode;
 
     class CommandVector
     {
@@ -86,6 +77,24 @@ namespace mcc
 
     using ResourceLocation = Resource<false>;
     using ResourceTag = Resource<true>;
+
+    struct Result
+    {
+        bool operator==(const Result &result) const;
+
+        ResultTypeE Type = ResultType_None;
+
+        /* Constant */
+        std::string Value;
+
+        /* Storage */
+        ResourceLocation Location;
+        std::string Path;
+
+        /* Score */
+        std::string Player;
+        std::string Objective;
+    };
 }
 
 namespace std

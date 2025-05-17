@@ -1,5 +1,5 @@
 #include <mcc/attribute.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
 
 mcc::ConstantPtr mcc::ConstantTarget::Create(
     TargetSelectorE selector,

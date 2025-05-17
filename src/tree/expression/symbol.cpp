@@ -1,5 +1,5 @@
 #include <mcc/builder.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/value.hpp>
 #include <mcc/tree.hpp>
 
 mcc::SymbolExpression::SymbolExpression(SourceLocation where, std::string name)
@@ -11,6 +11,11 @@ mcc::SymbolExpression::SymbolExpression(SourceLocation where, std::string name)
 std::ostream &mcc::SymbolExpression::Print(std::ostream &stream) const
 {
     return stream << Name;
+}
+
+bool mcc::SymbolExpression::IsConstant() const
+{
+    return false;
 }
 
 mcc::ValuePtr mcc::SymbolExpression::GenerateValue(Builder &builder) const

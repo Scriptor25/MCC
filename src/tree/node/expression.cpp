@@ -1,3 +1,4 @@
+#include <mcc/format.hpp>
 #include <mcc/tree.hpp>
 
 mcc::ExpressionNode::ExpressionNode(SourceLocation where, ExpressionPtr expression)
@@ -9,6 +10,11 @@ mcc::ExpressionNode::ExpressionNode(SourceLocation where, ExpressionPtr expressi
 std::ostream &mcc::ExpressionNode::Print(std::ostream &stream) const
 {
     return Expression->Print(stream << "${") << '}';
+}
+
+bool mcc::ExpressionNode::IsConstant() const
+{
+    return Expression->IsConstant();
 }
 
 mcc::ValuePtr mcc::ExpressionNode::Generate(Builder &builder) const

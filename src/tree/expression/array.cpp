@@ -1,7 +1,8 @@
 #include <mcc/builder.hpp>
-#include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
+#include <mcc/instruction.hpp>
 #include <mcc/tree.hpp>
+#include <mcc/value.hpp>
 
 mcc::ArrayExpression::ArrayExpression(SourceLocation where, std::vector<ExpressionPtr> elements)
     : Expression(std::move(where)),
@@ -19,6 +20,21 @@ std::ostream &mcc::ArrayExpression::Print(std::ostream &stream) const
         Elements[i]->Print(stream);
     }
     return stream << " ]";
+}
+
+bool mcc::ArrayExpression::IsConstant() const
+{
+    for (auto &element: Elements)
+        if (!element->IsConstant())
+            return false;
+    return true;
+}
+
+bool mcc::ArrayExpression::IsNull() const
+{
+    if (IsConstant())
+        return false;
+    return Expression::IsNull();
 }
 
 mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder) const

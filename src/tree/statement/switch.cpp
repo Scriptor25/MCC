@@ -1,7 +1,8 @@
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
-#include <mcc/intermediate.hpp>
 #include <mcc/tree.hpp>
+#include <mcc/value.hpp>
 
 mcc::SwitchStatement::SwitchStatement(
     SourceLocation where,

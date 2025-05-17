@@ -1,6 +1,7 @@
 #include <functional>
 #include <mcc/attribute.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/constant.hpp>
+#include <mcc/value.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/tree.hpp>
 

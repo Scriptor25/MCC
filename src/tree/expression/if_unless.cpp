@@ -1,5 +1,5 @@
 #include <mcc/builder.hpp>
-#include <mcc/intermediate.hpp>
+#include <mcc/value.hpp>
 #include <mcc/tree.hpp>
 
 mcc::IfUnlessExpression::IfUnlessExpression(
@@ -19,6 +19,22 @@ mcc::IfUnlessExpression::IfUnlessExpression(
 std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 {
     return Else->Print(Then->Print(Condition->Print(stream << "if (") << ") ") << " else ");
+}
+
+bool mcc::IfUnlessExpression::IsConstant() const
+{
+    if (!Condition->IsConstant())
+        return false;
+    if (Unless == Condition->IsNull())
+        return Then->IsConstant();
+    return Else->IsConstant();
+}
+
+bool mcc::IfUnlessExpression::IsNull() const
+{
+    if (IsConstant())
+        return Evaluate() == 0.0;
+    return Expression::IsNull();
 }
 
 mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder) const
