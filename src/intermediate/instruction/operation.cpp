@@ -15,7 +15,7 @@ mcc::OperationInstruction::OperationInstruction(
     const OperatorE operator_,
     const ResourceLocation &location,
     const std::vector<ValuePtr> &operands)
-    : Instruction(where),
+    : Instruction(where, TypeID_Number),
       Operator(operator_),
       Location(location),
       Operands(operands)

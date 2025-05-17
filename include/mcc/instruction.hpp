@@ -8,7 +8,7 @@ namespace mcc
 {
     struct Instruction : Value
     {
-        explicit Instruction(const SourceLocation &where);
+        Instruction(const SourceLocation &where, TypeID type);
 
         [[nodiscard]] virtual bool IsTerminator() const;
 
@@ -21,12 +21,16 @@ namespace mcc
 
     struct AllocationInstruction final : Instruction
     {
-        static InstructionPtr CreateValue(const SourceLocation &where, const ResourceLocation &location, IndexT index);
+        static InstructionPtr CreateValue(
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            IndexT index);
         static InstructionPtr CreateArray(const SourceLocation &where, const ResourceLocation &location, IndexT index);
         static InstructionPtr CreateObject(const SourceLocation &where, const ResourceLocation &location, IndexT index);
 
         AllocationInstruction(
             const SourceLocation &where,
+            TypeID type,
             AllocationTypeE allocation_type,
             const ResourceLocation &location,
             IndexT index);

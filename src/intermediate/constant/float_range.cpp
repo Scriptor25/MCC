@@ -19,7 +19,7 @@ mcc::ConstantFloatRange::ConstantFloatRange(
     const SourceLocation &where,
     const std::optional<FloatT> min,
     const std::optional<FloatT> max)
-    : Constant(where),
+    : Constant(where, TypeID_Null),
       Min(min),
       Max(max)
 {

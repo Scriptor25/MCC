@@ -303,7 +303,7 @@ mcc::CallInstruction::CallInstruction(
     const std::vector<ValuePtr> &arguments,
     const bool may_throw,
     const BlockPtr &landing_pad)
-    : Instruction(where),
+    : Instruction(where, TypeID_Any),
       Location(location),
       Callee(callee),
       Arguments(arguments),

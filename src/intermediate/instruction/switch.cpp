@@ -23,7 +23,7 @@ mcc::SwitchInstruction::SwitchInstruction(
     const ValuePtr &condition,
     const BlockPtr &default_target,
     const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets)
-    : Instruction(where),
+    : Instruction(where, TypeID_Void),
       Location(location),
       Condition(condition),
       DefaultTarget(default_target),

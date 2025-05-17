@@ -15,7 +15,7 @@ mcc::ConstantResource::ConstantResource(
     const ResourceLocation &location,
     const ConstantPtr &state,
     const ConstantPtr &data)
-    : Constant(where),
+    : Constant(where, TypeID_Null),
       Location(location),
       State(state),
       Data(data)

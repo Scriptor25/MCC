@@ -8,7 +8,7 @@ mcc::ConstantPtr mcc::ConstantObject::Create(
 }
 
 mcc::ConstantObject::ConstantObject(const SourceLocation &where, const std::map<std::string, ConstantPtr> &values)
-    : Constant(where),
+    : Constant(where, TypeID_Object),
       Values(values)
 {
     for (const auto &value: Values | std::views::values)

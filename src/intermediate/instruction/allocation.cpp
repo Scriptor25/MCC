@@ -6,7 +6,7 @@ mcc::InstructionPtr mcc::AllocationInstruction::CreateValue(
     const ResourceLocation &location,
     const IndexT index)
 {
-    return std::make_shared<AllocationInstruction>(where, AllocationType_Value, location, index);
+    return std::make_shared<AllocationInstruction>(where, TypeID_Any, AllocationType_Value, location, index);
 }
 
 mcc::InstructionPtr mcc::AllocationInstruction::CreateArray(
@@ -14,7 +14,7 @@ mcc::InstructionPtr mcc::AllocationInstruction::CreateArray(
     const ResourceLocation &location,
     const IndexT index)
 {
-    return std::make_shared<AllocationInstruction>(where, AllocationType_Array, location, index);
+    return std::make_shared<AllocationInstruction>(where, TypeID_Array, AllocationType_Array, location, index);
 }
 
 mcc::InstructionPtr mcc::AllocationInstruction::CreateObject(
@@ -22,15 +22,16 @@ mcc::InstructionPtr mcc::AllocationInstruction::CreateObject(
     const ResourceLocation &location,
     const IndexT index)
 {
-    return std::make_shared<AllocationInstruction>(where, AllocationType_Object, location, index);
+    return std::make_shared<AllocationInstruction>(where, TypeID_Object, AllocationType_Object, location, index);
 }
 
 mcc::AllocationInstruction::AllocationInstruction(
     const SourceLocation &where,
+    const TypeID type,
     const AllocationTypeE allocation_type,
     const ResourceLocation &location,
     const IndexT index)
-    : Instruction(where),
+    : Instruction(where, type),
       AllocationType(allocation_type),
       Location(location),
       Index(index)

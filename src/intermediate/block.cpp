@@ -25,7 +25,7 @@ mcc::Block::Block(
     const SourceLocation &where,
     const ResourceLocation &location,
     const ParameterList &parameters)
-    : Value(where),
+    : Value(where, TypeID_Void),
       Location(location),
       Parameters(parameters)
 {

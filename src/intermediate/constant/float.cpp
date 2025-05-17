@@ -6,7 +6,7 @@ mcc::ConstantPtr mcc::ConstantFloat::Create(const SourceLocation &where, const F
 }
 
 mcc::ConstantFloat::ConstantFloat(const SourceLocation &where, const FloatT value)
-    : Constant(where),
+    : Constant(where, TypeID_Number),
       Value(value)
 {
 }

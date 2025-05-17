@@ -53,7 +53,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     target_frame.Tail = tail_target;
 
     builder.SetInsertBlock(tail_target);
-    const auto branch_result = builder.CreateBranchResult(Where);
+    const auto branch_result = builder.CreateBranchResult(Where, TypeID_Any);
 
     builder.SetInsertBlock(default_target);
     const auto default_value = Default->GenerateValue(builder, target_frame);

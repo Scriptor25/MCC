@@ -13,7 +13,7 @@ mcc::CommandInstruction::CommandInstruction(
     const SourceLocation &where,
     const ResourceLocation &location,
     const CommandT &command)
-    : Instruction(where),
+    : Instruction(where, TypeID_Any),
       Location(location),
       Command(command)
 {

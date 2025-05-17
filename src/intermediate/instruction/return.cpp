@@ -13,7 +13,7 @@ mcc::ReturnInstruction::ReturnInstruction(
     const SourceLocation &where,
     const ResourceLocation &location,
     const ValuePtr &value)
-    : Instruction(where),
+    : Instruction(where, TypeID_Void),
       Location(location),
       Value(value)
 {

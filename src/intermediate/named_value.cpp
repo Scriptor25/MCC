@@ -8,8 +8,11 @@ mcc::ValuePtr mcc::NamedValue::Create(
     return std::make_shared<NamedValue>(where, location, name);
 }
 
-mcc::NamedValue::NamedValue(const SourceLocation &where, const ResourceLocation &location, const std::string &name)
-    : Value(where),
+mcc::NamedValue::NamedValue(
+    const SourceLocation &where,
+    const ResourceLocation &location,
+    const std::string &name)
+    : Value(where, TypeID_Any),
       Location(location),
       Name(name)
 {

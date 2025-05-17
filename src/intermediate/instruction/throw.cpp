@@ -19,7 +19,7 @@ mcc::ThrowInstruction::ThrowInstruction(
     const ResourceLocation &location,
     const ValuePtr &value,
     const BlockPtr &landing_pad)
-    : Instruction(where),
+    : Instruction(where, TypeID_Void),
       Location(location),
       Value(value),
       LandingPad(landing_pad)

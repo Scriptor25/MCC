@@ -19,7 +19,7 @@ mcc::IfUnlessStatement::IfUnlessStatement(
 
 std::ostream &mcc::IfUnlessStatement::Print(std::ostream &stream) const
 {
-    Then->Print(Condition->Print(stream << "if (") << ") ");
+    Then->Print(Condition->Print(stream << (Unless ? "unless" : "if") << " (") << ") ");
     if (Else)
         Else->Print(stream << " else ");
     return stream;

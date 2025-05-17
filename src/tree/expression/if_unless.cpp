@@ -18,7 +18,7 @@ mcc::IfUnlessExpression::IfUnlessExpression(
 
 std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 {
-    return Else->Print(Then->Print(Condition->Print(stream << "if (") << ") ") << " else ");
+    return Else->Print(Then->Print(Condition->Print(stream << (Unless ? "unless" : "if") << " (") << ") ") << " else ");
 }
 
 mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Frame &frame) const
@@ -29,10 +29,14 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Fra
     const auto tail_target = builder.CreateBlock(Where, parent);
 
     const auto condition = Condition->GenerateValue(builder, frame);
-    (void) builder.CreateBranch(Where, condition, then_target, else_target);
+    (void) builder.CreateBranch(
+        Where,
+        condition,
+        Unless ? else_target : then_target,
+        Unless ? then_target : else_target);
 
     builder.SetInsertBlock(tail_target);
-    auto branch_result = builder.CreateBranchResult(Where);
+    auto branch_result = builder.CreateBranchResult(Where, TypeID_Any);
 
     builder.SetInsertBlock(then_target);
     const auto then_value = Then->GenerateValue(builder, frame);

@@ -1,7 +1,7 @@
 #include <mcc/constant.hpp>
 
-mcc::Constant::Constant(const SourceLocation &where)
-    : Value(where)
+mcc::Constant::Constant(const SourceLocation &where, const TypeID type)
+    : Value(where, type)
 {
 }
 

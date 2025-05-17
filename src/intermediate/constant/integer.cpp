@@ -6,7 +6,7 @@ mcc::ConstantPtr mcc::ConstantInteger::Create(const SourceLocation &where, const
 }
 
 mcc::ConstantInteger::ConstantInteger(const SourceLocation &where, const IntegerT value)
-    : Constant(where),
+    : Constant(where, TypeID_Number),
       Value(value)
 {
 }

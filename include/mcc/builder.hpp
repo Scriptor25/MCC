@@ -73,7 +73,7 @@ namespace mcc
             const ValuePtr &value,
             const BlockPtr &landing_pad) const;
 
-        [[nodiscard]] ValuePtr CreateBranchResult(const SourceLocation &where) const;
+        [[nodiscard]] ValuePtr CreateBranchResult(const SourceLocation &where, TypeID type) const;
 
         [[nodiscard]] InstructionPtr CreateCall(
             const SourceLocation &where,
@@ -112,7 +112,7 @@ namespace mcc
             const ValuePtr &value,
             const std::string &key) const;
 
-        [[nodiscard]] ValuePtr CreateStoreResult(const SourceLocation &where, const std::string &variable) const;
+        [[nodiscard]] ValuePtr CreateStoreResult(const SourceLocation &where, TypeID type, const std::string &variable) const;
 
         [[nodiscard]] InstructionPtr Insert(const SourceLocation &where, InstructionPtr instruction) const;
 

@@ -22,7 +22,7 @@ mcc::BranchInstruction::BranchInstruction(
     const ValuePtr &condition,
     const BlockPtr &then_target,
     const BlockPtr &else_target)
-    : Instruction(where),
+    : Instruction(where, TypeID_Void),
       Location(location),
       Condition(condition),
       ThenTarget(then_target),

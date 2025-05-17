@@ -246,9 +246,9 @@ mcc::InstructionPtr mcc::Builder::CreateThrow(
     return Insert(where, ThrowInstruction::Create(where, GetLocation(where), value, landing_pad));
 }
 
-mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where) const
+mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where, const TypeID type) const
 {
-    return BranchResult::Create(where, GetLocation(where));
+    return BranchResult::Create(where, type, GetLocation(where));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
@@ -280,7 +280,12 @@ mcc::InstructionPtr mcc::Builder::AllocateValue(const SourceLocation &where) con
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    return Insert(where, AllocationInstruction::CreateValue(where, GetLocation(where), m_InsertBlock->StackIndex++));
+    return Insert(
+        where,
+        AllocationInstruction::CreateValue(
+            where,
+            GetLocation(where),
+            m_InsertBlock->StackIndex++));
 }
 
 mcc::InstructionPtr mcc::Builder::AllocateArray(const SourceLocation &where) const
@@ -386,12 +391,15 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
             key));
 }
 
-mcc::ValuePtr mcc::Builder::CreateStoreResult(const SourceLocation &where, const std::string &variable) const
+mcc::ValuePtr mcc::Builder::CreateStoreResult(
+    const SourceLocation &where,
+    const TypeID type,
+    const std::string &variable) const
 {
     Assert(!variable.empty(), where, "variable name must not be empty");
 
     const auto dst = GetVariable(where, variable);
-    const auto src = FunctionResult::Create(where, GetLocation(where));
+    const auto src = FunctionResult::Create(where, type, GetLocation(where));
     return CreateStore(where, dst, src);
 }
 

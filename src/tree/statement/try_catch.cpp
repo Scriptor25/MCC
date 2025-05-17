@@ -51,7 +51,7 @@ void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) cons
         builder.SetInsertBlock(catch_target);
 
         if (!Variable.empty())
-            (void) builder.CreateStoreResult(Catch->Where, Variable);
+            (void) builder.CreateStoreResult(Catch->Where, TypeID_Any, Variable);
 
         Catch->Generate(builder, frame);
 

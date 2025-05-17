@@ -9,11 +9,14 @@ namespace mcc
 {
     enum TypeID
     {
+        TypeID_Void,
+        TypeID_Null,
         TypeID_Boolean,
         TypeID_Number,
         TypeID_String,
         TypeID_Array,
         TypeID_Object,
+        TypeID_Any,
     };
 
     enum FrameFlagE

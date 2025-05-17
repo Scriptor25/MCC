@@ -77,7 +77,7 @@ mcc::ArrayInstruction::ArrayInstruction(
     const ValuePtr &value,
     const IndexT index,
     const bool stringify)
-    : Instruction(where),
+    : Instruction(where, array_operation == ArrayOperation_Extract ? TypeID_Any : TypeID_Void),
       ArrayOperation(array_operation),
       Location(location),
       Array(array),

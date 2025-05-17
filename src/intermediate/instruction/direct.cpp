@@ -35,7 +35,7 @@ mcc::DirectInstruction::DirectInstruction(
     const BlockPtr &target,
     const ValuePtr &result,
     const ValuePtr &branch_result)
-    : Instruction(where),
+    : Instruction(where, TypeID_Void),
       Location(location),
       Target(target),
       Result(result),

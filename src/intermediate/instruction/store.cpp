@@ -7,7 +7,7 @@ mcc::InstructionPtr mcc::StoreInstruction::Create(const SourceLocation &where, c
 }
 
 mcc::StoreInstruction::StoreInstruction(const SourceLocation &where, const ValuePtr &dst, const ValuePtr &src)
-    : Instruction(where),
+    : Instruction(where, dst->Type),
       Dst(dst),
       Src(src)
 {

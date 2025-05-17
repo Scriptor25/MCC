@@ -1,8 +1,9 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
-mcc::Value::Value(const SourceLocation &where)
-    : Where(where)
+mcc::Value::Value(const SourceLocation &where, const TypeID type)
+    : Where(where),
+      Type(type)
 {
 }
 

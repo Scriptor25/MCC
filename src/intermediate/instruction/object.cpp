@@ -22,7 +22,7 @@ mcc::ObjectInstruction::ObjectInstruction(
     const ValuePtr &object,
     const ValuePtr &value,
     const std::string &key)
-    : Instruction(where),
+    : Instruction(where, TypeID_Void),
       Location(location),
       Object(object),
       Value(value),

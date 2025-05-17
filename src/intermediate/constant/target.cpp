@@ -13,7 +13,7 @@ mcc::ConstantTarget::ConstantTarget(
     const SourceLocation &where,
     const TargetSelectorE selector,
     std::map<std::string, std::vector<TargetAttributePtr>> attributes)
-    : Constant(where),
+    : Constant(where, TypeID_Null),
       Selector(selector),
       Attributes(std::move(attributes))
 {

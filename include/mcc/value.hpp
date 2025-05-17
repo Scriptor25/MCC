@@ -1,14 +1,13 @@
 #pragma once
 
 #include <mcc/common.hpp>
-#include <mcc/lex.hpp>
 #include <mcc/package.hpp>
 
 namespace mcc
 {
     struct Value
     {
-        explicit Value(const SourceLocation &where);
+        Value(const SourceLocation &where, TypeID type);
         virtual ~Value() = default;
 
         virtual void Generate(CommandVector &commands, bool stack) const;
@@ -19,12 +18,16 @@ namespace mcc
         void Drop();
 
         SourceLocation Where;
+        TypeID Type;
         IndexT UseCount = 0;
     };
 
     struct NamedValue final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, const ResourceLocation &location, const std::string &name);
+        static ValuePtr Create(
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            const std::string &name);
 
         NamedValue(const SourceLocation &where, const ResourceLocation &location, const std::string &name);
 
@@ -37,9 +40,9 @@ namespace mcc
 
     struct BranchResult final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, const ResourceLocation &location);
+        static ValuePtr Create(const SourceLocation &where, TypeID type, const ResourceLocation &location);
 
-        BranchResult(const SourceLocation &where, const ResourceLocation &location);
+        BranchResult(const SourceLocation &where, TypeID type, const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -84,9 +87,9 @@ namespace mcc
 
     struct FunctionResult final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, const ResourceLocation &location);
+        static ValuePtr Create(const SourceLocation &where, TypeID type, const ResourceLocation &location);
 
-        FunctionResult(const SourceLocation &where, const ResourceLocation &location);
+        FunctionResult(const SourceLocation &where, TypeID type, const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
         Result GenerateResult(bool stringify) const override;

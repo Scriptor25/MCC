@@ -12,7 +12,7 @@ mcc::ConstantArray::ConstantArray(
     const SourceLocation &where,
     const std::vector<ConstantPtr> &values,
     const bool stringify)
-    : Constant(where),
+    : Constant(where, TypeID_Array),
       Values(values),
       Stringify(stringify)
 {

@@ -17,7 +17,7 @@ mcc::ComparisonInstruction::ComparisonInstruction(
     const ResourceLocation &location,
     const ValuePtr &left,
     const ValuePtr &right)
-    : Instruction(where),
+    : Instruction(where, TypeID_Boolean),
       Comparator(comparator),
       Location(location),
       Left(left),

@@ -1,7 +1,7 @@
 #include <mcc/instruction.hpp>
 
-mcc::Instruction::Instruction(const SourceLocation &where)
-    : Value(where)
+mcc::Instruction::Instruction(const SourceLocation &where, const TypeID type)
+    : Value(where, type)
 {
 }
 

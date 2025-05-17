@@ -6,7 +6,7 @@ mcc::ConstantPtr mcc::ConstantString::Create(const SourceLocation &where, const 
 }
 
 mcc::ConstantString::ConstantString(const SourceLocation &where, const std::string &value)
-    : Constant(where),
+    : Constant(where, TypeID_String),
       Value(value)
 {
 }

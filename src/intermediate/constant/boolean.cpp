@@ -6,7 +6,7 @@ mcc::ConstantPtr mcc::ConstantBoolean::Create(const SourceLocation &where, const
 }
 
 mcc::ConstantBoolean::ConstantBoolean(const SourceLocation &where, const bool value)
-    : Constant(where),
+    : Constant(where, TypeID_Boolean),
       Value(value)
 {
 }

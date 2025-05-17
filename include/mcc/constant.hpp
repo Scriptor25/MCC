@@ -9,7 +9,7 @@ namespace mcc
 {
     struct Constant : Value
     {
-        explicit Constant(const SourceLocation &where);
+        Constant(const SourceLocation &where, TypeID type);
 
         [[nodiscard]] bool RequireStack() const override;
     };
@@ -117,9 +117,17 @@ namespace mcc
 
     struct ConstantResource final : Constant
     {
-        static ConstantPtr Create(const SourceLocation &where, const ResourceLocation &location, const ConstantPtr &state, const ConstantPtr &data);
+        static ConstantPtr Create(
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            const ConstantPtr &state,
+            const ConstantPtr &data);
 
-        ConstantResource(const SourceLocation &where, const ResourceLocation &location, const ConstantPtr &state, const ConstantPtr &data);
+        ConstantResource(
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            const ConstantPtr &state,
+            const ConstantPtr &data);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
