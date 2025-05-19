@@ -39,9 +39,9 @@ mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const Frame
     }
 
     if (values.size() == constants.size())
-        return ConstantArray::Create(Where, constants, true);
+        return ConstantArray::Create(Where, builder.GetContext(), constants, true);
 
-    auto array = builder.AllocateArray(Where, TypeContext::GetUnion(elements));
+    auto array = builder.AllocateArray(Where, builder.GetContext().GetUnion(elements));
 
     for (const auto &value: values)
         (void) builder.CreateAppend(Where, array, value, true);

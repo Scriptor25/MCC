@@ -2,19 +2,21 @@
 
 mcc::ValuePtr mcc::NamedValue::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const TypePtr &type,
     const ResourceLocation &location,
     const std::string &name)
 {
-    return std::make_shared<NamedValue>(where, type, location, name);
+    return std::make_shared<NamedValue>(where, context, type, location, name);
 }
 
 mcc::NamedValue::NamedValue(
     const SourceLocation &where,
+    TypeContext &context,
     const TypePtr &type,
     const ResourceLocation &location,
     const std::string &name)
-    : Value(where, type),
+    : Value(where, context, type),
       Location(location),
       Name(name)
 {

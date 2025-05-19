@@ -10,19 +10,21 @@ namespace mcc
     class TypeContext
     {
     public:
-        static TypeContext GlobalContext;
+        TypePtr GetVoid();
+        TypePtr GetNull();
+        TypePtr GetBoolean();
+        TypePtr GetNumber();
+        TypePtr GetString();
+        TypePtr GetArray(const TypePtr &elements);
+        TypePtr GetStruct(const std::map<std::string, TypePtr> &elements);
+        TypePtr GetTuple(const std::vector<TypePtr> &elements);
+        TypePtr GetUnion(const std::set<TypePtr> &elements);
 
-        static TypePtr GetVoid();
-        static TypePtr GetNull();
-        static TypePtr GetBoolean();
-        static TypePtr GetNumber();
-        static TypePtr GetString();
-        static TypePtr GetArray(const TypePtr &elements);
-        static TypePtr GetStruct(const std::map<std::string, TypePtr> &elements);
-        static TypePtr GetTuple(const std::vector<TypePtr> &elements);
-        static TypePtr GetUnion(const std::set<TypePtr> &elements);
+        TypePtr SetNamed(const std::string &name, const TypePtr &type);
+        TypePtr GetNamed(const std::string &name) const;
 
     private:
+        std::map<std::string, TypePtr> m_Named;
         std::shared_ptr<Type> m_Void, m_Null, m_Boolean, m_Number, m_String;
         std::map<TypePtr, std::shared_ptr<Type>> m_Array;
         std::map<std::map<std::string, TypePtr>, std::shared_ptr<Type>> m_Struct;
@@ -75,7 +77,7 @@ namespace mcc
     /** A[] */
     struct ArrayType final : Type
     {
-        explicit ArrayType(const TypePtr &elements);
+        explicit ArrayType(TypePtr elements);
 
         std::ostream &Print(std::ostream &stream) const override;
 

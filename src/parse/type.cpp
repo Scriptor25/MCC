@@ -16,15 +16,18 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
         auto name = Skip().Value;
 
         if (name == "void")
-            return TypeContext::GetVoid();
+            return m_Context.GetVoid();
         if (name == "null")
-            return TypeContext::GetNull();
+            return m_Context.GetNull();
         if (name == "boolean")
-            return TypeContext::GetBoolean();
+            return m_Context.GetBoolean();
         if (name == "number")
-            return TypeContext::GetNumber();
+            return m_Context.GetNumber();
         if (name == "string")
-            return TypeContext::GetString();
+            return m_Context.GetString();
+
+        if (auto type = m_Context.GetNamed(name))
+            return type;
 
         Error(where, "undefined type {}", name);
     }
@@ -44,7 +47,7 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
         }
         Expect(TokenType_Other, "}");
 
-        return TypeContext::GetStruct(elements);
+        return m_Context.GetStruct(elements);
     }
 
     if (SkipIf(TokenType_Other, "["))
@@ -60,7 +63,7 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
         }
         Expect(TokenType_Other, "]");
 
-        return TypeContext::GetTuple(elements);
+        return m_Context.GetTuple(elements);
     }
 
     if (SkipIf(TokenType_Other, "("))
@@ -80,7 +83,7 @@ mcc::TypePtr mcc::Parser::ParseArrayType()
     while (SkipIf(TokenType_Other, "["))
     {
         Expect(TokenType_Other, "]");
-        base = TypeContext::GetArray(base);
+        base = m_Context.GetArray(base);
     }
 
     return base;
@@ -99,7 +102,7 @@ mcc::TypePtr mcc::Parser::ParseUnionType()
             elements.emplace(ParseArrayType());
         while (SkipIf(TokenType_Operator, "|"));
 
-        type = TypeContext::GetUnion(elements);
+        type = m_Context.GetUnion(elements);
     }
 
     return type;

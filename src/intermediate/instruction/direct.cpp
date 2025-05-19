@@ -4,11 +4,13 @@
 
 mcc::InstructionPtr mcc::DirectInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const BlockPtr &target)
 {
     return std::make_shared<DirectInstruction>(
         where,
+        context,
         location,
         target,
         nullptr,
@@ -17,6 +19,7 @@ mcc::InstructionPtr mcc::DirectInstruction::Create(
 
 mcc::InstructionPtr mcc::DirectInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const BlockPtr &target,
     const ValuePtr &result,
@@ -24,6 +27,7 @@ mcc::InstructionPtr mcc::DirectInstruction::Create(
 {
     return std::make_shared<DirectInstruction>(
         where,
+        context,
         location,
         target,
         result,
@@ -32,11 +36,12 @@ mcc::InstructionPtr mcc::DirectInstruction::Create(
 
 mcc::DirectInstruction::DirectInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const BlockPtr &target,
     const ValuePtr &result,
     const ValuePtr &branch_result)
-    : Instruction(where, TypeContext::GetVoid()),
+    : Instruction(where, context, context.GetVoid()),
       Location(location),
       Target(target),
       Result(result),

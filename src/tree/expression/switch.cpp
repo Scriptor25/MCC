@@ -47,8 +47,8 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     const auto start_target = builder.GetInsertBlock();
 
     const auto parent = builder.GetInsertBlock()->Parent;
-    const auto tail_target = Block::Create(Where, parent);
-    const auto default_target = Block::Create(Default->Where, parent);
+    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto default_target = Block::Create(Default->Where, builder.GetContext(), parent);
 
     auto target_frame = frame;
     target_frame.Tail = tail_target;
@@ -64,7 +64,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets;
     for (auto &[cases_, value_]: Cases)
     {
-        auto case_target = Block::Create(value_->Where, parent);
+        auto case_target = Block::Create(value_->Where, builder.GetContext(), parent);
 
         for (auto &case_: cases_)
         {
@@ -87,7 +87,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     builder.SetInsertBlock(tail_target);
     const auto type = (elements.size() == 1)
                           ? *elements.begin()
-                          : TypeContext::GetUnion(elements);
+                          : builder.GetContext().GetUnion(elements);
     const auto branch_result = builder.CreateBranchResult(Where, type);
 
     for (auto &[target_, value_]: case_values)

@@ -1,15 +1,16 @@
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
+#include <utility>
 
-mcc::BlockPtr mcc::Block::Create(const SourceLocation &where, const FunctionPtr &parent)
+mcc::BlockPtr mcc::Block::Create(const SourceLocation &where, TypeContext &context, const FunctionPtr &parent)
 {
-    return parent->Blocks.emplace_back(std::make_shared<Block>(where, parent));
+    return parent->Blocks.emplace_back(std::make_shared<Block>(where, context, parent));
 }
 
-mcc::Block::Block(const SourceLocation &where, const FunctionPtr &parent)
-    : Value(where, TypeContext::GetVoid()),
-      Parent(parent)
+mcc::Block::Block(const SourceLocation &where, TypeContext &context, FunctionPtr parent)
+    : Value(where, context, context.GetVoid()),
+      Parent(std::move(parent))
 {
 }
 
@@ -21,11 +22,12 @@ void mcc::Block::Generate(CommandVector &commands, const bool stack) const
 
 bool mcc::Block::RequireStack() const
 {
-    for (auto &instruction: Instructions)
-        if (instruction->RequireStack())
-            return true;
-
-    return false;
+    return std::ranges::any_of(
+        Instructions,
+        [](auto &instruction)
+        {
+            return instruction->RequireStack();
+        });
 }
 
 mcc::InstructionPtr mcc::Block::GetTerminator() const

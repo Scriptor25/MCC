@@ -4,6 +4,7 @@
 
 mcc::InstructionPtr mcc::BranchInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &condition,
     const BlockPtr &then_target,
@@ -11,6 +12,7 @@ mcc::InstructionPtr mcc::BranchInstruction::Create(
 {
     return std::make_shared<BranchInstruction>(
         where,
+        context,
         location,
         condition,
         then_target,
@@ -19,11 +21,12 @@ mcc::InstructionPtr mcc::BranchInstruction::Create(
 
 mcc::BranchInstruction::BranchInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &condition,
     const BlockPtr &then_target,
     const BlockPtr &else_target)
-    : Instruction(where, TypeContext::GetVoid()),
+    : Instruction(where, context, context.GetVoid()),
       Location(location),
       Condition(condition),
       ThenTarget(then_target),

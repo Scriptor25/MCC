@@ -7,7 +7,7 @@ namespace mcc
 {
     struct Value
     {
-        Value(const SourceLocation &where, const TypePtr &type);
+        Value(const SourceLocation &where, TypeContext &context, const TypePtr &type);
         virtual ~Value() = default;
 
         virtual void Generate(CommandVector &commands, bool stack) const;
@@ -18,6 +18,7 @@ namespace mcc
         void Drop();
 
         SourceLocation Where;
+        TypeContext &Context;
         TypePtr Type;
         IndexT UseCount = 0;
     };
@@ -26,12 +27,14 @@ namespace mcc
     {
         static ValuePtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             const std::string &name);
 
         NamedValue(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             const std::string &name);
@@ -45,9 +48,17 @@ namespace mcc
 
     struct BranchResult final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);
+        static ValuePtr Create(
+            const SourceLocation &where,
+            TypeContext &context,
+            const TypePtr &type,
+            const ResourceLocation &location);
 
-        BranchResult(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);
+        BranchResult(
+            const SourceLocation &where,
+            TypeContext &context,
+            const TypePtr &type,
+            const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -59,6 +70,7 @@ namespace mcc
     {
         static FunctionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ParameterList &parameters,
             const TypePtr &result,
@@ -66,6 +78,7 @@ namespace mcc
 
         Function(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ParameterList &parameters,
             const TypePtr &result,
@@ -74,7 +87,7 @@ namespace mcc
         void Generate(CommandVector &commands, bool stack) const override;
         bool RequireStack() const override;
 
-        void GenerateFunction(const Context &context) const;
+        void GenerateFunction(Package &package) const;
 
         void ForwardArguments(std::string &prefix, std::string &arguments) const;
 
@@ -92,9 +105,9 @@ namespace mcc
 
     struct Block final : Value
     {
-        static BlockPtr Create(const SourceLocation &where, const FunctionPtr &parent);
+        static BlockPtr Create(const SourceLocation &where, TypeContext &context, const FunctionPtr &parent);
 
-        Block(const SourceLocation &where, const FunctionPtr &parent);
+        Block(const SourceLocation &where, TypeContext &context, FunctionPtr parent);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
@@ -111,9 +124,17 @@ namespace mcc
 
     struct FunctionResult final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);
+        static ValuePtr Create(
+            const SourceLocation &where,
+            TypeContext &context,
+            const TypePtr &type,
+            const ResourceLocation &location);
 
-        FunctionResult(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);
+        FunctionResult(
+            const SourceLocation &where,
+            TypeContext &context,
+            const TypePtr &type,
+            const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
         Result GenerateResult(bool stringify) const override;

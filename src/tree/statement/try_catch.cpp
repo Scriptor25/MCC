@@ -32,8 +32,8 @@ std::ostream &mcc::TryCatchStatement::Print(std::ostream &stream) const
 void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) const
 {
     const auto parent = builder.GetInsertBlock()->Parent;
-    const auto tail_target = Block::Create(Where, parent);
-    const auto catch_target = Catch ? Block::Create(Catch->Where, parent) : tail_target;
+    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto catch_target = Catch ? Block::Create(Catch->Where, builder.GetContext(), parent) : tail_target;
 
     auto require_tail = !Catch;
 

@@ -10,7 +10,7 @@ mcc::ExpressionPtr mcc::Parser::ParseRangeExpression()
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
             token.Where,
-            ConstantFloat::Create(token.Where, token.Integer),
+            ConstantFloat::Create(token.Where, m_Context, token.Integer),
             token.Value);
     }
 
@@ -19,7 +19,7 @@ mcc::ExpressionPtr mcc::Parser::ParseRangeExpression()
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
             token.Where,
-            ConstantFloat::Create(token.Where, token.Float),
+            ConstantFloat::Create(token.Where, m_Context, token.Float),
             token.Value);
     }
 
@@ -28,9 +28,9 @@ mcc::ExpressionPtr mcc::Parser::ParseRangeExpression()
     return std::make_unique<ConstantExpression>(
         token.Where,
         beg_.has_value() && end_.has_value()
-            ? ConstantFloatRange::Create(token.Where, *beg_, *end_)
+            ? ConstantFloatRange::Create(token.Where, m_Context, *beg_, *end_)
             : beg_.has_value()
-                  ? ConstantFloatRange::CreateMin(token.Where, *beg_)
-                  : ConstantFloatRange::CreateMax(token.Where, *end_),
+                  ? ConstantFloatRange::CreateMin(token.Where, m_Context, *beg_)
+                  : ConstantFloatRange::CreateMax(token.Where, m_Context, *end_),
         token.Value);
 }

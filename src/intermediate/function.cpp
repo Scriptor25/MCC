@@ -1,4 +1,3 @@
-#include <mcc/context.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
@@ -6,27 +5,29 @@
 
 mcc::FunctionPtr mcc::Function::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ParameterList &parameters,
     const TypePtr &result,
     const bool throws)
 {
-    return std::make_shared<Function>(where, location, parameters, result, throws);
+    return std::make_shared<Function>(where, context, location, parameters, result, throws);
 }
 
 mcc::Function::Function(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ParameterList &parameters,
     const TypePtr &result,
     const bool throws)
-    : Value(where, TypeContext::GetVoid()),
+    : Value(where, context, context.GetVoid()),
       Location(location),
       Result(result),
       Throws(throws)
 {
     for (const auto &[name_, type_]: parameters)
-        Parameters.emplace_back(name_, NamedValue::Create(Where, type_, Location, name_));
+        Parameters.emplace_back(name_, NamedValue::Create(Where, Context, type_, Location, name_));
 }
 
 void mcc::Function::Generate(CommandVector &commands, const bool stack) const
@@ -50,7 +51,7 @@ bool mcc::Function::RequireStack() const
     return false;
 }
 
-void mcc::Function::GenerateFunction(const Context &context) const
+void mcc::Function::GenerateFunction(Package &package) const
 {
     const auto require_stack = RequireStack();
 
@@ -60,7 +61,7 @@ void mcc::Function::GenerateFunction(const Context &context) const
         if (i)
             path_ += '/' + std::to_string(i);
 
-        CommandVector commands(context.Pkg.Functions[namespace_][path_]);
+        CommandVector commands(package.Functions[namespace_][path_]);
 
         if (i == 0 && require_stack)
         {
@@ -71,7 +72,7 @@ void mcc::Function::GenerateFunction(const Context &context) const
                 if (!value_->UseCount)
                     continue;
 
-                if (value_->Type == TypeContext::GetString())
+                if (value_->Type == Context.GetString())
                     commands.Append(
                         "$data modify storage {0} stack[0].var.{1} set value \"$({1})\"",
                         Location,
@@ -99,7 +100,7 @@ void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments
     {
         if (i)
             arguments += ',';
-        if (Parameters[i].second->Type == TypeContext::GetString())
+        if (Parameters[i].second->Type == Context.GetString())
             arguments += std::format("{0}:\"$({0})\"", Parameters[i].first);
         else
             arguments += std::format("{0}:$({0})", Parameters[i].first);

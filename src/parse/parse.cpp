@@ -4,12 +4,12 @@
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
 
-mcc::Parser::Parser(Context &context, std::istream &stream, const std::string &filename)
+mcc::Parser::Parser(TypeContext &context, std::istream &stream, const std::string &filename)
     : Parser(context, stream, SourceLocation(filename, 1, 0))
 {
 }
 
-mcc::Parser::Parser(Context &context, std::istream &stream, const SourceLocation &location)
+mcc::Parser::Parser(TypeContext &context, std::istream &stream, const SourceLocation &location)
     : m_Context(context),
       m_Stream(stream),
       m_Where(location)

@@ -4,17 +4,19 @@
 
 mcc::InstructionPtr mcc::ReturnInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &value)
 {
-    return std::make_shared<ReturnInstruction>(where, location, value);
+    return std::make_shared<ReturnInstruction>(where, context, location, value);
 }
 
 mcc::ReturnInstruction::ReturnInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &value)
-    : Instruction(where, TypeContext::GetVoid()),
+    : Instruction(where, context, context.GetVoid()),
       Location(location),
       Value(value)
 {

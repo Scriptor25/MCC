@@ -21,5 +21,5 @@ std::ostream &mcc::CommandExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::CommandExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    return builder.CreateCommand(Where, Type ? Type : TypeContext::GetVoid(), Command);
+    return builder.CreateCommand(Where, Type ? Type : builder.GetContext().GetVoid(), Command);
 }

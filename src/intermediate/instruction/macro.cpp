@@ -183,19 +183,21 @@ static const std::map<std::string_view, Generator> generators
 
 mcc::InstructionPtr mcc::MacroInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const std::string &name,
     const std::vector<ValuePtr> &arguments)
 {
-    return std::make_shared<MacroInstruction>(where, location, name, arguments);
+    return std::make_shared<MacroInstruction>(where, context, location, name, arguments);
 }
 
 mcc::MacroInstruction::MacroInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const std::string &name,
     const std::vector<ValuePtr> &arguments)
-    : Instruction(where, TypeContext::GetVoid()),
+    : Instruction(where, context, context.GetVoid()),
       Location(location),
       Name(name),
       Arguments(arguments)

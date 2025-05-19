@@ -20,5 +20,5 @@ mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder, const Fra
     if (location.Namespace.empty())
         location.Namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
 
-    return ConstantResource::Create(Where, location);
+    return ConstantResource::Create(Where, builder.GetContext(), location);
 }

@@ -8,7 +8,7 @@ namespace mcc
 {
     struct Instruction : Value
     {
-        Instruction(const SourceLocation &where, const TypePtr &type);
+        Instruction(const SourceLocation &where, TypeContext &context, const TypePtr &type);
 
         [[nodiscard]] virtual bool IsTerminator() const;
 
@@ -23,22 +23,26 @@ namespace mcc
     {
         static InstructionPtr CreateValue(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             IndexT index);
         static InstructionPtr CreateArray(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             IndexT index);
         static InstructionPtr CreateObject(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             IndexT index);
 
         AllocationInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             AllocationTypeE allocation_type,
             const ResourceLocation &location,
@@ -57,18 +61,21 @@ namespace mcc
     {
         static InstructionPtr CreateAppend(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &array,
             const ValuePtr &value,
             bool stringify);
         static InstructionPtr CreatePrepend(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &array,
             const ValuePtr &value,
             bool stringify);
         static InstructionPtr CreateInsert(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &array,
             const ValuePtr &value,
@@ -76,12 +83,14 @@ namespace mcc
             bool stringify);
         static InstructionPtr CreateExtract(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &array,
             IndexT index);
 
         ArrayInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             ArrayOperationE array_operation,
             const ResourceLocation &location,
@@ -106,6 +115,7 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &condition,
             const BlockPtr &then_target,
@@ -113,6 +123,7 @@ namespace mcc
 
         BranchInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &condition,
             const BlockPtr &then_target,
@@ -133,6 +144,7 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             const ResourceLocation &callee,
@@ -142,6 +154,7 @@ namespace mcc
 
         CallInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             const ResourceLocation &callee,
@@ -165,12 +178,14 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             const CommandT &command);
 
         CommandInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             const CommandT &command);
@@ -187,6 +202,7 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ComparatorE &comparator,
             const ResourceLocation &location,
             const ValuePtr &left,
@@ -194,6 +210,7 @@ namespace mcc
 
         ComparisonInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             ComparatorE comparator,
             const ResourceLocation &location,
             const ValuePtr &left,
@@ -213,10 +230,12 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const BlockPtr &target);
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const BlockPtr &target,
             const ValuePtr &result,
@@ -224,6 +243,7 @@ namespace mcc
 
         DirectInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const BlockPtr &target,
             const ValuePtr &result,
@@ -244,12 +264,14 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const std::string &name,
             const std::vector<ValuePtr> &arguments);
 
         MacroInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const std::string &name,
             const std::vector<ValuePtr> &arguments);
@@ -267,6 +289,7 @@ namespace mcc
     {
         static InstructionPtr CreateInsert(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &object,
             const ValuePtr &value,
@@ -274,6 +297,7 @@ namespace mcc
 
         ObjectInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &object,
             const ValuePtr &value,
@@ -292,12 +316,14 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             OperatorE operator_,
             const ResourceLocation &location,
             const std::vector<ValuePtr> &operands);
 
         OperationInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             OperatorE operator_,
             const ResourceLocation &location,
             const std::vector<ValuePtr> &operands);
@@ -316,10 +342,15 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &value);
 
-        ReturnInstruction(const SourceLocation &where, const ResourceLocation &location, const ValuePtr &value);
+        ReturnInstruction(
+            const SourceLocation &where,
+            TypeContext &context,
+            const ResourceLocation &location,
+            const ValuePtr &value);
         ~ReturnInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -333,9 +364,13 @@ namespace mcc
 
     struct StoreInstruction final : Instruction
     {
-        static InstructionPtr Create(const SourceLocation &where, const ValuePtr &dst, const ValuePtr &src);
+        static InstructionPtr Create(
+            const SourceLocation &where,
+            TypeContext &context,
+            const ValuePtr &dst,
+            const ValuePtr &src);
 
-        StoreInstruction(const SourceLocation &where, const ValuePtr &dst, const ValuePtr &src);
+        StoreInstruction(const SourceLocation &where, TypeContext &context, const ValuePtr &dst, const ValuePtr &src);
         ~StoreInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -349,6 +384,7 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &condition,
             const BlockPtr &default_target,
@@ -356,6 +392,7 @@ namespace mcc
 
         SwitchInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &condition,
             const BlockPtr &default_target,
@@ -377,12 +414,14 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &value,
             const BlockPtr &landing_pad);
 
         ThrowInstruction(
             const SourceLocation &where,
+            TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &value,
             const BlockPtr &landing_pad);

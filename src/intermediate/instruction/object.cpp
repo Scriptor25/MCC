@@ -4,6 +4,7 @@
 
 mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &object,
     const ValuePtr &value,
@@ -11,6 +12,7 @@ mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
 {
     return std::make_shared<ObjectInstruction>(
         where,
+        context,
         location,
         object,
         value,
@@ -19,11 +21,12 @@ mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
 
 mcc::ObjectInstruction::ObjectInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &object,
     const ValuePtr &value,
     const std::string &key)
-    : Instruction(where, TypeContext::GetVoid()),
+    : Instruction(where, context, context.GetVoid()),
       Location(location),
       Object(object),
       Value(value),

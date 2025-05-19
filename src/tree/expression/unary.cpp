@@ -22,7 +22,7 @@ std::ostream &mcc::UnaryExpression::Print(std::ostream &stream) const
 
 using UnaryOperation = std::function<mcc::ValuePtr(
     const mcc::SourceLocation &where,
-    const mcc::Builder &builder,
+    mcc::Builder &builder,
     const mcc::ValuePtr &operand)>;
 
 struct UnaryOperator
@@ -31,21 +31,21 @@ struct UnaryOperator
     UnaryOperation Operation;
 };
 
-static mcc::ValuePtr inc(const mcc::SourceLocation &where, const mcc::Builder &builder, const mcc::ValuePtr &operand)
+static mcc::ValuePtr inc(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
-    const auto one = mcc::ConstantInteger::Create(where, 1);
+    const auto one = mcc::ConstantInteger::Create(where, builder.GetContext(), 1);
     return builder.CreateOperation(where, mcc::Operator_Add, {operand, one});
 };
 
-static mcc::ValuePtr dec(const mcc::SourceLocation &where, const mcc::Builder &builder, const mcc::ValuePtr &operand)
+static mcc::ValuePtr dec(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
-    const auto one = mcc::ConstantInteger::Create(where, 1);
+    const auto one = mcc::ConstantInteger::Create(where, builder.GetContext(), 1);
     return builder.CreateOperation(where, mcc::Operator_Sub, {operand, one});
 };
 
-static mcc::ValuePtr neg(const mcc::SourceLocation &where, const mcc::Builder &builder, const mcc::ValuePtr &operand)
+static mcc::ValuePtr neg(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
-    const auto zero = mcc::ConstantInteger::Create(where, 0);
+    const auto zero = mcc::ConstantInteger::Create(where, builder.GetContext(), 0);
     return builder.CreateOperation(where, mcc::Operator_Sub, {zero, operand});
 };
 

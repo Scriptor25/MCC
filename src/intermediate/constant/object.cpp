@@ -3,28 +3,31 @@
 
 mcc::ConstantPtr mcc::ConstantObject::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const TypePtr &type,
     const std::map<std::string, ConstantPtr> &values)
 {
-    return std::make_shared<ConstantObject>(where, type, values);
+    return std::make_shared<ConstantObject>(where, context, type, values);
 }
 
 mcc::ConstantPtr mcc::ConstantObject::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const std::map<std::string, ConstantPtr> &values)
 {
     std::map<std::string, TypePtr> elements;
     for (const auto &[name_, value_]: values)
         elements[name_] = value_->Type;
 
-    return std::make_shared<ConstantObject>(where, TypeContext::GetStruct(elements), values);
+    return std::make_shared<ConstantObject>(where, context, context.GetStruct(elements), values);
 }
 
 mcc::ConstantObject::ConstantObject(
     const SourceLocation &where,
+    TypeContext &context,
     const TypePtr &type,
     const std::map<std::string, ConstantPtr> &values)
-    : Constant(where, type),
+    : Constant(where, context, type),
       Values(values)
 {
     for (const auto &value: Values | std::views::values)

@@ -52,7 +52,7 @@ namespace mcc
         unsigned Col = 0;
     };
 
-    struct Context;
+    class TypeContext;
     class Parser;
     class Builder;
 

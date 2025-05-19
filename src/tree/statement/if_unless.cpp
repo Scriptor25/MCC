@@ -28,9 +28,9 @@ std::ostream &mcc::IfUnlessStatement::Print(std::ostream &stream) const
 void mcc::IfUnlessStatement::Generate(Builder &builder, const Frame &frame) const
 {
     const auto parent = builder.GetInsertBlock()->Parent;
-    const auto tail_target = Block::Create(Where, parent);
-    const auto then_target = Block::Create(Where, parent);
-    const auto else_target = Else ? Block::Create(Where, parent) : tail_target;
+    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto then_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto else_target = Else ? Block::Create(Where, builder.GetContext(), parent) : tail_target;
 
     auto require_tail = !Else;
 

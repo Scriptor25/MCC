@@ -2,13 +2,16 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::ConstantPtr mcc::ConstantResource::Create(const SourceLocation &where, const ResourceLocation &location)
+mcc::ConstantPtr mcc::ConstantResource::Create(
+    const SourceLocation &where,
+    TypeContext &context,
+    const ResourceLocation &location)
 {
-    return std::make_shared<ConstantResource>(where, location);
+    return std::make_shared<ConstantResource>(where, context, location);
 }
 
-mcc::ConstantResource::ConstantResource(const SourceLocation &where, ResourceLocation location)
-    : Constant(where, TypeContext::GetNull()),
+mcc::ConstantResource::ConstantResource(const SourceLocation &where, TypeContext &context, ResourceLocation location)
+    : Constant(where, context, context.GetNull()),
       Location(std::move(location))
 {
 }

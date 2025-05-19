@@ -11,8 +11,8 @@ namespace mcc
     class Parser
     {
     public:
-        Parser(Context &context, std::istream &stream, const std::string &filename);
-        Parser(Context &context, std::istream &stream, const SourceLocation &location);
+        Parser(TypeContext &context, std::istream &stream, const std::string &filename);
+        Parser(TypeContext &context, std::istream &stream, const SourceLocation &location);
 
         [[nodiscard]] size_t Count() const;
 
@@ -82,6 +82,7 @@ namespace mcc
         StatementPtr ParseDefineStatement();
         StatementPtr ParseIncludeStatement();
         StatementPtr ParseNamespaceStatement();
+        StatementPtr ParseTypeStatement();
 
         StatementPtr ParseStatement();
         StatementPtr ParseBreakStatement();
@@ -113,7 +114,8 @@ namespace mcc
         ExpressionPtr ParseSymbolExpression();
         ExpressionPtr ParseTargetExpression(bool with_attributes);
 
-        Context &m_Context;
+        TypeContext &m_Context;
+
         std::istream &m_Stream;
 
         int m_Buf = -1;

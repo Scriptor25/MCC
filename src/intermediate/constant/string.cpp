@@ -1,13 +1,16 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::ConstantPtr mcc::ConstantString::Create(const SourceLocation &where, const std::string &value)
+mcc::ConstantPtr mcc::ConstantString::Create(
+    const SourceLocation &where,
+    TypeContext &context,
+    const std::string &value)
 {
-    return std::make_shared<ConstantString>(where, value);
+    return std::make_shared<ConstantString>(where, context, value);
 }
 
-mcc::ConstantString::ConstantString(const SourceLocation &where, const std::string &value)
-    : Constant(where, TypeContext::GetString()),
+mcc::ConstantString::ConstantString(const SourceLocation &where, TypeContext &context, const std::string &value)
+    : Constant(where, context, context.GetString()),
       Value(value)
 {
 }

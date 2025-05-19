@@ -263,6 +263,6 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression(const bool with_attributes
 
     return std::make_unique<ConstantExpression>(
         where,
-        ConstantTarget::Create(where, selector, std::move(attributes)),
+        ConstantTarget::Create(where, m_Context, selector, std::move(attributes)),
         view);
 }

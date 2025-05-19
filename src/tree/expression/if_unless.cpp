@@ -25,9 +25,9 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     const auto parent = builder.GetInsertBlock()->Parent;
-    auto then_target = Block::Create(Then->Where, parent);
-    auto else_target = Block::Create(Else->Where, parent);
-    const auto tail_target = Block::Create(Where, parent);
+    auto then_target = Block::Create(Then->Where, builder.GetContext(), parent);
+    auto else_target = Block::Create(Else->Where, builder.GetContext(), parent);
+    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
 
     const auto condition = Condition->GenerateValue(builder, frame);
     (void) builder.CreateBranch(
@@ -47,7 +47,7 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Fra
     builder.SetInsertBlock(tail_target);
     const auto type = (then_value->Type == else_value->Type)
                           ? then_value->Type
-                          : TypeContext::GetUnion({then_value->Type, else_value->Type});
+                          : builder.GetContext().GetUnion({then_value->Type, else_value->Type});
     auto branch_result = builder.CreateBranchResult(Where, type);
 
     builder.SetInsertBlock(then_target);

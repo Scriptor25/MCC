@@ -5,6 +5,7 @@
 
 mcc::InstructionPtr mcc::SwitchInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &condition,
     const BlockPtr &default_target,
@@ -12,6 +13,7 @@ mcc::InstructionPtr mcc::SwitchInstruction::Create(
 {
     return std::make_shared<SwitchInstruction>(
         where,
+        context,
         location,
         condition,
         default_target,
@@ -20,11 +22,12 @@ mcc::InstructionPtr mcc::SwitchInstruction::Create(
 
 mcc::SwitchInstruction::SwitchInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &condition,
     const BlockPtr &default_target,
     const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets)
-    : Instruction(where, TypeContext::GetVoid()),
+    : Instruction(where, context, context.GetVoid()),
       Location(location),
       Condition(condition),
       DefaultTarget(default_target),

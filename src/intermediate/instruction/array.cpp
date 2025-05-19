@@ -4,6 +4,7 @@
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &array,
     const ValuePtr &value,
@@ -11,7 +12,8 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
 {
     return std::make_shared<ArrayInstruction>(
         where,
-        TypeContext::GetVoid(),
+        context,
+        context.GetVoid(),
         ArrayOperation_Append,
         location,
         array,
@@ -22,6 +24,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &array,
     const ValuePtr &value,
@@ -29,7 +32,8 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
 {
     return std::make_shared<ArrayInstruction>(
         where,
-        TypeContext::GetVoid(),
+        context,
+        context.GetVoid(),
         ArrayOperation_Prepend,
         location,
         array,
@@ -40,6 +44,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &array,
     const ValuePtr &value,
@@ -48,7 +53,8 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
 {
     return std::make_shared<ArrayInstruction>(
         where,
-        TypeContext::GetVoid(),
+        context,
+        context.GetVoid(),
         ArrayOperation_Insert,
         location,
         array,
@@ -59,6 +65,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &array,
     const IndexT index)
@@ -67,6 +74,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
 
     return std::make_shared<ArrayInstruction>(
         where,
+        context,
         type,
         ArrayOperation_Extract,
         location,
@@ -78,6 +86,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
 
 mcc::ArrayInstruction::ArrayInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const TypePtr &type,
     const ArrayOperationE array_operation,
     const ResourceLocation &location,
@@ -85,7 +94,7 @@ mcc::ArrayInstruction::ArrayInstruction(
     const ValuePtr &value,
     const IndexT index,
     const bool stringify)
-    : Instruction(where, type),
+    : Instruction(where, context, type),
       ArrayOperation(array_operation),
       Location(location),
       Array(array),

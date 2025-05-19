@@ -5,25 +5,25 @@
 #include <vector>
 #include <mcc/actions.hpp>
 #include <mcc/builder.hpp>
-#include <mcc/context.hpp>
 #include <mcc/error.hpp>
 #include <mcc/package.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
+#include <mcc/type.hpp>
 
 static void parse_file(mcc::Package &package, const std::filesystem::path &path)
 {
     std::ifstream stream(path);
     mcc::Assert(stream.is_open(), "failed to open file {}", path.string());
 
-    mcc::Context context(package, {});
+    mcc::TypeContext context;
     mcc::Parser parser(context, stream, path.string());
-    mcc::Builder builder(context);
+    mcc::Builder builder(context, package);
 
     while (parser)
         if (const auto statement = parser())
         {
-            statement->Print(std::cerr) << std::endl;
+            // statement->Print(std::cerr) << std::endl;
             statement->Generate(builder, {});
         }
 

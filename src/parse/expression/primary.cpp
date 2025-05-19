@@ -18,7 +18,7 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
             token.Where,
-            ConstantBoolean::Create(token.Where, token.Value == "true"),
+            ConstantBoolean::Create(token.Where, m_Context, token.Value == "true"),
             token.Value);
     }
 

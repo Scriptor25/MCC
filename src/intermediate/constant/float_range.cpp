@@ -1,26 +1,37 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::ConstantPtr mcc::ConstantFloatRange::Create(const SourceLocation &where, const FloatT min, const FloatT max)
+mcc::ConstantPtr mcc::ConstantFloatRange::Create(
+    const SourceLocation &where,
+    TypeContext &context,
+    const FloatT min,
+    const FloatT max)
 {
-    return std::make_shared<ConstantFloatRange>(where, min, max);
+    return std::make_shared<ConstantFloatRange>(where, context, min, max);
 }
 
-mcc::ConstantPtr mcc::ConstantFloatRange::CreateMin(const SourceLocation &where, const FloatT min)
+mcc::ConstantPtr mcc::ConstantFloatRange::CreateMin(
+    const SourceLocation &where,
+    TypeContext &context,
+    const FloatT min)
 {
-    return std::make_shared<ConstantFloatRange>(where, min, std::nullopt);
+    return std::make_shared<ConstantFloatRange>(where, context, min, std::nullopt);
 }
 
-mcc::ConstantPtr mcc::ConstantFloatRange::CreateMax(const SourceLocation &where, const FloatT max)
+mcc::ConstantPtr mcc::ConstantFloatRange::CreateMax(
+    const SourceLocation &where,
+    TypeContext &context,
+    const FloatT max)
 {
-    return std::make_shared<ConstantFloatRange>(where, std::nullopt, max);
+    return std::make_shared<ConstantFloatRange>(where, context, std::nullopt, max);
 }
 
 mcc::ConstantFloatRange::ConstantFloatRange(
     const SourceLocation &where,
+    TypeContext &context,
     const std::optional<FloatT> min,
     const std::optional<FloatT> max)
-    : Constant(where, TypeContext::GetNull()),
+    : Constant(where, context, context.GetNull()),
       Min(min),
       Max(max)
 {

@@ -14,6 +14,8 @@ mcc::StatementPtr mcc::Parser::ParseTopLevel()
         return ParseIncludeStatement();
     if (At(TokenType_Symbol, "namespace"))
         return ParseNamespaceStatement();
+    if (At(TokenType_Symbol, "type"))
+        return ParseTypeStatement();
 
     Error(
         m_Token.Where,

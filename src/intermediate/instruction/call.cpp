@@ -4,6 +4,7 @@
 
 mcc::InstructionPtr mcc::CallInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const TypePtr &type,
     const ResourceLocation &location,
     const ResourceLocation &callee,
@@ -13,6 +14,7 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
 {
     return std::make_shared<CallInstruction>(
         where,
+        context,
         type,
         location,
         callee,
@@ -23,13 +25,14 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
 
 mcc::CallInstruction::CallInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const TypePtr &type,
     const ResourceLocation &location,
     const ResourceLocation &callee,
     const std::vector<std::pair<std::string, ValuePtr>> &arguments,
     const bool may_throw,
     const BlockPtr &landing_pad)
-    : Instruction(where, type),
+    : Instruction(where, context, type),
       Location(location),
       Callee(callee),
       Arguments(arguments),

@@ -4,21 +4,23 @@
 
 mcc::InstructionPtr mcc::ComparisonInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ComparatorE &comparator,
     const ResourceLocation &location,
     const ValuePtr &left,
     const ValuePtr &right)
 {
-    return std::make_shared<ComparisonInstruction>(where, comparator, location, left, right);
+    return std::make_shared<ComparisonInstruction>(where, context, comparator, location, left, right);
 }
 
 mcc::ComparisonInstruction::ComparisonInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const ComparatorE comparator,
     const ResourceLocation &location,
     const ValuePtr &left,
     const ValuePtr &right)
-    : Instruction(where, TypeContext::GetBoolean()),
+    : Instruction(where, context, context.GetBoolean()),
       Comparator(comparator),
       Location(location),
       Left(left),

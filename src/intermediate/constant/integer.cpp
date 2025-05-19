@@ -1,13 +1,13 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::ConstantPtr mcc::ConstantInteger::Create(const SourceLocation &where, const IntegerT value)
+mcc::ConstantPtr mcc::ConstantInteger::Create(const SourceLocation &where, TypeContext &context, const IntegerT value)
 {
-    return std::make_shared<ConstantInteger>(where, value);
+    return std::make_shared<ConstantInteger>(where, context, value);
 }
 
-mcc::ConstantInteger::ConstantInteger(const SourceLocation &where, const IntegerT value)
-    : Constant(where, TypeContext::GetNumber()),
+mcc::ConstantInteger::ConstantInteger(const SourceLocation &where, TypeContext &context, const IntegerT value)
+    : Constant(where, context, context.GetNumber()),
       Value(value)
 {
 }

@@ -1,10 +1,9 @@
+#include <utility>
 #include <mcc/builder.hpp>
-#include <mcc/context.hpp>
 #include <mcc/error.hpp>
 #include <mcc/statement.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
-#include <utility>
 
 mcc::DefineStatement::DefineStatement(
     const SourceLocation &where,
@@ -58,22 +57,21 @@ void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
                                   Where,
                                   Location,
                                   Parameters,
-                                  Result ? Result : TypeContext::GetVoid(),
+                                  Result ? Result : builder.GetContext().GetVoid(),
                                   Throws);
 
     // TODO: assert that existing function has same parameters, result type and if it also throws
 
-    auto &[package_, namespace_] = builder.GetContext();
     for (auto [tag_namespace_, tag_path_]: Tags)
     {
         if (tag_namespace_.empty())
-            tag_namespace_ = namespace_;
+            tag_namespace_ = builder.GetNamespace();
 
-        auto &[replace_, tags_] = package_.Tags[tag_namespace_][tag_path_];
+        auto &[replace_, tags_] = builder.GetPackage().Tags[tag_namespace_][tag_path_];
         tags_.emplace_back(function->Location);
     }
 
-    builder.SetInsertBlock(Block::Create(Where, function));
+    builder.SetInsertBlock(Block::Create(Where, builder.GetContext(), function));
 
     builder.PushVariables();
     for (auto &[name_, value_]: function->Parameters)
@@ -99,7 +97,7 @@ void mcc::DefineStatement::GenerateInclude(Builder &builder) const
             Where,
             Location,
             Parameters,
-            Result ? Result : TypeContext::GetVoid(),
+            Result ? Result : builder.GetContext().GetVoid(),
             Throws);
         return;
     }

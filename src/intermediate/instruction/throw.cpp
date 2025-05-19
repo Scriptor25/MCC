@@ -4,12 +4,14 @@
 
 mcc::InstructionPtr mcc::ThrowInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &value,
     const BlockPtr &landing_pad)
 {
     return std::make_shared<ThrowInstruction>(
         where,
+        context,
         location,
         value,
         landing_pad);
@@ -17,10 +19,11 @@ mcc::InstructionPtr mcc::ThrowInstruction::Create(
 
 mcc::ThrowInstruction::ThrowInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &value,
     const BlockPtr &landing_pad)
-    : Instruction(where, TypeContext::GetVoid()),
+    : Instruction(where, context, context.GetVoid()),
       Location(location),
       Value(value),
       LandingPad(landing_pad)

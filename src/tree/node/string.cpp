@@ -1,3 +1,4 @@
+#include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/format.hpp>
 
@@ -14,5 +15,5 @@ std::ostream &mcc::StringNode::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::StringNode::Generate(Builder &builder, const Frame &frame) const
 {
-    return ConstantString::Create(Where, Value);
+    return ConstantString::Create(Where, builder.GetContext(), Value);
 }

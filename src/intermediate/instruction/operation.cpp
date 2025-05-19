@@ -4,19 +4,21 @@
 
 mcc::InstructionPtr mcc::OperationInstruction::Create(
     const SourceLocation &where,
+    TypeContext &context,
     const OperatorE operator_,
     const ResourceLocation &location,
     const std::vector<ValuePtr> &operands)
 {
-    return std::make_shared<OperationInstruction>(where, operator_, location, operands);
+    return std::make_shared<OperationInstruction>(where, context, operator_, location, operands);
 }
 
 mcc::OperationInstruction::OperationInstruction(
     const SourceLocation &where,
+    TypeContext &context,
     const OperatorE operator_,
     const ResourceLocation &location,
     const std::vector<ValuePtr> &operands)
-    : Instruction(where, TypeContext::GetNumber()),
+    : Instruction(where, context, context.GetNumber()),
       Operator(operator_),
       Location(location),
       Operands(operands)

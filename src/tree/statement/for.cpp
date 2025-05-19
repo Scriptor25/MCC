@@ -25,9 +25,9 @@ std::ostream &mcc::ForStatement::Print(std::ostream &stream) const
 void mcc::ForStatement::Generate(Builder &builder, const Frame &frame) const
 {
     const auto parent = builder.GetInsertBlock()->Parent;
-    const auto head_target = Block::Create(Where, parent);
-    const auto loop_target = Block::Create(Do->Where, parent);
-    const auto tail_target = Block::Create(Where, parent);
+    const auto head_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto loop_target = Block::Create(Do->Where, builder.GetContext(), parent);
+    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
 
     auto target_frame = frame;
     target_frame.Head = head_target;

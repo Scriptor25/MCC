@@ -42,10 +42,10 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame
         elements[key_] = value->Type;
     }
 
-    const auto type = TypeContext::GetStruct(elements);
+    const auto type = builder.GetContext().GetStruct(elements);
 
     if (values.size() == constants.size())
-        return ConstantObject::Create(Where, type, constants);
+        return ConstantObject::Create(Where, builder.GetContext(), type, constants);
 
     auto object = builder.AllocateObject(Where, type);
 
