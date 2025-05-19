@@ -24,10 +24,10 @@ std::ostream &mcc::ForStatement::Print(std::ostream &stream) const
 
 void mcc::ForStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent(Where);
-    const auto head_target = builder.CreateBlock(Where, parent);
-    const auto loop_target = builder.CreateBlock(Do->Where, parent);
-    const auto tail_target = builder.CreateBlock(Where, parent);
+    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto head_target = Block::Create(Where, parent);
+    const auto loop_target = Block::Create(Do->Where, parent);
+    const auto tail_target = Block::Create(Where, parent);
 
     auto target_frame = frame;
     target_frame.Head = head_target;
@@ -63,7 +63,7 @@ void mcc::ForStatement::Generate(Builder &builder, const Frame &frame) const
 
     if (!Condition && !(target_frame.Flags & FrameFlag_RequireTail))
     {
-        builder.RemoveBlock(Where, tail_target);
+        tail_target->Parent->Erase(tail_target);
         builder.SetInsertBlock(nullptr);
     }
     else

@@ -1,12 +1,12 @@
 namespace example
 
-define :print(targets: string, message: string) {
+define print(targets: string, message: string) {
     ?`$tellraw $(targets) $(message)`
 }
 
-define :test_print(builtin: boolean) {
+define test_print(builtin: boolean) {
     if (builtin)
-        print(@s, "Hello World!")
+        !print(@s, "Hello World!")
     else
-        $:print({ targets: "@s", message: "Hello World!" })
+        print("@s", "Hello World!")
 }

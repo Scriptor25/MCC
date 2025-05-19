@@ -53,7 +53,7 @@ mcc::SwitchInstruction::~SwitchInstruction()
 void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
 {
     std::string prefix, arguments;
-    (DefaultTarget ? DefaultTarget : CaseTargets.front().second)->ForwardArguments(prefix, arguments);
+    (DefaultTarget ? DefaultTarget : CaseTargets.front().second)->Parent->ForwardArguments(prefix, arguments);
 
     auto stack_path = GetStackPath();
     auto tmp_name = GetTmpName();
@@ -67,7 +67,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                     commands.Append(
                         "{}return run function {}{}",
                         prefix,
-                        target_->Location,
+                        target_->Parent->GetLocation(target_),
                         arguments);
             break;
 
@@ -94,10 +94,14 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                     prefix,
                     Location,
                     stack_path,
-                    target_->Location,
+                    target_->Parent->GetLocation(target_),
                     arguments);
             }
-            commands.Append("{}return run function {}{}", prefix, DefaultTarget->Location, arguments);
+            commands.Append(
+                "{}return run function {}{}",
+                prefix,
+                DefaultTarget->Parent->GetLocation(DefaultTarget),
+                arguments);
             break;
 
         case ResultType_Score:
@@ -110,10 +114,14 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                     condition.Player,
                     condition.Objective,
                     case_value.Value,
-                    target_->Location,
+                    target_->Parent->GetLocation(target_),
                     arguments);
             }
-            commands.Append("{}return run function {}{}", prefix, DefaultTarget->Location, arguments);
+            commands.Append(
+                "{}return run function {}{}",
+                prefix,
+                DefaultTarget->Parent->GetLocation(DefaultTarget),
+                arguments);
             break;
 
         default:

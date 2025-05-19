@@ -24,8 +24,9 @@ namespace mcc
     using ConstantPtr = std::shared_ptr<struct Constant>;
     using InstructionPtr = std::shared_ptr<struct Instruction>;
     using BlockPtr = std::shared_ptr<struct Block>;
+    using FunctionPtr = std::shared_ptr<struct Function>;
 
-    using TypePtr = struct Type const *;
+    using TypePtr = std::shared_ptr<struct Type>;
 
     struct Parameter
     {
@@ -121,6 +122,8 @@ namespace mcc
         std::string Player;
         std::string Objective;
     };
+
+    std::ostream &operator<<(std::ostream &stream, const TypePtr &type);
 }
 
 namespace std

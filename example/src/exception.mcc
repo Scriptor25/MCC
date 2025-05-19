@@ -1,33 +1,30 @@
+include "std.mcc"
+
 namespace example
 
-define :assert(x: boolean, message: string) {
-    unless (x)
-        throw message
-}
-
-define :test_assert() {
+define test_assert() {
     const a = 2
     const b = 2
     const c = a + b
-    $:assert({ x: c == 3, message: "c must be equal to 3" })
+    std:assert(c == 3, "c must be equal to 3")
 }
 
-define :test_try_catch() {
+define test_try_catch() {
     try {
         const a = 1
         const b = 2
         const c = a + b
-        $:assert({ x: c == 3, message: "c must be equal to 3" })
+        std:assert(c == 3, "c must be equal to 3")
     } catch (e: string) {
-        print(@s, `catched error: ${e}`)
+        !print(@s, `catched error: ${e}`)
     }
 
     try {
         const a = 1
         const b = 2
         const c = a + b
-        $:assert({ x: c == 4, message: "c must be equal to 4" })
+        std:assert(c == 4, "c must be equal to 4")
     } catch (e: string) {
-        print(@s, `catched error: ${e}`)
+        !print(@s, `catched error: ${e}`)
     }
 }

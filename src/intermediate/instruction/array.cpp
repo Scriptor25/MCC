@@ -63,7 +63,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
     const ValuePtr &array,
     const IndexT index)
 {
-    auto type = dynamic_cast<ArrayType const *>(array->Type)->Elements;
+    auto type = std::dynamic_pointer_cast<ArrayType>(array->Type)->Elements;
 
     return std::make_shared<ArrayInstruction>(
         where,
@@ -78,7 +78,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
 
 mcc::ArrayInstruction::ArrayInstruction(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ArrayOperationE array_operation,
     const ResourceLocation &location,
     const ValuePtr &array,

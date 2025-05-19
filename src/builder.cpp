@@ -16,51 +16,28 @@ mcc::Context &mcc::Builder::GetContext() const
     return m_Context;
 }
 
-const mcc::ResourceLocation &mcc::Builder::GetLocation(const SourceLocation &where) const
-{
-    return GetInsertParent(where)->Location;
-}
-
-mcc::BlockPtr mcc::Builder::CreateFunction(const SourceLocation &where, TypePtr type, ResourceLocation location)
+mcc::FunctionPtr mcc::Builder::CreateFunction(
+    const SourceLocation &where,
+    ResourceLocation location,
+    const ParameterList &parameters,
+    const TypePtr &result)
 {
     if (location.Namespace.empty())
         location.Namespace = m_Context.Namespace;
 
-    return m_Blocks.emplace_back(Block::CreateTopLevel(where, type, location));
+    auto &function = m_Functions[location.Namespace][location.Path];
+    Assert(!function, where, "already defined function {}", location);
+    return function = Function::Create(where, location, parameters, result);
 }
 
-mcc::BlockPtr mcc::Builder::CreateBlock(const SourceLocation &where, const BlockPtr &parent)
+mcc::FunctionPtr mcc::Builder::GetFunction(const SourceLocation &where, ResourceLocation location)
 {
-    const ResourceLocation location{
-        .Namespace = m_Context.Namespace,
-        .Path = std::format("{}/{}", parent->Location.Path, parent->Children.size()),
-    };
+    if (location.Namespace.empty())
+        location.Namespace = m_Context.Namespace;
 
-    return m_Blocks.emplace_back(Block::Create(where, parent, location));
-}
-
-mcc::BlockPtr mcc::Builder::FindBlock(const ResourceLocation &location) const
-{
-    for (auto &block: m_Blocks)
-        if (block->Location == location)
-            return block;
-    return nullptr;
-}
-
-void mcc::Builder::RemoveBlock(const SourceLocation &where, const BlockPtr &block)
-{
-    Assert(!!block, where, "block must not be null");
-
-    for (auto i = m_Blocks.begin(); i != m_Blocks.end(); ++i)
-    {
-        if (*i != block)
-            continue;
-
-        m_Blocks.erase(i);
-        return;
-    }
-
-    Error(where, "undefined block {}", block->Location);
+    auto &function = m_Functions[location.Namespace][location.Path];
+    Assert(!!function, where, "undefined function {}", location);
+    return function;
 }
 
 void mcc::Builder::SetInsertBlock(const BlockPtr &block)
@@ -73,17 +50,6 @@ mcc::BlockPtr mcc::Builder::GetInsertBlock() const
     return m_InsertBlock;
 }
 
-mcc::BlockPtr mcc::Builder::GetInsertParent(const SourceLocation &where) const
-{
-    Assert(!!m_InsertBlock, where, "insert block must not be null");
-
-    auto block = m_InsertBlock;
-    while (block->Parent)
-        block = block->Parent;
-
-    return block;
-}
-
 void mcc::Builder::PushVariables()
 {
     m_Variables.emplace_back();
@@ -94,23 +60,24 @@ void mcc::Builder::PopVariables()
     m_Variables.pop_back();
 }
 
-mcc::ValuePtr mcc::Builder::CreateVariable(
-    const SourceLocation &where,
-    TypePtr type,
-    const std::string &name)
+mcc::ValuePtr mcc::Builder::CreateVariable(const SourceLocation &where, const TypePtr &type, const std::string &name)
 {
-    Assert(!m_Variables.empty(), where, "TODO");
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
+    Assert(!m_Variables.empty(), where, "variables must not be empty");
+
     auto &variables = m_Variables.back();
     Assert(!variables.contains(name), where, "already defined variable {}", name);
-    return variables[name] = NamedValue::Create(where, type, GetLocation(where), name);
+    return variables[name] = NamedValue::Create(where, type, m_InsertBlock->Parent->Location, name);
 }
 
 mcc::ValuePtr mcc::Builder::GetVariable(const SourceLocation &where, const std::string &name) const
 {
-    Assert(!m_Variables.empty(), where, "TODO");
+    Assert(!m_Variables.empty(), where, "variables must not be empty");
+
     for (auto variables = m_Variables.rbegin(); variables != m_Variables.rend(); ++variables)
         if (variables->contains(name))
             return variables->at(name);
+
     Error(where, "undefined variable {}", name);
 }
 
@@ -131,7 +98,8 @@ mcc::InstructionPtr mcc::Builder::CreateComparison(
     const ValuePtr &left,
     const ValuePtr &right) const
 {
-    Assert(comparator, where, "comparator must not be null");
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
+    Assert(!!comparator, where, "comparator must not be null");
     Assert(!!left, where, "left must not be null");
     Assert(!!right, where, "right must not be null");
 
@@ -140,7 +108,7 @@ mcc::InstructionPtr mcc::Builder::CreateComparison(
         ComparisonInstruction::Create(
             where,
             comparator,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             left,
             right));
 }
@@ -150,6 +118,7 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
     const OperatorE operator_,
     const std::vector<ValuePtr> &operands) const
 {
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(operator_, where, "operator must not be null");
 
     for (auto &operand: operands)
@@ -160,28 +129,33 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
         OperationInstruction::Create(
             where,
             operator_,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             operands));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCommand(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const CommandT &command) const
 {
-    return Insert(where, CommandInstruction::Create(where, type, GetLocation(where), command));
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
+
+    return Insert(where, CommandInstruction::Create(where, type, m_InsertBlock->Parent->Location, command));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturnVoid(const SourceLocation &where) const
 {
-    return Insert(where, ReturnInstruction::Create(where, GetLocation(where), nullptr));
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
+
+    return Insert(where, ReturnInstruction::Create(where, m_InsertBlock->Parent->Location, nullptr));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(const SourceLocation &where, const ValuePtr &value) const
 {
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!value, where, "value must not be null");
 
-    return Insert(where, ReturnInstruction::Create(where, GetLocation(where), value));
+    return Insert(where, ReturnInstruction::Create(where, m_InsertBlock->Parent->Location, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateBranch(
@@ -190,6 +164,7 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(
     const BlockPtr &then_target,
     const BlockPtr &else_target) const
 {
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!condition, where, "condition must not be null");
     Assert(!!then_target, where, "then target must not be null");
     Assert(!!else_target, where, "else target must not be null");
@@ -198,7 +173,7 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(
         where,
         BranchInstruction::Create(
             where,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             condition,
             then_target,
             else_target));
@@ -206,9 +181,10 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(
 
 mcc::InstructionPtr mcc::Builder::CreateDirect(const SourceLocation &where, const BlockPtr &target) const
 {
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!target, where, "target must not be null");
 
-    return Insert(where, DirectInstruction::Create(where, GetLocation(where), target));
+    return Insert(where, DirectInstruction::Create(where, m_InsertBlock->Parent->Location, target));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateDirect(
@@ -217,6 +193,7 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(
     const ValuePtr &result,
     const ValuePtr &branch_result) const
 {
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!target, where, "target must not be null");
     Assert(!!result, where, "result must not be null");
     Assert(!!branch_result, where, "branch result must not be null");
@@ -225,7 +202,7 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(
         where,
         DirectInstruction::Create(
             where,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             target,
             result,
             branch_result));
@@ -237,6 +214,7 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
     const BlockPtr &default_target,
     const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets) const
 {
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!condition, where, "condition must not be null");
     Assert(!!default_target, where, "default target must not be null");
 
@@ -250,7 +228,7 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
         where,
         SwitchInstruction::Create(
             where,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             condition,
             default_target,
             case_targets));
@@ -261,51 +239,59 @@ mcc::InstructionPtr mcc::Builder::CreateThrow(
     const ValuePtr &value,
     const BlockPtr &landing_pad) const
 {
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!value, where, "value must not be null");
 
-    return Insert(where, ThrowInstruction::Create(where, GetLocation(where), value, landing_pad));
+    return Insert(where, ThrowInstruction::Create(where, m_InsertBlock->Parent->Location, value, landing_pad));
 }
 
-mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where, TypePtr type) const
+mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where, const TypePtr &type) const
 {
-    return BranchResult::Create(where, type, GetLocation(where));
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
+
+    return BranchResult::Create(where, type, m_InsertBlock->Parent->Location);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
     const SourceLocation &where,
     const ResourceLocation &callee,
     const std::vector<ValuePtr> &arguments,
-    const BlockPtr &landing_pad) const
+    const BlockPtr &landing_pad)
 {
-    TypePtr type;
-    bool may_throw;
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    if (callee.Namespace.empty())
-    {
-        type = nullptr;
-        may_throw = false;
-    }
-    else
-    {
-        const auto block = FindBlock(callee);
-        Assert(!!block, where, "undefined function {}", callee);
-        type = block->Type;
-        may_throw = block->MayThrow();
-    }
+    const auto &function = m_Functions[callee.Namespace][callee.Path];
+    Assert(!!function, where, "undefined function {}", callee);
+
+    const auto type = function->Type;
+
+    std::vector<std::pair<std::string, ValuePtr>> argument_pairs;
+    for (unsigned i = 0; i < arguments.size(); ++i)
+        argument_pairs.emplace_back(function->Parameters.at(i).first, arguments.at(i));
 
     return Insert(
         where,
         CallInstruction::Create(
             where,
             type,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             callee,
-            arguments,
-            may_throw,
+            argument_pairs,
+            function->Throws,
             landing_pad));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateValue(const SourceLocation &where, TypePtr type) const
+mcc::InstructionPtr mcc::Builder::CreateMacro(
+    const SourceLocation &where,
+    const std::string &name,
+    const std::vector<ValuePtr> &arguments) const
+{
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
+
+    return Insert(where, MacroInstruction::Create(where, m_InsertBlock->Parent->Location, name, arguments));
+}
+
+mcc::InstructionPtr mcc::Builder::AllocateValue(const SourceLocation &where, const TypePtr &type) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
@@ -314,11 +300,11 @@ mcc::InstructionPtr mcc::Builder::AllocateValue(const SourceLocation &where, Typ
         AllocationInstruction::CreateValue(
             where,
             type,
-            GetLocation(where),
-            m_InsertBlock->StackIndex++));
+            m_InsertBlock->Parent->Location,
+            m_InsertBlock->Parent->StackIndex++));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateArray(const SourceLocation &where, TypePtr type) const
+mcc::InstructionPtr mcc::Builder::AllocateArray(const SourceLocation &where, const TypePtr &type) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
@@ -327,11 +313,11 @@ mcc::InstructionPtr mcc::Builder::AllocateArray(const SourceLocation &where, Typ
         AllocationInstruction::CreateArray(
             where,
             type,
-            GetLocation(where),
-            m_InsertBlock->StackIndex++));
+            m_InsertBlock->Parent->Location,
+            m_InsertBlock->Parent->StackIndex++));
 }
 
-mcc::InstructionPtr mcc::Builder::AllocateObject(const SourceLocation &where, TypePtr type) const
+mcc::InstructionPtr mcc::Builder::AllocateObject(const SourceLocation &where, const TypePtr &type) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
@@ -340,8 +326,8 @@ mcc::InstructionPtr mcc::Builder::AllocateObject(const SourceLocation &where, Ty
         AllocationInstruction::CreateObject(
             where,
             type,
-            GetLocation(where),
-            m_InsertBlock->StackIndex++));
+            m_InsertBlock->Parent->Location,
+            m_InsertBlock->Parent->StackIndex++));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateAppend(
@@ -357,7 +343,7 @@ mcc::InstructionPtr mcc::Builder::CreateAppend(
         where,
         ArrayInstruction::CreateAppend(
             where,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             array,
             value,
             stringify));
@@ -376,7 +362,7 @@ mcc::InstructionPtr mcc::Builder::CreatePrepend(
         where,
         ArrayInstruction::CreatePrepend(
             where,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             array,
             value,
             stringify));
@@ -396,7 +382,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
         where,
         ArrayInstruction::CreateInsert(
             where,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             array,
             value,
             index,
@@ -410,7 +396,7 @@ mcc::InstructionPtr mcc::Builder::CreateExtract(
 {
     Assert(!!array, where, "array must not be null");
 
-    return Insert(where, ArrayInstruction::CreateExtract(where, GetLocation(where), array, index));
+    return Insert(where, ArrayInstruction::CreateExtract(where, m_InsertBlock->Parent->Location, array, index));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(
@@ -427,7 +413,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
         where,
         ObjectInstruction::CreateInsert(
             where,
-            GetLocation(where),
+            m_InsertBlock->Parent->Location,
             object,
             value,
             key));
@@ -435,13 +421,13 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 
 mcc::ValuePtr mcc::Builder::CreateStoreResult(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const std::string &variable)
 {
     Assert(!variable.empty(), where, "variable name must not be empty");
 
     const auto dst = CreateVariable(where, type, variable);
-    const auto src = FunctionResult::Create(where, type, GetLocation(where));
+    const auto src = FunctionResult::Create(where, type, m_InsertBlock->Parent->Location);
     return CreateStore(where, dst, src);
 }
 
@@ -455,13 +441,7 @@ mcc::InstructionPtr mcc::Builder::Insert(const SourceLocation &where, Instructio
 
 void mcc::Builder::Generate() const
 {
-    for (auto &block: m_Blocks)
-    {
-        auto &[location_, commands_] = m_Context.Pkg.Functions[block->Location];
-        location_ = block->Location;
-        commands_.clear();
-
-        CommandVector commands(commands_);
-        block->Generate(commands, false);
-    }
+    for (auto &functions: m_Functions | std::views::values)
+        for (auto &function: functions | std::views::values)
+            function->GenerateFunction(m_Context);
 }

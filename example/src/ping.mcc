@@ -1,5 +1,5 @@
 namespace example
 
-define :ping() {
+define ping() {
     ?`tellraw @s "Pong!"`
 }

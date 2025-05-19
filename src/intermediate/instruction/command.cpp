@@ -3,7 +3,7 @@
 
 mcc::InstructionPtr mcc::CommandInstruction::Create(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ResourceLocation &location,
     const CommandT &command)
 {
@@ -12,7 +12,7 @@ mcc::InstructionPtr mcc::CommandInstruction::Create(
 
 mcc::CommandInstruction::CommandInstruction(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ResourceLocation &location,
     const CommandT &command)
     : Instruction(where, type),

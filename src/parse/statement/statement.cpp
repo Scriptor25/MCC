@@ -8,10 +8,12 @@ mcc::StatementPtr mcc::Parser::ParseTopLevel()
     if (m_Token.Type == TokenType_EOF)
         return {};
 
-    if (At(TokenType_Symbol, "namespace"))
-        return ParseNamespaceStatement();
     if (At(TokenType_Symbol, "define"))
         return ParseDefineStatement();
+    if (At(TokenType_Symbol, "include"))
+        return ParseIncludeStatement();
+    if (At(TokenType_Symbol, "namespace"))
+        return ParseNamespaceStatement();
 
     Error(
         m_Token.Where,

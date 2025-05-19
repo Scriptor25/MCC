@@ -46,11 +46,11 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_Symbol))
         return ParseSymbolExpression();
 
-    if (SkipIf(TokenType_Other, "$"))
-        return ParseResourceExpression();
-
     if (At(TokenType_Other, "?"))
         return ParseCommandExpression();
+
+    if (At(TokenType_Other, "!"))
+        return ParseMacroExpression();
 
     if (At(TokenType_Other, "["))
         return ParseArrayExpression();

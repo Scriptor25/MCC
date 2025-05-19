@@ -44,13 +44,13 @@ mcc::BranchInstruction::~BranchInstruction()
 void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
 {
     std::string prefix, arguments;
-    ThenTarget->ForwardArguments(prefix, arguments);
+    ThenTarget->Parent->ForwardArguments(prefix, arguments);
 
     auto stack_path = GetStackPath();
     auto tmp_name = GetTmpName();
 
-    auto then = ThenTarget->Location;
-    auto else_ = ElseTarget->Location;
+    auto then = ThenTarget->Parent->GetLocation(ThenTarget);
+    auto else_ = ElseTarget->Parent->GetLocation(ElseTarget);
 
     switch (auto condition = Condition->GenerateResult(false); condition.Type)
     {

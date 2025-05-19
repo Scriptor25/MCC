@@ -1,5 +1,6 @@
 #include <mcc/builder.hpp>
 #include <mcc/context.hpp>
+#include <mcc/error.hpp>
 #include <mcc/statement.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
@@ -8,13 +9,15 @@ mcc::DefineStatement::DefineStatement(
     const SourceLocation &where,
     const ResourceLocation &location,
     const ParameterList &parameters,
-    TypePtr type,
+    const TypePtr &result,
+    const bool throws,
     const std::vector<ResourceLocation> &tags,
     StatementPtr body)
     : Statement(where),
       Location(location),
       Parameters(parameters),
-      Type(type),
+      Result(result),
+      Throws(throws),
       Tags(tags),
       Body(std::move(body))
 {
@@ -30,8 +33,10 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
         stream << Parameters[i].Name << ": " << Parameters[i].Type;
     }
     stream << ')';
-    if (Type)
-        stream << ": " << Type;
+    if (Result)
+        stream << ": " << Result;
+    if (Throws)
+        stream << " throws";
     stream << ' ';
     for (unsigned i = 0; i < Tags.size(); ++i)
     {
@@ -46,38 +51,45 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
 
 void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto block = builder.CreateFunction(Where, Type ? Type : TypeContext::GetVoid(), Location);
+    auto function = builder.GetFunction(Where, Location);
+    if (!function)
+        function = builder.CreateFunction(Where, Location, Parameters, Result ? Result : TypeContext::GetVoid());
 
-    const auto &[pkg_, namespace_] = builder.GetContext();
-    for (auto tag: Tags)
+    // TODO: assert that existing function has same parameters, result type and if it also throws
+
+    auto &[package_, namespace_] = builder.GetContext();
+    for (auto [tag_namespace_, tag_path_]: Tags)
     {
-        if (tag.Namespace.empty())
-            tag.Namespace = namespace_;
+        if (tag_namespace_.empty())
+            tag_namespace_ = namespace_;
 
-        auto &[replace_, values_] = pkg_.Tags[tag];
-        values_.emplace_back(block->Location);
+        auto &[replace_, tags_] = package_.Tags[tag_namespace_][tag_path_];
+        tags_.emplace_back(function->Location);
     }
 
-    builder.SetInsertBlock(block);
+    builder.SetInsertBlock(Block::Create(Where, function));
 
     builder.PushVariables();
-    for (const auto &[name_, type_]: Parameters)
-        block->Parameters.emplace_back(name_, builder.CreateVariable(Where, type_, name_));
+    for (auto &[name_, value_]: function->Parameters)
+        builder.CreateVariable(Where, value_->Type, name_);
     Body->Generate(builder, {});
     builder.PopVariables();
 
-    if (!block->GetTerminator())
-    {
-        builder.SetInsertBlock(block);
-        (void) builder.CreateReturnVoid(Where);
-    }
-
-    for (const auto &child: block->Children)
-        if (!child->GetTerminator())
+    for (auto &block: function->Blocks)
+        if (!block->GetTerminator())
         {
-            builder.SetInsertBlock(child);
+            builder.SetInsertBlock(block);
             (void) builder.CreateReturnVoid(Where);
         }
 
     builder.SetInsertBlock(nullptr);
+}
+
+void mcc::DefineStatement::GenerateInclude(Builder &builder) const
+{
+    auto function = builder.GetFunction(Where, Location);
+    if (!function)
+        function = builder.CreateFunction(Where, Location, Parameters, Result ? Result : TypeContext::GetVoid());
+
+    // TODO: assert that existing function has same parameters, result type and if it also throws
 }

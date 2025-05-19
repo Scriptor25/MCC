@@ -7,7 +7,7 @@ mcc::TryCatchStatement::TryCatchStatement(
     StatementPtr try_,
     StatementPtr catch_,
     const std::string &variable,
-    TypePtr error_type)
+    const TypePtr &error_type)
     : Statement(where),
       Try(std::move(try_)),
       Catch(std::move(catch_)),
@@ -31,9 +31,9 @@ std::ostream &mcc::TryCatchStatement::Print(std::ostream &stream) const
 
 void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent(Where);
-    const auto tail_target = builder.CreateBlock(Where, parent);
-    const auto catch_target = Catch ? builder.CreateBlock(Catch->Where, parent) : tail_target;
+    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto tail_target = Block::Create(Where, parent);
+    const auto catch_target = Catch ? Block::Create(Catch->Where, parent) : tail_target;
 
     auto require_tail = !Catch;
 
@@ -69,7 +69,7 @@ void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) cons
 
     if (!require_tail)
     {
-        builder.RemoveBlock(Where, tail_target);
+        tail_target->Parent->Erase(tail_target);
         builder.SetInsertBlock(nullptr);
     }
     else

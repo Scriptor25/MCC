@@ -1,6 +1,6 @@
 #include <mcc/instruction.hpp>
 
-mcc::Instruction::Instruction(const SourceLocation &where, TypePtr type)
+mcc::Instruction::Instruction(const SourceLocation &where, const TypePtr &type)
     : Value(where, type)
 {
 }

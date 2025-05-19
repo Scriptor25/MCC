@@ -1,16 +1,8 @@
+include "std.mcc"
+
 namespace example
 
-define :setblock(x: number, y: number, z: number, block: string, mode: string) {
-    ?`$setblock $(x) $(y) $(z) $(block) $(mode)`
-}
-
-define :random(min: number, max: number): number {
-    if (min > max)
-        swap(min, max)
-    return ?`$random value $(min)..$(max)`
-}
-
-define :sphere(cx: number, cy: number, cz: number, r: number, block: string, mode: string) {
+define sphere(cx: number, cy: number, cz: number, r: number, block: string, mode: string) {
     const r2 = r * r
     for (let dz = -r, dz <= r, ++dz) {
         const dz2 = dz * dz
@@ -27,13 +19,13 @@ define :sphere(cx: number, cy: number, cz: number, r: number, block: string, mod
                 const d2 = dx2 + dy2 + dz2
 
                 if (d2 < r2)
-                    $:setblock({ x, y, z, block, mode })
+                    std:setblock(x, y, z, block, mode)
             }
         }
     }
 }
 
-define :block_lut(index: number): string {
+define get_block_type(index: number): string {
     return switch (index) {
         case 0 -> "white_stained_glass"
         case 1 -> "light_gray_stained_glass"
@@ -55,21 +47,21 @@ define :block_lut(index: number): string {
     }
 }
 
-define :bubbles(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, n: number) {
+define bubbles(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, n: number) {
     for (let i = 0, i < n, ++i) {
-        const r = $:random({ min: 3, max: 10 })
-        const cx = $:random({ min: x1, max: x2 })
-        const cy = $:random({ min: y1, max: y2 })
-        const cz = $:random({ min: z1, max: z2 })
-        const bi = $:random({ min: 0, max: 15 })
+        const r = std:random(3, 10)
+        const cx = std:random(x1, x2)
+        const cy = std:random(y1, y2)
+        const cz = std:random(z1, z2)
+        const bi = std:random(0, 15)
 
-        const block = $:block_lut({ index: bi })
+        const block = get_block_type(bi)
 
-        $:sphere({ cx, cy, cz, r, block, mode: "replace" })
-        $:sphere({ cx, cy, cz, r: r - 1, block: "air", mode: "replace" })
+        sphere(cx, cy, cz, r, block, "replace")
+        sphere(cx, cy, cz, r - 1, "air", "replace")
     }
 }
 
-define :test() {
-    $:bubbles({ x1: -300, y1: -20, z1: -300, x2: 300, y2: 20, z2: 300, n: 50 })
+define test() {
+    bubbles(-300, -20, -300, 300, 20, 300, 50)
 }

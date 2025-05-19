@@ -60,7 +60,7 @@ namespace mcc
 
     struct CommandExpression final : Expression
     {
-        CommandExpression(const SourceLocation &where, TypePtr type, const CommandT &command);
+        CommandExpression(const SourceLocation &where, const TypePtr &type, const CommandT &command);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -106,20 +106,14 @@ namespace mcc
         ExpressionPtr Condition, Then, Else;
     };
 
-    struct ResourceExpression final : Expression
+    struct MacroExpression final : Expression
     {
-        ResourceExpression(
-            const SourceLocation &where,
-            const ResourceLocation &location,
-            ExpressionPtr state,
-            ExpressionPtr data);
+        MacroExpression(const SourceLocation &where, const std::string &name);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
 
-        ResourceLocation Location;
-        ExpressionPtr State;
-        ExpressionPtr Data;
+        std::string Name;
     };
 
     struct ObjectExpression final : Expression
@@ -130,6 +124,16 @@ namespace mcc
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
 
         std::map<std::string, ExpressionPtr> Elements;
+    };
+
+    struct ResourceExpression final : Expression
+    {
+        ResourceExpression(const SourceLocation &where, ResourceLocation location);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
+
+        ResourceLocation Location;
     };
 
     struct SubscriptExpression final : Expression

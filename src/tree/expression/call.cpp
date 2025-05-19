@@ -31,21 +31,25 @@ std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    ResourceLocation callee;
-
     std::vector<ValuePtr> arguments;
     for (auto &argument: Arguments)
         arguments.emplace_back(argument->GenerateValue(builder, frame));
 
+    if (const auto macro = dynamic_cast<MacroExpression *>(Callee.get()))
+        return builder.CreateMacro(Where, macro->Name, arguments);
+
+    const auto default_namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
+
+    ResourceLocation callee;
     if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
     {
-        callee = {.Path = symbol->Name};
+        callee = {default_namespace, symbol->Name};
     }
     else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))
     {
         callee = resource->Location;
         if (callee.Namespace.empty())
-            callee.Namespace = builder.GetLocation(Callee->Where).Namespace;
+            callee.Namespace = default_namespace;
     }
     else
     {

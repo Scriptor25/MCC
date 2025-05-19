@@ -46,9 +46,9 @@ void mcc::SwitchStatement::Generate(Builder &builder, const Frame &frame) const
 {
     const auto start_target = builder.GetInsertBlock();
 
-    const auto parent = builder.GetInsertParent(Where);
-    const auto tail_target = builder.CreateBlock(Where, parent);
-    const auto default_target = Default ? builder.CreateBlock(Default->Where, parent) : tail_target;
+    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto tail_target = Block::Create(Where, parent);
+    const auto default_target = Default ? Block::Create(Default->Where, parent) : tail_target;
 
     auto require_tail = !Default;
 
@@ -70,8 +70,8 @@ void mcc::SwitchStatement::Generate(Builder &builder, const Frame &frame) const
 
     for (auto &[cases_, value_]: Cases)
     {
-        auto case_target = builder.CreateBlock(value_->Where, parent);
-        builder.SetInsertBlock(case_target);
+        auto case_target = Block::Create(value_->Where, parent);
+
         for (auto &case_: cases_)
         {
             auto value = case_->GenerateValue(builder, frame);
@@ -79,7 +79,10 @@ void mcc::SwitchStatement::Generate(Builder &builder, const Frame &frame) const
             Assert(!!constant, case_->Where, "case entry must be constant");
             case_targets.emplace_back(constant, case_target);
         }
+
+        builder.SetInsertBlock(case_target);
         value_->Generate(builder, target_frame);
+
         if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_tail = true;
@@ -97,7 +100,7 @@ void mcc::SwitchStatement::Generate(Builder &builder, const Frame &frame) const
 
     if (!require_tail && !(target_frame.Flags & FrameFlag_RequireTail))
     {
-        builder.RemoveBlock(Where, tail_target);
+        tail_target->Parent->Erase(tail_target);
         builder.SetInsertBlock(nullptr);
     }
     else

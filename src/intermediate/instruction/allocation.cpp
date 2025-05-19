@@ -3,7 +3,7 @@
 
 mcc::InstructionPtr mcc::AllocationInstruction::CreateValue(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ResourceLocation &location,
     const IndexT index)
 {
@@ -12,7 +12,7 @@ mcc::InstructionPtr mcc::AllocationInstruction::CreateValue(
 
 mcc::InstructionPtr mcc::AllocationInstruction::CreateArray(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ResourceLocation &location,
     const IndexT index)
 {
@@ -21,7 +21,7 @@ mcc::InstructionPtr mcc::AllocationInstruction::CreateArray(
 
 mcc::InstructionPtr mcc::AllocationInstruction::CreateObject(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ResourceLocation &location,
     const IndexT index)
 {
@@ -30,7 +30,7 @@ mcc::InstructionPtr mcc::AllocationInstruction::CreateObject(
 
 mcc::AllocationInstruction::AllocationInstruction(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const AllocationTypeE allocation_type,
     const ResourceLocation &location,
     const IndexT index)

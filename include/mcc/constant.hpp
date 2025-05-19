@@ -9,7 +9,7 @@ namespace mcc
 {
     struct Constant : Value
     {
-        Constant(const SourceLocation &where, TypePtr type);
+        Constant(const SourceLocation &where, const TypePtr &type);
 
         [[nodiscard]] bool RequireStack() const override;
     };
@@ -76,7 +76,7 @@ namespace mcc
     {
         static ConstantPtr Create(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const std::vector<ConstantPtr> &values,
             bool stringify);
         static ConstantPtr Create(
@@ -86,7 +86,7 @@ namespace mcc
 
         ConstantArray(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const std::vector<ConstantPtr> &values,
             bool stringify);
         ~ConstantArray() override;
@@ -101,7 +101,7 @@ namespace mcc
     {
         static ConstantPtr Create(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const std::map<std::string, ConstantPtr> &values);
         static ConstantPtr Create(
             const SourceLocation &where,
@@ -109,7 +109,7 @@ namespace mcc
 
         ConstantObject(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const std::map<std::string, ConstantPtr> &values);
         ~ConstantObject() override;
 
@@ -138,22 +138,12 @@ namespace mcc
 
     struct ConstantResource final : Constant
     {
-        static ConstantPtr Create(
-            const SourceLocation &where,
-            const ResourceLocation &location,
-            const ConstantPtr &state,
-            const ConstantPtr &data);
+        static ConstantPtr Create(const SourceLocation &where, const ResourceLocation &location);
 
-        ConstantResource(
-            const SourceLocation &where,
-            const ResourceLocation &location,
-            const ConstantPtr &state,
-            const ConstantPtr &data);
+        ConstantResource(const SourceLocation &where, ResourceLocation location);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
-        ConstantPtr State;
-        ConstantPtr Data;
     };
 }

@@ -14,7 +14,7 @@
 static void parse_file(mcc::Package &package, const std::filesystem::path &path)
 {
     std::ifstream stream(path);
-    mcc::Assert(stream.is_open(), "failed to open source file {}", path.string());
+    mcc::Assert(stream.is_open(), "failed to open file {}", path.string());
 
     mcc::Context context(package, {});
     mcc::Parser parser(context, stream, path.string());
@@ -22,7 +22,10 @@ static void parse_file(mcc::Package &package, const std::filesystem::path &path)
 
     while (parser)
         if (const auto statement = parser())
+        {
+            statement->Print(std::cerr) << std::endl;
             statement->Generate(builder, {});
+        }
 
     builder.Generate();
 }

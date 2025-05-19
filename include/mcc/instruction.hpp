@@ -8,7 +8,7 @@ namespace mcc
 {
     struct Instruction : Value
     {
-        Instruction(const SourceLocation &where, TypePtr type);
+        Instruction(const SourceLocation &where, const TypePtr &type);
 
         [[nodiscard]] virtual bool IsTerminator() const;
 
@@ -23,23 +23,23 @@ namespace mcc
     {
         static InstructionPtr CreateValue(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const ResourceLocation &location,
             IndexT index);
         static InstructionPtr CreateArray(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const ResourceLocation &location,
             IndexT index);
         static InstructionPtr CreateObject(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const ResourceLocation &location,
             IndexT index);
 
         AllocationInstruction(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             AllocationTypeE allocation_type,
             const ResourceLocation &location,
             IndexT index);
@@ -82,7 +82,7 @@ namespace mcc
 
         ArrayInstruction(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             ArrayOperationE array_operation,
             const ResourceLocation &location,
             const ValuePtr &array,
@@ -133,19 +133,19 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const ResourceLocation &location,
             const ResourceLocation &callee,
-            const std::vector<ValuePtr> &arguments,
+            const std::vector<std::pair<std::string, ValuePtr>> &arguments,
             bool may_throw,
             const BlockPtr &landing_pad);
 
         CallInstruction(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const ResourceLocation &location,
             const ResourceLocation &callee,
-            const std::vector<ValuePtr> &arguments,
+            const std::vector<std::pair<std::string, ValuePtr>> &arguments,
             bool may_throw,
             const BlockPtr &landing_pad);
         ~CallInstruction() override;
@@ -156,7 +156,7 @@ namespace mcc
 
         ResourceLocation Location;
         ResourceLocation Callee;
-        std::vector<ValuePtr> Arguments;
+        std::vector<std::pair<std::string, ValuePtr>> Arguments;
         bool MayThrow;
         BlockPtr LandingPad;
     };
@@ -165,13 +165,13 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const ResourceLocation &location,
             const CommandT &command);
 
         CommandInstruction(
             const SourceLocation &where,
-            TypePtr type,
+            const TypePtr &type,
             const ResourceLocation &location,
             const CommandT &command);
 
@@ -238,6 +238,29 @@ namespace mcc
         ResourceLocation Location;
         BlockPtr Target;
         ValuePtr Result, BranchResult;
+    };
+
+    struct MacroInstruction final : Instruction
+    {
+        static InstructionPtr Create(
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            const std::string &name,
+            const std::vector<ValuePtr> &arguments);
+
+        MacroInstruction(
+            const SourceLocation &where,
+            const ResourceLocation &location,
+            const std::string &name,
+            const std::vector<ValuePtr> &arguments);
+        ~MacroInstruction() override;
+
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
+
+        ResourceLocation Location;
+        std::string Name;
+        std::vector<ValuePtr> Arguments;
     };
 
     struct ObjectInstruction final : Instruction

@@ -4,7 +4,7 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::CommandExpression::CommandExpression(const SourceLocation &where, TypePtr type, const CommandT &command)
+mcc::CommandExpression::CommandExpression(const SourceLocation &where, const TypePtr &type, const CommandT &command)
     : Expression(where),
       Type(type),
       Command(command)

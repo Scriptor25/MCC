@@ -111,9 +111,9 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
     }
 
     std::string prefix, arguments;
-    Target->ForwardArguments(prefix, arguments);
+    Target->Parent->ForwardArguments(prefix, arguments);
 
-    commands.Append("{}return run function {}{}", prefix, Target->Location, arguments);
+    commands.Append("{}return run function {}{}", prefix, Target->Parent->GetLocation(Target), arguments);
 }
 
 bool mcc::DirectInstruction::RequireStack() const

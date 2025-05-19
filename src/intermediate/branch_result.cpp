@@ -2,13 +2,13 @@
 
 mcc::ValuePtr mcc::BranchResult::Create(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ResourceLocation &location)
 {
     return std::make_shared<BranchResult>(where, type, location);
 }
 
-mcc::BranchResult::BranchResult(const SourceLocation &where, TypePtr type, const ResourceLocation &location)
+mcc::BranchResult::BranchResult(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location)
     : Value(where, type),
       Location(location)
 {

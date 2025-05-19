@@ -1,17 +1,17 @@
 namespace example
 
-define :hello() {
+define hello() {
     ?`tellraw @s ["Hello ",{"selector":"@s","color":"gold"},"!"]`
 }
 
-define :hello_all() {
-    print(@s, `Hello ${@s}! Hello to all of ${@e[type=!player]}!`)
+define hello_all() {
+    !print(@s, `Hello ${@s}! Hello to all of ${@e[type=!player]}!`)
 }
 
-define :hello_rec(d: number) {
-    print(@s, `Hello ${d}`)
+define hello_rec(d: number) {
+    !print(@s, `Hello ${d}`)
     if (d <= 0)
-        print(@s, "reached end of recursive loop")
+        !print(@s, "reached end of recursive loop")
     else
-        $:hello_rec({ d: d - 1 })
+        hello_rec(d - 1)
 }

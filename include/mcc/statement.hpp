@@ -1,10 +1,10 @@
 #pragma once
 
+#include <filesystem>
 #include <iosfwd>
 #include <string>
 #include <vector>
 #include <mcc/common.hpp>
-#include <mcc/lex.hpp>
 
 namespace mcc
 {
@@ -16,6 +16,7 @@ namespace mcc
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
         virtual void Generate(Builder &builder, const Frame &frame) const = 0;
+        virtual void GenerateInclude(Builder &builder) const;
 
         SourceLocation Where;
     };
@@ -42,16 +43,19 @@ namespace mcc
             const SourceLocation &where,
             const ResourceLocation &location,
             const ParameterList &parameters,
-            TypePtr type,
+            const TypePtr &result,
+            bool throws,
             const std::vector<ResourceLocation> &tags,
             StatementPtr body);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, const Frame &frame) const override;
+        void GenerateInclude(Builder &builder) const override;
 
         ResourceLocation Location;
         ParameterList Parameters;
-        TypePtr Type;
+        TypePtr Result;
+        bool Throws;
         std::vector<ResourceLocation> Tags;
         StatementPtr Body;
     };
@@ -89,6 +93,17 @@ namespace mcc
         StatementPtr Then, Else;
     };
 
+    struct IncludeStatement final : Statement
+    {
+        IncludeStatement(const SourceLocation &where, const std::filesystem::path &filepath);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
+        void GenerateInclude(Builder &builder) const override;
+
+        std::filesystem::path Filepath;
+    };
+
     struct MultiStatement final : Statement
     {
         MultiStatement(const SourceLocation &where, std::vector<StatementPtr> statements);
@@ -105,6 +120,7 @@ namespace mcc
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, const Frame &frame) const override;
+        void GenerateInclude(Builder &builder) const override;
 
         std::string Namespace;
     };
@@ -152,7 +168,7 @@ namespace mcc
             StatementPtr try_,
             StatementPtr catch_,
             const std::string &variable,
-            TypePtr error_type);
+            const TypePtr &error_type);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, const Frame &frame) const override;

@@ -3,7 +3,7 @@
 
 mcc::ConstantPtr mcc::ConstantObject::Create(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const std::map<std::string, ConstantPtr> &values)
 {
     return std::make_shared<ConstantObject>(where, type, values);
@@ -22,7 +22,7 @@ mcc::ConstantPtr mcc::ConstantObject::Create(
 
 mcc::ConstantObject::ConstantObject(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const std::map<std::string, ConstantPtr> &values)
     : Constant(where, type),
       Values(values)

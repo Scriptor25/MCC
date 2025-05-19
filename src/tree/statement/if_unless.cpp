@@ -27,10 +27,10 @@ std::ostream &mcc::IfUnlessStatement::Print(std::ostream &stream) const
 
 void mcc::IfUnlessStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent(Where);
-    const auto tail_target = builder.CreateBlock(Where, parent);
-    const auto then_target = builder.CreateBlock(Where, parent);
-    const auto else_target = Else ? builder.CreateBlock(Where, parent) : tail_target;
+    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto tail_target = Block::Create(Where, parent);
+    const auto then_target = Block::Create(Where, parent);
+    const auto else_target = Else ? Block::Create(Where, parent) : tail_target;
 
     auto require_tail = !Else;
 
@@ -62,7 +62,7 @@ void mcc::IfUnlessStatement::Generate(Builder &builder, const Frame &frame) cons
 
     if (!require_tail)
     {
-        builder.RemoveBlock(Where, tail_target);
+        tail_target->Parent->Erase(tail_target);
         builder.SetInsertBlock(nullptr);
     }
     else

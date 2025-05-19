@@ -58,7 +58,7 @@ namespace mcc
             return ExpectAny({args...});
         }
 
-        ResourceLocation ParseResourceLocation();
+        ResourceLocation ParseResourceLocation(const std::string &default_namespace = {});
 
         TargetAttributePtr ParseEnumAttribute(bool invert, const std::vector<const char *> &values);
         TargetAttributePtr ParseFloatAttribute(bool invert);
@@ -80,6 +80,7 @@ namespace mcc
 
         StatementPtr ParseTopLevel();
         StatementPtr ParseDefineStatement();
+        StatementPtr ParseIncludeStatement();
         StatementPtr ParseNamespaceStatement();
 
         StatementPtr ParseStatement();
@@ -95,22 +96,22 @@ namespace mcc
         StatementPtr ParseVariableStatement();
 
         ExpressionPtr ParseExpression();
-        ExpressionPtr ParseResourceExpression();
-        ExpressionPtr ParseTargetExpression(bool with_attributes);
         ExpressionPtr ParseArrayExpression();
-        ExpressionPtr ParseObjectExpression();
+        ExpressionPtr ParseBinaryExpression(ExpressionPtr left, unsigned min_pre);
+        ExpressionPtr ParseCommandExpression();
+        ExpressionPtr ParseFloatExpression();
         ExpressionPtr ParseFormatExpression();
         ExpressionPtr ParseIfUnlessExpression();
-        ExpressionPtr ParseSwitchExpression();
-        ExpressionPtr ParseCommandExpression();
         ExpressionPtr ParseIntegerExpression();
-        ExpressionPtr ParseFloatExpression();
+        ExpressionPtr ParseMacroExpression();
+        ExpressionPtr ParseObjectExpression();
+        ExpressionPtr ParseOperandExpression();
+        ExpressionPtr ParsePrimaryExpression();
         ExpressionPtr ParseRangeExpression();
         ExpressionPtr ParseStringExpression();
+        ExpressionPtr ParseSwitchExpression();
         ExpressionPtr ParseSymbolExpression();
-        ExpressionPtr ParsePrimaryExpression();
-        ExpressionPtr ParseOperandExpression();
-        ExpressionPtr ParseBinaryExpression(ExpressionPtr left, unsigned min_pre);
+        ExpressionPtr ParseTargetExpression(bool with_attributes);
 
         Context &m_Context;
         std::istream &m_Stream;

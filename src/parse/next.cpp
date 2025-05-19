@@ -7,7 +7,6 @@ mcc::Token &mcc::Parser::Next()
     static const std::map<std::string, std::set<int>> operator_map
     {
         {"=", {'='}},
-        {"!", {'='}},
         {"<", {'='}},
         {">", {'='}},
         {"+", {'=', '+'}},
@@ -57,6 +56,7 @@ mcc::Token &mcc::Parser::Next()
                     case '#':
                     case '$':
                     case '?':
+                    case '!':
                         where = m_Where;
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
@@ -68,7 +68,6 @@ mcc::Token &mcc::Parser::Next()
                                    .Value = std::move(value),
                                };
 
-                    case '!':
                     case '=':
                     case '<':
                     case '>':

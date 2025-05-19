@@ -3,7 +3,6 @@
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
-#include <mcc/value.hpp>
 
 mcc::BinaryExpression::BinaryExpression(
     const SourceLocation &where,

@@ -1,0 +1,16 @@
+namespace std
+
+define assert(x: boolean, message: string) throws {
+    unless (x)
+        throw message
+}
+
+define setblock(x: number, y: number, z: number, block: string, mode: string) {
+    ?`$setblock $(x) $(y) $(z) $(block) $(mode)`
+}
+
+define random(min: number, max: number): number {
+    if (min > max)
+        !swap(min, max)
+    return ?`$random value $(min)..$(max)`
+}

@@ -2,7 +2,7 @@
 
 mcc::ValuePtr mcc::NamedValue::Create(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ResourceLocation &location,
     const std::string &name)
 {
@@ -11,7 +11,7 @@ mcc::ValuePtr mcc::NamedValue::Create(
 
 mcc::NamedValue::NamedValue(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const ResourceLocation &location,
     const std::string &name)
     : Value(where, type),

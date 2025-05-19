@@ -3,7 +3,7 @@
 
 mcc::ConstantPtr mcc::ConstantArray::Create(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const std::vector<ConstantPtr> &values,
     const bool stringify)
 {
@@ -30,7 +30,7 @@ mcc::ConstantPtr mcc::ConstantArray::Create(
 
 mcc::ConstantArray::ConstantArray(
     const SourceLocation &where,
-    TypePtr type,
+    const TypePtr &type,
     const std::vector<ConstantPtr> &values,
     const bool stringify)
     : Constant(where, type),

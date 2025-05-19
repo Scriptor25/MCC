@@ -76,7 +76,7 @@ mcc::TargetAttributePtr mcc::Parser::ParseMapAttribute(bool invert, const Parse 
     {
         auto key = Expect(TokenType_Symbol).Value;
         Expect(TokenType_Operator, "=");
-        values[key] = parse(*this, SkipIf(TokenType_Operator, "!"));
+        values[key] = parse(*this, SkipIf(TokenType_Other, "!"));
         if (!At(TokenType_Other, "}"))
             Expect(TokenType_Other, ",");
     }
@@ -91,9 +91,9 @@ mcc::TargetAttributePtr mcc::Parser::ParseResourceMapAttribute(bool invert, cons
     std::vector<std::pair<ResourceLocation, TargetAttributePtr>> values;
     while (!SkipIf(TokenType_Other, "}"))
     {
-        auto key = ParseResourceLocation();
+        auto key = ParseResourceLocation("minecraft");
         Expect(TokenType_Operator, "=");
-        auto value = parse(*this, SkipIf(TokenType_Operator, "!"));
+        auto value = parse(*this, SkipIf(TokenType_Other, "!"));
         values.emplace_back(key, std::move(value));
         if (!At(TokenType_Other, "}"))
             Expect(TokenType_Other, ",");
@@ -110,14 +110,14 @@ mcc::TargetAttributePtr mcc::Parser::ParseNBTAttribute(bool invert)
 
 mcc::TargetAttributePtr mcc::Parser::ParseResourceAttribute(bool invert)
 {
-    auto value = ParseResourceLocation();
+    auto value = ParseResourceLocation("minecraft");
     return std::make_unique<ResourceAttribute>(invert, value);
 }
 
 mcc::TargetAttributePtr mcc::Parser::ParseTagAttribute(bool invert)
 {
     Expect(TokenType_Other, "#");
-    auto [namespace_, path_] = ParseResourceLocation();
+    auto [namespace_, path_] = ParseResourceLocation("minecraft");
     return std::make_unique<TagAttribute>(invert, ResourceTag(std::move(namespace_), std::move(path_)));
 }
 
@@ -232,7 +232,7 @@ mcc::ExpressionPtr mcc::Parser::ParseTargetExpression(const bool with_attributes
         {
             auto key = Expect(TokenType_Symbol).Value;
             Expect(TokenType_Operator, "=");
-            const auto invert = SkipIf(TokenType_Operator, "!");
+            const auto invert = SkipIf(TokenType_Other, "!");
             auto node = map.at(key)(*this, invert);
             attributes[key].emplace_back(std::move(node));
 

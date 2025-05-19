@@ -1,19 +1,19 @@
 namespace example
 
-define :add(x: number, y: number): number #:math {
+define add(x: number, y: number): number #math {
     const result = x + y
-    print(@s, `${x} + ${y} = ${result}`)
+    !print(@s, `${x} + ${y} = ${result}`)
     return result
 }
 
-define :sub(x: number, y: number): number #:math {
+define sub(x: number, y: number): number #math {
     const result = x - y
-    print(@s, `${x} - ${y} = ${result}`)
+    !print(@s, `${x} - ${y} = ${result}`)
     return result
 }
 
-define :fib(n: number): number {
+define fib(n: number): number {
     if (n <= 1)
         return n
-    return $:fib({ n: n - 1 }) + $:fib({ n: n - 2 })
+    return fib(n - 1) + fib(n - 2)
 }

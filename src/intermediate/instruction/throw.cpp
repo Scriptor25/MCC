@@ -77,9 +77,9 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
     if (LandingPad)
     {
         std::string prefix, arguments;
-        LandingPad->ForwardArguments(prefix, arguments);
+        LandingPad->Parent->ForwardArguments(prefix, arguments);
 
-        commands.Append("{}return run function {}{}", prefix, LandingPad->Location, arguments);
+        commands.Append("{}return run function {}{}", prefix, LandingPad->Parent->GetLocation(LandingPad), arguments);
         return;
     }
 

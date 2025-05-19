@@ -24,10 +24,10 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    const auto parent = builder.GetInsertParent(Where);
-    auto then_target = builder.CreateBlock(Then->Where, parent);
-    auto else_target = builder.CreateBlock(Else->Where, parent);
-    const auto tail_target = builder.CreateBlock(Where, parent);
+    const auto parent = builder.GetInsertBlock()->Parent;
+    auto then_target = Block::Create(Then->Where, parent);
+    auto else_target = Block::Create(Else->Where, parent);
+    const auto tail_target = Block::Create(Where, parent);
 
     const auto condition = Condition->GenerateValue(builder, frame);
     (void) builder.CreateBranch(
