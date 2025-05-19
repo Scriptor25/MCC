@@ -13,11 +13,13 @@ namespace mcc
 
         [[nodiscard]] Context &GetContext() const;
 
+        [[nodiscard]] bool HasFunction(const ResourceLocation &location) const;
         FunctionPtr CreateFunction(
             const SourceLocation &where,
-             ResourceLocation location,
+            ResourceLocation location,
             const ParameterList &parameters,
-            const TypePtr &result);
+            const TypePtr &result,
+            bool throws);
         FunctionPtr GetFunction(const SourceLocation &where, ResourceLocation location);
 
         void SetInsertBlock(const BlockPtr &block);

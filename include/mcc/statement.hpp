@@ -41,9 +41,9 @@ namespace mcc
     {
         DefineStatement(
             const SourceLocation &where,
-            const ResourceLocation &location,
-            const ParameterList &parameters,
-            const TypePtr &result,
+            ResourceLocation location,
+            ParameterList parameters,
+            TypePtr result,
             bool throws,
             const std::vector<ResourceLocation> &tags,
             StatementPtr body);

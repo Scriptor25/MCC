@@ -16,18 +16,24 @@ mcc::Context &mcc::Builder::GetContext() const
     return m_Context;
 }
 
+bool mcc::Builder::HasFunction(const ResourceLocation &location) const
+{
+    return m_Functions.contains(location.Namespace) && m_Functions.at(location.Namespace).contains(location.Path);
+}
+
 mcc::FunctionPtr mcc::Builder::CreateFunction(
     const SourceLocation &where,
     ResourceLocation location,
     const ParameterList &parameters,
-    const TypePtr &result)
+    const TypePtr &result,
+    const bool throws)
 {
     if (location.Namespace.empty())
         location.Namespace = m_Context.Namespace;
 
     auto &function = m_Functions[location.Namespace][location.Path];
     Assert(!function, where, "already defined function {}", location);
-    return function = Function::Create(where, location, parameters, result);
+    return function = Function::Create(where, location, parameters, result, throws);
 }
 
 mcc::FunctionPtr mcc::Builder::GetFunction(const SourceLocation &where, ResourceLocation location)

@@ -2,7 +2,7 @@ include "std.mcc"
 
 namespace example
 
-define test_assert() {
+define test_assert() throws {
     const a = 2
     const b = 2
     const c = a + b

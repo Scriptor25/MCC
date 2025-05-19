@@ -4,19 +4,20 @@
 #include <mcc/statement.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
+#include <utility>
 
 mcc::DefineStatement::DefineStatement(
     const SourceLocation &where,
-    const ResourceLocation &location,
-    const ParameterList &parameters,
-    const TypePtr &result,
+    ResourceLocation location,
+    ParameterList parameters,
+    TypePtr result,
     const bool throws,
     const std::vector<ResourceLocation> &tags,
     StatementPtr body)
     : Statement(where),
-      Location(location),
-      Parameters(parameters),
-      Result(result),
+      Location(std::move(location)),
+      Parameters(std::move(parameters)),
+      Result(std::move(result)),
       Throws(throws),
       Tags(tags),
       Body(std::move(body))
@@ -51,9 +52,14 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
 
 void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
 {
-    auto function = builder.GetFunction(Where, Location);
-    if (!function)
-        function = builder.CreateFunction(Where, Location, Parameters, Result ? Result : TypeContext::GetVoid());
+    const auto function = builder.HasFunction(Location)
+                              ? builder.GetFunction(Where, Location)
+                              : builder.CreateFunction(
+                                  Where,
+                                  Location,
+                                  Parameters,
+                                  Result ? Result : TypeContext::GetVoid(),
+                                  Throws);
 
     // TODO: assert that existing function has same parameters, result type and if it also throws
 
@@ -87,9 +93,18 @@ void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
 
 void mcc::DefineStatement::GenerateInclude(Builder &builder) const
 {
-    auto function = builder.GetFunction(Where, Location);
-    if (!function)
-        function = builder.CreateFunction(Where, Location, Parameters, Result ? Result : TypeContext::GetVoid());
+    if (!builder.HasFunction(Location))
+    {
+        builder.CreateFunction(
+            Where,
+            Location,
+            Parameters,
+            Result ? Result : TypeContext::GetVoid(),
+            Throws);
+        return;
+    }
+
+    const auto function = builder.GetFunction(Where, Location);
 
     // TODO: assert that existing function has same parameters, result type and if it also throws
 }
