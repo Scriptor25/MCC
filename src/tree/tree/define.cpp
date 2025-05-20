@@ -90,7 +90,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
     builder.SetInsertBlock(nullptr);
 }
 
-void mcc::DefineNode::GenerateInclude(Builder &builder) const
+void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem::path>& include_chain) const
 {
     if (!builder.HasFunction(Location))
     {

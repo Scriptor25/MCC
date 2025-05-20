@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <set>
 #include <mcc/common.hpp>
 
 namespace mcc
@@ -13,7 +14,7 @@ namespace mcc
         virtual std::ostream &Print(std::ostream &stream) const = 0;
 
         virtual void Generate(Builder &builder) const = 0;
-        virtual void GenerateInclude(Builder &builder) const = 0;
+        virtual void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const = 0;
 
         SourceLocation Where;
     };
@@ -31,7 +32,7 @@ namespace mcc
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder) const override;
-        void GenerateInclude(Builder &builder) const override;
+        void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const override;
 
         ResourceLocation Location;
         ParameterList Parameters;
@@ -47,7 +48,7 @@ namespace mcc
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder) const override;
-        void GenerateInclude(Builder &builder) const override;
+        void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const override;
 
         std::filesystem::path Filepath;
     };
@@ -58,7 +59,7 @@ namespace mcc
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder) const override;
-        void GenerateInclude(Builder &builder) const override;
+        void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const override;
 
         std::string Namespace;
     };

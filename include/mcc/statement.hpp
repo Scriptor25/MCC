@@ -14,7 +14,7 @@ namespace mcc
         explicit Statement(const SourceLocation &where);
 
         void Generate(Builder &builder) const override;
-        void GenerateInclude(Builder &builder) const override;
+        void GenerateInclude(Builder &builder, std::set<std::filesystem::path>& include_chain) const override;
 
         virtual void Generate(Builder &builder, const Frame &frame) const = 0;
     };

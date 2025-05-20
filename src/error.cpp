@@ -42,6 +42,19 @@ void mcc::Error(const SourceLocation &where, const std::string &message) noexcep
     throw std::runtime_error(message);
 }
 
+void mcc::Warning(const SourceLocation &where, const char *message)
+{
+    std::cerr
+            << std::filesystem::canonical(where.Filename).string()
+            << ':'
+            << where.Row
+            << ':'
+            << where.Col
+            << ": "
+            << message
+            << std::endl;
+}
+
 void mcc::Assert(const bool condition, const char *message) noexcept(false)
 {
     if (condition)

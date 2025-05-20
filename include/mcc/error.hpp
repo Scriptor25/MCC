@@ -9,6 +9,8 @@ namespace mcc
     [[noreturn]] void Error(const SourceLocation &where, const char *message) noexcept(false);
     [[noreturn]] void Error(const SourceLocation &where, const std::string &message) noexcept(false);
 
+    void Warning(const SourceLocation &where, const char *message);
+
     template<typename... Args>
     [[noreturn]] void Error(const char *format, Args &&... args) noexcept(false)
     {
@@ -57,7 +59,11 @@ namespace mcc
     }
 
     template<typename... Args>
-    void Assert(const bool condition, const SourceLocation &where, const std::string_view &format, Args &&... args) noexcept(false)
+    void Assert(
+        const bool condition,
+        const SourceLocation &where,
+        const std::string_view &format,
+        Args &&... args) noexcept(false)
     {
         Assert(condition, where, std::vformat(format, std::make_format_args(args...)));
     }

@@ -22,13 +22,30 @@ void mcc::IncludeNode::Generate(Builder &builder) const
     std::ifstream stream(Filepath);
     Assert(stream.is_open(), Where, "failed to open file {}", Filepath.string());
 
+    std::set<std::filesystem::path> include_chain;
+    include_chain.insert(canonical(Filepath));
+
     Parser parser(builder.GetContext(), stream, Filepath.string());
     while (parser)
         if (const auto statement = parser())
-            statement->GenerateInclude(builder);
+            statement->GenerateInclude(builder, include_chain);
 }
 
-void mcc::IncludeNode::GenerateInclude(Builder &builder) const
+void mcc::IncludeNode::GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const
 {
-    Error(Where, "mcc::IncludeStatement::GenerateInclude");
+    if (include_chain.contains(canonical(Filepath)))
+    {
+        Warning(Where, "recursive include chain detected!");
+        return;
+    }
+
+    std::ifstream stream(Filepath);
+    Assert(stream.is_open(), Where, "failed to open file {}", Filepath.string());
+
+    include_chain.insert(canonical(Filepath));
+
+    Parser parser(builder.GetContext(), stream, Filepath.string());
+    while (parser)
+        if (const auto statement = parser())
+            statement->GenerateInclude(builder, include_chain);
 }
