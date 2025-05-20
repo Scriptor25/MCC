@@ -3,7 +3,7 @@
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
 
-mcc::StatementPtr mcc::Parser::ParseIncludeStatement()
+mcc::TreeNodePtr mcc::Parser::ParseIncludeNode()
 {
     const auto where = Expect(TokenType_Symbol, "include").Where;
     const auto filename = Expect(TokenType_String).Value;
@@ -12,5 +12,5 @@ mcc::StatementPtr mcc::Parser::ParseIncludeStatement()
     if (filepath.is_relative())
         filepath = std::filesystem::path(where.Filename).parent_path() / filename;
 
-    return std::make_unique<IncludeStatement>(where, filepath);
+    return std::make_unique<IncludeNode>(where, filepath);
 }

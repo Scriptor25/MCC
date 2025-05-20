@@ -2,7 +2,7 @@
 #include <mcc/statement.hpp>
 #include <mcc/type.hpp>
 
-mcc::StatementPtr mcc::Parser::ParseTypeStatement()
+mcc::TreeNodePtr mcc::Parser::ParseTypeNode()
 {
     auto where = Expect(TokenType_Symbol, "type").Where;
     const auto name = Expect(TokenType_Symbol).Value;

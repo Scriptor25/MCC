@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <istream>
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
@@ -9,10 +10,10 @@ mcc::Parser::Parser(TypeContext &context, std::istream &stream, const std::strin
 {
 }
 
-mcc::Parser::Parser(TypeContext &context, std::istream &stream, const SourceLocation &location)
+mcc::Parser::Parser(TypeContext &context, std::istream &stream, SourceLocation location)
     : m_Context(context),
       m_Stream(stream),
-      m_Where(location)
+      m_Where(std::move(location))
 {
     Get();
     Next();
@@ -28,9 +29,9 @@ mcc::Parser::operator bool() const
     return !m_Stream.eof();
 }
 
-mcc::StatementPtr mcc::Parser::operator()()
+mcc::TreeNodePtr mcc::Parser::operator()()
 {
-    return ParseTopLevel();
+    return ParseTreeNode();
 }
 
 void mcc::Parser::Get()

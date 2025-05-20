@@ -2,8 +2,13 @@
 #include <mcc/statement.hpp>
 
 mcc::Statement::Statement(const SourceLocation &where)
-    : Where(where)
+    : TreeNode(where)
 {
+}
+
+void mcc::Statement::Generate(Builder &builder) const
+{
+    Generate(builder, {});
 }
 
 void mcc::Statement::GenerateInclude(Builder &builder) const

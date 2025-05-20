@@ -2,7 +2,7 @@
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
 
-mcc::StatementPtr mcc::Parser::ParseDefineStatement()
+mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
 {
     auto where = Expect(TokenType_Symbol, "define").Where;
 
@@ -46,5 +46,5 @@ mcc::StatementPtr mcc::Parser::ParseDefineStatement()
 
     auto body = ParseMultiStatement();
 
-    return std::make_unique<DefineStatement>(where, location, parameters, result, throws, tags, std::move(body));
+    return std::make_unique<DefineNode>(where, location, parameters, result, throws, tags, std::move(body));
 }

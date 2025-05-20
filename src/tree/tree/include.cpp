@@ -1,21 +1,23 @@
 #include <fstream>
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
+#include <mcc/tree.hpp>
 
-mcc::IncludeStatement::IncludeStatement(const SourceLocation &where, const std::filesystem::path &filepath)
-    : Statement(where),
-      Filepath(filepath)
+mcc::IncludeNode::IncludeNode(const SourceLocation &where, std::filesystem::path filepath)
+    : TreeNode(where),
+      Filepath(std::move(filepath))
 {
 }
 
-std::ostream &mcc::IncludeStatement::Print(std::ostream &stream) const
+std::ostream &mcc::IncludeNode::Print(std::ostream &stream) const
 {
     return stream << "include " << '"' << Filepath.string() << '"';
 }
 
-void mcc::IncludeStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::IncludeNode::Generate(Builder &builder) const
 {
     std::ifstream stream(Filepath);
     Assert(stream.is_open(), Where, "failed to open file {}", Filepath.string());
@@ -26,7 +28,7 @@ void mcc::IncludeStatement::Generate(Builder &builder, const Frame &frame) const
             statement->GenerateInclude(builder);
 }
 
-void mcc::IncludeStatement::GenerateInclude(Builder &builder) const
+void mcc::IncludeNode::GenerateInclude(Builder &builder) const
 {
     Error(Where, "mcc::IncludeStatement::GenerateInclude");
 }

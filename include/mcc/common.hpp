@@ -13,11 +13,10 @@ namespace mcc
     using IndexT = unsigned long long;
     using CommandT = std::string;
 
+    using TreeNodePtr = std::unique_ptr<struct TreeNode>;
     using StatementPtr = std::unique_ptr<struct Statement>;
     using ExpressionPtr = std::unique_ptr<struct Expression>;
-
     using FormatNodePtr = std::unique_ptr<struct FormatNode>;
-
     using TargetAttributePtr = std::unique_ptr<struct TargetAttribute>;
 
     using ValuePtr = std::shared_ptr<struct Value>;

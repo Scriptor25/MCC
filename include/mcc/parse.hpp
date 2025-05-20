@@ -12,12 +12,12 @@ namespace mcc
     {
     public:
         Parser(TypeContext &context, std::istream &stream, const std::string &filename);
-        Parser(TypeContext &context, std::istream &stream, const SourceLocation &location);
+        Parser(TypeContext &context, std::istream &stream, SourceLocation location);
 
         [[nodiscard]] size_t Count() const;
 
         explicit operator bool() const;
-        StatementPtr operator()();
+        TreeNodePtr operator()();
 
     private:
         void Get();
@@ -78,11 +78,11 @@ namespace mcc
         TypePtr ParseArrayType();
         TypePtr ParseUnionType();
 
-        StatementPtr ParseTopLevel();
-        StatementPtr ParseDefineStatement();
-        StatementPtr ParseIncludeStatement();
-        StatementPtr ParseNamespaceStatement();
-        StatementPtr ParseTypeStatement();
+        TreeNodePtr ParseTreeNode();
+        TreeNodePtr ParseDefineNode();
+        TreeNodePtr ParseIncludeNode();
+        TreeNodePtr ParseNamespaceNode();
+        TreeNodePtr ParseTypeNode();
 
         StatementPtr ParseStatement();
         StatementPtr ParseBreakStatement();

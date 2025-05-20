@@ -2,10 +2,11 @@
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/statement.hpp>
+#include <mcc/tree.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::DefineStatement::DefineStatement(
+mcc::DefineNode::DefineNode(
     const SourceLocation &where,
     ResourceLocation location,
     ParameterList parameters,
@@ -13,7 +14,7 @@ mcc::DefineStatement::DefineStatement(
     const bool throws,
     const std::vector<ResourceLocation> &tags,
     StatementPtr body)
-    : Statement(where),
+    : TreeNode(where),
       Location(std::move(location)),
       Parameters(std::move(parameters)),
       Result(std::move(result)),
@@ -23,7 +24,7 @@ mcc::DefineStatement::DefineStatement(
 {
 }
 
-std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
+std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
 {
     Location.Print(stream << "define ") << '(';
     for (unsigned i = 0; i < Parameters.size(); ++i)
@@ -49,7 +50,7 @@ std::ostream &mcc::DefineStatement::Print(std::ostream &stream) const
     return Body->Print(stream);
 }
 
-void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::DefineNode::Generate(Builder &builder) const
 {
     const auto function = builder.HasFunction(Location)
                               ? builder.GetFunction(Where, Location)
@@ -89,7 +90,7 @@ void mcc::DefineStatement::Generate(Builder &builder, const Frame &frame) const
     builder.SetInsertBlock(nullptr);
 }
 
-void mcc::DefineStatement::GenerateInclude(Builder &builder) const
+void mcc::DefineNode::GenerateInclude(Builder &builder) const
 {
     if (!builder.HasFunction(Location))
     {

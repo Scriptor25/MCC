@@ -5,20 +5,18 @@
 #include <string>
 #include <vector>
 #include <mcc/common.hpp>
+#include <mcc/tree.hpp>
 
 namespace mcc
 {
-    struct Statement
+    struct Statement : TreeNode
     {
         explicit Statement(const SourceLocation &where);
 
-        virtual ~Statement() = default;
+        void Generate(Builder &builder) const override;
+        void GenerateInclude(Builder &builder) const override;
 
-        virtual std::ostream &Print(std::ostream &stream) const = 0;
         virtual void Generate(Builder &builder, const Frame &frame) const = 0;
-        virtual void GenerateInclude(Builder &builder) const;
-
-        SourceLocation Where;
     };
 
     struct BreakStatement final : Statement
@@ -35,29 +33,6 @@ namespace mcc
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, const Frame &frame) const override;
-    };
-
-    struct DefineStatement final : Statement
-    {
-        DefineStatement(
-            const SourceLocation &where,
-            ResourceLocation location,
-            ParameterList parameters,
-            TypePtr result,
-            bool throws,
-            const std::vector<ResourceLocation> &tags,
-            StatementPtr body);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
-        void GenerateInclude(Builder &builder) const override;
-
-        ResourceLocation Location;
-        ParameterList Parameters;
-        TypePtr Result;
-        bool Throws;
-        std::vector<ResourceLocation> Tags;
-        StatementPtr Body;
     };
 
     struct ForStatement final : Statement
@@ -93,17 +68,6 @@ namespace mcc
         StatementPtr Then, Else;
     };
 
-    struct IncludeStatement final : Statement
-    {
-        IncludeStatement(const SourceLocation &where, const std::filesystem::path &filepath);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
-        void GenerateInclude(Builder &builder) const override;
-
-        std::filesystem::path Filepath;
-    };
-
     struct MultiStatement final : Statement
     {
         MultiStatement(const SourceLocation &where, std::vector<StatementPtr> statements);
@@ -112,17 +76,6 @@ namespace mcc
         void Generate(Builder &builder, const Frame &frame) const override;
 
         std::vector<StatementPtr> Statements;
-    };
-
-    struct NamespaceStatement final : Statement
-    {
-        NamespaceStatement(const SourceLocation &where, const std::string &namespace_);
-
-        std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
-        void GenerateInclude(Builder &builder) const override;
-
-        std::string Namespace;
     };
 
     struct ReturnStatement final : Statement

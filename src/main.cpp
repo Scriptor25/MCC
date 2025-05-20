@@ -21,11 +21,8 @@ static void parse_file(mcc::Package &package, const std::filesystem::path &path)
     mcc::Builder builder(context, package);
 
     while (parser)
-        if (const auto statement = parser())
-        {
-            // statement->Print(std::cerr) << std::endl;
-            statement->Generate(builder, {});
-        }
+        if (const auto node = parser())
+            node->Generate(builder);
 
     builder.Generate();
 }
