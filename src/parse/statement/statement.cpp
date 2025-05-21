@@ -10,6 +10,8 @@ mcc::StatementPtr mcc::Parser::ParseStatement()
         return ParseContinueStatement();
     if (At(TokenType_Symbol, "for"))
         return ParseForStatement();
+    if (At(TokenType_Symbol, "foreach"))
+        return ParseForEachStatement();
     if (AtEnum("if", "unless"))
         return ParseIfUnlessStatement();
     if (At(TokenType_Other, "{"))

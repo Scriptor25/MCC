@@ -14,7 +14,7 @@ namespace mcc
         explicit Statement(const SourceLocation &where);
 
         void Generate(Builder &builder) const override;
-        void GenerateInclude(Builder &builder, std::set<std::filesystem::path>& include_chain) const override;
+        void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const override;
 
         virtual void Generate(Builder &builder, const Frame &frame) const = 0;
     };
@@ -49,6 +49,24 @@ namespace mcc
 
         ExpressionPtr Condition;
         StatementPtr Prefix, Suffix, Do;
+    };
+
+    struct ForEachStatement final : Statement
+    {
+        ForEachStatement(
+            const SourceLocation &where,
+            bool constant,
+            std::string name,
+            ExpressionPtr iterable,
+            StatementPtr do_);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder, const Frame &frame) const override;
+
+        bool Constant;
+        std::string Name;
+        ExpressionPtr Iterable;
+        StatementPtr Do;
     };
 
     struct IfUnlessStatement final : Statement

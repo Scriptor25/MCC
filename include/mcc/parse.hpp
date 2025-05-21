@@ -88,6 +88,7 @@ namespace mcc
         StatementPtr ParseBreakStatement();
         StatementPtr ParseContinueStatement();
         StatementPtr ParseForStatement();
+        StatementPtr ParseForEachStatement();
         StatementPtr ParseIfUnlessStatement();
         StatementPtr ParseMultiStatement();
         StatementPtr ParseReturnStatement();

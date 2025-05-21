@@ -2,7 +2,6 @@
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
-#include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
 
 mcc::SubscriptExpression::SubscriptExpression(const SourceLocation &where, ExpressionPtr array, ExpressionPtr index)
@@ -25,5 +24,5 @@ mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder, const Fr
     const auto constant_index = std::dynamic_pointer_cast<ConstantInteger>(index);
     Assert(!!constant_index, Index->Where, "index must be constant integer");
 
-    return builder.CreateExtract(Where, array, constant_index->Value);
+    return ElementReference::Create(Where, builder.GetContext(), array, constant_index->Value);
 }

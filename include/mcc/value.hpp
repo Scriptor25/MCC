@@ -23,29 +23,6 @@ namespace mcc
         IndexT UseCount = 0;
     };
 
-    struct NamedValue final : Value
-    {
-        static ValuePtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location,
-            const std::string &name);
-
-        NamedValue(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location,
-            const std::string &name);
-
-        [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        ResourceLocation Location;
-        std::string Name;
-    };
-
     struct BranchResult final : Value
     {
         static ValuePtr Create(
@@ -64,43 +41,6 @@ namespace mcc
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
-    };
-
-    struct Function final : Value
-    {
-        static FunctionPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const ResourceLocation &location,
-            const ParameterList &parameters,
-            const TypePtr &result,
-            bool throws);
-
-        Function(
-            const SourceLocation &where,
-            TypeContext &context,
-            const ResourceLocation &location,
-            const ParameterList &parameters,
-            const TypePtr &result,
-            bool throws);
-
-        void Generate(CommandVector &commands, bool stack) const override;
-        bool RequireStack() const override;
-
-        void GenerateFunction(Package &package) const;
-
-        void ForwardArguments(std::string &prefix, std::string &arguments) const;
-
-        [[nodiscard]] ResourceLocation GetLocation(const BlockPtr &target_block) const;
-        BlockPtr Erase(const BlockPtr &target_block);
-
-        ResourceLocation Location;
-        std::vector<std::pair<std::string, ValuePtr>> Parameters;
-        TypePtr Result;
-        bool Throws;
-
-        IndexT StackIndex = 0;
-        std::vector<BlockPtr> Blocks;
     };
 
     struct Block final : Value
@@ -122,6 +62,43 @@ namespace mcc
         std::vector<InstructionPtr> Instructions;
     };
 
+    struct Function final : Value
+    {
+        static FunctionPtr Create(
+            const SourceLocation &where,
+            TypeContext &context,
+            const ResourceLocation &location,
+            const ParameterList &parameters,
+            const TypePtr &result,
+            bool throws);
+
+        Function(
+            const SourceLocation &where,
+            TypeContext &context,
+            const ResourceLocation &location,
+            const ParameterList &parameters,
+            const TypePtr &result,
+            bool throws);
+
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
+
+        void GenerateFunction(Package &package) const;
+
+        void ForwardArguments(std::string &prefix, std::string &arguments) const;
+
+        [[nodiscard]] ResourceLocation GetLocation(const BlockPtr &target_block) const;
+        BlockPtr Erase(const BlockPtr &target_block);
+
+        ResourceLocation Location;
+        std::vector<std::pair<std::string, ValuePtr>> Parameters;
+        TypePtr Result;
+        bool Throws;
+
+        IndexT StackIndex = 0;
+        std::vector<BlockPtr> Blocks;
+    };
+
     struct FunctionResult final : Value
     {
         static ValuePtr Create(
@@ -137,8 +114,50 @@ namespace mcc
             const ResourceLocation &location);
 
         [[nodiscard]] bool RequireStack() const override;
-        Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
+    };
+
+    struct ElementReference final : Value
+    {
+        static ValuePtr Create(const SourceLocation &where, TypeContext &context, const ValuePtr &array, IndexT index);
+
+        ElementReference(
+            const SourceLocation &where,
+            TypeContext &context,
+            const TypePtr &type,
+            ValuePtr array,
+            IndexT index);
+        ~ElementReference() override;
+
+        [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        ValuePtr Array;
+        IndexT Index;
+    };
+
+    struct NamedValue final : Value
+    {
+        static ValuePtr Create(
+            const SourceLocation &where,
+            TypeContext &context,
+            const TypePtr &type,
+            const ResourceLocation &location,
+            const std::string &name);
+
+        NamedValue(
+            const SourceLocation &where,
+            TypeContext &context,
+            const TypePtr &type,
+            const ResourceLocation &location,
+            const std::string &name);
+
+        [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        ResourceLocation Location;
+        std::string Name;
     };
 }

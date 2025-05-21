@@ -1,14 +1,15 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
+#include <utility>
 
-mcc::InstructionPtr mcc::DirectInstruction::Create(
+mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
     const SourceLocation &where,
     TypeContext &context,
     const ResourceLocation &location,
     const BlockPtr &target)
 {
-    return std::make_shared<DirectInstruction>(
+    return std::make_shared<DirectBranchInstruction>(
         where,
         context,
         location,
@@ -17,7 +18,7 @@ mcc::InstructionPtr mcc::DirectInstruction::Create(
         nullptr);
 }
 
-mcc::InstructionPtr mcc::DirectInstruction::Create(
+mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
     const SourceLocation &where,
     TypeContext &context,
     const ResourceLocation &location,
@@ -25,7 +26,7 @@ mcc::InstructionPtr mcc::DirectInstruction::Create(
     const ValuePtr &result,
     const ValuePtr &branch_result)
 {
-    return std::make_shared<DirectInstruction>(
+    return std::make_shared<DirectBranchInstruction>(
         where,
         context,
         location,
@@ -34,18 +35,18 @@ mcc::InstructionPtr mcc::DirectInstruction::Create(
         branch_result);
 }
 
-mcc::DirectInstruction::DirectInstruction(
+mcc::DirectBranchInstruction::DirectBranchInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const ResourceLocation &location,
-    const BlockPtr &target,
-    const ValuePtr &result,
-    const ValuePtr &branch_result)
+    ResourceLocation location,
+    BlockPtr target,
+    ValuePtr result,
+    ValuePtr branch_result)
     : Instruction(where, context, context.GetVoid()),
-      Location(location),
-      Target(target),
-      Result(result),
-      BranchResult(branch_result)
+      Location(std::move(location)),
+      Target(std::move(target)),
+      Result(std::move(result)),
+      BranchResult(std::move(branch_result))
 {
     Target->Use();
     if (Result)
@@ -54,7 +55,7 @@ mcc::DirectInstruction::DirectInstruction(
         BranchResult->Use();
 }
 
-mcc::DirectInstruction::~DirectInstruction()
+mcc::DirectBranchInstruction::~DirectBranchInstruction()
 {
     Target->Drop();
     if (Result)
@@ -63,7 +64,7 @@ mcc::DirectInstruction::~DirectInstruction()
         BranchResult->Drop();
 }
 
-void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
+void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack) const
 {
     if (Result)
     {
@@ -121,12 +122,12 @@ void mcc::DirectInstruction::Generate(CommandVector &commands, bool stack) const
     commands.Append("{}return run function {}{}", prefix, Target->Parent->GetLocation(Target), arguments);
 }
 
-bool mcc::DirectInstruction::RequireStack() const
+bool mcc::DirectBranchInstruction::RequireStack() const
 {
-    return Result ? Result->RequireStack() || BranchResult->RequireStack() : false;
+    return Result ? Result->RequireStack() : (BranchResult ? BranchResult->RequireStack() : false);
 }
 
-bool mcc::DirectInstruction::IsTerminator() const
+bool mcc::DirectBranchInstruction::IsTerminator() const
 {
     return true;
 }

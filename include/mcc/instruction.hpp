@@ -81,28 +81,21 @@ namespace mcc
             const ValuePtr &value,
             IndexT index,
             bool stringify);
-        static InstructionPtr CreateExtract(
-            const SourceLocation &where,
-            TypeContext &context,
-            const ResourceLocation &location,
-            const ValuePtr &array,
-            IndexT index);
 
         ArrayInstruction(
             const SourceLocation &where,
             TypeContext &context,
             const TypePtr &type,
             ArrayOperationE array_operation,
-            const ResourceLocation &location,
-            const ValuePtr &array,
-            const ValuePtr &value,
+            ResourceLocation location,
+            ValuePtr array,
+            ValuePtr value,
             IndexT index,
             bool stringify);
         ~ArrayInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ArrayOperationE ArrayOperation;
         ResourceLocation Location;
@@ -226,7 +219,20 @@ namespace mcc
         ValuePtr Left, Right;
     };
 
-    struct DirectInstruction final : Instruction
+    struct DeleteInstruction final : Instruction
+    {
+        static InstructionPtr Create(const SourceLocation &where, TypeContext &context, const ValuePtr &value);
+
+        DeleteInstruction(const SourceLocation &where, TypeContext &context, const ValuePtr &value);
+        ~DeleteInstruction() override;
+
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
+
+        ValuePtr Value;
+    };
+
+    struct DirectBranchInstruction final : Instruction
     {
         static InstructionPtr Create(
             const SourceLocation &where,
@@ -241,14 +247,14 @@ namespace mcc
             const ValuePtr &result,
             const ValuePtr &branch_result);
 
-        DirectInstruction(
+        DirectBranchInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
-            const BlockPtr &target,
-            const ValuePtr &result,
-            const ValuePtr &branch_result);
-        ~DirectInstruction() override;
+            ResourceLocation location,
+            BlockPtr target,
+            ValuePtr result,
+            ValuePtr branch_result);
+        ~DirectBranchInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
@@ -283,6 +289,29 @@ namespace mcc
         ResourceLocation Location;
         std::string Name;
         std::vector<ValuePtr> Arguments;
+    };
+
+    struct NotNullInstruction final : Instruction
+    {
+        static InstructionPtr Create(
+            const SourceLocation &where,
+            TypeContext &context,
+            const ResourceLocation &location,
+            const ValuePtr &value);
+
+        NotNullInstruction(
+            const SourceLocation &where,
+            TypeContext &context,
+            ResourceLocation location,
+            ValuePtr value);
+        ~NotNullInstruction() override;
+
+        void Generate(CommandVector &commands, bool stack) const override;
+        [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        ResourceLocation Location;
+        ValuePtr Value;
     };
 
     struct ObjectInstruction final : Instruction

@@ -1,7 +1,7 @@
+#include <utility>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
-#include <utility>
 
 mcc::BlockPtr mcc::Block::Create(const SourceLocation &where, TypeContext &context, const FunctionPtr &parent)
 {

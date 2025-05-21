@@ -1,6 +1,7 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
+#include <utility>
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
     const SourceLocation &where,
@@ -63,42 +64,21 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
         stringify);
 }
 
-mcc::InstructionPtr mcc::ArrayInstruction::CreateExtract(
-    const SourceLocation &where,
-    TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &array,
-    const IndexT index)
-{
-    auto type = std::dynamic_pointer_cast<ArrayType>(array->Type)->Elements;
-
-    return std::make_shared<ArrayInstruction>(
-        where,
-        context,
-        type,
-        ArrayOperation_Extract,
-        location,
-        array,
-        nullptr,
-        index,
-        false);
-}
-
 mcc::ArrayInstruction::ArrayInstruction(
     const SourceLocation &where,
     TypeContext &context,
     const TypePtr &type,
     const ArrayOperationE array_operation,
-    const ResourceLocation &location,
-    const ValuePtr &array,
-    const ValuePtr &value,
+    ResourceLocation location,
+    ValuePtr array,
+    ValuePtr value,
     const IndexT index,
     const bool stringify)
     : Instruction(where, context, type),
       ArrayOperation(array_operation),
-      Location(location),
-      Array(array),
-      Value(value),
+      Location(std::move(location)),
+      Array(std::move(array)),
+      Value(std::move(value)),
       Index(index),
       Stringify(stringify)
 {
@@ -116,9 +96,6 @@ mcc::ArrayInstruction::~ArrayInstruction()
 
 void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    if (ArrayOperation == ArrayOperation_Extract)
-        return;
-
     auto array = Array->GenerateResult(false);
     auto value = Value->GenerateResult(Stringify);
 
@@ -143,9 +120,6 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
         case ArrayOperation_Insert:
             operation = std::format("insert {}", Index);
             break;
-
-        default:
-            Error(Where, "TODO");
     }
 
     auto conversion = Stringify ? "string" : "from";
@@ -204,24 +178,4 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 bool mcc::ArrayInstruction::RequireStack() const
 {
     return Array->RequireStack() || Value->RequireStack();
-}
-
-mcc::Result mcc::ArrayInstruction::GenerateResult(bool stringify) const
-{
-    Assert(ArrayOperation == ArrayOperation_Extract, Where, "only the extract array operation produces a result");
-
-    auto array = Array->GenerateResult(false);
-
-    Assert(
-        array.Type == ResultType_Storage,
-        Where,
-        "array must be {}, but is {}",
-        ResultType_Storage,
-        array.Type);
-
-    return {
-        .Type = ResultType_Storage,
-        .Location = array.Location,
-        .Path = std::format("{}[{}]", array.Path, Index),
-    };
 }

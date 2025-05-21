@@ -82,7 +82,6 @@ namespace mcc
         ArrayOperation_Append,
         ArrayOperation_Prepend,
         ArrayOperation_Insert,
-        ArrayOperation_Extract,
     };
 
     enum OffsetTypeE
