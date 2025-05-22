@@ -153,7 +153,7 @@ mcc::Token &mcc::Parser::Next()
                 break;
 
             case LexState_Symbol:
-                if (!std::isalnum(m_Buf) && m_Buf != '.' && m_Buf != '_')
+                if (!std::isalnum(m_Buf) && m_Buf != '_')
                     return m_Token = {
                                .Type = TokenType_Symbol,
                                .Where = std::move(where),

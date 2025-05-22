@@ -12,7 +12,6 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
         {"/=", 0},
         {"%=", 0},
         {"==", 1},
-        {"!=", 1},
         {"<=", 1},
         {">=", 1},
         {"<", 1},
