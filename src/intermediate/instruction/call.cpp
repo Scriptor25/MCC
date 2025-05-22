@@ -227,9 +227,6 @@ bool mcc::CallInstruction::RequireStack() const
 
 mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify) const
 {
-    if (!UseCount)
-        return {.Type = ResultType_None};
-
     return {
         .Type = ResultType_Storage,
         .Location = Location,

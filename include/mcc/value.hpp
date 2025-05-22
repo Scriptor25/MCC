@@ -7,7 +7,7 @@ namespace mcc
 {
     struct Value
     {
-        Value(const SourceLocation &where, TypeContext &context, const TypePtr &type);
+        Value(SourceLocation where, TypeContext &context, TypePtr type);
         virtual ~Value() = default;
 
         virtual void Generate(CommandVector &commands, bool stack) const;

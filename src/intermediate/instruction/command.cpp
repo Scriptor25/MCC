@@ -23,7 +23,7 @@ mcc::CommandInstruction::CommandInstruction(
 {
 }
 
-void mcc::CommandInstruction::Generate(CommandVector &commands, bool stack) const
+void mcc::CommandInstruction::Generate(CommandVector &commands, const bool stack) const
 {
     if (!UseCount)
     {
@@ -47,14 +47,11 @@ void mcc::CommandInstruction::Generate(CommandVector &commands, bool stack) cons
 
 bool mcc::CommandInstruction::RequireStack() const
 {
-    return !!UseCount;
+    return UseCount;
 }
 
 mcc::Result mcc::CommandInstruction::GenerateResult(const bool stringify) const
 {
-    if (!UseCount)
-        return {.Type = ResultType_None};
-
     return {
         .Type = ResultType_Storage,
         .Location = Location,

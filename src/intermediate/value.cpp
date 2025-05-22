@@ -1,10 +1,11 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
-mcc::Value::Value(const SourceLocation &where, TypeContext &context, const TypePtr &type)
-    : Where(where),
+mcc::Value::Value(SourceLocation where, TypeContext &context, TypePtr type)
+    : Where(std::move(where)),
       Context(context),
-      Type(type)
+      Type(std::move(type))
 {
 }
 

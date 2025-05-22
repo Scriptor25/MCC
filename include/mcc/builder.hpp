@@ -24,7 +24,7 @@ namespace mcc
             const ParameterList &parameters,
             const TypePtr &result,
             bool throws);
-        FunctionPtr GetFunction(const SourceLocation &where, ResourceLocation location);
+        [[nodiscard]] FunctionPtr GetFunction(const SourceLocation &where, ResourceLocation location) const;
 
         void SetInsertBlock(const BlockPtr &block);
         [[nodiscard]] BlockPtr GetInsertBlock() const;
@@ -130,8 +130,8 @@ namespace mcc
             const TypePtr &type,
             const std::string &variable);
 
-        InstructionPtr CreateNotNull(const SourceLocation &where, const ValuePtr &value) const;
-        InstructionPtr CreateDelete(const SourceLocation &where, const ValuePtr &value) const;
+        [[nodiscard]] InstructionPtr CreateNotNull(const SourceLocation &where, const ValuePtr &value) const;
+        [[nodiscard]] InstructionPtr CreateDelete(const SourceLocation &where, const ValuePtr &value) const;
 
         [[nodiscard]] InstructionPtr Insert(const SourceLocation &where, const InstructionPtr &instruction) const;
 

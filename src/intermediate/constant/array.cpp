@@ -19,7 +19,7 @@ mcc::ConstantPtr mcc::ConstantArray::Create(
 {
     std::set<TypePtr> elements;
     for (auto &value: values)
-        elements.emplace(value->Type);
+        elements.insert(value->Type);
 
     auto type = context.GetArray(
         elements.size() == 1

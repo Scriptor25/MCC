@@ -37,7 +37,7 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
             constants.emplace_back(constant);
         values.emplace_back(value);
 
-        elements.emplace(value->Type);
+        elements.insert(value->Type);
     }
 
     const auto type = builder.GetContext().GetArray(

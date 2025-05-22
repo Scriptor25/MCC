@@ -51,14 +51,15 @@ mcc::FunctionPtr mcc::Builder::CreateFunction(
     return function = Function::Create(where, m_Context, location, parameters, result, throws);
 }
 
-mcc::FunctionPtr mcc::Builder::GetFunction(const SourceLocation &where, ResourceLocation location)
+mcc::FunctionPtr mcc::Builder::GetFunction(const SourceLocation &where, ResourceLocation location) const
 {
     if (location.Namespace.empty())
         location.Namespace = m_Namespace;
 
-    auto &function = m_Functions[location.Namespace][location.Path];
-    Assert(!!function, where, "undefined function {}", location);
-    return function;
+    Assert(m_Functions.contains(location.Namespace), where, "undefined namespace {}", location.Namespace);
+    Assert(m_Functions.at(location.Namespace).contains(location.Path), where, "undefined function {}", location);
+
+    return m_Functions.at(location.Namespace).at(location.Path);
 }
 
 void mcc::Builder::SetInsertBlock(const BlockPtr &block)

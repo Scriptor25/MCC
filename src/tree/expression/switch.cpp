@@ -58,7 +58,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
 
     builder.SetInsertBlock(default_target);
     const auto default_value = Default->GenerateValue(builder, target_frame);
-    elements.emplace(default_value->Type);
+    elements.insert(default_value->Type);
     case_values.emplace_back(default_target, default_value);
 
     std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets;
@@ -76,7 +76,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
 
         builder.SetInsertBlock(case_target);
         const auto case_value = value_->GenerateValue(builder, target_frame);
-        elements.emplace(case_value->Type);
+        elements.insert(case_value->Type);
         case_values.emplace_back(case_target, case_value);
     }
 

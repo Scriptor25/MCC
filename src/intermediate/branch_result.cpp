@@ -26,11 +26,9 @@ bool mcc::BranchResult::RequireStack() const
 
 mcc::Result mcc::BranchResult::GenerateResult(bool stringify) const
 {
-    auto stack_path = std::format("stack[0].result.{}", reinterpret_cast<uintptr_t>(this));
-
     return {
         .Type = ResultType_Storage,
         .Location = Location,
-        .Path = std::move(stack_path),
+        .Path = std::format("stack[0].result.{}", reinterpret_cast<uintptr_t>(this)),
     };
 }

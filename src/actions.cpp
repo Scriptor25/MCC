@@ -31,7 +31,7 @@ void mcc::Actions::operator()(const int argc, const char **argv)
                 continue;
 
             if (parameter.IsFlag)
-                m_Flags.emplace(j);
+                m_Flags.insert(j);
             else
                 m_Strings[j] = argv[++i];
 

@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <mcc/common.hpp>
-#include <mcc/lex.hpp>
 #include <mcc/statement.hpp>
 
 namespace mcc

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mcc/common.hpp>
-#include <mcc/lex.hpp>
 #include <mcc/value.hpp>
 
 namespace mcc

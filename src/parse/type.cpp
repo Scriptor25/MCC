@@ -96,10 +96,10 @@ mcc::TypePtr mcc::Parser::ParseUnionType()
     if (SkipIf(TokenType_Operator, "|"))
     {
         std::set<TypePtr> elements;
-        elements.emplace(type);
+        elements.insert(type);
 
         do
-            elements.emplace(ParseArrayType());
+            elements.insert(ParseArrayType());
         while (SkipIf(TokenType_Operator, "|"));
 
         type = m_Context.GetUnion(elements);
