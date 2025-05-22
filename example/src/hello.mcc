@@ -1,5 +1,9 @@
 namespace example
 
+define hello_world() {
+    !print(@s, "Hello World!")
+}
+
 define hello() {
     ?`tellraw @s ["Hello ",{"selector":"@s","color":"gold"},"!"]`
 }
