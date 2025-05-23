@@ -19,17 +19,21 @@ namespace mcc
         TypePtr GetStruct(const std::map<std::string, TypePtr> &elements);
         TypePtr GetTuple(const std::vector<TypePtr> &elements);
         TypePtr GetUnion(const std::set<TypePtr> &elements);
+        TypePtr GetFunction(const std::vector<TypePtr> &parameters, const TypePtr &result, bool throws);
 
         TypePtr SetNamed(const std::string &name, const TypePtr &type);
         TypePtr GetNamed(const std::string &name) const;
 
     private:
         std::map<std::string, TypePtr> m_Named;
-        std::shared_ptr<Type> m_Void, m_Null, m_Boolean, m_Number, m_String;
-        std::map<TypePtr, std::shared_ptr<Type>> m_Array;
-        std::map<std::map<std::string, TypePtr>, std::shared_ptr<Type>> m_Struct;
-        std::map<std::vector<TypePtr>, std::shared_ptr<Type>> m_Tuple;
-        std::map<std::set<TypePtr>, std::shared_ptr<Type>> m_Union;
+
+        TypePtr m_Void, m_Null, m_Boolean, m_Number, m_String;
+        std::map<TypePtr, std::shared_ptr<struct ArrayType>> m_Array;
+        std::map<std::map<std::string, TypePtr>, std::shared_ptr<struct StructType>> m_Struct;
+        std::map<std::vector<TypePtr>, std::shared_ptr<struct TupleType>> m_Tuple;
+        std::map<std::set<TypePtr>, std::shared_ptr<struct UnionType>> m_Union;
+        std::map<std::vector<TypePtr>, std::map<TypePtr, std::map<bool, std::shared_ptr<struct FunctionType>>>>
+        m_Function;
     };
 
     struct Type
@@ -122,6 +126,19 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         std::set<TypePtr> Elements;
+    };
+
+    /** $(A, ..., B) => C, $!(A, ..., B) => C */
+    struct FunctionType final : Type
+    {
+        FunctionType(const std::vector<TypePtr> &parameters, const TypePtr &result, bool throws);
+
+        std::string String() const override;
+        std::ostream &Print(std::ostream &stream) const override;
+
+        std::vector<TypePtr> Parameters;
+        TypePtr Result;
+        bool Throws;
     };
 }
 

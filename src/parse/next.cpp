@@ -6,7 +6,7 @@ mcc::Token &mcc::Parser::Next()
 {
     static const std::map<std::string, std::set<int>> operator_map
     {
-        {"=", {'='}},
+        {"=", {'=', '>'}},
         {"<", {'='}},
         {">", {'='}},
         {"+", {'=', '+'}},

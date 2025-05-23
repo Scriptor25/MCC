@@ -66,6 +66,28 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
         return m_Context.GetTuple(elements);
     }
 
+    if (SkipIf(TokenType_Other, "$"))
+    {
+        std::vector<TypePtr> parameters;
+
+        const auto throws = SkipIf(TokenType_Other, "!");
+
+        Expect(TokenType_Other, "(");
+        while (!At(TokenType_Other, ")") && !At(TokenType_EOF))
+        {
+            parameters.emplace_back(ParseType());
+
+            if (!At(TokenType_Other, ")"))
+                Expect(TokenType_Other, ",");
+        }
+        Expect(TokenType_Other, ")");
+        Expect(TokenType_Operator, "=>");
+
+        const auto result = ParseType();
+
+        return m_Context.GetFunction(parameters, result, throws);
+    }
+
     if (SkipIf(TokenType_Other, "("))
     {
         auto type = ParseType();

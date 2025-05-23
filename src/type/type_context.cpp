@@ -37,30 +37,42 @@ mcc::TypePtr mcc::TypeContext::GetString()
 
 mcc::TypePtr mcc::TypeContext::GetArray(const TypePtr &elements)
 {
-    if (!m_Array.contains(elements))
-        m_Array[elements] = std::make_shared<ArrayType>(elements);
-    return m_Array.at(elements);
+    auto &type = m_Array[elements];
+    if (!type)
+        type = std::make_shared<ArrayType>(elements);
+    return type;
 }
 
 mcc::TypePtr mcc::TypeContext::GetStruct(const std::map<std::string, TypePtr> &elements)
 {
-    if (!m_Struct.contains(elements))
-        m_Struct[elements] = std::make_shared<StructType>(elements);
-    return m_Struct.at(elements);
+    auto &type = m_Struct[elements];
+    if (!type)
+        type = std::make_shared<StructType>(elements);
+    return type;
 }
 
 mcc::TypePtr mcc::TypeContext::GetTuple(const std::vector<TypePtr> &elements)
 {
-    if (!m_Tuple.contains(elements))
-        m_Tuple[elements] = std::make_shared<TupleType>(elements);
-    return m_Tuple.at(elements);
+    auto &type = m_Tuple[elements];
+    if (!type)
+        type = std::make_shared<TupleType>(elements);
+    return type;
 }
 
 mcc::TypePtr mcc::TypeContext::GetUnion(const std::set<TypePtr> &elements)
 {
-    if (!m_Union.contains(elements))
-        m_Union[elements] = std::make_shared<UnionType>(elements);
-    return m_Union.at(elements);
+    auto &type = m_Union[elements];
+    if (!type)
+        type = std::make_shared<UnionType>(elements);
+    return type;
+}
+
+mcc::TypePtr mcc::TypeContext::GetFunction(const std::vector<TypePtr> &parameters, const TypePtr &result, bool throws)
+{
+    auto &type = m_Function[parameters][result][throws];
+    if (!type)
+        type = std::make_shared<FunctionType>(parameters, result, throws);
+    return type;
 }
 
 mcc::TypePtr mcc::TypeContext::SetNamed(const std::string &name, const TypePtr &type)

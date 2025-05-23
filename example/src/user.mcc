@@ -4,13 +4,15 @@ type user = {
     age: number,
     name: string,
     email: string,
+    func: $(number, string, string) => void,
 }
 
-define user_create(age: number, name: string, email: string): user {
+define user_create(age: number, name: string, email: string, func: $(number, string, string) => void): user {
     return {
         age,
         name,
         email,
+        func,
     }
 }
 
@@ -36,4 +38,17 @@ define user_name_set(self: user, name: string) {
 
 define user_email_set(self: user, email: string) {
     self.email = email
+}
+
+define user_call(self: user) {
+    self.func(self.age, self.name, self.email)
+}
+
+define user_print(age: number, name: string, email: string) {
+    !print(@s, `age: ${age}, name: ${name}, email: ${email}`)
+}
+
+define user_test() {
+    const user = user_create(19, "Felix", "your@mom.net", user_print)
+    user_call(user)
 }

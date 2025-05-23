@@ -116,8 +116,17 @@ mcc::ValuePtr mcc::Builder::GetVariable(const SourceLocation &where, const std::
     Assert(!m_Variables.empty(), where, "variables must not be empty");
 
     for (const auto &variables: std::ranges::reverse_view(m_Variables))
+    {
         if (variables.contains(name))
+        {
             return variables.at(name);
+        }
+    }
+
+    if (HasFunction({.Path = name}))
+    {
+        return GetFunction(where, {.Path = name});
+    }
 
     Error(where, "undefined variable {}", name);
 }

@@ -16,9 +16,16 @@ std::ostream &mcc::ResourceExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
+    if (builder.HasFunction(Location))
+    {
+        return builder.GetFunction(Where, Location);
+    }
+
     auto location = Location;
     if (location.Namespace.empty())
+    {
         location.Namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
+    }
 
     return ConstantResource::Create(Where, builder.GetContext(), location);
 }
