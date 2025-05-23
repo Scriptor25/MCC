@@ -62,6 +62,25 @@ namespace mcc
         std::vector<InstructionPtr> Instructions;
     };
 
+    struct ElementReference final : Value
+    {
+        static ValuePtr Create(const SourceLocation &where, TypeContext &context, const ValuePtr &array, IndexT index);
+
+        ElementReference(
+            const SourceLocation &where,
+            TypeContext &context,
+            const TypePtr &type,
+            ValuePtr array,
+            IndexT index);
+        ~ElementReference() override;
+
+        [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        ValuePtr Array;
+        IndexT Index;
+    };
+
     struct Function final : Value
     {
         static FunctionPtr Create(
@@ -119,23 +138,27 @@ namespace mcc
         ResourceLocation Location;
     };
 
-    struct ElementReference final : Value
+    struct MemberReference final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, TypeContext &context, const ValuePtr &array, IndexT index);
+        static ValuePtr Create(
+            const SourceLocation &where,
+            TypeContext &context,
+            const ValuePtr &object,
+            const std::string &member);
 
-        ElementReference(
+        MemberReference(
             const SourceLocation &where,
             TypeContext &context,
             const TypePtr &type,
-            ValuePtr array,
-            IndexT index);
-        ~ElementReference() override;
+            ValuePtr object,
+            const std::string &member);
+        ~MemberReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
-        ValuePtr Array;
-        IndexT Index;
+        ValuePtr Object;
+        std::string Member;
     };
 
     struct NamedValue final : Value

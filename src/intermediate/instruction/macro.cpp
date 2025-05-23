@@ -20,20 +20,12 @@ static void generate_macro_print(const mcc::MacroInstruction &self, mcc::Command
                 message.Path);
             break;
 
-        case mcc::ResultType_Score:
-            message_value = std::format(
-                "{{score:{{name:\"{}\",objective:\"{}\"}}}}",
-                message.Player,
-                message.Objective);
-            break;
-
         default:
             mcc::Error(
                 self.Where,
-                "message must be {}, {} or {}, but is {}",
+                "message must be {} or {}, but is {}",
                 mcc::ResultType_Value,
                 mcc::ResultType_Storage,
-                mcc::ResultType_Score,
                 message.Type);
     }
 
@@ -54,121 +46,39 @@ static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandV
     auto value1 = self.Arguments[0]->GenerateResult(false);
     auto value2 = self.Arguments[1]->GenerateResult(false);
 
+    mcc::Assert(
+        value1.Type == mcc::ResultType_Storage,
+        self.Where,
+        "first value must be {}, but is {}",
+        mcc::ResultType_Storage,
+        value1.Type);
+    mcc::Assert(
+        value2.Type == mcc::ResultType_Storage,
+        self.Where,
+        "second value must be {}, but is {}",
+        mcc::ResultType_Storage,
+        value2.Type);
+
     auto tmp_name = self.GetTmpName();
 
-    switch (value1.Type)
-    {
-        case mcc::ResultType_Storage:
-            commands.Append(
-                "data modify storage {} {} set from storage {} {}",
-                self.Location,
-                tmp_name,
-                value1.Location,
-                value1.Path);
-            switch (value2.Type)
-            {
-                case mcc::ResultType_Storage:
-                    commands.Append(
-                        "data modify storage {} {} set from storage {} {}",
-                        value1.Location,
-                        value1.Path,
-                        value2.Location,
-                        value2.Path);
-                    break;
-
-                case mcc::ResultType_Score:
-                    commands.Append(
-                        "execute store result storage {} {} double 1 run scoreboard players get {} {}",
-                        value1.Location,
-                        value1.Path,
-                        value2.Player,
-                        value2.Objective);
-                    break;
-
-                default:
-                    mcc::Error(
-                        self.Where,
-                        "value 2 must be {} or {}, but is {}",
-                        mcc::ResultType_Storage,
-                        mcc::ResultType_Score,
-                        value2.Type);
-            }
-            break;
-
-        case mcc::ResultType_Score:
-            commands.Append(
-                "execute store result storage {} {} double 1 run scoreboard players get {} {}",
-                self.Location,
-                tmp_name,
-                value1.Player,
-                value1.Objective);
-            switch (value2.Type)
-            {
-                case mcc::ResultType_Storage:
-                    commands.Append(
-                        "execute store result score {} {} run data get storage {} {}",
-                        value1.Player,
-                        value1.Objective,
-                        value2.Location,
-                        value2.Path);
-                    break;
-
-                case mcc::ResultType_Score:
-                    commands.Append(
-                        "scoreboard players operation {} {} = {} {}",
-                        value1.Player,
-                        value1.Objective,
-                        value2.Player,
-                        value2.Objective);
-                    break;
-
-                default:
-                    mcc::Error(
-                        self.Where,
-                        "value 2 must be {} or {}, but is {}",
-                        mcc::ResultType_Storage,
-                        mcc::ResultType_Score,
-                        value2.Type);
-            }
-            break;
-
-        default:
-            mcc::Error(
-                self.Where,
-                "value 1 must be {} or {}, but is {}",
-                mcc::ResultType_Storage,
-                mcc::ResultType_Score,
-                value1.Type);
-    }
-
-    switch (value2.Type)
-    {
-        case mcc::ResultType_Storage:
-            commands.Append(
-                "data modify storage {} {} set from storage {} {}",
-                value2.Location,
-                value2.Path,
-                self.Location,
-                tmp_name);
-            break;
-
-        case mcc::ResultType_Score:
-            commands.Append(
-                "execute store result score {} {} run data get storage {} {}",
-                value2.Player,
-                value2.Objective,
-                self.Location,
-                tmp_name);
-            break;
-
-        default:
-            mcc::Error(
-                self.Where,
-                "value 2 must be {} or {}, but is {}",
-                mcc::ResultType_Storage,
-                mcc::ResultType_Score,
-                value2.Type);
-    }
+    commands.Append(
+        "data modify storage {} {} set from storage {} {}",
+        self.Location,
+        tmp_name,
+        value1.Location,
+        value1.Path);
+    commands.Append(
+        "data modify storage {} {} set from storage {} {}",
+        value1.Location,
+        value1.Path,
+        value2.Location,
+        value2.Path);
+    commands.Append(
+        "data modify storage {} {} set from storage {} {}",
+        value2.Location,
+        value2.Path,
+        self.Location,
+        tmp_name);
 
     commands.Append("data remove storage {} {}", self.Location, tmp_name);
 }

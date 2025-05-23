@@ -99,27 +99,12 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
                 arguments);
             break;
 
-        case ResultType_Score:
-            commands.Append(
-                "execute unless score {} {} matches 0 run return run function {}{}",
-                condition.Player,
-                condition.Objective,
-                then,
-                arguments);
-            commands.Append(
-                "{}return run function {}{}",
-                prefix,
-                else_,
-                arguments);
-            break;
-
         default:
             Error(
                 Where,
-                "condition must be {}, {} or {}, but is {}",
+                "condition must be {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
-                ResultType_Score,
                 condition.Type);
     }
 }

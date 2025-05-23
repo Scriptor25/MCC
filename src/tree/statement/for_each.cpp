@@ -32,7 +32,7 @@ std::ostream &mcc::ForEachStatement::Print(std::ostream &stream) const
         << ") ");
 }
 
-void mcc::ForEachStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::ForEachStatement::Generate(Builder &builder, Frame &frame) const
 {
     const auto parent = builder.GetInsertBlock()->Parent;
     const auto head_target = Block::Create(Where, builder.GetContext(), parent);

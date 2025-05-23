@@ -13,7 +13,7 @@ std::ostream &mcc::ThrowStatement::Print(std::ostream &stream) const
     return Value->Print(stream << "throw ");
 }
 
-void mcc::ThrowStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::ThrowStatement::Generate(Builder &builder, Frame &frame) const
 {
     const auto value = Value->GenerateValue(builder, frame);
     (void) builder.CreateThrow(Where, value, frame.LandingPad);

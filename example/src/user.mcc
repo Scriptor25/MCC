@@ -1,0 +1,39 @@
+namespace example
+
+type user = {
+    age: number,
+    name: string,
+    email: string,
+}
+
+define user_create(age: number, name: string, email: string): user {
+    return {
+        age,
+        name,
+        email,
+    }
+}
+
+define user_age_get(self: user): number {
+    return self.age
+}
+
+define user_name_get(self: user): string {
+    return self.name
+}
+
+define user_email_get(self: user): string {
+    return self.email
+}
+
+define user_age_set(self: user, age: number) {
+    self.age = age
+}
+
+define user_name_set(self: user, name: string) {
+    self.name = name
+}
+
+define user_email_set(self: user, email: string) {
+    self.email = email
+}

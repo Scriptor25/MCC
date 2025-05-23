@@ -13,7 +13,7 @@ namespace mcc
     {
         explicit Expression(const SourceLocation &where);
 
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         [[nodiscard]] virtual ValuePtr GenerateValue(Builder &builder, const Frame &frame) const = 0;
     };
@@ -113,6 +113,17 @@ namespace mcc
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
 
         std::string Name;
+    };
+
+    struct MemberExpression final : Expression
+    {
+        MemberExpression(const SourceLocation &where, ExpressionPtr object, const std::string &member);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
+
+        ExpressionPtr Object;
+        std::string Member;
     };
 
     struct ObjectExpression final : Expression

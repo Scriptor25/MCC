@@ -5,38 +5,31 @@
 mcc::InstructionPtr mcc::CallInstruction::Create(
     const SourceLocation &where,
     TypeContext &context,
-    const TypePtr &type,
     const ResourceLocation &location,
-    const ResourceLocation &callee,
+    const FunctionPtr &callee,
     const std::vector<std::pair<std::string, ValuePtr>> &arguments,
-    const bool may_throw,
     const BlockPtr &landing_pad)
 {
     return std::make_shared<CallInstruction>(
         where,
         context,
-        type,
         location,
         callee,
         arguments,
-        may_throw,
         landing_pad);
 }
 
 mcc::CallInstruction::CallInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const TypePtr &type,
     const ResourceLocation &location,
-    const ResourceLocation &callee,
+    const FunctionPtr &callee,
     const std::vector<std::pair<std::string, ValuePtr>> &arguments,
-    const bool may_throw,
     const BlockPtr &landing_pad)
-    : Instruction(where, context, type),
+    : Instruction(where, context, callee->Result),
       Location(location),
       Callee(callee),
       Arguments(arguments),
-      MayThrow(may_throw),
       LandingPad(landing_pad)
 {
     for (const auto &argument: Arguments | std::views::values)
@@ -115,23 +108,12 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                             value.Path);
                         break;
 
-                    case ResultType_Score:
-                        commands.Append(
-                            "execute store result storage {} {}.{} double 1 run scoreboard players get {} {}",
-                            Location,
-                            stack_path,
-                            key,
-                            value.Player,
-                            value.Objective);
-                        break;
-
                     default:
                         Error(
                             Where,
-                            "value must be {}, {} or {}, but is {}",
+                            "value must be {} or {}, but is {}",
                             ResultType_Value,
                             ResultType_Storage,
-                            ResultType_Score,
                             value.Type);
                 }
             }
@@ -141,13 +123,13 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
         }
     }
 
-    if (MayThrow)
+    if (Callee->Throws)
     {
         commands.Append(CreateTmpScore());
         commands.Append(
             "execute store result score %c {} run function {}{}",
             tmp_name,
-            Callee,
+            Callee->Location,
             argument_object);
         commands.Append(
             "data remove storage {} {}",
@@ -167,7 +149,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
             "execute if data storage {0} {1} run data modify storage {0} result set from storage {2} result",
             Location,
             stack_path,
-            Callee);
+            Callee->Location);
 
         if (LandingPad)
         {
@@ -195,7 +177,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
     {
         commands.Append(
             "function {} {}",
-            Callee,
+            Callee->Location,
             argument_object);
     }
 
@@ -206,7 +188,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
             "data modify storage {} {} set from storage {} result",
             Location,
             stack_path,
-            Callee);
+            Callee->Location);
     }
     else if (require_cleanup)
     {

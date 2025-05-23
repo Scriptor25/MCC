@@ -35,9 +35,9 @@ mcc::OperationInstruction::~OperationInstruction()
 
 void mcc::OperationInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    commands.Append(CreateTmpScore());
-
     auto objective = GetTmpName();
+
+    commands.Append(CreateTmpScore());
 
     std::string operator_;
     switch (Operator)
@@ -102,22 +102,12 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
                         operand.Path);
                     break;
 
-                case ResultType_Score:
-                    commands.Append(
-                        "scoreboard players operation {} {} = {} {}",
-                        player,
-                        objective,
-                        operand.Player,
-                        operand.Objective);
-                    break;
-
                 default:
                     Error(
                         Where,
-                        "operand must be {}, {} or {}, but is {}",
+                        "operand must be {} or {}, but is {}",
                         ResultType_Value,
                         ResultType_Storage,
-                        ResultType_Score,
                         operand.Type);
             }
         }

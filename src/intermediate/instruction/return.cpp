@@ -33,6 +33,7 @@ mcc::ReturnInstruction::~ReturnInstruction()
 void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack) const
 {
     if (Value)
+    {
         switch (auto value = Value->GenerateResult(false); value.Type)
         {
             case ResultType_Value:
@@ -50,28 +51,24 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
                     value.Path);
                 break;
 
-            case ResultType_Score:
-                commands.Append(
-                    "execute store result storage {} result double 1 run scoreboard players get {} {}",
-                    Location,
-                    value.Player,
-                    value.Objective);
-                break;
-
             default:
                 Error(
                     Where,
-                    "value must be {}, {} or {}, but is {}",
+                    "value must be {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Storage,
-                    ResultType_Score,
                     value.Type);
         }
+    }
     else
+    {
         commands.Append("data remove storage {} result", Location);
+    }
 
     if (stack)
+    {
         commands.Append("data remove storage {} stack[0]", Location);
+    }
 
     commands.Append("return 0");
 }

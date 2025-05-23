@@ -6,9 +6,19 @@ std::ostream &mcc::operator<<(std::ostream &stream, const TypePtr &type)
     return type->Print(stream);
 }
 
+std::string mcc::VoidType::String() const
+{
+    return "void";
+}
+
 std::ostream &mcc::VoidType::Print(std::ostream &stream) const
 {
     return stream << "void";
+}
+
+std::string mcc::NullType::String() const
+{
+    return "null";
 }
 
 std::ostream &mcc::NullType::Print(std::ostream &stream) const
@@ -16,14 +26,29 @@ std::ostream &mcc::NullType::Print(std::ostream &stream) const
     return stream << "null";
 }
 
+std::string mcc::BooleanType::String() const
+{
+    return "boolean";
+}
+
 std::ostream &mcc::BooleanType::Print(std::ostream &stream) const
 {
     return stream << "boolean";
 }
 
+std::string mcc::NumberType::String() const
+{
+    return "number";
+}
+
 std::ostream &mcc::NumberType::Print(std::ostream &stream) const
 {
     return stream << "number";
+}
+
+std::string mcc::StringType::String() const
+{
+    return "string";
 }
 
 std::ostream &mcc::StringType::Print(std::ostream &stream) const
@@ -36,6 +61,11 @@ mcc::ArrayType::ArrayType(TypePtr elements)
 {
 }
 
+std::string mcc::ArrayType::String() const
+{
+    return Elements->String() + "[]";
+}
+
 std::ostream &mcc::ArrayType::Print(std::ostream &stream) const
 {
     return Elements->Print(stream) << "[]";
@@ -44,6 +74,25 @@ std::ostream &mcc::ArrayType::Print(std::ostream &stream) const
 mcc::StructType::StructType(const std::map<std::string, TypePtr> &elements)
     : Elements(elements)
 {
+}
+
+std::string mcc::StructType::String() const
+{
+    std::string result;
+    result += "{ ";
+
+    auto first = true;
+    for (auto &[key, element]: Elements)
+    {
+        if (first)
+            first = false;
+        else
+            result += ", ";
+        result += key + ": " + element->String();
+    }
+
+    result += " }";
+    return result;
 }
 
 std::ostream &mcc::StructType::Print(std::ostream &stream) const
@@ -68,6 +117,25 @@ mcc::TupleType::TupleType(const std::vector<TypePtr> &elements)
 {
 }
 
+std::string mcc::TupleType::String() const
+{
+    std::string result;
+    result += "[ ";
+
+    auto first = true;
+    for (auto &element: Elements)
+    {
+        if (first)
+            first = false;
+        else
+            result += ", ";
+        result += element->String();
+    }
+
+    result += " ]";
+    return result;
+}
+
 std::ostream &mcc::TupleType::Print(std::ostream &stream) const
 {
     stream << "[ ";
@@ -88,6 +156,25 @@ std::ostream &mcc::TupleType::Print(std::ostream &stream) const
 mcc::UnionType::UnionType(const std::set<TypePtr> &elements)
     : Elements(elements)
 {
+}
+
+std::string mcc::UnionType::String() const
+{
+    std::string result;
+    result += '(';
+
+    auto first = true;
+    for (auto &element: Elements)
+    {
+        if (first)
+            first = false;
+        else
+            result += " | ";
+        result += element->String();
+    }
+
+    result += ')';
+    return result;
 }
 
 std::ostream &mcc::UnionType::Print(std::ostream &stream) const

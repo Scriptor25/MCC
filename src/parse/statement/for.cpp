@@ -4,14 +4,26 @@
 
 mcc::StatementPtr mcc::Parser::ParseForStatement()
 {
+    StatementPtr prefix, suffix;
+    ExpressionPtr condition;
+
     auto where = Expect(TokenType_Symbol, "for").Where;
     Expect(TokenType_Other, "(");
-    auto prefix = ParseStatement();
-    Expect(TokenType_Other, ",");
-    auto condition = ParseExpression();
-    Expect(TokenType_Other, ",");
-    auto suffix = ParseStatement();
-    Expect(TokenType_Other, ")");
+    if (!SkipIf(TokenType_Other, ","))
+    {
+        prefix = ParseStatement();
+        Expect(TokenType_Other, ",");
+    }
+    if (!SkipIf(TokenType_Other, ","))
+    {
+        condition = ParseExpression();
+        Expect(TokenType_Other, ",");
+    }
+    if (!SkipIf(TokenType_Other, ")"))
+    {
+        suffix = ParseStatement();
+        Expect(TokenType_Other, ")");
+    }
     auto do_ = ParseStatement();
     return std::make_unique<ForStatement>(
         where,

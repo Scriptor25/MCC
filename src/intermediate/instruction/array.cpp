@@ -146,31 +146,12 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
                 value.Path);
             break;
 
-        case ResultType_Score:
-            commands.Append(
-                "execute store result storage {} {} double 1 run scoreboard players get {} {}",
-                Location,
-                GetTmpName(),
-                value.Player,
-                value.Objective);
-            commands.Append(
-                "data modify storage {} {} {} {} storage {} {}",
-                array.Location,
-                array.Path,
-                operation,
-                conversion,
-                Location,
-                GetTmpName());
-            commands.Append("data remove storage {} {}", Location, GetTmpName());
-            break;
-
         default:
             Error(
                 Where,
-                "value must be {}, {} or {}, but is {}",
+                "value must be {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
-                ResultType_Score,
                 value.Type);
     }
 }

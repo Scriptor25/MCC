@@ -68,6 +68,24 @@ mcc::Token &mcc::Parser::Next()
                                    .Value = std::move(value),
                                };
 
+                    case '.':
+                        where = m_Where;
+                        raw += static_cast<char>(m_Buf);
+                        value += static_cast<char>(m_Buf);
+                        Get();
+                        if (std::isdigit(m_Buf))
+                        {
+                            decimals++;
+                            state = LexState_Number;
+                            break;
+                        }
+                        return m_Token = {
+                                   .Type = TokenType_Other,
+                                   .Where = std::move(where),
+                                   .Raw = std::move(raw),
+                                   .Value = std::move(value),
+                               };
+
                     case '=':
                     case '<':
                     case '>':
@@ -125,7 +143,7 @@ mcc::Token &mcc::Parser::Next()
                             break;
                         }
 
-                        if (std::isdigit(m_Buf) || m_Buf == '.')
+                        if (std::isdigit(m_Buf))
                         {
                             where = m_Where;
                             state = LexState_Number;
@@ -176,28 +194,22 @@ mcc::Token &mcc::Parser::Next()
                     switch (decimals)
                     {
                         case 0:
-                        {
-                            auto integer = std::stoll(value);
                             return m_Token = {
                                        .Type = TokenType_Integer,
                                        .Where = std::move(where),
                                        .Raw = std::move(raw),
-                                       .Value = std::move(value),
-                                       .Integer = integer,
+                                       .Value = value,
+                                       .Integer = std::stoll(value),
                                    };
-                        }
 
                         case 1:
-                        {
-                            auto float_ = std::stold(value);
                             return m_Token = {
                                        .Type = TokenType_Float,
                                        .Where = std::move(where),
                                        .Raw = std::move(raw),
-                                       .Value = std::move(value),
-                                       .Float = float_,
+                                       .Value = value,
+                                       .Float = std::stold(value),
                                    };
-                        }
 
                         case 2:
                         {
@@ -216,10 +228,12 @@ mcc::Token &mcc::Parser::Next()
                         }
 
                         default:
-                            Error(
-                                m_Where,
-                                "invalid number of decimal points in range token, must be either 0, 1 or 2, but is {}",
-                                decimals);
+                            return m_Token = {
+                                       .Type = TokenType_Undefined,
+                                       .Where = std::move(where),
+                                       .Raw = std::move(raw),
+                                       .Value = std::move(value),
+                                   };
                     }
                 }
 

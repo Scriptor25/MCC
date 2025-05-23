@@ -12,5 +12,5 @@ define setblock(x: number, y: number, z: number, block: string, mode: string) {
 define random(min: number, max: number): number {
     if (min > max)
         !swap(min, max)
-    return ?`$random value $(min)..$(max)`
+    return ?:number`$random value $(min)..$(max)`
 }

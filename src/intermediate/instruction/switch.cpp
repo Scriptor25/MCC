@@ -107,33 +107,12 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                 arguments);
             break;
 
-        case ResultType_Score:
-            for (auto &[case_, target_]: CaseTargets)
-            {
-                auto case_value = case_->GenerateResult(false);
-                commands.Append(
-                    "{}execute if score {} {} matches {} run return run function {}{}",
-                    prefix,
-                    condition.Player,
-                    condition.Objective,
-                    case_value.Value,
-                    target_->Parent->GetLocation(target_),
-                    arguments);
-            }
-            commands.Append(
-                "{}return run function {}{}",
-                prefix,
-                DefaultTarget->Parent->GetLocation(DefaultTarget),
-                arguments);
-            break;
-
         default:
             Error(
                 Where,
-                "condition must be {}, {} or {}, but is {}",
+                "condition must be {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
-                ResultType_Score,
                 condition.Type);
     }
 }

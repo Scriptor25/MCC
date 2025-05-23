@@ -19,7 +19,7 @@ std::ostream &mcc::MultiStatement::Print(std::ostream &stream) const
     return stream << indentation << '}';
 }
 
-void mcc::MultiStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::MultiStatement::Generate(Builder &builder, Frame &frame) const
 {
     builder.PushVariables();
 

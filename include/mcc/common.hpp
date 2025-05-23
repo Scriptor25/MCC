@@ -108,7 +108,7 @@ namespace mcc
     {
         bool operator==(const Result &result) const;
 
-        ResultTypeE Type = ResultType_None;
+        ResultTypeE Type;
 
         /* Constant */
         std::string Value;

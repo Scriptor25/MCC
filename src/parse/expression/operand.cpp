@@ -34,6 +34,14 @@ mcc::ExpressionPtr mcc::Parser::ParseOperandExpression()
             continue;
         }
 
+        if (SkipIf(TokenType_Other, "."))
+        {
+            auto member = Expect(TokenType_Symbol).Value;
+
+            operand = std::make_unique<MemberExpression>(where, std::move(operand), member);
+            continue;
+        }
+
         return operand;
     }
 }

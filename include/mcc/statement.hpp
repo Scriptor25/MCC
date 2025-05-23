@@ -16,7 +16,7 @@ namespace mcc
         void Generate(Builder &builder) const override;
         void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const override;
 
-        virtual void Generate(Builder &builder, const Frame &frame) const = 0;
+        virtual void Generate(Builder &builder, Frame &frame) const = 0;
     };
 
     struct BreakStatement final : Statement
@@ -24,7 +24,7 @@ namespace mcc
         explicit BreakStatement(const SourceLocation &where);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
     };
 
     struct ContinueStatement final : Statement
@@ -32,7 +32,7 @@ namespace mcc
         explicit ContinueStatement(const SourceLocation &where);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
     };
 
     struct ForStatement final : Statement
@@ -45,7 +45,7 @@ namespace mcc
             StatementPtr do_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         ExpressionPtr Condition;
         StatementPtr Prefix, Suffix, Do;
@@ -61,7 +61,7 @@ namespace mcc
             StatementPtr do_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         bool Constant;
         std::string Name;
@@ -79,7 +79,7 @@ namespace mcc
             StatementPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         bool Unless;
         ExpressionPtr Condition;
@@ -91,7 +91,7 @@ namespace mcc
         MultiStatement(const SourceLocation &where, std::vector<StatementPtr> statements);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         std::vector<StatementPtr> Statements;
     };
@@ -101,7 +101,7 @@ namespace mcc
         ReturnStatement(const SourceLocation &where, ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         ExpressionPtr Value;
     };
@@ -115,7 +115,7 @@ namespace mcc
             std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         ExpressionPtr Condition;
         StatementPtr Default;
@@ -127,7 +127,7 @@ namespace mcc
         ThrowStatement(const SourceLocation &where, ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         ExpressionPtr Value;
     };
@@ -142,7 +142,7 @@ namespace mcc
             const TypePtr &error_type);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         StatementPtr Try, Catch;
         std::string Variable;
@@ -151,13 +151,19 @@ namespace mcc
 
     struct VariableStatement final : Statement
     {
-        VariableStatement(const SourceLocation &where, bool constant, const std::string &name, ExpressionPtr value);
+        VariableStatement(
+            const SourceLocation &where,
+            bool constant,
+            std::string name,
+            TypePtr type,
+            ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
-        void Generate(Builder &builder, const Frame &frame) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
 
         bool Constant;
         std::string Name;
+        TypePtr Type;
         ExpressionPtr Value;
     };
 }

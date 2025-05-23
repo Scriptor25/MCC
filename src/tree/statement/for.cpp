@@ -22,7 +22,7 @@ std::ostream &mcc::ForStatement::Print(std::ostream &stream) const
     return Do->Print(Suffix->Print(Condition->Print(Prefix->Print(stream << "for (") << ", ") << ", ") << ") ");
 }
 
-void mcc::ForStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::ForStatement::Generate(Builder &builder, Frame &frame) const
 {
     const auto parent = builder.GetInsertBlock()->Parent;
     const auto head_target = Block::Create(Where, builder.GetContext(), parent);
@@ -36,7 +36,9 @@ void mcc::ForStatement::Generate(Builder &builder, const Frame &frame) const
     builder.PushVariables();
 
     if (Prefix)
+    {
         Prefix->Generate(builder, frame);
+    }
     (void) builder.CreateDirect(Where, head_target);
 
     builder.SetInsertBlock(head_target);

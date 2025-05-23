@@ -33,9 +33,12 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
     for (auto &element: Elements)
     {
         auto value = element->GenerateValue(builder, frame);
-        if (auto constant = std::dynamic_pointer_cast<Constant>(value))
-            constants.emplace_back(constant);
         values.emplace_back(value);
+
+        if (auto constant = std::dynamic_pointer_cast<Constant>(value))
+        {
+            constants.emplace_back(constant);
+        }
 
         elements.insert(value->Type);
     }
@@ -46,12 +49,16 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
             : builder.GetContext().GetUnion(elements));
 
     if (values.size() == constants.size())
+    {
         return ConstantArray::Create(Where, builder.GetContext(), type, constants, false);
+    }
 
     auto array = builder.AllocateArray(Where, type);
 
     for (const auto &value: values)
+    {
         (void) builder.CreateAppend(Where, array, value, false);
+    }
 
     return array;
 }

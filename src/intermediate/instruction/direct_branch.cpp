@@ -96,22 +96,12 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
                     result.Path);
                 break;
 
-            case ResultType_Score:
-                commands.Append(
-                    "execute store result storage {} {} double 1 run scoreboard players get {} {}",
-                    branch_result.Location,
-                    branch_result.Path,
-                    result.Player,
-                    result.Objective);
-                break;
-
             default:
                 Error(
                     Where,
-                    "result must be {}, {} or {}, but is {}",
+                    "result must be {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Storage,
-                    ResultType_Score,
                     result.Type);
         }
     }

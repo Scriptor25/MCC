@@ -16,10 +16,8 @@ namespace mcc
 
     enum ResultTypeE
     {
-        ResultType_None,
         ResultType_Value,
         ResultType_Storage,
-        ResultType_Score,
     };
 
     enum TargetSelectorE
@@ -119,10 +117,8 @@ namespace mcc
     {
         static const std::map<ResultTypeE, const char *> map
         {
-            {ResultType_None, "none"},
             {ResultType_Value, "value"},
             {ResultType_Storage, "storage"},
-            {ResultType_Score, "score"},
         };
 
         return map.at(enum_);

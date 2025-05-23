@@ -35,7 +35,7 @@ mcc::ElementReference::~ElementReference()
 
 bool mcc::ElementReference::RequireStack() const
 {
-    return false;
+    return Array->RequireStack();
 }
 
 mcc::Result mcc::ElementReference::GenerateResult(const bool stringify) const

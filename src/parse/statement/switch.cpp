@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
@@ -15,6 +16,7 @@ mcc::StatementPtr mcc::Parser::ParseSwitchStatement()
     {
         if (SkipIf(TokenType_Symbol, "default"))
         {
+            Assert(!default_, where, "only one default case is permitted");
             if (SkipIf(TokenType_Operator, "->"))
                 default_ = ParseStatement();
             else

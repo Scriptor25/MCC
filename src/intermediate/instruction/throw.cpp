@@ -59,21 +59,12 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
                 value.Path);
             break;
 
-        case ResultType_Score:
-            commands.Append(
-                "execute store result storage {} result double 1 run scoreboard players get {} {}",
-                Location,
-                value.Player,
-                value.Objective);
-            break;
-
         default:
             Error(
                 Where,
-                "value must be {}, {} or {}, but is {}",
+                "value must be {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
-                ResultType_Score,
                 value.Type);
     }
 

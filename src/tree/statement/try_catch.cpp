@@ -29,7 +29,7 @@ std::ostream &mcc::TryCatchStatement::Print(std::ostream &stream) const
     return stream;
 }
 
-void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::TryCatchStatement::Generate(Builder &builder, Frame &frame) const
 {
     const auto parent = builder.GetInsertBlock()->Parent;
     const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
@@ -50,21 +50,24 @@ void mcc::TryCatchStatement::Generate(Builder &builder, const Frame &frame) cons
 
     if (Catch)
     {
-        builder.PushVariables();
         builder.SetInsertBlock(catch_target);
 
+        builder.PushVariables();
+
         if (!Variable.empty())
+        {
             (void) builder.CreateStoreResult(Catch->Where, ErrorType, Variable);
+        }
 
         Catch->Generate(builder, frame);
+
+        builder.PopVariables();
 
         if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_tail = true;
             (void) builder.CreateDirect(Catch->Where, tail_target);
         }
-
-        builder.PopVariables();
     }
 
     if (!require_tail)

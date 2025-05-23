@@ -59,21 +59,12 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
                 left.Path);
             break;
 
-        case ResultType_Score:
-            commands.Append(
-                "scoreboard players operation %a {} = {} {}",
-                GetTmpName(),
-                left.Player,
-                left.Objective);
-            break;
-
         default:
             Error(
                 Where,
-                "left must be {}, {} or {}, but is {}",
+                "left must be {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
-                ResultType_Score,
                 left.Type);
     }
 
@@ -92,21 +83,12 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
                     right.Path);
                 break;
 
-            case ResultType_Score:
-                commands.Append(
-                    "scoreboard players operation %b {} = {} {}",
-                    GetTmpName(),
-                    right.Player,
-                    right.Objective);
-                break;
-
             default:
                 Error(
                     Where,
-                    "right must be {}, {} or {}, but is {}",
+                    "right must be {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Storage,
-                    ResultType_Score,
                     right.Type);
         }
 

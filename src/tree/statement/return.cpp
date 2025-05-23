@@ -14,7 +14,7 @@ std::ostream &mcc::ReturnStatement::Print(std::ostream &stream) const
     return Value->Print(stream << "return ");
 }
 
-void mcc::ReturnStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::ReturnStatement::Generate(Builder &builder, Frame &frame) const
 {
     if (!Value)
     {

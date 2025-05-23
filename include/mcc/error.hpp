@@ -43,18 +43,24 @@ namespace mcc
     template<typename... Args>
     void Assert(const bool condition, const char *format, Args &&... args) noexcept(false)
     {
+        if (condition)
+            return;
         Assert(condition, std::vformat(format, std::make_format_args(args...)));
     }
 
     template<typename... Args>
     void Assert(const bool condition, const std::string_view &format, Args &&... args) noexcept(false)
     {
+        if (condition)
+            return;
         Assert(condition, std::vformat(format, std::make_format_args(args...)));
     }
 
     template<typename... Args>
     void Assert(const bool condition, const SourceLocation &where, const char *format, Args &&... args) noexcept(false)
     {
+        if (condition)
+            return;
         Assert(condition, where, std::vformat(format, std::make_format_args(args...)));
     }
 
@@ -65,6 +71,8 @@ namespace mcc
         const std::string_view &format,
         Args &&... args) noexcept(false)
     {
+        if (condition)
+            return;
         Assert(condition, where, std::vformat(format, std::make_format_args(args...)));
     }
 }

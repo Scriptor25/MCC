@@ -1,11 +1,11 @@
 #include <mcc/expression.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
+#include <mcc/type.hpp>
 
 mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
 {
     auto where = Expect(TokenType_Symbol, "define").Where;
-
     auto location = ParseResourceLocation();
 
     ParameterList parameters;
@@ -22,13 +22,21 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
         parameters.emplace_back(name, type);
 
         if (!At(TokenType_Other, ")"))
+        {
             Expect(TokenType_Other, ",");
+        }
     }
     Expect(TokenType_Other, ")");
 
     TypePtr result;
     if (SkipIf(TokenType_Other, ":"))
+    {
         result = ParseType();
+    }
+    else
+    {
+        result = m_Context.GetVoid();
+    }
 
     auto throws = SkipIf(TokenType_Symbol, "throws");
 
@@ -40,11 +48,15 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
             tags.emplace_back(ParseResourceLocation());
 
             if (!At(TokenType_Other, "{"))
+            {
                 Expect(TokenType_Other, ",");
+            }
         }
     }
 
-    auto body = ParseMultiStatement();
+    StatementPtr body;
+    if (At(TokenType_Other, "{"))
+        body = ParseMultiStatement();
 
     return std::make_unique<DefineNode>(where, location, parameters, result, throws, tags, std::move(body));
 }

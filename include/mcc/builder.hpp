@@ -17,7 +17,7 @@ namespace mcc
 
         void SetNamespace(const std::string &namespace_);
 
-        [[nodiscard]] bool HasFunction(const ResourceLocation &location) const;
+        [[nodiscard]] bool HasFunction(ResourceLocation location) const;
         FunctionPtr CreateFunction(
             const SourceLocation &where,
             ResourceLocation location,
@@ -36,6 +36,7 @@ namespace mcc
             const SourceLocation &where,
             const TypePtr &type,
             const std::string &name);
+        ValuePtr InsertVariable(const SourceLocation &where, const std::string &name, const ValuePtr &value);
         [[nodiscard]] ValuePtr GetVariable(const SourceLocation &where, const std::string &name) const;
 
         [[nodiscard]] InstructionPtr CreateStore(
@@ -90,9 +91,9 @@ namespace mcc
 
         [[nodiscard]] InstructionPtr CreateCall(
             const SourceLocation &where,
-            const ResourceLocation &callee,
+            const FunctionPtr &callee,
             const std::vector<ValuePtr> &arguments,
-            const BlockPtr &landing_pad);
+            const BlockPtr &landing_pad) const;
         [[nodiscard]] InstructionPtr CreateMacro(
             const SourceLocation &where,
             const std::string &name,
@@ -128,7 +129,7 @@ namespace mcc
         InstructionPtr CreateStoreResult(
             const SourceLocation &where,
             const TypePtr &type,
-            const std::string &variable);
+            const std::string &name);
 
         [[nodiscard]] InstructionPtr CreateNotNull(const SourceLocation &where, const ValuePtr &value) const;
         [[nodiscard]] InstructionPtr CreateDelete(const SourceLocation &where, const ValuePtr &value) const;

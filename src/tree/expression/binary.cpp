@@ -91,7 +91,9 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame
         comparator = Comparator_EQ;
 
     if (comparator)
+    {
         return builder.CreateComparison(Where, comparator, left, right);
+    }
 
     const auto store = Operator.back() == '=';
     auto operator_string = Operator;
@@ -114,7 +116,9 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame
     {
         auto operation = builder.CreateOperation(Where, operator_, {left, right});
         if (store)
+        {
             return builder.CreateStore(Where, left, operation);
+        }
         return operation;
     }
 

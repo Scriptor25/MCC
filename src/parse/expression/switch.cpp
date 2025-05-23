@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/parse.hpp>
 
@@ -29,6 +30,8 @@ mcc::ExpressionPtr mcc::Parser::ParseSwitchExpression()
         cases.emplace_back(std::move(conditions), std::move(value));
     }
     Expect(TokenType_Other, "}");
+
+    Assert(!!default_, where, "switch expression must specify exactly one default case");
 
     return std::make_unique<SwitchExpression>(
         where,

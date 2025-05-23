@@ -137,21 +137,17 @@ namespace mcc
         static InstructionPtr Create(
             const SourceLocation &where,
             TypeContext &context,
-            const TypePtr &type,
             const ResourceLocation &location,
-            const ResourceLocation &callee,
+            const FunctionPtr &callee,
             const std::vector<std::pair<std::string, ValuePtr>> &arguments,
-            bool may_throw,
             const BlockPtr &landing_pad);
 
         CallInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const TypePtr &type,
             const ResourceLocation &location,
-            const ResourceLocation &callee,
+            const FunctionPtr &callee,
             const std::vector<std::pair<std::string, ValuePtr>> &arguments,
-            bool may_throw,
             const BlockPtr &landing_pad);
         ~CallInstruction() override;
 
@@ -160,9 +156,8 @@ namespace mcc
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
-        ResourceLocation Callee;
+        FunctionPtr Callee;
         std::vector<std::pair<std::string, ValuePtr>> Arguments;
-        bool MayThrow;
         BlockPtr LandingPad;
     };
 

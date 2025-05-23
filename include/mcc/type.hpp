@@ -36,6 +36,7 @@ namespace mcc
     {
         virtual ~Type() = default;
 
+        virtual std::string String() const = 0;
         virtual std::ostream &Print(std::ostream &stream) const = 0;
     };
 
@@ -43,6 +44,7 @@ namespace mcc
     {
         VoidType() = default;
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
     };
 
@@ -50,6 +52,7 @@ namespace mcc
     {
         NullType() = default;
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
     };
 
@@ -57,6 +60,7 @@ namespace mcc
     {
         BooleanType() = default;
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
     };
 
@@ -64,6 +68,7 @@ namespace mcc
     {
         NumberType() = default;
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
     };
 
@@ -71,6 +76,7 @@ namespace mcc
     {
         StringType() = default;
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
     };
 
@@ -79,6 +85,7 @@ namespace mcc
     {
         explicit ArrayType(TypePtr elements);
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         TypePtr Elements;
@@ -89,6 +96,7 @@ namespace mcc
     {
         explicit StructType(const std::map<std::string, TypePtr> &elements);
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         std::map<std::string, TypePtr> Elements;
@@ -99,6 +107,7 @@ namespace mcc
     {
         explicit TupleType(const std::vector<TypePtr> &elements);
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         std::vector<TypePtr> Elements;
@@ -109,8 +118,22 @@ namespace mcc
     {
         explicit UnionType(const std::set<TypePtr> &elements);
 
+        std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         std::set<TypePtr> Elements;
+    };
+}
+
+namespace std
+{
+    template<>
+    struct formatter<mcc::TypePtr> final : formatter<string>
+    {
+        template<typename FormatContext>
+        auto format(const mcc::TypePtr &type, FormatContext &ctx) const
+        {
+            return formatter<string>::format(type->String(), ctx);
+        }
     };
 }

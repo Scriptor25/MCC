@@ -31,8 +31,13 @@ void mcc::Builder::SetNamespace(const std::string &namespace_)
     m_Namespace = namespace_;
 }
 
-bool mcc::Builder::HasFunction(const ResourceLocation &location) const
+bool mcc::Builder::HasFunction(ResourceLocation location) const
 {
+    if (location.Namespace.empty())
+    {
+        location.Namespace = m_Namespace;
+    }
+
     return m_Functions.contains(location.Namespace) && m_Functions.at(location.Namespace).contains(location.Path);
 }
 
@@ -44,7 +49,9 @@ mcc::FunctionPtr mcc::Builder::CreateFunction(
     const bool throws)
 {
     if (location.Namespace.empty())
+    {
         location.Namespace = m_Namespace;
+    }
 
     auto &function = m_Functions[location.Namespace][location.Path];
     Assert(!function, where, "already defined function {}", location);
@@ -54,7 +61,9 @@ mcc::FunctionPtr mcc::Builder::CreateFunction(
 mcc::FunctionPtr mcc::Builder::GetFunction(const SourceLocation &where, ResourceLocation location) const
 {
     if (location.Namespace.empty())
+    {
         location.Namespace = m_Namespace;
+    }
 
     Assert(m_Functions.contains(location.Namespace), where, "undefined namespace {}", location.Namespace);
     Assert(m_Functions.at(location.Namespace).contains(location.Path), where, "undefined function {}", location);
@@ -90,6 +99,16 @@ mcc::ValuePtr mcc::Builder::CreateVariable(const SourceLocation &where, const Ty
     auto &variables = m_Variables.back();
     Assert(!variables.contains(name), where, "already defined variable {}", name);
     return variables[name] = NamedValue::Create(where, m_Context, type, m_InsertBlock->Parent->Location, name);
+}
+
+mcc::ValuePtr mcc::Builder::InsertVariable(const SourceLocation &where, const std::string &name, const ValuePtr &value)
+{
+    Assert(!!m_InsertBlock, where, "insert block must not be null");
+    Assert(!m_Variables.empty(), where, "variables must not be empty");
+
+    auto &variables = m_Variables.back();
+    Assert(!variables.contains(name), where, "already defined variable {}", name);
+    return variables[name] = value;
 }
 
 mcc::ValuePtr mcc::Builder::GetVariable(const SourceLocation &where, const std::string &name) const
@@ -283,31 +302,24 @@ mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where, cons
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
     const SourceLocation &where,
-    const ResourceLocation &callee,
+    const FunctionPtr &callee,
     const std::vector<ValuePtr> &arguments,
-    const BlockPtr &landing_pad)
+    const BlockPtr &landing_pad) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    const auto &function = m_Functions[callee.Namespace][callee.Path];
-    Assert(!!function, where, "undefined function {}", callee);
-
-    const auto type = function->Type;
-
     std::vector<std::pair<std::string, ValuePtr>> argument_pairs;
     for (unsigned i = 0; i < arguments.size(); ++i)
-        argument_pairs.emplace_back(function->Parameters.at(i).first, arguments.at(i));
+        argument_pairs.emplace_back(callee->Parameters.at(i).first, arguments.at(i));
 
     return Insert(
         where,
         CallInstruction::Create(
             where,
             m_Context,
-            type,
             m_InsertBlock->Parent->Location,
             callee,
             argument_pairs,
-            function->Throws,
             landing_pad));
 }
 
@@ -449,11 +461,11 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 mcc::InstructionPtr mcc::Builder::CreateStoreResult(
     const SourceLocation &where,
     const TypePtr &type,
-    const std::string &variable)
+    const std::string &name)
 {
-    Assert(!variable.empty(), where, "variable name must not be empty");
+    Assert(!name.empty(), where, "name must not be empty");
 
-    const auto dst = CreateVariable(where, type, variable);
+    const auto dst = CreateVariable(where, type, name);
     const auto src = FunctionResult::Create(where, m_Context, type, m_InsertBlock->Parent->Location);
     return CreateStore(where, dst, src);
 }

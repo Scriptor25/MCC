@@ -42,7 +42,7 @@ std::ostream &mcc::SwitchStatement::Print(std::ostream &stream) const
     return stream << '}';
 }
 
-void mcc::SwitchStatement::Generate(Builder &builder, const Frame &frame) const
+void mcc::SwitchStatement::Generate(Builder &builder, Frame &frame) const
 {
     const auto start_target = builder.GetInsertBlock();
 

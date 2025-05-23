@@ -2,6 +2,7 @@
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::CallExpression::CallExpression(
@@ -33,10 +34,14 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
 {
     std::vector<ValuePtr> arguments;
     for (auto &argument: Arguments)
+    {
         arguments.emplace_back(argument->GenerateValue(builder, frame));
+    }
 
     if (const auto macro = dynamic_cast<MacroExpression *>(Callee.get()))
+    {
         return builder.CreateMacro(Where, macro->Name, arguments);
+    }
 
     const auto default_namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
 
@@ -49,12 +54,37 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
     {
         callee = resource->Location;
         if (callee.Namespace.empty())
+        {
             callee.Namespace = default_namespace;
+        }
     }
     else
     {
         Error(Callee->Where, "invalid callee, must be a symbol or resource");
     }
 
-    return builder.CreateCall(Where, callee, arguments, frame.LandingPad);
+    Assert(builder.HasFunction(callee), Where, "undefined function {}", callee);
+    const auto function = builder.GetFunction(Where, callee);
+
+    auto argument_size = arguments.size();
+    auto parameter_size = function->Parameters.size();
+    Assert(
+        argument_size == parameter_size,
+        Where,
+        "invalid number of arguments, got {}, require {}",
+        argument_size,
+        parameter_size);
+    for (unsigned i = 0; i < argument_size; ++i)
+    {
+        auto argument = arguments[i]->Type;
+        auto parameter = function->Parameters[i].second->Type;
+        Assert(
+            argument == parameter,
+            Where,
+            "cannot assign value of type {} to argument of type {}",
+            argument,
+            parameter);
+    }
+
+    return builder.CreateCall(Where, function, arguments, frame.LandingPad);
 }
