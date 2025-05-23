@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
@@ -36,11 +37,11 @@ mcc::AllocationInstruction::AllocationInstruction(
     TypeContext &context,
     const TypePtr &type,
     const AllocationTypeE allocation_type,
-    const ResourceLocation &location,
+    ResourceLocation location,
     const IndexT index)
     : Instruction(where, context, type),
       AllocationType(allocation_type),
-      Location(location),
+      Location(std::move(location)),
       Index(index)
 {
 }
@@ -64,7 +65,7 @@ void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool st
     }
 
     Assert(stack, Where, "allocation instruction requires stack");
-    commands.Append("data modify storage {} stack[0].val insert {} value {}", Location, Index, value);
+    commands.Append("data modify storage {} stack[0].val[{}] set value {}", Location, Index, value);
 }
 
 bool mcc::AllocationInstruction::RequireStack() const

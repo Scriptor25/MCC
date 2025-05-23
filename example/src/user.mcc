@@ -40,8 +40,12 @@ define user_email_set(self: user, email: string) {
     self.email = email
 }
 
+define user_call_wrapper(func: $(number, string, string) => void, age: number, name: string, email: string) {
+    ?`$function $(func) {age:$(age),name:"$(name)",email:"$(email)"}`
+}
+
 define user_call(self: user) {
-    self.func(self.age, self.name, self.email)
+    user_call_wrapper(self.func, self.age, self.name, self.email)
 }
 
 define user_print(age: number, name: string, email: string) {

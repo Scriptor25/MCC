@@ -44,7 +44,7 @@ namespace mcc
             TypeContext &context,
             const TypePtr &type,
             AllocationTypeE allocation_type,
-            const ResourceLocation &location,
+            ResourceLocation location,
             IndexT index);
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -145,10 +145,10 @@ namespace mcc
         CallInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
+            ResourceLocation location,
             const FunctionPtr &callee,
             const std::vector<std::pair<std::string, ValuePtr>> &arguments,
-            const BlockPtr &landing_pad);
+            BlockPtr landing_pad);
         ~CallInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;

@@ -1,6 +1,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <utility>
 
 mcc::InstructionPtr mcc::CallInstruction::Create(
     const SourceLocation &where,
@@ -22,15 +23,15 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
 mcc::CallInstruction::CallInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const ResourceLocation &location,
+    ResourceLocation location,
     const FunctionPtr &callee,
     const std::vector<std::pair<std::string, ValuePtr>> &arguments,
-    const BlockPtr &landing_pad)
+    BlockPtr landing_pad)
     : Instruction(where, context, callee->Result),
-      Location(location),
+      Location(std::move(location)),
       Callee(callee),
       Arguments(arguments),
-      LandingPad(landing_pad)
+      LandingPad(std::move(landing_pad))
 {
     for (const auto &argument: Arguments | std::views::values)
         argument->Use();
@@ -83,18 +84,16 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
         {
             commands.Append("data modify storage {} {} set value {{}}", Location, stack_path);
 
-            for (unsigned i = 0; i < Arguments.size(); ++i)
+            for (auto &[key_, argument_]: Arguments)
             {
-                auto [key, argument] = Arguments.at(i);
-
-                switch (auto value = argument->GenerateResult(false); value.Type)
+                switch (auto value = argument_->GenerateResult(false); value.Type)
                 {
                     case ResultType_Value:
                         commands.Append(
                             "data modify storage {} {}.{} set value {}",
                             Location,
                             stack_path,
-                            key,
+                            key_,
                             value.Value);
                         break;
 
@@ -103,7 +102,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                             "data modify storage {} {}.{} set from storage {} {}",
                             Location,
                             stack_path,
-                            key,
+                            key_,
                             value.Location,
                             value.Path);
                         break;
@@ -176,7 +175,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
     else
     {
         commands.Append(
-            "function {} {}",
+            "function {}{}",
             Callee->Location,
             argument_object);
     }

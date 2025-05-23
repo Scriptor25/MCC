@@ -94,13 +94,15 @@ namespace mcc
         Function(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
+            const TypePtr &type,
+            ResourceLocation location,
             const ParameterList &parameters,
-            const TypePtr &result,
+            TypePtr result,
             bool throws);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         void GenerateFunction(Package &package) const;
 
