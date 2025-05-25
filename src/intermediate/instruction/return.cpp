@@ -54,7 +54,7 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
                 break;
 
             case ResultType_Argument:
-                commands.Append("$data modify storage {} result set value $({})", Location, value.Name);
+                commands.Append("$data modify storage {} result set value {}", Location, value.Name);
                 break;
 
             default:

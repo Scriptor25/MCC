@@ -25,14 +25,9 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
             token.Value);
     }
 
-    if (At(TokenType_Integer))
+    if (At(TokenType_Number))
     {
-        return ParseIntegerExpression();
-    }
-
-    if (At(TokenType_Float))
-    {
-        return ParseFloatExpression();
+        return ParseNumberExpression();
     }
 
     if (At(TokenType_String))

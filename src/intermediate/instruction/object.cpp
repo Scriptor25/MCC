@@ -46,9 +46,8 @@ mcc::ObjectInstruction::~ObjectInstruction()
 void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
 {
     auto object = Object->GenerateResult(false);
-    auto value = Value->GenerateResult(false);
 
-    switch (value.Type)
+    switch (auto value = Value->GenerateResult(false); value.Type)
     {
         case ResultType_Value:
             commands.Append(
@@ -69,10 +68,19 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
                 value.Path);
             break;
 
+        case ResultType_Argument:
+            commands.Append(
+                "$data modify storage {} {}.{} set value {}",
+                object.Location,
+                object.Path,
+                Key,
+                value.Name);
+            break;
+
         default:
             Error(
                 Where,
-                "value must be {} or {}, but is {}",
+                "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
                 value.Type);

@@ -33,7 +33,6 @@ mcc::Token &mcc::Parser::Next()
     std::string value;
 
     auto formatted = false;
-    unsigned decimals = 0;
 
     while (m_Buf >= 0)
     {
@@ -58,28 +57,11 @@ mcc::Token &mcc::Parser::Next()
                     case '?':
                     case '!':
                     case '@':
-                        where = m_Where;
-                        raw += static_cast<char>(m_Buf);
-                        value += static_cast<char>(m_Buf);
-                        Get();
-                        return m_Token = {
-                                   .Type = TokenType_Other,
-                                   .Where = std::move(where),
-                                   .Raw = std::move(raw),
-                                   .Value = std::move(value),
-                               };
-
                     case '.':
                         where = m_Where;
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
                         Get();
-                        if (std::isdigit(m_Buf))
-                        {
-                            decimals++;
-                            state = LexState_Number;
-                            break;
-                        }
                         return m_Token = {
                                    .Type = TokenType_Other,
                                    .Where = std::move(where),
@@ -161,40 +143,15 @@ mcc::Token &mcc::Parser::Next()
                 break;
 
             case LexState_Number:
-                if (m_Buf == '.')
+                if (!std::isdigit(m_Buf))
                 {
-                    decimals++;
-                }
-                else if (!std::isdigit(m_Buf))
-                {
-                    switch (decimals)
-                    {
-                        case 0:
-                            return m_Token = {
-                                       .Type = TokenType_Integer,
-                                       .Where = std::move(where),
-                                       .Raw = std::move(raw),
-                                       .Value = value,
-                                       .Integer = std::stoll(value),
-                                   };
-
-                        case 1:
-                            return m_Token = {
-                                       .Type = TokenType_Float,
-                                       .Where = std::move(where),
-                                       .Raw = std::move(raw),
-                                       .Value = value,
-                                       .Float = std::stold(value),
-                                   };
-
-                        default:
-                            return m_Token = {
-                                       .Type = TokenType_Undefined,
-                                       .Where = std::move(where),
-                                       .Raw = std::move(raw),
-                                       .Value = std::move(value),
-                                   };
-                    }
+                    return m_Token = {
+                               .Type = TokenType_Number,
+                               .Where = std::move(where),
+                               .Raw = std::move(raw),
+                               .Value = value,
+                               .Number = std::stoull(value),
+                           };
                 }
 
                 raw += static_cast<char>(m_Buf);

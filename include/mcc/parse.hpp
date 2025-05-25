@@ -6,8 +6,6 @@
 
 namespace mcc
 {
-    using Parse = std::function<TargetAttributePtr(Parser &self, bool invert)>;
-
     class Parser
     {
     public:
@@ -91,7 +89,7 @@ namespace mcc
         ExpressionPtr ParseFloatExpression();
         ExpressionPtr ParseFormatExpression();
         ExpressionPtr ParseIfUnlessExpression();
-        ExpressionPtr ParseIntegerExpression();
+        ExpressionPtr ParseNumberExpression();
         ExpressionPtr ParseMacroExpression();
         ExpressionPtr ParseObjectExpression();
         ExpressionPtr ParseOperandExpression();

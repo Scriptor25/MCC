@@ -31,7 +31,9 @@ mcc::StoreInstruction::~StoreInstruction()
 void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
 {
     if (Dst == Src)
+    {
         return;
+    }
 
     auto dst = Dst->GenerateResult(false);
     auto src = Src->GenerateResult(false);
@@ -46,7 +48,9 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
 
         case ResultType_Storage:
             if (dst.Location == src.Location && dst.Path == src.Path)
+            {
                 break;
+            }
 
             commands.Append(
                 "data modify storage {} {} set from storage {} {}",
@@ -56,12 +60,17 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
                 src.Path);
             break;
 
+        case ResultType_Argument:
+            commands.Append("$data modify storage {} {} set value {}", dst.Location, dst.Path, src.Name);
+            break;
+
         default:
             Error(
                 Where,
-                "src must be {} or {}, but is {}",
+                "src must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
+                ResultType_Argument,
                 src.Type);
     }
 }

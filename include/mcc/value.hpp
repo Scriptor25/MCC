@@ -24,6 +24,18 @@ namespace mcc
         IndexT UseCount = 0;
     };
 
+    struct ArgumentValue final : Value
+    {
+        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const std::string &name);
+
+        ArgumentValue(const SourceLocation &where, const TypePtr &type, std::string name);
+
+        [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        std::string Name;
+    };
+
     struct BranchResult final : Value
     {
         static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);

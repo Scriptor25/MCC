@@ -16,9 +16,13 @@ define user_create(age: number, name: string, email: string, func: $(number, str
     }
 }
 
+define user_call_wrapper(func: $(number, string, string) => void, self: user) {
+    ?`$function $(func) $(self)`
+}
+
 define user_call(self: user) {
     const copy = self
-    ?`$function $(copy.func) $(self)`
+    user_call_wrapper(copy.func, self)
 }
 
 define user_print(age: number, name: string, email: string) {

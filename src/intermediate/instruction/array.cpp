@@ -144,7 +144,7 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 
         case ResultType_Argument:
             commands.Append(
-                "$data modify storage {} {} {} value $({})",
+                "$data modify storage {} {} {} value {}",
                 array.Location,
                 array.Path,
                 operation,

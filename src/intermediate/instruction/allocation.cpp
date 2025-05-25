@@ -49,15 +49,15 @@ void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool st
         return;
     }
 
-    auto init = initializer->GenerateResult(false);
+    auto initializer_value = initializer->GenerateResult(false);
     Assert(
-        init.Type == ResultType_Value,
+        initializer_value.Type == ResultType_Value,
         Where,
         "initializer must be {}, but is {}",
         ResultType_Value,
-        init.Type);
+        initializer_value.Type);
 
-    commands.Append("data modify storage {} stack[0].val[{}] set value {}", Location, Index, init.Value);
+    commands.Append("data modify storage {} stack[0].val[{}] set value {}", Location, Index, initializer_value.Value);
 }
 
 bool mcc::AllocationInstruction::RequireStack() const

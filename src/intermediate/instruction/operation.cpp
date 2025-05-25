@@ -108,7 +108,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
                     break;
 
                 case ResultType_Argument:
-                    commands.Append("$scoreboard players set {} {} $({})", player, objective, operand.Name);
+                    commands.Append("$scoreboard players set {} {} {}", player, objective, operand.Name);
                     break;
 
                 default:
@@ -134,7 +134,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
 
     Assert(stack, Where, "operation instruction requires stack");
     commands.Append(
-        "execute store result storage {} {} double 1 run scoreboard players get %a {}",
+        "execute store result storage {} {} long 1 run scoreboard players get %a {}",
         Location,
         GetStackPath(),
         objective);

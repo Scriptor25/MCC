@@ -13,17 +13,6 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
     };
 
-    struct ConstantArgument final : Constant
-    {
-        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const std::string &name);
-
-        ConstantArgument(const SourceLocation &where, const TypePtr &type, std::string name);
-
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        std::string Name;
-    };
-
     struct ConstantArray final : Constant
     {
         static ConstantPtr Create(
@@ -72,13 +61,13 @@ namespace mcc
 
     struct ConstantNumber final : Constant
     {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, FloatT value);
+        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, IntegerT value);
 
-        ConstantNumber(const SourceLocation &where, TypeContext &context, FloatT value);
+        ConstantNumber(const SourceLocation &where, TypeContext &context, IntegerT value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
-        FloatT Value;
+        IntegerT Value;
     };
 
     struct ConstantObject final : Constant

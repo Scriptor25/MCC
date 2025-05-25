@@ -63,7 +63,7 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
             break;
 
         case ResultType_Argument:
-            commands.Append("$scoreboard players set %a {} $({})", objective, left.Name);
+            commands.Append("$scoreboard players set %a {} {}", objective, left.Name);
             break;
 
         default:
@@ -93,7 +93,7 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
                 break;
 
             case ResultType_Argument:
-                commands.Append("$scoreboard players set %b {} $({})", objective, right.Name);
+                commands.Append("$scoreboard players set %b {} {}", objective, right.Name);
                 break;
 
             default:

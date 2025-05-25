@@ -17,7 +17,6 @@ namespace mcc
     using StatementPtr = std::unique_ptr<struct Statement>;
     using ExpressionPtr = std::unique_ptr<struct Expression>;
     using FormatNodePtr = std::unique_ptr<struct FormatNode>;
-    using TargetAttributePtr = std::unique_ptr<struct TargetAttribute>;
 
     using ValuePtr = std::shared_ptr<struct Value>;
     using ConstantPtr = std::shared_ptr<struct Constant>;

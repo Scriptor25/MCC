@@ -100,7 +100,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
 
     for (auto &[name_, type_]: function->Parameters)
     {
-        builder.InsertVariable(Where, name_, ConstantArgument::Create(Where, type_, name_));
+        builder.InsertVariable(Where, name_, ArgumentValue::Create(Where, type_, name_));
     }
 
     Frame target_frame;

@@ -102,7 +102,7 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
 
         case ResultType_Argument:
             commands.Append(CreateTmpScore());
-            commands.Append("$scoreboard players set %c {} $({})", tmp_name, condition.Name);
+            commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);
             commands.Append(
                 "data remove storage {} {}",
                 Location,

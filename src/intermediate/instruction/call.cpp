@@ -83,7 +83,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                 if (auto value = argument->GenerateResult(false); value.Type == ResultType_Argument)
                 {
                     argument_prefix = "$";
-                    argument_object += std::format("\"{}\":$({})", key, value.Name);
+                    argument_object += std::format("\"{}\":{}", key, value.Name);
                 }
                 else
                 {
@@ -122,7 +122,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
 
                     case ResultType_Argument:
                         commands.Append(
-                            "$data modify storage {} {}.{} set value $({})",
+                            "$data modify storage {} {}.{} set value {}",
                             Location,
                             stack_path,
                             key_,

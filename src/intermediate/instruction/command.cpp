@@ -37,7 +37,7 @@ void mcc::CommandInstruction::Generate(CommandVector &commands, const bool stack
 
     Assert(stack, Where, "command instruction with result requires stack");
     commands.Append(
-        "{}execute store result storage {} {} double 1 run {}",
+        "{}execute store result storage {} {} long 1 run {}",
         macro ? "$" : "",
         Location,
         GetStackPath(),

@@ -141,7 +141,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                 auto case_value = case_->GenerateResult(false);
 
                 commands.Append(CreateTmpScore());
-                commands.Append("$scoreboard players set %c {} $({})", tmp_name, condition.Name);
+                commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);
                 commands.Append("data remove storage {} {}", Location, stack_path);
                 commands.Append(
                     "execute if score %c {} matches {} run data modify storage {} {} set value 1",

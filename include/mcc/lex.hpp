@@ -11,8 +11,7 @@ namespace mcc
         TokenType_EOF,
         TokenType_Symbol,
         TokenType_Operator,
-        TokenType_Integer,
-        TokenType_Float,
+        TokenType_Number,
         TokenType_String,
         TokenType_FormatString,
         TokenType_Other,
@@ -25,9 +24,7 @@ namespace mcc
         SourceLocation Where;
         std::string Raw;
         std::string Value;
-        IntegerT Integer = 0;
-        FloatT Float = 0.0;
-        std::pair<std::optional<IntegerT>, std::optional<IntegerT>> Range;
+        IndexT Number = 0;
     };
 }
 
@@ -44,8 +41,7 @@ namespace std
                 {mcc::TokenType_EOF, "eof"},
                 {mcc::TokenType_Symbol, "symbol"},
                 {mcc::TokenType_Operator, "operator"},
-                {mcc::TokenType_Integer, "integer"},
-                {mcc::TokenType_Float, "float"},
+                {mcc::TokenType_Number, "number"},
                 {mcc::TokenType_String, "string"},
                 {mcc::TokenType_FormatString, "format string"},
                 {mcc::TokenType_Other, "other"},

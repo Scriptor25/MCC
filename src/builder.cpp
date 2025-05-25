@@ -116,7 +116,7 @@ mcc::ValuePtr mcc::Builder::CreateVariable(
 
     variable = Allocate(where, type, is_constant, constant_initializer);
 
-    if (!constant_initializer && initializer)
+    if (initializer && !constant_initializer)
     {
         (void) CreateStore(where, variable, initializer, true);
     }
@@ -128,6 +128,8 @@ mcc::ValuePtr mcc::Builder::InsertVariable(const SourceLocation &where, const st
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!m_Variables.empty(), where, "variables must not be empty");
+    Assert(!name.empty(), where, "name must not be empty");
+    Assert(!!value, where, "value must not be null");
 
     auto &variables = m_Variables.back();
     auto &variable = variables[name];

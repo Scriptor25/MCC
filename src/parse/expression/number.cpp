@@ -3,11 +3,11 @@
 #include <mcc/parse.hpp>
 #include <mcc/value.hpp>
 
-mcc::ExpressionPtr mcc::Parser::ParseIntegerExpression()
+mcc::ExpressionPtr mcc::Parser::ParseNumberExpression()
 {
-    auto token = Expect(TokenType_Integer);
+    auto token = Expect(TokenType_Number);
     return std::make_unique<ConstantExpression>(
         token.Where,
-        ConstantNumber::Create(token.Where, m_Context, token.Integer),
+        ConstantNumber::Create(token.Where, m_Context, token.Number),
         token.Value);
 }
