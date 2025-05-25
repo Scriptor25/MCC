@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
@@ -23,14 +24,14 @@ mcc::InstructionPtr mcc::SwitchInstruction::Create(
 mcc::SwitchInstruction::SwitchInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &condition,
-    const BlockPtr &default_target,
+    ResourceLocation location,
+    ValuePtr condition,
+    BlockPtr default_target,
     const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets)
-    : Instruction(where, context, context.GetVoid()),
-      Location(location),
-      Condition(condition),
-      DefaultTarget(default_target),
+    : Instruction(where, context.GetVoid(), false),
+      Location(std::move(location)),
+      Condition(std::move(condition)),
+      DefaultTarget(std::move(default_target)),
       CaseTargets(case_targets)
 {
     Condition->Use();
@@ -61,23 +62,49 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
     auto stack_path = GetStackPath();
     auto tmp_name = GetTmpName();
 
+    auto take_default = true;
+
     switch (auto condition = Condition->GenerateResult(false); condition.Type)
     {
         case ResultType_Value:
             for (auto &[case_, target_]: CaseTargets)
-                if (auto case_value = case_->GenerateResult(false);
-                    case_value.Value == condition.Value)
-                    commands.Append(
-                        "{}return run function {}{}",
-                        prefix,
-                        target_->Parent->GetLocation(target_),
-                        arguments);
+            {
+                auto case_value = case_->GenerateResult(false);
+                Assert(
+                    case_value.Type == ResultType_Value,
+                    case_->Where,
+                    "case value must be {}, but is {}",
+                    ResultType_Value,
+                    case_value.Type);
+
+                if (case_value.Value != condition.Value)
+                {
+                    continue;
+                }
+
+                commands.Append(
+                    "{}return run function {}{}",
+                    prefix,
+                    target_->Parent->GetLocation(target_),
+                    arguments);
+                take_default = false;
+                break;
+            }
+            if (take_default)
+            {
+                commands.Append(
+                    "{}return run function {}{}",
+                    prefix,
+                    DefaultTarget->Parent->GetLocation(DefaultTarget),
+                    arguments);
+            }
             break;
 
         case ResultType_Storage:
             for (auto &[case_, target_]: CaseTargets)
             {
                 auto case_value = case_->GenerateResult(false);
+
                 commands.Append(CreateTmpScore());
                 commands.Append(
                     "execute store result score %c {} run data get storage {} {}",
@@ -92,6 +119,38 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                     Location,
                     stack_path);
                 commands.Append(RemoveTmpScore());
+
+                commands.Append(
+                    "{}execute if data storage {} {} run return run function {}{}",
+                    prefix,
+                    Location,
+                    stack_path,
+                    target_->Parent->GetLocation(target_),
+                    arguments);
+            }
+            commands.Append(
+                "{}return run function {}{}",
+                prefix,
+                DefaultTarget->Parent->GetLocation(DefaultTarget),
+                arguments);
+            break;
+
+        case ResultType_Argument:
+            for (auto &[case_, target_]: CaseTargets)
+            {
+                auto case_value = case_->GenerateResult(false);
+
+                commands.Append(CreateTmpScore());
+                commands.Append("$scoreboard players set %c {} $({})", tmp_name, condition.Name);
+                commands.Append("data remove storage {} {}", Location, stack_path);
+                commands.Append(
+                    "execute if score %c {} matches {} run data modify storage {} {} set value 1",
+                    tmp_name,
+                    case_value.Value,
+                    Location,
+                    stack_path);
+                commands.Append(RemoveTmpScore());
+
                 commands.Append(
                     "{}execute if data storage {} {} run return run function {}{}",
                     prefix,
@@ -110,9 +169,10 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
         default:
             Error(
                 Where,
-                "condition must be {} or {}, but is {}",
+                "condition must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
+                ResultType_Argument,
                 condition.Type);
     }
 }

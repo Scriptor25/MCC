@@ -1,21 +1,17 @@
 #include <mcc/value.hpp>
+#include <utility>
 
 mcc::ValuePtr mcc::FunctionResult::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
     const ResourceLocation &location)
 {
-    return std::make_shared<FunctionResult>(where, context, type, location);
+    return std::make_shared<FunctionResult>(where, type, location);
 }
 
-mcc::FunctionResult::FunctionResult(
-    const SourceLocation &where,
-    TypeContext &context,
-    const TypePtr &type,
-    const ResourceLocation &location)
-    : Value(where, context, type),
-      Location(location)
+mcc::FunctionResult::FunctionResult(const SourceLocation &where, const TypePtr &type, ResourceLocation location)
+    : Value(where, type, false),
+      Location(std::move(location))
 {
 }
 

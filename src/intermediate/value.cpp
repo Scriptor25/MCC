@@ -2,10 +2,10 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
-mcc::Value::Value(SourceLocation where, TypeContext &context, TypePtr type)
+mcc::Value::Value(SourceLocation where, TypePtr type, const bool is_mutable)
     : Where(std::move(where)),
-      Context(context),
-      Type(std::move(type))
+      Type(std::move(type)),
+      IsMutable(is_mutable)
 {
 }
 

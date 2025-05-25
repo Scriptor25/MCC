@@ -1,28 +1,25 @@
 #include <mcc/error.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
-#include <utility>
 
 mcc::ValuePtr mcc::ElementReference::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const ValuePtr &array,
     const IndexT index)
 {
     const auto array_type = std::dynamic_pointer_cast<ArrayType>(array->Type);
     Assert(!!array_type, where, "array must be of type array");
     auto type = array_type->Elements;
-    return std::make_shared<ElementReference>(where, context, type, array, index);
+    return std::make_shared<ElementReference>(where, type, array, index);
 }
 
 mcc::ElementReference::ElementReference(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
-    ValuePtr array,
+    const ValuePtr &array,
     const IndexT index)
-    : Value(where, context, type),
-      Array(std::move(array)),
+    : Value(where, type, array->IsMutable),
+      Array(array),
       Index(index)
 {
     Array->Use();

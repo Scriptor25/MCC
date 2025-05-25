@@ -18,7 +18,7 @@ void mcc::NamespaceNode::Generate(Builder &builder) const
     builder.SetNamespace(Namespace);
 }
 
-void mcc::NamespaceNode::GenerateInclude(Builder &builder, std::set<std::filesystem::path>& include_chain) const
+void mcc::NamespaceNode::GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const
 {
     builder.SetNamespace(Namespace);
 }

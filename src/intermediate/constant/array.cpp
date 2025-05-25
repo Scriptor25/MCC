@@ -3,12 +3,11 @@
 
 mcc::ConstantPtr mcc::ConstantArray::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
     const std::vector<ConstantPtr> &values,
     const bool stringify)
 {
-    return std::make_shared<ConstantArray>(where, context, type, values, stringify);
+    return std::make_shared<ConstantArray>(where, type, values, stringify);
 }
 
 mcc::ConstantPtr mcc::ConstantArray::Create(
@@ -19,23 +18,24 @@ mcc::ConstantPtr mcc::ConstantArray::Create(
 {
     std::set<TypePtr> elements;
     for (auto &value: values)
+    {
         elements.insert(value->Type);
+    }
 
     auto type = context.GetArray(
         elements.size() == 1
             ? *elements.begin()
             : context.GetUnion(elements));
 
-    return std::make_shared<ConstantArray>(where, context, type, values, stringify);
+    return std::make_shared<ConstantArray>(where, type, values, stringify);
 }
 
 mcc::ConstantArray::ConstantArray(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
     const std::vector<ConstantPtr> &values,
     const bool stringify)
-    : Constant(where, context, type),
+    : Constant(where, type),
       Values(values),
       Stringify(stringify)
 {
@@ -70,5 +70,6 @@ mcc::Result mcc::ConstantArray::GenerateResult(const bool stringify) const
     return {
         .Type = ResultType_Value,
         .Value = std::move(result),
+        .NotNull = true,
     };
 }

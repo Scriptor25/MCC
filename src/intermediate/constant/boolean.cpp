@@ -7,7 +7,7 @@ mcc::ConstantPtr mcc::ConstantBoolean::Create(const SourceLocation &where, TypeC
 }
 
 mcc::ConstantBoolean::ConstantBoolean(const SourceLocation &where, TypeContext &context, const bool value)
-    : Constant(where, context, context.GetBoolean()),
+    : Constant(where, context.GetBoolean()),
       Value(value)
 {
 }
@@ -21,5 +21,6 @@ mcc::Result mcc::ConstantBoolean::GenerateResult(const bool stringify) const
     return {
         .Type = ResultType_Value,
         .Value = std::move(value),
+        .NotNull = Value,
     };
 }

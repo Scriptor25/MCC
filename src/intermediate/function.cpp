@@ -14,28 +14,27 @@ mcc::FunctionPtr mcc::Function::Create(
 {
     std::vector<TypePtr> parameter_types;
     for (const auto &[name_, type_]: parameters)
+    {
         parameter_types.emplace_back(type_);
+    }
+
     auto type = context.GetFunction(parameter_types, result, throws);
-    return std::make_shared<Function>(where, context, type, location, parameters, result, throws);
+    return std::make_shared<Function>(where, type, location, parameters, result, throws);
 }
 
 mcc::Function::Function(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
     ResourceLocation location,
     const ParameterList &parameters,
     TypePtr result,
     const bool throws)
-    : Value(where, context, type),
+    : Value(where, type, false),
       Location(std::move(location)),
+      Parameters(parameters),
       Result(std::move(result)),
       Throws(throws)
 {
-    for (const auto &[name_, type_]: parameters)
-    {
-        Parameters.emplace_back(name_, NamedValue::Create(Where, Context, type_, Location, name_));
-    }
 }
 
 void mcc::Function::Generate(CommandVector &commands, const bool stack) const
@@ -48,14 +47,6 @@ bool mcc::Function::RequireStack() const
     if (StackIndex)
     {
         return true;
-    }
-
-    for (auto &parameter: Parameters | std::views::values)
-    {
-        if (parameter->UseCount)
-        {
-            return true;
-        }
     }
 
     for (auto &block: Blocks)
@@ -74,6 +65,7 @@ mcc::Result mcc::Function::GenerateResult(bool stringify) const
     return {
         .Type = ResultType_Value,
         .Value = '"' + Location.String() + '"',
+        .NotNull = true,
     };
 }
 
@@ -94,29 +86,6 @@ void mcc::Function::GenerateFunction(Package &package) const
         if (i == 0 && require_stack)
         {
             commands.Append("data modify storage {} stack prepend value {{}}", Location);
-
-            for (auto &[name_, value_]: Parameters)
-            {
-                if (!value_->UseCount)
-                {
-                    continue;
-                }
-
-                if (value_->Type == Context.GetString())
-                {
-                    commands.Append(
-                        "$data modify storage {0} stack[0].var.{1} set value \"$({1})\"",
-                        Location,
-                        name_);
-                }
-                else
-                {
-                    commands.Append(
-                        "$data modify storage {0} stack[0].var.{1} set value $({1})",
-                        Location,
-                        name_);
-                }
-            }
 
             for (unsigned s = 0; s < StackIndex; ++s)
             {
@@ -143,13 +112,13 @@ void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments
         {
             arguments += ',';
         }
-        if (Parameters[i].second->Type == Context.GetString())
+        if (Parameters.at(i).Type == Type->Context.GetString())
         {
-            arguments += std::format("{0}:\"$({0})\"", Parameters[i].first);
+            arguments += std::format("\"{0}\":\"$({0})\"", Parameters.at(i).Name);
         }
         else
         {
-            arguments += std::format("{0}:$({0})", Parameters[i].first);
+            arguments += std::format("\"{0}\":$({0})", Parameters.at(i).Name);
         }
     }
     arguments += '}';

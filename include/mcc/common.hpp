@@ -112,14 +112,14 @@ namespace mcc
 
         /* Constant */
         std::string Value;
+        bool NotNull;
 
         /* Storage */
         ResourceLocation Location;
         std::string Path;
 
-        /* Score */
-        std::string Player;
-        std::string Objective;
+        /* Argument */
+        std::string Name;
     };
 
     std::ostream &operator<<(std::ostream &stream, const TypePtr &type);

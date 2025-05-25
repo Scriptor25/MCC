@@ -9,7 +9,7 @@ mcc::BlockPtr mcc::Block::Create(const SourceLocation &where, TypeContext &conte
 }
 
 mcc::Block::Block(const SourceLocation &where, TypeContext &context, FunctionPtr parent)
-    : Value(where, context, context.GetVoid()),
+    : Value(where, context.GetVoid(), false),
       Parent(std::move(parent))
 {
 }

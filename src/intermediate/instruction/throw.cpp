@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
@@ -20,24 +21,28 @@ mcc::InstructionPtr mcc::ThrowInstruction::Create(
 mcc::ThrowInstruction::ThrowInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &value,
-    const BlockPtr &landing_pad)
-    : Instruction(where, context, context.GetVoid()),
-      Location(location),
-      Value(value),
-      LandingPad(landing_pad)
+    ResourceLocation location,
+    ValuePtr value,
+    BlockPtr landing_pad)
+    : Instruction(where, context.GetVoid(), false),
+      Location(std::move(location)),
+      Value(std::move(value)),
+      LandingPad(std::move(landing_pad))
 {
     Value->Use();
     if (LandingPad)
+    {
         LandingPad->Use();
+    }
 }
 
 mcc::ThrowInstruction::~ThrowInstruction()
 {
     Value->Drop();
     if (LandingPad)
+    {
         LandingPad->Drop();
+    }
 }
 
 void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) const
@@ -45,10 +50,7 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
     switch (auto value = Value->GenerateResult(false); value.Type)
     {
         case ResultType_Value:
-            commands.Append(
-                "data modify storage {} result set value {}",
-                Location,
-                value.Value);
+            commands.Append("data modify storage {} result set value {}", Location, value.Value);
             break;
 
         case ResultType_Storage:
@@ -59,12 +61,17 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
                 value.Path);
             break;
 
+        case ResultType_Argument:
+            commands.Append("$data modify storage {} result set value $({})", Location, value.Name);
+            break;
+
         default:
             Error(
                 Where,
-                "value must be {} or {}, but is {}",
+                "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
+                ResultType_Argument,
                 value.Type);
     }
 

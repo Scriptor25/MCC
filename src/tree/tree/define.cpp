@@ -1,5 +1,6 @@
 #include <utility>
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/statement.hpp>
@@ -32,7 +33,7 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
     {
         if (i > 0)
             stream << ", ";
-        stream << Parameters[i].Name << ": " << Parameters[i].Type;
+        stream << Parameters.at(i).Name << ": " << Parameters.at(i).Type;
     }
     stream << ')';
     if (Result)
@@ -44,7 +45,7 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
     {
         if (i > 0)
             stream << ", ";
-        Tags[i].Print(stream << '#');
+        Tags.at(i).Print(stream << '#');
     }
     if (!Tags.empty())
         stream << ' ';
@@ -72,7 +73,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
         for (unsigned i = 0; i < Parameters.size(); ++i)
         {
             Assert(
-                function->Parameters[i].second->Type == Parameters[i].Type,
+                function->Parameters.at(i).Type == Parameters.at(i).Type,
                 Where,
                 "cannot implement function with different parameter type for offset {}",
                 i);
@@ -97,9 +98,9 @@ void mcc::DefineNode::Generate(Builder &builder) const
 
     builder.PushVariables();
 
-    for (auto &[name_, value_]: function->Parameters)
+    for (auto &[name_, type_]: function->Parameters)
     {
-        builder.InsertVariable(Where, name_, value_);
+        builder.InsertVariable(Where, name_, ConstantArgument::Create(Where, type_, name_));
     }
 
     Frame target_frame;
@@ -155,7 +156,7 @@ void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem
     for (unsigned i = 0; i < Parameters.size(); ++i)
     {
         Assert(
-            function->Parameters[i].second->Type == Parameters[i].Type,
+            function->Parameters.at(i).Type == Parameters.at(i).Type,
             Where,
             "cannot implement function with different parameter type for offset {}",
             i);

@@ -2,13 +2,13 @@ namespace example
 
 define add(x: number, y: number): number #math {
     const result = x + y
-    !print(@s, `${x} + ${y} = ${result}`)
+    !print("@s", `${x} + ${y} = ${result}`)
     return result
 }
 
 define sub(x: number, y: number): number #math {
     const result = x - y
-    !print(@s, `${x} - ${y} = ${result}`)
+    !print("@s", `${x} - ${y} = ${result}`)
     return result
 }
 

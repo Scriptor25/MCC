@@ -1,28 +1,28 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::MemberReference::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const ValuePtr &object,
     const std::string &member)
 {
     const auto object_type = std::dynamic_pointer_cast<StructType>(object->Type);
     Assert(!!object_type, where, "object must be of type object");
+
     auto type = object_type->Elements.at(member);
-    return std::make_shared<MemberReference>(where, context, type, object, member);
+    return std::make_shared<MemberReference>(where, type, object, member);
 }
 
 mcc::MemberReference::MemberReference(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
-    ValuePtr object,
-    const std::string &member)
-    : Value(where, context, type),
-      Object(std::move(object)),
-      Member(member)
+    const ValuePtr &object,
+    std::string member)
+    : Value(where, type, object->IsMutable),
+      Object(object),
+      Member(std::move(member))
 {
     Object->Use();
 }

@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
@@ -17,14 +18,14 @@ mcc::ComparisonInstruction::ComparisonInstruction(
     const SourceLocation &where,
     TypeContext &context,
     const ComparatorE comparator,
-    const ResourceLocation &location,
-    const ValuePtr &left,
-    const ValuePtr &right)
-    : Instruction(where, context, context.GetBoolean()),
+    ResourceLocation location,
+    ValuePtr left,
+    ValuePtr right)
+    : Instruction(where, context.GetBoolean(), false),
       Comparator(comparator),
-      Location(location),
-      Left(left),
-      Right(right)
+      Location(std::move(location)),
+      Left(std::move(left)),
+      Right(std::move(right))
 {
     Left->Use();
     Right->Use();
@@ -41,56 +42,70 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
     auto left = Left->GenerateResult(false);
     auto right = Right->GenerateResult(false);
 
-    auto require_right = Left != Right && left != right;
+    const auto require_right = Left != Right && left != right;
+
+    auto objective = GetTmpName();
 
     commands.Append(CreateTmpScore());
 
     switch (left.Type)
     {
         case ResultType_Value:
-            commands.Append("scoreboard players set %a {} {}", GetTmpName(), left.Value);
+            commands.Append("scoreboard players set %a {} {}", objective, left.Value);
             break;
 
         case ResultType_Storage:
             commands.Append(
                 "execute store result score %a {} run data get storage {} {}",
-                GetTmpName(),
+                objective,
                 left.Location,
                 left.Path);
+            break;
+
+        case ResultType_Argument:
+            commands.Append("$scoreboard players set %a {} $({})", objective, left.Name);
             break;
 
         default:
             Error(
                 Where,
-                "left must be {} or {}, but is {}",
+                "left must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
+                ResultType_Argument,
                 left.Type);
     }
 
     if (require_right)
+    {
         switch (right.Type)
         {
             case ResultType_Value:
-                commands.Append("scoreboard players set %b {} {}", GetTmpName(), right.Value);
+                commands.Append("scoreboard players set %b {} {}", objective, right.Value);
                 break;
 
             case ResultType_Storage:
                 commands.Append(
                     "execute store result score %b {} run data get storage {} {}",
-                    GetTmpName(),
+                    objective,
                     right.Location,
                     right.Path);
+                break;
+
+            case ResultType_Argument:
+                commands.Append("$scoreboard players set %b {} $({})", objective, right.Name);
                 break;
 
             default:
                 Error(
                     Where,
-                    "right must be {} or {}, but is {}",
+                    "right must be {}, {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Storage,
+                    ResultType_Argument,
                     right.Type);
         }
+    }
 
     std::string operator_;
     switch (Comparator)
@@ -124,10 +139,10 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
         "execute store result storage {} {} byte 1 if score %a {} {} {} {}",
         Location,
         GetStackPath(),
-        GetTmpName(),
+        objective,
         operator_,
         require_right ? "%b" : "%a",
-        GetTmpName());
+        objective);
 
     commands.Append(RemoveTmpScore());
 }

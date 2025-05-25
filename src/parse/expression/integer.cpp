@@ -8,6 +8,6 @@ mcc::ExpressionPtr mcc::Parser::ParseIntegerExpression()
     auto token = Expect(TokenType_Integer);
     return std::make_unique<ConstantExpression>(
         token.Where,
-        ConstantInteger::Create(token.Where, m_Context, token.Integer),
+        ConstantNumber::Create(token.Where, m_Context, token.Integer),
         token.Value);
 }

@@ -7,7 +7,7 @@ namespace mcc
 {
     struct Value
     {
-        Value(SourceLocation where, TypeContext &context, TypePtr type);
+        Value(SourceLocation where, TypePtr type, bool is_mutable);
         virtual ~Value() = default;
 
         virtual void Generate(CommandVector &commands, bool stack) const;
@@ -18,24 +18,17 @@ namespace mcc
         void Drop();
 
         SourceLocation Where;
-        TypeContext &Context;
         TypePtr Type;
+        bool IsMutable;
+
         IndexT UseCount = 0;
     };
 
     struct BranchResult final : Value
     {
-        static ValuePtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location);
+        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);
 
-        BranchResult(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location);
+        BranchResult(const SourceLocation &where, const TypePtr &type, ResourceLocation location);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -64,14 +57,9 @@ namespace mcc
 
     struct ElementReference final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, TypeContext &context, const ValuePtr &array, IndexT index);
+        static ValuePtr Create(const SourceLocation &where, const ValuePtr &array, IndexT index);
 
-        ElementReference(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            ValuePtr array,
-            IndexT index);
+        ElementReference(const SourceLocation &where, const TypePtr &type, const ValuePtr &array, IndexT index);
         ~ElementReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
@@ -93,7 +81,6 @@ namespace mcc
 
         Function(
             const SourceLocation &where,
-            TypeContext &context,
             const TypePtr &type,
             ResourceLocation location,
             const ParameterList &parameters,
@@ -112,7 +99,7 @@ namespace mcc
         BlockPtr Erase(const BlockPtr &target_block);
 
         ResourceLocation Location;
-        std::vector<std::pair<std::string, ValuePtr>> Parameters;
+        ParameterList Parameters;
         TypePtr Result;
         bool Throws;
 
@@ -122,17 +109,9 @@ namespace mcc
 
     struct FunctionResult final : Value
     {
-        static ValuePtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location);
+        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);
 
-        FunctionResult(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location);
+        FunctionResult(const SourceLocation &where, const TypePtr &type, ResourceLocation location);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
@@ -142,18 +121,9 @@ namespace mcc
 
     struct MemberReference final : Value
     {
-        static ValuePtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const ValuePtr &object,
-            const std::string &member);
+        static ValuePtr Create(const SourceLocation &where, const ValuePtr &object, const std::string &member);
 
-        MemberReference(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            ValuePtr object,
-            const std::string &member);
+        MemberReference(const SourceLocation &where, const TypePtr &type, const ValuePtr &object, std::string member);
         ~MemberReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
@@ -161,28 +131,5 @@ namespace mcc
 
         ValuePtr Object;
         std::string Member;
-    };
-
-    struct NamedValue final : Value
-    {
-        static ValuePtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location,
-            const std::string &name);
-
-        NamedValue(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location,
-            const std::string &name);
-
-        [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        ResourceLocation Location;
-        std::string Name;
     };
 }

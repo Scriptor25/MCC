@@ -1,4 +1,3 @@
-#include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
@@ -21,8 +20,8 @@ mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder, const Fr
     const auto array = Array->GenerateValue(builder, frame);
     const auto index = Index->GenerateValue(builder, frame);
 
-    const auto constant_index = std::dynamic_pointer_cast<ConstantInteger>(index);
-    Assert(!!constant_index, Index->Where, "index must be constant integer");
+    const auto constant_index = std::dynamic_pointer_cast<ConstantNumber>(index);
+    Assert(!!constant_index, Index->Where, "index must be a constant number");
 
-    return ElementReference::Create(Where, builder.GetContext(), array, constant_index->Value);
+    return ElementReference::Create(Where, array, static_cast<IndexT>(constant_index->Value));
 }

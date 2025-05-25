@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
@@ -14,20 +15,24 @@ mcc::InstructionPtr mcc::ReturnInstruction::Create(
 mcc::ReturnInstruction::ReturnInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &value)
-    : Instruction(where, context, context.GetVoid()),
-      Location(location),
-      Value(value)
+    ResourceLocation location,
+    ValuePtr value)
+    : Instruction(where, context.GetVoid(), false),
+      Location(std::move(location)),
+      Value(std::move(value))
 {
     if (Value)
+    {
         Value->Use();
+    }
 }
 
 mcc::ReturnInstruction::~ReturnInstruction()
 {
     if (Value)
+    {
         Value->Drop();
+    }
 }
 
 void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack) const
@@ -37,10 +42,7 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
         switch (auto value = Value->GenerateResult(false); value.Type)
         {
             case ResultType_Value:
-                commands.Append(
-                    "data modify storage {} result set value {}",
-                    Location,
-                    value.Value);
+                commands.Append("data modify storage {} result set value {}", Location, value.Value);
                 break;
 
             case ResultType_Storage:
@@ -49,6 +51,10 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
                     Location,
                     value.Location,
                     value.Path);
+                break;
+
+            case ResultType_Argument:
+                commands.Append("$data modify storage {} result set value $({})", Location, value.Name);
                 break;
 
             default:
@@ -75,7 +81,7 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
 
 bool mcc::ReturnInstruction::RequireStack() const
 {
-    return Value ? Value->RequireStack() : false;
+    return Value && Value->RequireStack();
 }
 
 bool mcc::ReturnInstruction::IsTerminator() const

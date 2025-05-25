@@ -7,7 +7,7 @@ namespace mcc
 {
     struct Instruction : Value
     {
-        Instruction(const SourceLocation &where, TypeContext &context, const TypePtr &type);
+        Instruction(const SourceLocation &where, const TypePtr &type, bool is_mutable);
 
         [[nodiscard]] virtual bool IsTerminator() const;
 
@@ -20,40 +20,29 @@ namespace mcc
 
     struct AllocationInstruction final : Instruction
     {
-        static InstructionPtr CreateValue(
+        static InstructionPtr Create(
             const SourceLocation &where,
-            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
-            IndexT index);
-        static InstructionPtr CreateArray(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location,
-            IndexT index);
-        static InstructionPtr CreateObject(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const ResourceLocation &location,
-            IndexT index);
+            IndexT index,
+            bool is_mutable,
+            const ConstantPtr &initializer);
 
         AllocationInstruction(
             const SourceLocation &where,
-            TypeContext &context,
             const TypePtr &type,
-            AllocationTypeE allocation_type,
             ResourceLocation location,
-            IndexT index);
+            IndexT index,
+            bool is_mutable,
+            ConstantPtr initializer);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
-        AllocationTypeE AllocationType;
         ResourceLocation Location;
         IndexT Index;
+        ConstantPtr Initializer;
     };
 
     struct ArrayInstruction final : Instruction
@@ -84,7 +73,6 @@ namespace mcc
         ArrayInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const TypePtr &type,
             ArrayOperationE array_operation,
             ResourceLocation location,
             ValuePtr array,
@@ -116,10 +104,10 @@ namespace mcc
         BranchInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
-            const ValuePtr &condition,
-            const BlockPtr &then_target,
-            const BlockPtr &else_target);
+            ResourceLocation location,
+            ValuePtr condition,
+            BlockPtr then_target,
+            BlockPtr else_target);
         ~BranchInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -136,7 +124,6 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
-            TypeContext &context,
             const ResourceLocation &location,
             const FunctionPtr &callee,
             const std::vector<std::pair<std::string, ValuePtr>> &arguments,
@@ -144,7 +131,6 @@ namespace mcc
 
         CallInstruction(
             const SourceLocation &where,
-            TypeContext &context,
             ResourceLocation location,
             const FunctionPtr &callee,
             const std::vector<std::pair<std::string, ValuePtr>> &arguments,
@@ -165,17 +151,15 @@ namespace mcc
     {
         static InstructionPtr Create(
             const SourceLocation &where,
-            TypeContext &context,
             const TypePtr &type,
             const ResourceLocation &location,
             const CommandT &command);
 
         CommandInstruction(
             const SourceLocation &where,
-            TypeContext &context,
             const TypePtr &type,
-            const ResourceLocation &location,
-            const CommandT &command);
+            ResourceLocation location,
+            CommandT command);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
@@ -199,9 +183,9 @@ namespace mcc
             const SourceLocation &where,
             TypeContext &context,
             ComparatorE comparator,
-            const ResourceLocation &location,
-            const ValuePtr &left,
-            const ValuePtr &right);
+            ResourceLocation location,
+            ValuePtr left,
+            ValuePtr right);
         ~ComparisonInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -272,8 +256,8 @@ namespace mcc
         MacroInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
-            const std::string &name,
+            ResourceLocation location,
+            std::string name,
             const std::vector<ValuePtr> &arguments);
         ~MacroInstruction() override;
 
@@ -321,10 +305,10 @@ namespace mcc
         ObjectInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
-            const ValuePtr &object,
-            const ValuePtr &value,
-            const std::string &key);
+            ResourceLocation location,
+            ValuePtr object,
+            ValuePtr value,
+            std::string key);
         ~ObjectInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -348,7 +332,7 @@ namespace mcc
             const SourceLocation &where,
             TypeContext &context,
             OperatorE operator_,
-            const ResourceLocation &location,
+            ResourceLocation location,
             const std::vector<ValuePtr> &operands);
         ~OperationInstruction() override;
 
@@ -372,8 +356,8 @@ namespace mcc
         ReturnInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
-            const ValuePtr &value);
+            ResourceLocation location,
+            ValuePtr value);
         ~ReturnInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -387,13 +371,9 @@ namespace mcc
 
     struct StoreInstruction final : Instruction
     {
-        static InstructionPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const ValuePtr &dst,
-            const ValuePtr &src);
+        static InstructionPtr Create(const SourceLocation &where, const ValuePtr &dst, const ValuePtr &src);
 
-        StoreInstruction(const SourceLocation &where, TypeContext &context, const ValuePtr &dst, const ValuePtr &src);
+        StoreInstruction(const SourceLocation &where, const ValuePtr &dst, ValuePtr src);
         ~StoreInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -416,9 +396,9 @@ namespace mcc
         SwitchInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
-            const ValuePtr &condition,
-            const BlockPtr &default_target,
+            ResourceLocation location,
+            ValuePtr condition,
+            BlockPtr default_target,
             const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets);
         ~SwitchInstruction() override;
 
@@ -445,9 +425,9 @@ namespace mcc
         ThrowInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            const ResourceLocation &location,
-            const ValuePtr &value,
-            const BlockPtr &landing_pad);
+            ResourceLocation location,
+            ValuePtr value,
+            BlockPtr landing_pad);
         ~ThrowInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;

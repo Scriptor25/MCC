@@ -1,7 +1,7 @@
 namespace example
 
 define hello_world() {
-    !print(@s, "Hello World!")
+    !print("@s", "Hello World!")
 }
 
 define hello() {
@@ -9,13 +9,13 @@ define hello() {
 }
 
 define hello_all() {
-    !print(@s, `Hello ${@s}! Hello to all of ${@e[type=!player]}!`)
+    !print("@s", `Hello ${{ selector: "@s" }}! Hello to all of ${{ selector: "@e[type=!player]" }}!`)
 }
 
 define hello_rec(d: number) {
-    !print(@s, `Hello ${d}`)
+    !print("@s", `Hello ${d}`)
     if (d <= 0)
-        !print(@s, "reached end of recursive loop")
+        !print("@s", "reached end of recursive loop")
     else
         hello_rec(d - 1)
 }

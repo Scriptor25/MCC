@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <optional>
 #include <mcc/common.hpp>
 #include <mcc/value.hpp>
 
@@ -9,9 +8,46 @@ namespace mcc
 {
     struct Constant : Value
     {
-        Constant(const SourceLocation &where, TypeContext &context, const TypePtr &type);
+        Constant(const SourceLocation &where, const TypePtr &type);
 
         [[nodiscard]] bool RequireStack() const override;
+    };
+
+    struct ConstantArgument final : Constant
+    {
+        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const std::string &name);
+
+        ConstantArgument(const SourceLocation &where, const TypePtr &type, std::string name);
+
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        std::string Name;
+    };
+
+    struct ConstantArray final : Constant
+    {
+        static ConstantPtr Create(
+            const SourceLocation &where,
+            const TypePtr &type,
+            const std::vector<ConstantPtr> &values,
+            bool stringify);
+        static ConstantPtr Create(
+            const SourceLocation &where,
+            TypeContext &context,
+            const std::vector<ConstantPtr> &values,
+            bool stringify);
+
+        ConstantArray(
+            const SourceLocation &where,
+            const TypePtr &type,
+            const std::vector<ConstantPtr> &values,
+            bool stringify);
+        ~ConstantArray() override;
+
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        std::vector<ConstantPtr> Values;
+        bool Stringify;
     };
 
     struct ConstantBoolean final : Constant
@@ -25,90 +61,30 @@ namespace mcc
         bool Value;
     };
 
-    struct ConstantInteger final : Constant
+    struct ConstantNull final : Constant
     {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, IntegerT value);
+        static ConstantPtr Create(const SourceLocation &where, TypeContext &context);
 
-        ConstantInteger(const SourceLocation &where, TypeContext &context, IntegerT value);
+        ConstantNull(const SourceLocation &where, TypeContext &context);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        IntegerT Value;
     };
 
-    struct ConstantFloat final : Constant
+    struct ConstantNumber final : Constant
     {
         static ConstantPtr Create(const SourceLocation &where, TypeContext &context, FloatT value);
 
-        ConstantFloat(const SourceLocation &where, TypeContext &context, FloatT value);
+        ConstantNumber(const SourceLocation &where, TypeContext &context, FloatT value);
 
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         FloatT Value;
     };
 
-    struct ConstantFloatRange final : Constant
-    {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, FloatT min, FloatT max);
-        static ConstantPtr CreateMin(const SourceLocation &where, TypeContext &context, FloatT min);
-        static ConstantPtr CreateMax(const SourceLocation &where, TypeContext &context, FloatT max);
-
-        ConstantFloatRange(
-            const SourceLocation &where,
-            TypeContext &context,
-            std::optional<FloatT> min,
-            std::optional<FloatT> max);
-
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        std::optional<FloatT> Min;
-        std::optional<FloatT> Max;
-    };
-
-    struct ConstantString final : Constant
-    {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, const std::string &value);
-
-        ConstantString(const SourceLocation &where, TypeContext &context, const std::string &value);
-
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        std::string Value;
-    };
-
-    struct ConstantArray final : Constant
-    {
-        static ConstantPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
-        static ConstantPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
-
-        ConstantArray(
-            const SourceLocation &where,
-            TypeContext &context,
-            const TypePtr &type,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
-        ~ConstantArray() override;
-
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        std::vector<ConstantPtr> Values;
-        bool Stringify;
-    };
-
     struct ConstantObject final : Constant
     {
         static ConstantPtr Create(
             const SourceLocation &where,
-            TypeContext &context,
             const TypePtr &type,
             const std::map<std::string, ConstantPtr> &values);
         static ConstantPtr Create(
@@ -118,7 +94,6 @@ namespace mcc
 
         ConstantObject(
             const SourceLocation &where,
-            TypeContext &context,
             const TypePtr &type,
             const std::map<std::string, ConstantPtr> &values);
         ~ConstantObject() override;
@@ -126,26 +101,6 @@ namespace mcc
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         std::map<std::string, ConstantPtr> Values;
-    };
-
-    struct ConstantTarget final : Constant
-    {
-        static ConstantPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            TargetSelectorE selector,
-            std::map<std::string, std::vector<TargetAttributePtr>> attributes);
-
-        ConstantTarget(
-            const SourceLocation &where,
-            TypeContext &context,
-            TargetSelectorE selector,
-            std::map<std::string, std::vector<TargetAttributePtr>> attributes);
-
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
-
-        TargetSelectorE Selector;
-        std::map<std::string, std::vector<TargetAttributePtr>> Attributes;
     };
 
     struct ConstantResource final : Constant
@@ -157,5 +112,16 @@ namespace mcc
         [[nodiscard]] Result GenerateResult(bool stringify) const override;
 
         ResourceLocation Location;
+    };
+
+    struct ConstantString final : Constant
+    {
+        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, const std::string &value);
+
+        ConstantString(const SourceLocation &where, TypeContext &context, std::string value);
+
+        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+
+        std::string Value;
     };
 }

@@ -16,40 +16,13 @@ define user_create(age: number, name: string, email: string, func: $(number, str
     }
 }
 
-define user_age_get(self: user): number {
-    return self.age
-}
-
-define user_name_get(self: user): string {
-    return self.name
-}
-
-define user_email_get(self: user): string {
-    return self.email
-}
-
-define user_age_set(self: user, age: number) {
-    self.age = age
-}
-
-define user_name_set(self: user, name: string) {
-    self.name = name
-}
-
-define user_email_set(self: user, email: string) {
-    self.email = email
-}
-
-define user_call_wrapper(func: $(number, string, string) => void, age: number, name: string, email: string) {
-    ?`$function $(func) {age:$(age),name:"$(name)",email:"$(email)"}`
-}
-
 define user_call(self: user) {
-    user_call_wrapper(self.func, self.age, self.name, self.email)
+    const copy = self
+    ?`$function $(copy.func) $(self)`
 }
 
 define user_print(age: number, name: string, email: string) {
-    !print(@s, `age: ${age}, name: ${name}, email: ${email}`)
+    !print("@s", `age: ${age}, name: ${name}, email: ${email}`)
 }
 
 define user_test() {

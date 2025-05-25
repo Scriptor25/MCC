@@ -5,7 +5,6 @@
 
 mcc::InstructionPtr mcc::CallInstruction::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const ResourceLocation &location,
     const FunctionPtr &callee,
     const std::vector<std::pair<std::string, ValuePtr>> &arguments,
@@ -13,7 +12,6 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
 {
     return std::make_shared<CallInstruction>(
         where,
-        context,
         location,
         callee,
         arguments,
@@ -22,29 +20,36 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
 
 mcc::CallInstruction::CallInstruction(
     const SourceLocation &where,
-    TypeContext &context,
     ResourceLocation location,
     const FunctionPtr &callee,
     const std::vector<std::pair<std::string, ValuePtr>> &arguments,
     BlockPtr landing_pad)
-    : Instruction(where, context, callee->Result),
+    : Instruction(where, callee->Result, false),
       Location(std::move(location)),
       Callee(callee),
       Arguments(arguments),
       LandingPad(std::move(landing_pad))
 {
     for (const auto &argument: Arguments | std::views::values)
+    {
         argument->Use();
+    }
     if (LandingPad)
+    {
         LandingPad->Use();
+    }
 }
 
 mcc::CallInstruction::~CallInstruction()
 {
     for (const auto &argument: Arguments | std::views::values)
+    {
         argument->Drop();
+    }
     if (LandingPad)
+    {
         LandingPad->Drop();
+    }
 }
 
 void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) const
@@ -52,6 +57,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
     auto stack_path = GetStackPath();
     auto tmp_name = GetTmpName();
 
+    std::string argument_prefix;
     std::string argument_object;
     auto require_cleanup = false;
     if (!Arguments.empty())
@@ -74,8 +80,15 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
 
                 auto [key, argument] = Arguments.at(i);
 
-                auto value = argument->GenerateResult(false);
-                argument_object += std::format("\"{}\":{}", key, value.Value);
+                if (auto value = argument->GenerateResult(false); value.Type == ResultType_Argument)
+                {
+                    argument_prefix = "$";
+                    argument_object += std::format("\"{}\":$({})", key, value.Name);
+                }
+                else
+                {
+                    argument_object += std::format("\"{}\":{}", key, value.Value);
+                }
             }
 
             argument_object += '}';
@@ -107,12 +120,22 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                             value.Path);
                         break;
 
+                    case ResultType_Argument:
+                        commands.Append(
+                            "$data modify storage {} {}.{} set value $({})",
+                            Location,
+                            stack_path,
+                            key_,
+                            value.Name);
+                        break;
+
                     default:
                         Error(
                             Where,
-                            "value must be {} or {}, but is {}",
+                            "value must be {}, {} or {}, but is {}",
                             ResultType_Value,
                             ResultType_Storage,
+                            ResultType_Argument,
                             value.Type);
                 }
             }
@@ -126,7 +149,8 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
     {
         commands.Append(CreateTmpScore());
         commands.Append(
-            "execute store result score %c {} run function {}{}",
+            "{}execute store result score %c {} run function {}{}",
+            argument_prefix,
             tmp_name,
             Callee->Location,
             argument_object);
@@ -175,7 +199,8 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
     else
     {
         commands.Append(
-            "function {}{}",
+            "{}function {}{}",
+            argument_prefix,
             Callee->Location,
             argument_object);
     }

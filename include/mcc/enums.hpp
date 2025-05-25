@@ -2,7 +2,6 @@
 
 #include <format>
 #include <map>
-#include <ostream>
 #include <string>
 
 namespace mcc
@@ -18,34 +17,7 @@ namespace mcc
     {
         ResultType_Value,
         ResultType_Storage,
-    };
-
-    enum TargetSelectorE
-    {
-        TargetSelector_P,
-        TargetSelector_R,
-        TargetSelector_A,
-        TargetSelector_E,
-        TargetSelector_S,
-    };
-
-    enum GameModeE
-    {
-        GameMode_None,
-        GameMode_Survival,
-        GameMode_Creative,
-        GameMode_Adventure,
-        GameMode_Hardcore,
-        GameMode_Spectator,
-    };
-
-    enum SortOrderE
-    {
-        SortOrder_None,
-        SortOrder_Nearest,
-        SortOrder_Furthest,
-        SortOrder_Random,
-        SortOrder_Arbitrary,
+        ResultType_Argument,
     };
 
     enum ComparatorE
@@ -68,13 +40,6 @@ namespace mcc
         Operator_Rem,
     };
 
-    enum AllocationTypeE
-    {
-        AllocationType_Value,
-        AllocationType_Array,
-        AllocationType_Object,
-    };
-
     enum ArrayOperationE
     {
         ArrayOperation_Append,
@@ -82,57 +47,13 @@ namespace mcc
         ArrayOperation_Insert,
     };
 
-    enum OffsetTypeE
-    {
-        OffsetType_Relative,
-        OffsetType_Local,
-    };
-
-    inline TargetSelectorE ToTargetSelector(const std::string_view &string)
-    {
-        static const std::map<std::string_view, TargetSelectorE> map
-        {
-            {"p", TargetSelector_P},
-            {"r", TargetSelector_R},
-            {"a", TargetSelector_A},
-            {"e", TargetSelector_E},
-            {"s", TargetSelector_S},
-        };
-
-        return map.at(string);
-    }
-
-    inline OffsetTypeE ToOffsetType(const std::string_view &string)
-    {
-        static const std::map<std::string_view, OffsetTypeE> map
-        {
-            {"~", OffsetType_Relative},
-            {"^", OffsetType_Local},
-        };
-
-        return map.at(string);
-    }
-
     inline const char *ToString(const ResultTypeE enum_)
     {
         static const std::map<ResultTypeE, const char *> map
         {
             {ResultType_Value, "value"},
             {ResultType_Storage, "storage"},
-        };
-
-        return map.at(enum_);
-    }
-
-    inline const char *ToString(const TargetSelectorE enum_)
-    {
-        static const std::map<TargetSelectorE, const char *> map
-        {
-            {TargetSelector_P, "p"},
-            {TargetSelector_R, "r"},
-            {TargetSelector_A, "a"},
-            {TargetSelector_E, "e"},
-            {TargetSelector_S, "s"},
+            {ResultType_Argument, "argument"},
         };
 
         return map.at(enum_);
@@ -166,22 +87,6 @@ namespace mcc
         };
 
         return map.at(enum_);
-    }
-
-    inline const char *ToString(const OffsetTypeE enum_)
-    {
-        static const std::map<OffsetTypeE, const char *> map
-        {
-            {OffsetType_Relative, "~"},
-            {OffsetType_Local, "^"},
-        };
-
-        return map.at(enum_);
-    }
-
-    inline std::ostream &operator<<(std::ostream &stream, const TargetSelectorE &e)
-    {
-        return stream << ToString(e);
     }
 }
 

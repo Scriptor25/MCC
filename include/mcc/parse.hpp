@@ -60,19 +60,6 @@ namespace mcc
 
         ResourceLocation ParseResourceLocation(const std::string &default_namespace = {});
 
-        TargetAttributePtr ParseEnumAttribute(bool invert, const std::vector<const char *> &values);
-        TargetAttributePtr ParseFloatAttribute(bool invert);
-        TargetAttributePtr ParseFloatRangeAttribute(bool invert);
-        TargetAttributePtr ParseIntegerAttribute(bool invert);
-        TargetAttributePtr ParseIntegerRangeAttribute(bool invert);
-        TargetAttributePtr ParseMapAttribute(bool invert, const Parse &parse);
-        TargetAttributePtr ParseNameAttribute(bool invert);
-        TargetAttributePtr ParseNBTAttribute(bool invert);
-        TargetAttributePtr ParseResourceAttribute(bool invert);
-        TargetAttributePtr ParseResourceMapAttribute(bool invert, const Parse &parse);
-        TargetAttributePtr ParseStringAttribute(bool invert);
-        TargetAttributePtr ParseTagAttribute(bool invert);
-
         TypePtr ParseType();
         TypePtr ParseBaseType();
         TypePtr ParseArrayType();
@@ -109,11 +96,9 @@ namespace mcc
         ExpressionPtr ParseObjectExpression();
         ExpressionPtr ParseOperandExpression();
         ExpressionPtr ParsePrimaryExpression();
-        ExpressionPtr ParseRangeExpression();
         ExpressionPtr ParseStringExpression();
         ExpressionPtr ParseSwitchExpression();
         ExpressionPtr ParseSymbolExpression();
-        ExpressionPtr ParseTargetExpression(bool with_attributes);
 
         TypeContext &m_Context;
 

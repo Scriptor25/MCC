@@ -10,13 +10,13 @@ mcc::ExpressionPtr mcc::Parser::ParseFloatExpression()
         auto token = Skip();
         return std::make_unique<ConstantExpression>(
             token.Where,
-            ConstantFloat::Create(token.Where, m_Context, token.Integer),
+            ConstantNumber::Create(token.Where, m_Context, token.Integer),
             token.Value);
     }
 
     auto token = Expect(TokenType_Float);
     return std::make_unique<ConstantExpression>(
         token.Where,
-        ConstantFloat::Create(token.Where, m_Context, token.Float),
+        ConstantNumber::Create(token.Where, m_Context, token.Float),
         token.Value);
 }

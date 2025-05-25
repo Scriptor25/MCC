@@ -50,10 +50,10 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
 
     if (values.size() == constants.size())
     {
-        return ConstantArray::Create(Where, builder.GetContext(), type, constants, false);
+        return ConstantArray::Create(Where, type, constants, false);
     }
 
-    auto array = builder.AllocateArray(Where, type);
+    auto array = builder.Allocate(Where, type, false, nullptr);
 
     for (const auto &value: values)
     {

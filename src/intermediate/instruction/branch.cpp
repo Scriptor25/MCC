@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
@@ -22,15 +23,15 @@ mcc::InstructionPtr mcc::BranchInstruction::Create(
 mcc::BranchInstruction::BranchInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &condition,
-    const BlockPtr &then_target,
-    const BlockPtr &else_target)
-    : Instruction(where, context, context.GetVoid()),
-      Location(location),
-      Condition(condition),
-      ThenTarget(then_target),
-      ElseTarget(else_target)
+    ResourceLocation location,
+    ValuePtr condition,
+    BlockPtr then_target,
+    BlockPtr else_target)
+    : Instruction(where, context.GetVoid(), false),
+      Location(std::move(location)),
+      Condition(std::move(condition)),
+      ThenTarget(std::move(then_target)),
+      ElseTarget(std::move(else_target))
 {
     Condition->Use();
     ThenTarget->Use();
@@ -61,9 +62,9 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
             commands.Append(
                 "{}return run function {}{}",
                 prefix,
-                condition.Value == "false" || condition.Value == "0"
-                    ? else_
-                    : then,
+                condition.NotNull
+                    ? then
+                    : else_,
                 arguments);
             break;
 
@@ -99,12 +100,41 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
                 arguments);
             break;
 
+        case ResultType_Argument:
+            commands.Append(CreateTmpScore());
+            commands.Append("$scoreboard players set %c {} $({})", tmp_name, condition.Name);
+            commands.Append(
+                "data remove storage {} {}",
+                Location,
+                stack_path);
+            commands.Append(
+                "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
+                tmp_name,
+                Location,
+                stack_path);
+            commands.Append(RemoveTmpScore());
+
+            commands.Append(
+                "{}execute if data storage {} {} run return run function {}{}",
+                prefix,
+                Location,
+                stack_path,
+                then,
+                arguments);
+            commands.Append(
+                "{}return run function {}{}",
+                prefix,
+                else_,
+                arguments);
+            break;
+
         default:
             Error(
                 Where,
-                "condition must be {} or {}, but is {}",
+                "condition must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
+                ResultType_Argument,
                 condition.Type);
     }
 }

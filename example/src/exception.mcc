@@ -16,7 +16,7 @@ define test_try_catch() {
         const c = a + b
         std:assert(c == 3, "c must be equal to 3")
     } catch (e: string) {
-        !print(@s, `catched error: ${e}`)
+        !print("@s", `catched error: ${e}`)
     }
 
     try {
@@ -25,6 +25,6 @@ define test_try_catch() {
         const c = a + b
         std:assert(c == 4, "c must be equal to 4")
     } catch (e: string) {
-        !print(@s, `catched error: ${e}`)
+        !print("@s", `catched error: ${e}`)
     }
 }

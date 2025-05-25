@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
@@ -22,15 +23,15 @@ mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
 mcc::ObjectInstruction::ObjectInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &object,
-    const ValuePtr &value,
-    const std::string &key)
-    : Instruction(where, context, context.GetVoid()),
-      Location(location),
-      Object(object),
-      Value(value),
-      Key(key)
+    ResourceLocation location,
+    ValuePtr object,
+    ValuePtr value,
+    std::string key)
+    : Instruction(where, context.GetVoid(), false),
+      Location(std::move(location)),
+      Object(std::move(object)),
+      Value(std::move(value)),
+      Key(std::move(key))
 {
     Object->Use();
     Value->Use();

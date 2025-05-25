@@ -77,7 +77,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
     for (unsigned i = 0; i < argument_size; ++i)
     {
         auto argument = arguments[i]->Type;
-        auto parameter = function->Parameters[i].second->Type;
+        auto parameter = function->Parameters[i].Type;
         Assert(
             argument == parameter,
             Where,

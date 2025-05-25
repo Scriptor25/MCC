@@ -33,19 +33,19 @@ struct UnaryOperator
 
 static mcc::ValuePtr inc(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
-    const auto one = mcc::ConstantInteger::Create(where, builder.GetContext(), 1);
+    const auto one = mcc::ConstantNumber::Create(where, builder.GetContext(), 1);
     return builder.CreateOperation(where, mcc::Operator_Add, {operand, one});
 };
 
 static mcc::ValuePtr dec(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
-    const auto one = mcc::ConstantInteger::Create(where, builder.GetContext(), 1);
+    const auto one = mcc::ConstantNumber::Create(where, builder.GetContext(), 1);
     return builder.CreateOperation(where, mcc::Operator_Sub, {operand, one});
 };
 
 static mcc::ValuePtr neg(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
-    const auto zero = mcc::ConstantInteger::Create(where, builder.GetContext(), 0);
+    const auto zero = mcc::ConstantNumber::Create(where, builder.GetContext(), 0);
     return builder.CreateOperation(where, mcc::Operator_Sub, {zero, operand});
 };
 

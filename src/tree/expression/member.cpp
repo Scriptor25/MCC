@@ -1,4 +1,3 @@
-#include <mcc/builder.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/value.hpp>
 
@@ -17,5 +16,5 @@ std::ostream &mcc::MemberExpression::Print(std::ostream &stream) const
 mcc::ValuePtr mcc::MemberExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     const auto object = Object->GenerateValue(builder, frame);
-    return MemberReference::Create(Where, builder.GetContext(), object, Member);
+    return MemberReference::Create(Where, object, Member);
 }

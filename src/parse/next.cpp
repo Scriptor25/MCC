@@ -57,6 +57,7 @@ mcc::Token &mcc::Parser::Next()
                     case '$':
                     case '?':
                     case '!':
+                    case '@':
                         where = m_Where;
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);
@@ -100,31 +101,6 @@ mcc::Token &mcc::Parser::Next()
                         state = LexState_Operator;
                         Get();
                         break;
-
-                    case '@':
-                        where = m_Where;
-                        raw += static_cast<char>(m_Buf);
-                        Get();
-                        raw += static_cast<char>(m_Buf);
-                        value += static_cast<char>(m_Buf);
-                        Get();
-                        if (m_Buf == '[')
-                        {
-                            raw += static_cast<char>(m_Buf);
-                            Get();
-                            return m_Token = {
-                                       .Type = TokenType_TargetAttributes,
-                                       .Where = std::move(where),
-                                       .Raw = std::move(raw),
-                                       .Value = std::move(value),
-                                   };
-                        }
-                        return m_Token = {
-                                   .Type = TokenType_Target,
-                                   .Where = std::move(where),
-                                   .Raw = std::move(raw),
-                                   .Value = std::move(value),
-                               };
 
                     case '`':
                         formatted = true;
@@ -210,22 +186,6 @@ mcc::Token &mcc::Parser::Next()
                                        .Value = value,
                                        .Float = std::stold(value),
                                    };
-
-                        case 2:
-                        {
-                            auto split = value.find("..");
-                            auto beg_string = value.substr(0, split);
-                            auto end_string = value.substr(split + 2);
-                            auto beg = beg_string.empty() ? std::nullopt : std::optional(std::stoll(beg_string));
-                            auto end = end_string.empty() ? std::nullopt : std::optional(std::stoll(end_string));
-                            return m_Token = {
-                                       .Type = TokenType_Range,
-                                       .Where = std::move(where),
-                                       .Raw = std::move(raw),
-                                       .Value = std::move(value),
-                                       .Range = {beg, end},
-                                   };
-                        }
 
                         default:
                             return m_Token = {

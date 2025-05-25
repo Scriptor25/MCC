@@ -8,12 +8,12 @@
 
 mcc::VariableStatement::VariableStatement(
     const SourceLocation &where,
-    const bool constant,
+    const bool is_constant,
     std::string name,
     TypePtr type,
     ExpressionPtr value)
     : Statement(where),
-      Constant(constant),
+      IsConstant(is_constant),
       Name(std::move(name)),
       Type(std::move(type)),
       Value(std::move(value))
@@ -22,7 +22,7 @@ mcc::VariableStatement::VariableStatement(
 
 std::ostream &mcc::VariableStatement::Print(std::ostream &stream) const
 {
-    stream << (Constant ? "const" : "let") << ' ' << Name;
+    stream << (IsConstant ? "const" : "let") << ' ' << Name;
     if (Type)
         Type->Print(stream << ": ");
     if (Value)
@@ -45,10 +45,6 @@ void mcc::VariableStatement::Generate(Builder &builder, Frame &frame) const
     }
 
     const auto type = Type ? Type : value->Type;
-    const auto variable = builder.CreateVariable(Where, type, Name);
 
-    if (value)
-    {
-        (void) builder.CreateStore(Where, variable, value);
-    }
+    (void) builder.CreateVariable(Where, type, Name, IsConstant, value);
 }

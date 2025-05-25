@@ -31,20 +31,32 @@ mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const Frame
     for (auto &node: Nodes)
     {
         auto value = node->Generate(builder, frame);
-        if (auto constant = std::dynamic_pointer_cast<Constant>(value))
-            constants.emplace_back(constant);
         values.emplace_back(value);
+
+        if (auto constant = std::dynamic_pointer_cast<Constant>(value))
+        {
+            constants.emplace_back(constant);
+        }
 
         elements.insert(value->Type);
     }
 
     if (values.size() == constants.size())
+    {
         return ConstantArray::Create(Where, builder.GetContext(), constants, true);
+    }
 
-    auto array = builder.AllocateArray(Where, builder.GetContext().GetUnion(elements));
+    const auto type = builder.GetContext().GetArray(
+        elements.size() == 1
+            ? *elements.begin()
+            : builder.GetContext().GetUnion(elements));
+
+    auto array = builder.Allocate(Where, type, false, nullptr);
 
     for (const auto &value: values)
+    {
         (void) builder.CreateAppend(Where, array, value, true);
+    }
 
     return array;
 }

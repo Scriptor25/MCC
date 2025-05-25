@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
@@ -16,21 +17,25 @@ mcc::OperationInstruction::OperationInstruction(
     const SourceLocation &where,
     TypeContext &context,
     const OperatorE operator_,
-    const ResourceLocation &location,
+    ResourceLocation location,
     const std::vector<ValuePtr> &operands)
-    : Instruction(where, context, context.GetNumber()),
+    : Instruction(where, context.GetNumber(), false),
       Operator(operator_),
-      Location(location),
+      Location(std::move(location)),
       Operands(operands)
 {
     for (const auto &operand: Operands)
+    {
         operand->Use();
+    }
 }
 
 mcc::OperationInstruction::~OperationInstruction()
 {
     for (const auto &operand: Operands)
+    {
         operand->Drop();
+    }
 }
 
 void mcc::OperationInstruction::Generate(CommandVector &commands, const bool stack) const
@@ -73,7 +78,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
     {
         auto player = i == 0 ? "%a" : "%b";
 
-        auto operand_value = Operands[i];
+        auto operand_value = Operands.at(i);
         auto operand = operand_value->GenerateResult(false);
 
         auto require_operand = operand_value != pre_operand_value && operand != pre_operand;
@@ -102,12 +107,17 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
                         operand.Path);
                     break;
 
+                case ResultType_Argument:
+                    commands.Append("$scoreboard players set {} {} $({})", player, objective, operand.Name);
+                    break;
+
                 default:
                     Error(
                         Where,
-                        "operand must be {} or {}, but is {}",
+                        "operand must be {}, {} or {}, but is {}",
                         ResultType_Value,
                         ResultType_Storage,
+                        ResultType_Argument,
                         operand.Type);
             }
         }

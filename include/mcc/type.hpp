@@ -38,59 +38,77 @@ namespace mcc
 
     struct Type
     {
+        explicit Type(TypeContext &context);
         virtual ~Type() = default;
 
         virtual std::string String() const = 0;
         virtual std::ostream &Print(std::ostream &stream) const = 0;
+
+        virtual ConstantPtr GetNull(const SourceLocation &where) const = 0;
+
+        TypeContext &Context;
+        std::weak_ptr<Type> Self;
     };
 
     struct VoidType final : Type
     {
-        VoidType() = default;
+        explicit VoidType(TypeContext &context);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
     };
 
     struct NullType final : Type
     {
-        NullType() = default;
+        explicit NullType(TypeContext &context);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
     };
 
     struct BooleanType final : Type
     {
-        BooleanType() = default;
+        explicit BooleanType(TypeContext &context);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
     };
 
     struct NumberType final : Type
     {
-        NumberType() = default;
+        explicit NumberType(TypeContext &context);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
     };
 
     struct StringType final : Type
     {
-        StringType() = default;
+        explicit StringType(TypeContext &context);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
     };
 
     /** A[] */
     struct ArrayType final : Type
     {
-        explicit ArrayType(TypePtr elements);
+        ArrayType(TypeContext &context, TypePtr elements);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
 
         TypePtr Elements;
     };
@@ -98,10 +116,12 @@ namespace mcc
     /** { a: A, ..., b: B } */
     struct StructType final : Type
     {
-        explicit StructType(const std::map<std::string, TypePtr> &elements);
+        StructType(TypeContext &context, const std::map<std::string, TypePtr> &elements);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
 
         std::map<std::string, TypePtr> Elements;
     };
@@ -109,10 +129,12 @@ namespace mcc
     /** [ A, ..., B ] */
     struct TupleType final : Type
     {
-        explicit TupleType(const std::vector<TypePtr> &elements);
+        TupleType(TypeContext &context, const std::vector<TypePtr> &elements);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
 
         std::vector<TypePtr> Elements;
     };
@@ -120,10 +142,12 @@ namespace mcc
     /** A | ... | B */
     struct UnionType final : Type
     {
-        explicit UnionType(const std::set<TypePtr> &elements);
+        UnionType(TypeContext &context, const std::set<TypePtr> &elements);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
 
         std::set<TypePtr> Elements;
     };
@@ -131,10 +155,12 @@ namespace mcc
     /** $(A, ..., B) => C, $!(A, ..., B) => C */
     struct FunctionType final : Type
     {
-        FunctionType(const std::vector<TypePtr> &parameters, const TypePtr &result, bool throws);
+        FunctionType(TypeContext &context, const std::vector<TypePtr> &parameters, const TypePtr &result, bool throws);
 
         std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
 
         std::vector<TypePtr> Parameters;
         TypePtr Result;

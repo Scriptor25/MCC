@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
@@ -9,9 +10,9 @@ mcc::ConstantPtr mcc::ConstantString::Create(
     return std::make_shared<ConstantString>(where, context, value);
 }
 
-mcc::ConstantString::ConstantString(const SourceLocation &where, TypeContext &context, const std::string &value)
-    : Constant(where, context, context.GetString()),
-      Value(value)
+mcc::ConstantString::ConstantString(const SourceLocation &where, TypeContext &context, std::string value)
+    : Constant(where, context.GetString()),
+      Value(std::move(value))
 {
 }
 
@@ -20,5 +21,6 @@ mcc::Result mcc::ConstantString::GenerateResult(const bool stringify) const
     return {
         .Type = ResultType_Value,
         .Value = '"' + Value + '"',
+        .NotNull = true,
     };
 }

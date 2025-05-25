@@ -1,23 +1,22 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::StoreInstruction::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const ValuePtr &dst,
     const ValuePtr &src)
 {
-    return std::make_shared<StoreInstruction>(where, context, dst, src);
+    return std::make_shared<StoreInstruction>(where, dst, src);
 }
 
 mcc::StoreInstruction::StoreInstruction(
     const SourceLocation &where,
-    TypeContext &context,
     const ValuePtr &dst,
-    const ValuePtr &src)
-    : Instruction(where, context, dst->Type),
+    ValuePtr src)
+    : Instruction(where, dst->Type, dst->IsMutable),
       Dst(dst),
-      Src(src)
+      Src(std::move(src))
 {
     Dst->Use();
     Src->Use();

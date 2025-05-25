@@ -35,14 +35,17 @@ namespace mcc
         ValuePtr CreateVariable(
             const SourceLocation &where,
             const TypePtr &type,
-            const std::string &name);
+            const std::string &name,
+            bool is_constant,
+            const ValuePtr &initializer);
         ValuePtr InsertVariable(const SourceLocation &where, const std::string &name, const ValuePtr &value);
         [[nodiscard]] ValuePtr GetVariable(const SourceLocation &where, const std::string &name) const;
 
         [[nodiscard]] InstructionPtr CreateStore(
             const SourceLocation &where,
             const ValuePtr &dst,
-            const ValuePtr &src) const;
+            const ValuePtr &src,
+            bool force = false) const;
 
         [[nodiscard]] InstructionPtr CreateComparison(
             const SourceLocation &where,
@@ -99,9 +102,11 @@ namespace mcc
             const std::string &name,
             const std::vector<ValuePtr> &arguments) const;
 
-        [[nodiscard]] InstructionPtr AllocateValue(const SourceLocation &where, const TypePtr &type) const;
-        [[nodiscard]] InstructionPtr AllocateArray(const SourceLocation &where, const TypePtr &type) const;
-        [[nodiscard]] InstructionPtr AllocateObject(const SourceLocation &where, const TypePtr &type) const;
+        [[nodiscard]] InstructionPtr Allocate(
+            const SourceLocation &where,
+            const TypePtr &type,
+            bool is_constant,
+            const ConstantPtr &initializer) const;
 
         [[nodiscard]] InstructionPtr CreateAppend(
             const SourceLocation &where,
@@ -126,7 +131,7 @@ namespace mcc
             const ValuePtr &value,
             const std::string &key) const;
 
-        InstructionPtr CreateStoreResult(
+        mcc::ValuePtr CreateStoreResult(
             const SourceLocation &where,
             const TypePtr &type,
             const std::string &name);

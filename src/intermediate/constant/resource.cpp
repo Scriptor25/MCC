@@ -11,7 +11,7 @@ mcc::ConstantPtr mcc::ConstantResource::Create(
 }
 
 mcc::ConstantResource::ConstantResource(const SourceLocation &where, TypeContext &context, ResourceLocation location)
-    : Constant(where, context, context.GetNull()),
+    : Constant(where, context.GetNull()),
       Location(std::move(location))
 {
 }
@@ -23,5 +23,6 @@ mcc::Result mcc::ConstantResource::GenerateResult(const bool stringify) const
     return {
         .Type = ResultType_Value,
         .Value = std::move(value),
+        .NotNull = true,
     };
 }

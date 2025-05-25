@@ -3,11 +3,10 @@
 
 mcc::ConstantPtr mcc::ConstantObject::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
     const std::map<std::string, ConstantPtr> &values)
 {
-    return std::make_shared<ConstantObject>(where, context, type, values);
+    return std::make_shared<ConstantObject>(where, type, values);
 }
 
 mcc::ConstantPtr mcc::ConstantObject::Create(
@@ -17,27 +16,32 @@ mcc::ConstantPtr mcc::ConstantObject::Create(
 {
     std::map<std::string, TypePtr> elements;
     for (const auto &[name_, value_]: values)
+    {
         elements[name_] = value_->Type;
+    }
 
-    return std::make_shared<ConstantObject>(where, context, context.GetStruct(elements), values);
+    return std::make_shared<ConstantObject>(where, context.GetStruct(elements), values);
 }
 
 mcc::ConstantObject::ConstantObject(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
     const std::map<std::string, ConstantPtr> &values)
-    : Constant(where, context, type),
+    : Constant(where, type),
       Values(values)
 {
     for (const auto &value: Values | std::views::values)
+    {
         value->Use();
+    }
 }
 
 mcc::ConstantObject::~ConstantObject()
 {
     for (const auto &value: Values | std::views::values)
+    {
         value->Drop();
+    }
 }
 
 mcc::Result mcc::ConstantObject::GenerateResult(const bool stringify) const
@@ -49,10 +53,14 @@ mcc::Result mcc::ConstantObject::GenerateResult(const bool stringify) const
     for (auto &[key_, value_]: Values)
     {
         if (first)
+        {
             first = false;
+        }
         else
+        {
             result += ',';
-        result += key_ + ':' + value_->GenerateResult(stringify).Value;
+        }
+        result += '"' + key_ + "\":" + value_->GenerateResult(false).Value;
     }
 
     result += '}';
@@ -60,5 +68,6 @@ mcc::Result mcc::ConstantObject::GenerateResult(const bool stringify) const
     return {
         .Type = ResultType_Value,
         .Value = std::move(result),
+        .NotNull = true,
     };
 }

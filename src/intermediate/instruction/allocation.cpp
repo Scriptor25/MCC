@@ -1,71 +1,63 @@
 #include <utility>
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
-mcc::InstructionPtr mcc::AllocationInstruction::CreateValue(
+mcc::InstructionPtr mcc::AllocationInstruction::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
     const ResourceLocation &location,
-    const IndexT index)
+    const IndexT index,
+    const bool is_mutable,
+    const ConstantPtr &initializer)
 {
-    return std::make_shared<AllocationInstruction>(where, context, type, AllocationType_Value, location, index);
-}
-
-mcc::InstructionPtr mcc::AllocationInstruction::CreateArray(
-    const SourceLocation &where,
-    TypeContext &context,
-    const TypePtr &type,
-    const ResourceLocation &location,
-    const IndexT index)
-{
-    return std::make_shared<AllocationInstruction>(where, context, type, AllocationType_Array, location, index);
-}
-
-mcc::InstructionPtr mcc::AllocationInstruction::CreateObject(
-    const SourceLocation &where,
-    TypeContext &context,
-    const TypePtr &type,
-    const ResourceLocation &location,
-    const IndexT index)
-{
-    return std::make_shared<AllocationInstruction>(where, context, type, AllocationType_Object, location, index);
+    return std::make_shared<AllocationInstruction>(
+        where,
+        type,
+        location,
+        index,
+        is_mutable,
+        initializer);
 }
 
 mcc::AllocationInstruction::AllocationInstruction(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
-    const AllocationTypeE allocation_type,
     ResourceLocation location,
-    const IndexT index)
-    : Instruction(where, context, type),
-      AllocationType(allocation_type),
+    const IndexT index,
+    const bool is_mutable,
+    ConstantPtr initializer)
+    : Instruction(where, type, is_mutable),
       Location(std::move(location)),
-      Index(index)
+      Index(index),
+      Initializer(std::move(initializer))
 {
 }
 
 void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    std::string value;
-    switch (AllocationType)
+    Assert(stack, Where, "allocation instruction requires stack");
+
+
+    const auto initializer = Initializer
+                                 ? Initializer
+                                 : Type->GetNull(Where);
+
+    if (!initializer)
     {
-        case AllocationType_Value:
-            value = "0";
-            break;
-
-        case AllocationType_Array:
-            value = "[]";
-            break;
-
-        case AllocationType_Object:
-            value = "{}";
-            break;
+        return;
     }
 
-    Assert(stack, Where, "allocation instruction requires stack");
-    commands.Append("data modify storage {} stack[0].val[{}] set value {}", Location, Index, value);
+    auto init = initializer->GenerateResult(false);
+    Assert(
+        init.Type == ResultType_Value,
+        Where,
+        "initializer must be {}, but is {}",
+        ResultType_Value,
+        init.Type);
+
+    commands.Append("data modify storage {} stack[0].val[{}] set value {}", Location, Index, init.Value);
 }
 
 bool mcc::AllocationInstruction::RequireStack() const

@@ -55,7 +55,7 @@ namespace mcc
     {
         ForEachStatement(
             const SourceLocation &where,
-            bool constant,
+            bool is_constant,
             std::string name,
             ExpressionPtr iterable,
             StatementPtr do_);
@@ -63,7 +63,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
 
-        bool Constant;
+        bool IsConstant;
         std::string Name;
         ExpressionPtr Iterable;
         StatementPtr Do;
@@ -153,7 +153,7 @@ namespace mcc
     {
         VariableStatement(
             const SourceLocation &where,
-            bool constant,
+            bool is_constant,
             std::string name,
             TypePtr type,
             ExpressionPtr value);
@@ -161,7 +161,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
 
-        bool Constant;
+        bool IsConstant;
         std::string Name;
         TypePtr Type;
         ExpressionPtr Value;

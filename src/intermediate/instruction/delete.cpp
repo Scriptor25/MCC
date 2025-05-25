@@ -11,7 +11,7 @@ mcc::InstructionPtr mcc::DeleteInstruction::Create(
 }
 
 mcc::DeleteInstruction::DeleteInstruction(const SourceLocation &where, TypeContext &context, const ValuePtr &value)
-    : Instruction(where, context, context.GetVoid()),
+    : Instruction(where, context.GetVoid(), false),
       Value(value)
 {
     value->Use();

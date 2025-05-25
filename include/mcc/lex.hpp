@@ -13,11 +13,8 @@ namespace mcc
         TokenType_Operator,
         TokenType_Integer,
         TokenType_Float,
-        TokenType_Range,
         TokenType_String,
         TokenType_FormatString,
-        TokenType_Target,
-        TokenType_TargetAttributes,
         TokenType_Other,
         TokenType_Undefined,
     };
@@ -49,11 +46,8 @@ namespace std
                 {mcc::TokenType_Operator, "operator"},
                 {mcc::TokenType_Integer, "integer"},
                 {mcc::TokenType_Float, "float"},
-                {mcc::TokenType_Range, "range"},
                 {mcc::TokenType_String, "string"},
                 {mcc::TokenType_FormatString, "format string"},
-                {mcc::TokenType_Target, "target"},
-                {mcc::TokenType_TargetAttributes, "target attributes"},
                 {mcc::TokenType_Other, "other"},
                 {mcc::TokenType_Undefined, "undefined"},
             };

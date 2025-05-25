@@ -1,25 +1,24 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::CommandInstruction::Create(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
     const ResourceLocation &location,
     const CommandT &command)
 {
-    return std::make_shared<CommandInstruction>(where, context, type, location, command);
+    return std::make_shared<CommandInstruction>(where, type, location, command);
 }
 
 mcc::CommandInstruction::CommandInstruction(
     const SourceLocation &where,
-    TypeContext &context,
     const TypePtr &type,
-    const ResourceLocation &location,
-    const CommandT &command)
-    : Instruction(where, context, type),
-      Location(location),
-      Command(command)
+    ResourceLocation location,
+    CommandT command)
+    : Instruction(where, type, false),
+      Location(std::move(location)),
+      Command(std::move(command))
 {
 }
 

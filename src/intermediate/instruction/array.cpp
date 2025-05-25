@@ -14,7 +14,6 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
     return std::make_shared<ArrayInstruction>(
         where,
         context,
-        context.GetVoid(),
         ArrayOperation_Append,
         location,
         array,
@@ -34,7 +33,6 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
     return std::make_shared<ArrayInstruction>(
         where,
         context,
-        context.GetVoid(),
         ArrayOperation_Prepend,
         location,
         array,
@@ -55,7 +53,6 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
     return std::make_shared<ArrayInstruction>(
         where,
         context,
-        context.GetVoid(),
         ArrayOperation_Insert,
         location,
         array,
@@ -67,14 +64,13 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
 mcc::ArrayInstruction::ArrayInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const TypePtr &type,
     const ArrayOperationE array_operation,
     ResourceLocation location,
     ValuePtr array,
     ValuePtr value,
     const IndexT index,
     const bool stringify)
-    : Instruction(where, context, type),
+    : Instruction(where, context.GetVoid(), false),
       ArrayOperation(array_operation),
       Location(std::move(location)),
       Array(std::move(array)),
@@ -146,12 +142,22 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
                 value.Path);
             break;
 
+        case ResultType_Argument:
+            commands.Append(
+                "$data modify storage {} {} {} value $({})",
+                array.Location,
+                array.Path,
+                operation,
+                value.Name);
+            break;
+
         default:
             Error(
                 Where,
-                "value must be {} or {}, but is {}",
+                "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
                 ResultType_Storage,
+                ResultType_Argument,
                 value.Type);
     }
 }

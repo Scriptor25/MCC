@@ -6,7 +6,7 @@ define print(targets: string, message: string) {
 
 define test_print(builtin: boolean) {
     if (builtin)
-        !print(@s, "Hello World!")
+        !print("@s", "Hello World!")
     else
         print("@s", "Hello World!")
 }
