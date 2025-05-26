@@ -2,50 +2,52 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::ValuePtr mcc::StringifyValue::Create(const SourceLocation &where, const ValuePtr &value)
+mcc::ValuePtr mcc::StringifyValue::Create(const SourceLocation &where, const ValuePtr &target)
 {
-    return std::make_shared<StringifyValue>(where, value);
+    return std::make_shared<StringifyValue>(where, target);
 }
 
-mcc::StringifyValue::StringifyValue(const SourceLocation &where, const ValuePtr &val)
-    : Value(where, val->Type->Context.GetString(), false),
-      Val(val)
+mcc::StringifyValue::StringifyValue(const SourceLocation &where, const ValuePtr &target)
+    : Value(where, target->Type->Context.GetString(), false),
+      Target(target)
 {
-    Val->Use();
+    Target->Use();
 }
 
 mcc::StringifyValue::~StringifyValue()
 {
-    Val->Drop();
+    Target->Drop();
 }
 
 bool mcc::StringifyValue::RequireStack() const
 {
-    return Val->RequireStack();
+    return Target->RequireStack();
 }
 
 mcc::Result mcc::StringifyValue::GenerateResult() const
 {
-    if (Val->Type->IsString())
+    if (Target->Type->IsString())
     {
-        return Val->GenerateResult();
+        return Target->GenerateResult();
     }
 
-    std::string result;
+    std::string value;
 
-    switch (auto value = Val->GenerateResultUnwrap(); value.Type)
+    switch (auto target = Target->GenerateResultUnwrap(); target.Type)
     {
         case ResultType_Value:
-            result = std::format("\"{}\"", value.Value);
+            value = std::format("\"{}\"", target.Value);
             break;
 
         case ResultType_Storage:
-            result = std::format("{{\"storage\":\"{}\",\"nbt\":\"{}\"}}", value.Location, value.Path);
+            value = std::format("{{\"storage\":\"{}\",\"nbt\":\"{}\"}}", target.Location, target.Path);
             break;
 
         case ResultType_Argument:
-            result = std::format("\"{}\"", value.Name);
-            break;
+            return {
+                .Type = ResultType_Argument,
+                .Name = std::format("\"{}\"", target.Name),
+            };
 
         default:
             Error(
@@ -54,12 +56,12 @@ mcc::Result mcc::StringifyValue::GenerateResult() const
                 ResultType_Value,
                 ResultType_Storage,
                 ResultType_Argument,
-                value.Type);
+                target.Type);
     }
 
     return {
         .Type = ResultType_Value,
-        .Value = std::move(result),
+        .Value = std::move(value),
         .NotNull = true,
     };
 }

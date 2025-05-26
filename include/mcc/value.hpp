@@ -149,14 +149,14 @@ namespace mcc
 
     struct StringifyValue final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, const ValuePtr &value);
+        static ValuePtr Create(const SourceLocation &where, const ValuePtr &target);
 
-        StringifyValue(const SourceLocation &where, const ValuePtr &val);
+        StringifyValue(const SourceLocation &where, const ValuePtr &target);
         ~StringifyValue() override;
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        ValuePtr Val;
+        ValuePtr Target;
     };
 }

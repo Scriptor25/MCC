@@ -154,7 +154,7 @@ namespace mcc
         VariableStatement(
             const SourceLocation &where,
             bool is_constant,
-            std::string name,
+            std::vector<std::string> names,
             TypePtr type,
             ExpressionPtr value);
 
@@ -162,7 +162,7 @@ namespace mcc
         void Generate(Builder &builder, Frame &frame) const override;
 
         bool IsConstant;
-        std::string Name;
+        std::vector<std::string> Names;
         TypePtr Type;
         ExpressionPtr Value;
     };

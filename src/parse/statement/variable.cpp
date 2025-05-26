@@ -7,7 +7,11 @@ mcc::StatementPtr mcc::Parser::ParseVariableStatement()
 {
     auto where = m_Token.Where;
     auto is_constant = SkipIf(TokenType_Symbol, "const") || (Expect(TokenType_Symbol, "let"), false);
-    auto name = Expect(TokenType_Symbol).Value;
+
+    std::vector<std::string> names;
+    do
+        names.emplace_back(Expect(TokenType_Symbol).Value);
+    while (SkipIf(TokenType_Other, ","));
 
     TypePtr type;
     if (SkipIf(TokenType_Other, ":"))
@@ -19,5 +23,5 @@ mcc::StatementPtr mcc::Parser::ParseVariableStatement()
 
     Assert(type || value, where, "variable definition must at least specify either a type or a value");
 
-    return std::make_unique<VariableStatement>(where, is_constant, name, std::move(type), std::move(value));
+    return std::make_unique<VariableStatement>(where, is_constant, names, std::move(type), std::move(value));
 }

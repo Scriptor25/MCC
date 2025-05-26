@@ -76,12 +76,30 @@ static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandV
     commands.Append("data remove storage {} {}", self.Location, tmp_name);
 }
 
+static void generate_macro_data(const mcc::MacroInstruction &self, mcc::CommandVector &commands)
+{
+    auto dst = self.Arguments.at(0)->GenerateResult();
+    auto src = self.Arguments.at(1)->GenerateResultUnwrap();
+
+    commands.Append("data modify storage {} {} set from {}", dst.Location, dst.Path, src.Value);
+}
+
+static void generate_macro_store(const mcc::MacroInstruction &self, mcc::CommandVector &commands)
+{
+    auto dst = self.Arguments.at(0)->GenerateResult();
+    auto src = self.Arguments.at(1)->GenerateResultUnwrap();
+
+    commands.Append("execute store result storage {} {} long 1 run {}", dst.Location, dst.Path, src.Value);
+}
+
 using Generator = std::function<void(const mcc::MacroInstruction &, mcc::CommandVector &)>;
 
 static const std::map<std::string_view, Generator> generators
 {
     {"print", generate_macro_print},
     {"swap", generate_macro_swap},
+    {"data", generate_macro_data},
+    {"store", generate_macro_store},
 };
 
 mcc::InstructionPtr mcc::MacroInstruction::Create(

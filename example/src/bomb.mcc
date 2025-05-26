@@ -1,0 +1,22 @@
+include "std.mcc"
+
+namespace example
+
+define spawn_tnt() {
+    let x, y, z: number
+    !store(x, "data get entity @s Pos[0] 1")
+    !store(y, "data get entity @s Pos[1] 1")
+    !store(z, "data get entity @s Pos[2] 1")
+    std:summon(x, y, z, "minecraft:tnt")
+}
+
+define on_ground(): boolean {
+    let g: boolean
+    !store(g, "data get entity @s OnGround 1")
+    return g
+}
+
+define bomb() {
+    unless (on_ground())
+        spawn_tnt()
+}

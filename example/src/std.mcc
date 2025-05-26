@@ -9,6 +9,10 @@ define setblock(x: number, y: number, z: number, block: string, mode: string) {
     ?`$setblock $(x) $(y) $(z) $(block) $(mode)`
 }
 
+define summon(x: number, y: number, z: number, type: string) {
+    ?`$summon $(type) $(x) $(y) $(z)`
+}
+
 define random(min: number, max: number): number {
     if (min > max)
         return random(max, min)
