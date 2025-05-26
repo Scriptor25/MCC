@@ -1,13 +1,15 @@
 namespace example
 
+type user_print_func = $(number, string, string) => void
+
 type user = {
     age: number,
     name: string,
     email: string,
-    func: $(number, string, string) => void,
+    func: user_print_func,
 }
 
-define user_create(age: number, name: string, email: string, func: $(number, string, string) => void): user {
+define user_create(age: number, name: string, email: string, func: user_print_func): user {
     return {
         age,
         name,
@@ -16,7 +18,7 @@ define user_create(age: number, name: string, email: string, func: $(number, str
     }
 }
 
-define user_call_wrapper(func: $(number, string, string) => void, self: user) {
+define user_call_wrapper(func: user_print_func, self: user) {
     ?`$function $(func) $(self)`
 }
 
@@ -30,6 +32,6 @@ define user_print(age: number, name: string, email: string) {
 }
 
 define user_test() {
-    const user = user_create(19, "Felix", "your@mom.net", user_print)
+    const user = user_create(19, "Max Mustermann", "max@mustermann.com", user_print)
     user_call(user)
 }
