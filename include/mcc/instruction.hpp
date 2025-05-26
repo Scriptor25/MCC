@@ -38,7 +38,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ResourceLocation Location;
         IndexT Index;
@@ -52,23 +52,20 @@ namespace mcc
             TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &array,
-            const ValuePtr &value,
-            bool stringify);
+            const ValuePtr &value);
         static InstructionPtr CreatePrepend(
             const SourceLocation &where,
             TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &array,
-            const ValuePtr &value,
-            bool stringify);
+            const ValuePtr &value);
         static InstructionPtr CreateInsert(
             const SourceLocation &where,
             TypeContext &context,
             const ResourceLocation &location,
             const ValuePtr &array,
             const ValuePtr &value,
-            IndexT index,
-            bool stringify);
+            IndexT index);
 
         ArrayInstruction(
             const SourceLocation &where,
@@ -77,8 +74,7 @@ namespace mcc
             ResourceLocation location,
             ValuePtr array,
             ValuePtr value,
-            IndexT index,
-            bool stringify);
+            IndexT index);
         ~ArrayInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -88,7 +84,6 @@ namespace mcc
         ResourceLocation Location;
         ValuePtr Array, Value;
         IndexT Index;
-        bool Stringify;
     };
 
     struct BranchInstruction final : Instruction
@@ -139,7 +134,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ResourceLocation Location;
         FunctionPtr Callee;
@@ -163,7 +158,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ResourceLocation Location;
         CommandT Command;
@@ -190,7 +185,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ComparatorE Comparator;
         ResourceLocation Location;
@@ -286,7 +281,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ResourceLocation Location;
         ValuePtr Value;
@@ -338,7 +333,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         OperatorE Operator;
         ResourceLocation Location;
@@ -378,7 +373,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ValuePtr Dst, Src;
     };

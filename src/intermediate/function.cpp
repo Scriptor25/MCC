@@ -60,7 +60,7 @@ bool mcc::Function::RequireStack() const
     return false;
 }
 
-mcc::Result mcc::Function::GenerateResult(bool stringify) const
+mcc::Result mcc::Function::GenerateResult() const
 {
     return {
         .Type = ResultType_Value,
@@ -112,7 +112,7 @@ void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments
         {
             arguments += ',';
         }
-        if (Parameters.at(i).Type == Type->Context.GetString())
+        if (Parameters.at(i).Type->IsString())
         {
             arguments += std::format("\"{0}\":\"$({0})\"", Parameters.at(i).Name);
         }

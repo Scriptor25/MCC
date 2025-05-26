@@ -45,9 +45,9 @@ mcc::ObjectInstruction::~ObjectInstruction()
 
 void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    auto object = Object->GenerateResult(false);
+    auto object = Object->GenerateResult();
 
-    switch (auto value = Value->GenerateResult(false); value.Type)
+    switch (auto value = Value->GenerateResult(); value.Type)
     {
         case ResultType_Value:
             commands.Append(

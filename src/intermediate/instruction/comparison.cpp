@@ -39,8 +39,8 @@ mcc::ComparisonInstruction::~ComparisonInstruction()
 
 void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    auto left = Left->GenerateResult(false);
-    auto right = Right->GenerateResult(false);
+    auto left = Left->GenerateResult();
+    auto right = Right->GenerateResult();
 
     const auto require_right = Left != Right && left != right;
 
@@ -152,7 +152,7 @@ bool mcc::ComparisonInstruction::RequireStack() const
     return true;
 }
 
-mcc::Result mcc::ComparisonInstruction::GenerateResult(const bool stringify) const
+mcc::Result mcc::ComparisonInstruction::GenerateResult() const
 {
     return {
         .Type = ResultType_Storage,

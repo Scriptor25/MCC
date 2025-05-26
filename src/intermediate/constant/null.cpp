@@ -11,11 +11,10 @@ mcc::ConstantNull::ConstantNull(const SourceLocation &where, TypeContext &contex
 {
 }
 
-mcc::Result mcc::ConstantNull::GenerateResult(bool stringify) const
+mcc::Result mcc::ConstantNull::GenerateResult() const
 {
     return {
         .Type = ResultType_Value,
-        .Value = "null",
         .NotNull = false,
     };
 }

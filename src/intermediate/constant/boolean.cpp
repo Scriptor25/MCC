@@ -12,15 +12,11 @@ mcc::ConstantBoolean::ConstantBoolean(const SourceLocation &where, TypeContext &
 {
 }
 
-mcc::Result mcc::ConstantBoolean::GenerateResult(const bool stringify) const
+mcc::Result mcc::ConstantBoolean::GenerateResult() const
 {
-    std::string value(Value ? "true" : "false");
-    if (stringify)
-        value = '"' + value + '"';
-
     return {
         .Type = ResultType_Value,
-        .Value = std::move(value),
+        .Value = (Value ? "true" : "false"),
         .NotNull = Value,
     };
 }

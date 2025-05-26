@@ -47,7 +47,7 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
         }
         Expect(TokenType_Other, "}");
 
-        return m_Context.GetStruct(elements);
+        return m_Context.GetObject(elements);
     }
 
     if (SkipIf(TokenType_Other, "["))

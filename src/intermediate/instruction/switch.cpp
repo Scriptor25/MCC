@@ -64,12 +64,12 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
 
     auto take_default = true;
 
-    switch (auto condition = Condition->GenerateResult(false); condition.Type)
+    switch (auto condition = Condition->GenerateResult(); condition.Type)
     {
         case ResultType_Value:
             for (auto &[case_, target_]: CaseTargets)
             {
-                auto case_value = case_->GenerateResult(false);
+                auto case_value = case_->GenerateResult();
                 Assert(
                     case_value.Type == ResultType_Value,
                     case_->Where,
@@ -103,7 +103,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
         case ResultType_Storage:
             for (auto &[case_, target_]: CaseTargets)
             {
-                auto case_value = case_->GenerateResult(false);
+                auto case_value = case_->GenerateResult();
 
                 commands.Append(CreateTmpScore());
                 commands.Append(
@@ -138,7 +138,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
         case ResultType_Argument:
             for (auto &[case_, target_]: CaseTargets)
             {
-                auto case_value = case_->GenerateResult(false);
+                auto case_value = case_->GenerateResult();
 
                 commands.Append(CreateTmpScore());
                 commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);

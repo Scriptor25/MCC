@@ -49,7 +49,7 @@ bool mcc::CommandInstruction::RequireStack() const
     return UseCount;
 }
 
-mcc::Result mcc::CommandInstruction::GenerateResult(const bool stringify) const
+mcc::Result mcc::CommandInstruction::GenerateResult() const
 {
     return {
         .Type = ResultType_Storage,

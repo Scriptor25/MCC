@@ -47,7 +47,7 @@ mcc::ThrowInstruction::~ThrowInstruction()
 
 void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    switch (auto value = Value->GenerateResult(false); value.Type)
+    switch (auto value = Value->GenerateResult(); value.Type)
     {
         case ResultType_Value:
             commands.Append("data modify storage {} result set value {}", Location, value.Value);

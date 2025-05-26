@@ -79,7 +79,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
         auto player = i == 0 ? "%a" : "%b";
 
         auto operand_value = Operands.at(i);
-        auto operand = operand_value->GenerateResult(false);
+        auto operand = operand_value->GenerateResult();
 
         auto require_operand = operand_value != pre_operand_value && operand != pre_operand;
 
@@ -147,7 +147,7 @@ bool mcc::OperationInstruction::RequireStack() const
     return true;
 }
 
-mcc::Result mcc::OperationInstruction::GenerateResult(const bool stringify) const
+mcc::Result mcc::OperationInstruction::GenerateResult() const
 {
     return {
         .Type = ResultType_Storage,

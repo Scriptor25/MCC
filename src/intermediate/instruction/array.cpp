@@ -8,18 +8,9 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
     TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &array,
-    const ValuePtr &value,
-    const bool stringify)
+    const ValuePtr &value)
 {
-    return std::make_shared<ArrayInstruction>(
-        where,
-        context,
-        ArrayOperation_Append,
-        location,
-        array,
-        value,
-        ~0,
-        stringify);
+    return std::make_shared<ArrayInstruction>(where, context, ArrayOperation_Append, location, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
@@ -27,18 +18,9 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
     TypeContext &context,
     const ResourceLocation &location,
     const ValuePtr &array,
-    const ValuePtr &value,
-    const bool stringify)
+    const ValuePtr &value)
 {
-    return std::make_shared<ArrayInstruction>(
-        where,
-        context,
-        ArrayOperation_Prepend,
-        location,
-        array,
-        value,
-        ~0,
-        stringify);
+    return std::make_shared<ArrayInstruction>(where, context, ArrayOperation_Prepend, location, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
@@ -47,18 +29,9 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
     const ResourceLocation &location,
     const ValuePtr &array,
     const ValuePtr &value,
-    const IndexT index,
-    const bool stringify)
+    const IndexT index)
 {
-    return std::make_shared<ArrayInstruction>(
-        where,
-        context,
-        ArrayOperation_Insert,
-        location,
-        array,
-        value,
-        index,
-        stringify);
+    return std::make_shared<ArrayInstruction>(where, context, ArrayOperation_Insert, location, array, value, index);
 }
 
 mcc::ArrayInstruction::ArrayInstruction(
@@ -68,32 +41,34 @@ mcc::ArrayInstruction::ArrayInstruction(
     ResourceLocation location,
     ValuePtr array,
     ValuePtr value,
-    const IndexT index,
-    const bool stringify)
+    const IndexT index)
     : Instruction(where, context.GetVoid(), false),
       ArrayOperation(array_operation),
       Location(std::move(location)),
       Array(std::move(array)),
       Value(std::move(value)),
-      Index(index),
-      Stringify(stringify)
+      Index(index)
 {
     Array->Use();
     if (Value)
+    {
         Value->Use();
+    }
 }
 
 mcc::ArrayInstruction::~ArrayInstruction()
 {
     Array->Drop();
     if (Value)
+    {
         Value->Drop();
+    }
 }
 
 void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    auto array = Array->GenerateResult(false);
-    auto value = Value->GenerateResult(Stringify);
+    auto array = Array->GenerateResult();
+    auto value = Value->GenerateResult();
 
     Assert(
         array.Type == ResultType_Storage,
@@ -118,8 +93,6 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
             break;
     }
 
-    auto conversion = Stringify ? "string" : "from";
-
     switch (value.Type)
     {
         case ResultType_Value:
@@ -133,11 +106,10 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 
         case ResultType_Storage:
             commands.Append(
-                "data modify storage {} {} {} {} storage {} {}",
+                "data modify storage {} {} {} from storage {} {}",
                 array.Location,
                 array.Path,
                 operation,
-                conversion,
                 value.Location,
                 value.Path);
             break;

@@ -16,13 +16,11 @@ mcc::ConstantResource::ConstantResource(const SourceLocation &where, TypeContext
 {
 }
 
-mcc::Result mcc::ConstantResource::GenerateResult(const bool stringify) const
+mcc::Result mcc::ConstantResource::GenerateResult() const
 {
-    auto value = Location.String();
-
     return {
         .Type = ResultType_Value,
-        .Value = std::move(value),
+        .Value = Location.String(),
         .NotNull = true,
     };
 }

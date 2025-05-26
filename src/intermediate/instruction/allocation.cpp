@@ -49,7 +49,7 @@ void mcc::AllocationInstruction::Generate(CommandVector &commands, const bool st
         return;
     }
 
-    auto initializer_value = initializer->GenerateResult(false);
+    auto initializer_value = initializer->GenerateResult();
     Assert(
         initializer_value.Type == ResultType_Value,
         Where,
@@ -65,7 +65,7 @@ bool mcc::AllocationInstruction::RequireStack() const
     return true;
 }
 
-mcc::Result mcc::AllocationInstruction::GenerateResult(const bool stringify) const
+mcc::Result mcc::AllocationInstruction::GenerateResult() const
 {
     return {
         .Type = ResultType_Storage,

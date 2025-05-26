@@ -35,9 +35,9 @@ bool mcc::ElementReference::RequireStack() const
     return Array->RequireStack();
 }
 
-mcc::Result mcc::ElementReference::GenerateResult(const bool stringify) const
+mcc::Result mcc::ElementReference::GenerateResult() const
 {
-    auto array = Array->GenerateResult(stringify);
+    auto array = Array->GenerateResult();
     Assert(array.Type == ResultType_Storage, Where, "array must be {}, but is {}", ResultType_Storage, array.Type);
 
     return {

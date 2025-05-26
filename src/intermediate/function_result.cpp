@@ -20,7 +20,7 @@ bool mcc::FunctionResult::RequireStack() const
     return false;
 }
 
-mcc::Result mcc::FunctionResult::GenerateResult(bool stringify) const
+mcc::Result mcc::FunctionResult::GenerateResult() const
 {
     return {
         .Type = ResultType_Storage,

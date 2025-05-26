@@ -61,12 +61,12 @@ mcc::TypePtr mcc::TypeContext::GetArray(const TypePtr &elements)
     return type;
 }
 
-mcc::TypePtr mcc::TypeContext::GetStruct(const std::map<std::string, TypePtr> &elements)
+mcc::TypePtr mcc::TypeContext::GetObject(const std::map<std::string, TypePtr> &elements)
 {
     auto &type = m_Struct[elements];
     if (!type)
     {
-        type = std::make_shared<StructType>(*this, elements);
+        type = std::make_shared<ObjectType>(*this, elements);
         type->Self = type;
     }
     return type;

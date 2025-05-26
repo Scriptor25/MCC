@@ -12,7 +12,8 @@ namespace mcc
 
         virtual void Generate(CommandVector &commands, bool stack) const;
         [[nodiscard]] virtual bool RequireStack() const;
-        [[nodiscard]] virtual Result GenerateResult(bool stringify) const;
+        [[nodiscard]] virtual Result GenerateResult() const;
+        [[nodiscard]] virtual Result GenerateResultUnwrap() const;
 
         void Use();
         void Drop();
@@ -31,7 +32,8 @@ namespace mcc
         ArgumentValue(const SourceLocation &where, const TypePtr &type, std::string name);
 
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
+        [[nodiscard]] Result GenerateResultUnwrap() const override;
 
         std::string Name;
     };
@@ -43,7 +45,7 @@ namespace mcc
         BranchResult(const SourceLocation &where, const TypePtr &type, ResourceLocation location);
 
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ResourceLocation Location;
     };
@@ -75,7 +77,7 @@ namespace mcc
         ~ElementReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ValuePtr Array;
         IndexT Index;
@@ -101,7 +103,7 @@ namespace mcc
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         void GenerateFunction(Package &package) const;
 
@@ -126,7 +128,7 @@ namespace mcc
         FunctionResult(const SourceLocation &where, const TypePtr &type, ResourceLocation location);
 
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ResourceLocation Location;
     };
@@ -139,9 +141,22 @@ namespace mcc
         ~MemberReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ValuePtr Object;
         std::string Member;
+    };
+
+    struct StringifyValue final : Value
+    {
+        static ValuePtr Create(const SourceLocation &where, const ValuePtr &value);
+
+        StringifyValue(const SourceLocation &where, const ValuePtr &val);
+        ~StringifyValue() override;
+
+        [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult() const override;
+
+        ValuePtr Val;
     };
 }

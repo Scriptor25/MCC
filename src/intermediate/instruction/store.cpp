@@ -35,8 +35,8 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
         return;
     }
 
-    auto dst = Dst->GenerateResult(false);
-    auto src = Src->GenerateResult(false);
+    auto dst = Dst->GenerateResult();
+    auto src = Src->GenerateResult();
 
     Assert(dst.Type == ResultType_Storage, Where, "destination must be {}, but is {}", ResultType_Storage, dst.Type);
 
@@ -80,7 +80,7 @@ bool mcc::StoreInstruction::RequireStack() const
     return Dst->RequireStack() || Src->RequireStack();
 }
 
-mcc::Result mcc::StoreInstruction::GenerateResult(const bool stringify) const
+mcc::Result mcc::StoreInstruction::GenerateResult() const
 {
-    return Dst->GenerateResult(stringify);
+    return Dst->GenerateResult();
 }

@@ -31,7 +31,7 @@ mcc::NotNullInstruction::~NotNullInstruction()
 
 void mcc::NotNullInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    auto value = Value->GenerateResult(false);
+    auto value = Value->GenerateResult();
     Assert(value.Type == ResultType_Storage, Where, "value must be {}, but is {}", ResultType_Storage, value.Type);
 
     auto stack_path = GetStackPath();
@@ -50,7 +50,7 @@ bool mcc::NotNullInstruction::RequireStack() const
     return UseCount || Value->RequireStack();
 }
 
-mcc::Result mcc::NotNullInstruction::GenerateResult(bool stringify) const
+mcc::Result mcc::NotNullInstruction::GenerateResult() const
 {
     return {
         .Type = ResultType_Storage,

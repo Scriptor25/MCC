@@ -16,11 +16,20 @@ mcc::ConstantString::ConstantString(const SourceLocation &where, TypeContext &co
 {
 }
 
-mcc::Result mcc::ConstantString::GenerateResult(const bool stringify) const
+mcc::Result mcc::ConstantString::GenerateResult() const
 {
     return {
         .Type = ResultType_Value,
         .Value = '"' + Value + '"',
+        .NotNull = true,
+    };
+}
+
+mcc::Result mcc::ConstantString::GenerateResultUnwrap() const
+{
+    return {
+        .Type = ResultType_Value,
+        .Value = Value,
         .NotNull = true,
     };
 }

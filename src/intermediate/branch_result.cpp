@@ -20,7 +20,7 @@ bool mcc::BranchResult::RequireStack() const
     return true;
 }
 
-mcc::Result mcc::BranchResult::GenerateResult(bool stringify) const
+mcc::Result mcc::BranchResult::GenerateResult() const
 {
     return {
         .Type = ResultType_Storage,

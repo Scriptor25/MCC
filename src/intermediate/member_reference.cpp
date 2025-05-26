@@ -8,7 +8,7 @@ mcc::ValuePtr mcc::MemberReference::Create(
     const ValuePtr &object,
     const std::string &member)
 {
-    const auto object_type = std::dynamic_pointer_cast<StructType>(object->Type);
+    const auto object_type = std::dynamic_pointer_cast<ObjectType>(object->Type);
     Assert(!!object_type, where, "object must be of type object");
 
     auto type = object_type->Elements.at(member);
@@ -37,9 +37,9 @@ bool mcc::MemberReference::RequireStack() const
     return Object->RequireStack();
 }
 
-mcc::Result mcc::MemberReference::GenerateResult(bool stringify) const
+mcc::Result mcc::MemberReference::GenerateResult() const
 {
-    auto object = Object->GenerateResult(false);
+    auto object = Object->GenerateResult();
     Assert(object.Type == ResultType_Storage, Where, "object must be {}, but is {}", ResultType_Storage, object.Type);
 
     return {

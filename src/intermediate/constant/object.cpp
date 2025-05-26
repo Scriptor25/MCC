@@ -20,7 +20,7 @@ mcc::ConstantPtr mcc::ConstantObject::Create(
         elements[name_] = value_->Type;
     }
 
-    return std::make_shared<ConstantObject>(where, context.GetStruct(elements), values);
+    return std::make_shared<ConstantObject>(where, context.GetObject(elements), values);
 }
 
 mcc::ConstantObject::ConstantObject(
@@ -44,7 +44,7 @@ mcc::ConstantObject::~ConstantObject()
     }
 }
 
-mcc::Result mcc::ConstantObject::GenerateResult(const bool stringify) const
+mcc::Result mcc::ConstantObject::GenerateResult() const
 {
     std::string result;
     result += '{';
@@ -60,7 +60,7 @@ mcc::Result mcc::ConstantObject::GenerateResult(const bool stringify) const
         {
             result += ',';
         }
-        result += '"' + key_ + "\":" + value_->GenerateResult(false).Value;
+        result += '"' + key_ + "\":" + value_->GenerateResult().Value;
     }
 
     result += '}';

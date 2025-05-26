@@ -51,11 +51,11 @@ mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const Frame
             ? *elements.begin()
             : builder.GetContext().GetUnion(elements));
 
-    auto array = builder.Allocate(Where, type, false, nullptr);
+    auto array = builder.CreateAllocation(Where, type, false, nullptr);
 
-    for (const auto &value: values)
+    for (auto value: values)
     {
-        (void) builder.CreateAppend(Where, array, value, true);
+        (void) builder.CreateAppend(Where, array, StringifyValue::Create(Where, value));
     }
 
     return array;

@@ -18,12 +18,20 @@ bool mcc::ArgumentValue::RequireStack() const
     return false;
 }
 
-mcc::Result mcc::ArgumentValue::GenerateResult(bool stringify) const
+mcc::Result mcc::ArgumentValue::GenerateResult() const
 {
-    stringify |= (Type == Type->Context.GetString());
+    const auto stringify = Type->IsString();
 
     return {
         .Type = ResultType_Argument,
         .Name = std::format("{0}$({1}){0}", stringify ? "\"" : "", Name),
+    };
+}
+
+mcc::Result mcc::ArgumentValue::GenerateResultUnwrap() const
+{
+    return {
+        .Type = ResultType_Argument,
+        .Name = std::format("$({})", Name),
     };
 }

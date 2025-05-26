@@ -80,7 +80,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
 
                 auto [key, argument] = Arguments.at(i);
 
-                if (auto value = argument->GenerateResult(false); value.Type == ResultType_Argument)
+                if (auto value = argument->GenerateResult(); value.Type == ResultType_Argument)
                 {
                     argument_prefix = "$";
                     argument_object += std::format("\"{}\":{}", key, value.Name);
@@ -99,7 +99,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
 
             for (auto &[key_, argument_]: Arguments)
             {
-                switch (auto value = argument_->GenerateResult(false); value.Type)
+                switch (auto value = argument_->GenerateResult(); value.Type)
                 {
                     case ResultType_Value:
                         commands.Append(
@@ -231,7 +231,7 @@ bool mcc::CallInstruction::RequireStack() const
                });
 }
 
-mcc::Result mcc::CallInstruction::GenerateResult(const bool stringify) const
+mcc::Result mcc::CallInstruction::GenerateResult() const
 {
     return {
         .Type = ResultType_Storage,

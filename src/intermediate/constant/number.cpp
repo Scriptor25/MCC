@@ -12,15 +12,11 @@ mcc::ConstantNumber::ConstantNumber(const SourceLocation &where, TypeContext &co
 {
 }
 
-mcc::Result mcc::ConstantNumber::GenerateResult(const bool stringify) const
+mcc::Result mcc::ConstantNumber::GenerateResult() const
 {
-    auto value = std::to_string(Value);
-    if (stringify)
-        value = '"' + value + '"';
-
     return {
         .Type = ResultType_Value,
-        .Value = std::move(value),
+        .Value = std::to_string(Value),
         .NotNull = Value != 0.0,
     };
 }

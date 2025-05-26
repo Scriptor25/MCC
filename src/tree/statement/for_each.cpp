@@ -46,7 +46,7 @@ void mcc::ForEachStatement::Generate(Builder &builder, Frame &frame) const
 
     const auto iterable = Iterable->GenerateValue(builder, frame);
     const auto iterable_constant = std::dynamic_pointer_cast<Constant>(iterable);
-    const auto iterable_copy = builder.Allocate(Where, iterable->Type, false, iterable_constant);
+    const auto iterable_copy = builder.CreateAllocation(Where, iterable->Type, false, iterable_constant);
     if (!iterable_constant)
     {
         (void) builder.CreateStore(Where, iterable_copy, iterable);

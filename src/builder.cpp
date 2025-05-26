@@ -114,7 +114,7 @@ mcc::ValuePtr mcc::Builder::CreateVariable(
         return variable = constant_initializer;
     }
 
-    variable = Allocate(where, type, is_constant, constant_initializer);
+    variable = CreateAllocation(where, type, is_constant, constant_initializer);
 
     if (initializer && !constant_initializer)
     {
@@ -372,7 +372,7 @@ mcc::InstructionPtr mcc::Builder::CreateMacro(
     return Insert(where, MacroInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, name, arguments));
 }
 
-mcc::InstructionPtr mcc::Builder::Allocate(
+mcc::InstructionPtr mcc::Builder::CreateAllocation(
     const SourceLocation &where,
     const TypePtr &type,
     const bool is_constant,
@@ -389,8 +389,7 @@ mcc::InstructionPtr mcc::Builder::Allocate(
 mcc::InstructionPtr mcc::Builder::CreateAppend(
     const SourceLocation &where,
     const ValuePtr &array,
-    const ValuePtr &value,
-    const bool stringify) const
+    const ValuePtr &value) const
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
@@ -398,20 +397,13 @@ mcc::InstructionPtr mcc::Builder::CreateAppend(
 
     return Insert(
         where,
-        ArrayInstruction::CreateAppend(
-            where,
-            m_Context,
-            m_InsertBlock->Parent->Location,
-            array,
-            value,
-            stringify));
+        ArrayInstruction::CreateAppend(where, m_Context, m_InsertBlock->Parent->Location, array, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreatePrepend(
     const SourceLocation &where,
     const ValuePtr &array,
-    const ValuePtr &value,
-    const bool stringify) const
+    const ValuePtr &value) const
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
@@ -419,21 +411,14 @@ mcc::InstructionPtr mcc::Builder::CreatePrepend(
 
     return Insert(
         where,
-        ArrayInstruction::CreatePrepend(
-            where,
-            m_Context,
-            m_InsertBlock->Parent->Location,
-            array,
-            value,
-            stringify));
+        ArrayInstruction::CreatePrepend(where, m_Context, m_InsertBlock->Parent->Location, array, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(
     const ValuePtr &array,
     const SourceLocation &where,
     const ValuePtr &value,
-    const IndexT index,
-    const bool stringify) const
+    const IndexT index) const
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
@@ -441,14 +426,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 
     return Insert(
         where,
-        ArrayInstruction::CreateInsert(
-            where,
-            m_Context,
-            m_InsertBlock->Parent->Location,
-            array,
-            value,
-            index,
-            stringify));
+        ArrayInstruction::CreateInsert(where, m_Context, m_InsertBlock->Parent->Location, array, value, index));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(

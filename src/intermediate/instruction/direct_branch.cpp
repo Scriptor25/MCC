@@ -68,7 +68,7 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
 {
     if (Result)
     {
-        auto branch_result = BranchResult->GenerateResult(false);
+        auto branch_result = BranchResult->GenerateResult();
 
         Assert(
             branch_result.Type == ResultType_Storage,
@@ -77,7 +77,7 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
             ResultType_Storage,
             branch_result.Type);
 
-        switch (auto result = Result->GenerateResult(false); result.Type)
+        switch (auto result = Result->GenerateResult(); result.Type)
         {
             case ResultType_Value:
                 commands.Append(

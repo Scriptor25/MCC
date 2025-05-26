@@ -9,7 +9,7 @@ static void generate_macro_print(const mcc::MacroInstruction &self, mcc::Command
     const auto targets = std::dynamic_pointer_cast<mcc::ConstantString>(self.Arguments.at(0));
 
     std::string message_value;
-    switch (auto message = self.Arguments.at(1)->GenerateResult(false); message.Type)
+    switch (auto message = self.Arguments.at(1)->GenerateResult(); message.Type)
     {
         case mcc::ResultType_Value:
             message_value = message.Value;
@@ -36,8 +36,8 @@ static void generate_macro_print(const mcc::MacroInstruction &self, mcc::Command
 
 static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandVector &commands)
 {
-    auto value1 = self.Arguments.at(0)->GenerateResult(false);
-    auto value2 = self.Arguments.at(1)->GenerateResult(false);
+    auto value1 = self.Arguments.at(0)->GenerateResult();
+    auto value2 = self.Arguments.at(1)->GenerateResult();
 
     mcc::Assert(
         value1.Type == mcc::ResultType_Storage,

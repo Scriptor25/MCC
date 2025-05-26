@@ -56,7 +56,7 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
     auto then = ThenTarget->Parent->GetLocation(ThenTarget);
     auto else_ = ElseTarget->Parent->GetLocation(ElseTarget);
 
-    switch (auto condition = Condition->GenerateResult(false); condition.Type)
+    switch (auto condition = Condition->GenerateResult(); condition.Type)
     {
         case ResultType_Value:
             commands.Append(

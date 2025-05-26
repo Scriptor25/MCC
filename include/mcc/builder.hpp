@@ -102,7 +102,7 @@ namespace mcc
             const std::string &name,
             const std::vector<ValuePtr> &arguments) const;
 
-        [[nodiscard]] InstructionPtr Allocate(
+        [[nodiscard]] InstructionPtr CreateAllocation(
             const SourceLocation &where,
             const TypePtr &type,
             bool is_constant,
@@ -111,19 +111,16 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateAppend(
             const SourceLocation &where,
             const ValuePtr &array,
-            const ValuePtr &value,
-            bool stringify) const;
+            const ValuePtr &value) const;
         [[nodiscard]] InstructionPtr CreatePrepend(
             const SourceLocation &where,
             const ValuePtr &array,
-            const ValuePtr &value,
-            bool stringify) const;
+            const ValuePtr &value) const;
         [[nodiscard]] InstructionPtr CreateInsert(
             const ValuePtr &array,
             const SourceLocation &where,
             const ValuePtr &value,
-            IndexT index,
-            bool stringify) const;
+            IndexT index) const;
 
         [[nodiscard]] InstructionPtr CreateInsert(
             const SourceLocation &where,
@@ -131,7 +128,7 @@ namespace mcc
             const ValuePtr &value,
             const std::string &key) const;
 
-        mcc::ValuePtr CreateStoreResult(
+        ValuePtr CreateStoreResult(
             const SourceLocation &where,
             const TypePtr &type,
             const std::string &name);

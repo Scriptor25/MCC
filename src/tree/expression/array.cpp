@@ -53,11 +53,11 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
         return ConstantArray::Create(Where, type, constants, false);
     }
 
-    auto array = builder.Allocate(Where, type, false, nullptr);
+    auto array = builder.CreateAllocation(Where, type, false, nullptr);
 
     for (const auto &value: values)
     {
-        (void) builder.CreateAppend(Where, array, value, false);
+        (void) builder.CreateAppend(Where, array, value);
     }
 
     return array;

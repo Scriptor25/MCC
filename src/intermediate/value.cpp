@@ -19,9 +19,14 @@ bool mcc::Value::RequireStack() const
     Error(Where, "mcc::Value::RequireStack");
 }
 
-mcc::Result mcc::Value::GenerateResult(const bool stringify) const
+mcc::Result mcc::Value::GenerateResult() const
 {
     Error(Where, "mcc::Value::GenerateResult");
+}
+
+mcc::Result mcc::Value::GenerateResultUnwrap() const
+{
+    return GenerateResult();
 }
 
 void mcc::Value::Use()

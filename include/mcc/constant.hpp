@@ -33,7 +33,7 @@ namespace mcc
             bool stringify);
         ~ConstantArray() override;
 
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         std::vector<ConstantPtr> Values;
         bool Stringify;
@@ -45,7 +45,7 @@ namespace mcc
 
         ConstantBoolean(const SourceLocation &where, TypeContext &context, bool value);
 
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         bool Value;
     };
@@ -56,7 +56,7 @@ namespace mcc
 
         ConstantNull(const SourceLocation &where, TypeContext &context);
 
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
     };
 
     struct ConstantNumber final : Constant
@@ -65,7 +65,7 @@ namespace mcc
 
         ConstantNumber(const SourceLocation &where, TypeContext &context, IntegerT value);
 
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         IntegerT Value;
     };
@@ -87,7 +87,7 @@ namespace mcc
             const std::map<std::string, ConstantPtr> &values);
         ~ConstantObject() override;
 
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         std::map<std::string, ConstantPtr> Values;
     };
@@ -98,7 +98,7 @@ namespace mcc
 
         ConstantResource(const SourceLocation &where, TypeContext &context, ResourceLocation location);
 
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
 
         ResourceLocation Location;
     };
@@ -109,7 +109,8 @@ namespace mcc
 
         ConstantString(const SourceLocation &where, TypeContext &context, std::string value);
 
-        [[nodiscard]] Result GenerateResult(bool stringify) const override;
+        [[nodiscard]] Result GenerateResult() const override;
+        [[nodiscard]] Result GenerateResultUnwrap() const override;
 
         std::string Value;
     };

@@ -24,7 +24,7 @@ mcc::DeleteInstruction::~DeleteInstruction()
 
 void mcc::DeleteInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    auto value = Value->GenerateResult(false);
+    auto value = Value->GenerateResult();
     Assert(value.Type == ResultType_Storage, Where, "value must be {}, but is {}", ResultType_Storage, value.Type);
 
     commands.Append("data remove storage {} {}", value.Location, value.Path);
