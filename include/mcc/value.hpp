@@ -192,8 +192,8 @@ namespace mcc
         GenericStorageReference(
             const SourceLocation &where,
             const TypePtr &type,
-            const ResourceLocation &location,
-            const std::string &path);
+            ResourceLocation location,
+            std::string path);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;

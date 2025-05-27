@@ -47,7 +47,6 @@ bool mcc::ElementReference::RequireStack() const
 mcc::Result mcc::ElementReference::GenerateResult() const
 {
     auto base = Base->GenerateResult();
-
     Assert(base.Type == ResultType_Reference, Where, "array must be {}, but is {}", ResultType_Reference, base.Type);
 
     return {

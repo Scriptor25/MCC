@@ -69,6 +69,7 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
     if (Result)
     {
         auto branch_result = BranchResult->GenerateResult();
+        auto result = Result->GenerateResult();
 
         Assert(
             branch_result.Type == ResultType_Reference,
@@ -77,11 +78,18 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
             ResultType_Reference,
             branch_result.Type);
 
-        switch (auto result = Result->GenerateResult(); result.Type)
+        std::string prefix;
+        if (branch_result.WithArgument || result.WithArgument)
+        {
+            prefix = "$";
+        }
+
+        switch (result.Type)
         {
             case ResultType_Value:
                 commands.Append(
-                    "data modify {} {} {} set value {}",
+                    "{}data modify {} {} {} set value {}",
+                    prefix,
                     branch_result.ReferenceType,
                     branch_result.Target,
                     branch_result.Path,
@@ -90,7 +98,8 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
 
             case ResultType_Reference:
                 commands.Append(
-                    "data modify {} {} {} set from {} {} {}",
+                    "{}data modify {} {} {} set from {} {} {}",
+                    prefix,
                     branch_result.ReferenceType,
                     branch_result.Target,
                     branch_result.Path,
@@ -99,12 +108,21 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
                     result.Path);
                 break;
 
+            case ResultType_Argument:
+                commands.Append(
+                    "$data modify {} {} {} set value {}",
+                    branch_result.ReferenceType,
+                    branch_result.Target,
+                    branch_result.Path,
+                    result.Name);
+
             default:
                 Error(
                     Where,
-                    "result must be {} or {}, but is {}",
+                    "result must be {}, {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Reference,
+                    ResultType_Argument,
                     result.Type);
         }
     }

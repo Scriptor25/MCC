@@ -88,11 +88,18 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
 
         if (require_operand)
         {
+            std::string prefix;
+            if (operand.WithArgument)
+            {
+                prefix = "$";
+            }
+
             switch (operand.Type)
             {
                 case ResultType_Value:
                     commands.Append(
-                        "scoreboard players set {} {} {}",
+                        "{}scoreboard players set {} {} {}",
+                        prefix,
                         player,
                         objective,
                         operand.Value);
@@ -100,7 +107,8 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
 
                 case ResultType_Reference:
                     commands.Append(
-                        "execute store result score {} {} run data get {} {} {}",
+                        "{}execute store result score {} {} run data get {} {} {}",
+                        prefix,
                         player,
                         objective,
                         operand.ReferenceType,

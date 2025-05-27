@@ -83,7 +83,7 @@ namespace mcc
         static const std::map<ResultTypeE, const char *> map
         {
             {ResultType_Value, "value"},
-            {ResultType_Reference, "storage"},
+            {ResultType_Reference, "reference"},
             {ResultType_Argument, "argument"},
         };
 

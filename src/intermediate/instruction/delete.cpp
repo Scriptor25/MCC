@@ -27,7 +27,13 @@ void mcc::DeleteInstruction::Generate(CommandVector &commands, bool stack) const
     auto value = Value->GenerateResult();
     Assert(value.Type == ResultType_Reference, Where, "value must be {}, but is {}", ResultType_Reference, value.Type);
 
-    commands.Append("data remove {} {} {}", value.ReferenceType, value.Target, value.Path);
+    std::string prefix;
+    if (value.WithArgument)
+    {
+        prefix = "$";
+    }
+
+    commands.Append("{}data remove {} {} {}", prefix, value.ReferenceType, value.Target, value.Path);
 }
 
 bool mcc::DeleteInstruction::RequireStack() const

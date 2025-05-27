@@ -64,7 +64,15 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
 
     auto take_default = true;
 
-    switch (auto condition = Condition->GenerateResult(); condition.Type)
+    auto condition = Condition->GenerateResult();
+
+    std::string condition_prefix;
+    if (condition.WithArgument)
+    {
+        condition_prefix = "$";
+    }
+
+    switch (condition.Type)
     {
         case ResultType_Value:
             for (auto &[case_, target_]: CaseTargets)
@@ -104,10 +112,17 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
             for (auto &[case_, target_]: CaseTargets)
             {
                 auto case_value = case_->GenerateResult();
+                Assert(
+                    case_value.Type == ResultType_Value,
+                    case_->Where,
+                    "case value must be {}, but is {}",
+                    ResultType_Value,
+                    case_value.Type);
 
                 commands.Append(CreateTmpScore());
                 commands.Append(
-                    "execute store result score %c {} run data get {} {} {}",
+                    "{}execute store result score %c {} run data get {} {} {}",
+                    condition_prefix,
                     tmp_name,
                     condition.ReferenceType,
                     condition.Target,

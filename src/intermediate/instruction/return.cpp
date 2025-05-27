@@ -39,15 +39,24 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
 {
     if (Value)
     {
-        switch (auto value = Value->GenerateResult(); value.Type)
+        auto value = Value->GenerateResult();
+
+        std::string prefix;
+        if (value.WithArgument)
+        {
+            prefix = "$";
+        }
+
+        switch (value.Type)
         {
             case ResultType_Value:
-                commands.Append("data modify storage {} result set value {}", Location, value.Value);
+                commands.Append("{}data modify storage {} result set value {}", prefix, Location, value.Value);
                 break;
 
             case ResultType_Reference:
                 commands.Append(
-                    "data modify storage {} result set from {} {} {}",
+                    "{}data modify storage {} result set from {} {} {}",
+                    prefix,
                     Location,
                     value.ReferenceType,
                     value.Target,
@@ -61,9 +70,10 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
             default:
                 Error(
                     Where,
-                    "value must be {} or {}, but is {}",
+                    "value must be {}, {} or {}, but is {}",
                     ResultType_Value,
                     ResultType_Reference,
+                    ResultType_Argument,
                     value.Type);
         }
     }

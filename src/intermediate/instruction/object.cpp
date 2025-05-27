@@ -46,12 +46,20 @@ mcc::ObjectInstruction::~ObjectInstruction()
 void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
 {
     auto object = Object->GenerateResult();
+    auto value = Value->GenerateResult();
 
-    switch (auto value = Value->GenerateResult(); value.Type)
+    std::string prefix;
+    if (object.WithArgument || value.WithArgument)
+    {
+        prefix = "$";
+    }
+
+    switch (value.Type)
     {
         case ResultType_Value:
             commands.Append(
-                "data modify {} {} {}.{} set value {}",
+                "{}data modify {} {} {}.{} set value {}",
+                prefix,
                 object.ReferenceType,
                 object.Target,
                 object.Path,
@@ -61,7 +69,8 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
 
         case ResultType_Reference:
             commands.Append(
-                "data modify {} {} {}.{} set from {} {} {}",
+                "{}data modify {} {} {}.{} set from {} {} {}",
+                prefix,
                 object.ReferenceType,
                 object.Target,
                 object.Path,

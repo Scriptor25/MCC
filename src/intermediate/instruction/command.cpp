@@ -33,7 +33,9 @@ void mcc::CommandInstruction::Generate(CommandVector &commands, const bool stack
     auto command = Command;
     const auto macro = command.front() == '$';
     if (macro)
+    {
         command.erase(command.begin());
+    }
 
     Assert(stack, Where, "command instruction with result requires stack");
     commands.Append(

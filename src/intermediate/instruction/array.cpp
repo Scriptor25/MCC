@@ -93,11 +93,18 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
             break;
     }
 
+    std::string prefix;
+    if (value.WithArgument)
+    {
+        prefix = "$";
+    }
+
     switch (value.Type)
     {
         case ResultType_Value:
             commands.Append(
-                "data modify {} {} {} {} value {}",
+                "{}data modify {} {} {} {} value {}",
+                prefix,
                 array.ReferenceType,
                 array.Target,
                 array.Path,
@@ -107,7 +114,8 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
 
         case ResultType_Reference:
             commands.Append(
-                "data modify {} {} {} {} from {} {} {}",
+                "{}data modify {} {} {} {} from {} {} {}",
+                prefix,
                 array.ReferenceType,
                 array.Target,
                 array.Path,

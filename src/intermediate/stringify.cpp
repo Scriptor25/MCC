@@ -31,16 +31,21 @@ mcc::Result mcc::StringifyValue::GenerateResult() const
         return Target->GenerateResult();
     }
 
-    std::string value;
+    auto target = Target->GenerateResultUnwrap();
 
-    switch (auto target = Target->GenerateResultUnwrap(); target.Type)
+    std::string target_value;
+    switch (target.Type)
     {
         case ResultType_Value:
-            value = std::format("\"{}\"", target.Value);
+            target_value = std::format("\"{}\"", target.Value);
             break;
 
         case ResultType_Reference:
-            value = std::format("{{\"{}\":\"{}\",\"nbt\":\"{}\"}}", target.ReferenceType, target.Target, target.Path);
+            target_value = std::format(
+                "{{\"{}\":\"{}\",\"nbt\":\"{}\"}}",
+                target.ReferenceType,
+                target.Target,
+                target.Path);
             break;
 
         case ResultType_Argument:
@@ -61,7 +66,8 @@ mcc::Result mcc::StringifyValue::GenerateResult() const
 
     return {
         .Type = ResultType_Value,
-        .Value = std::move(value),
+        .WithArgument = target.WithArgument,
+        .Value = std::move(target_value),
         .NotNull = true,
     };
 }

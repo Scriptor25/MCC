@@ -56,7 +56,15 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
     auto then = ThenTarget->Parent->GetLocation(ThenTarget);
     auto else_ = ElseTarget->Parent->GetLocation(ElseTarget);
 
-    switch (auto condition = Condition->GenerateResult(); condition.Type)
+    auto condition = Condition->GenerateResult();
+
+    std::string condition_prefix;
+    if (condition.WithArgument)
+    {
+        condition_prefix = "$";
+    }
+
+    switch (condition.Type)
     {
         case ResultType_Value:
             commands.Append(
@@ -71,7 +79,8 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
         case ResultType_Reference:
             commands.Append(CreateTmpScore());
             commands.Append(
-                "execute store result score %c {} run data get {} {} {}",
+                "{}execute store result score %c {} run data get {} {} {}",
+                condition_prefix,
                 tmp_name,
                 condition.ReferenceType,
                 condition.Target,

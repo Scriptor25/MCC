@@ -48,15 +48,22 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
 
     commands.Append(CreateTmpScore());
 
+    std::string prefix;
+    if (left.WithArgument)
+    {
+        prefix = "$";
+    }
+
     switch (left.Type)
     {
         case ResultType_Value:
-            commands.Append("scoreboard players set %a {} {}", objective, left.Value);
+            commands.Append("{}scoreboard players set %a {} {}", prefix, objective, left.Value);
             break;
 
         case ResultType_Reference:
             commands.Append(
-                "execute store result score %a {} run data get {} {} {}",
+                "{}execute store result score %a {} run data get {} {} {}",
+                prefix,
                 objective,
                 left.ReferenceType,
                 left.Target,
@@ -79,15 +86,22 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
 
     if (require_right)
     {
+        prefix = "";
+        if (right.WithArgument)
+        {
+            prefix = "$";
+        }
+
         switch (right.Type)
         {
             case ResultType_Value:
-                commands.Append("scoreboard players set %b {} {}", objective, right.Value);
+                commands.Append("{}scoreboard players set %b {} {}", prefix, objective, right.Value);
                 break;
 
             case ResultType_Reference:
                 commands.Append(
-                    "execute store result score %b {} run data get {} {} {}",
+                    "{}execute store result score %b {} run data get {} {} {}",
+                    prefix,
                     objective,
                     right.ReferenceType,
                     right.Target,

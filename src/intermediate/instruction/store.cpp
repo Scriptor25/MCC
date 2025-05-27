@@ -45,10 +45,22 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
         ResultType_Reference,
         dst.Type);
 
+    std::string prefix;
+    if (dst.WithArgument || src.WithArgument)
+    {
+        prefix = "$";
+    }
+
     switch (src.Type)
     {
         case ResultType_Value:
-            commands.Append("data modify {} {} {} set value {}", dst.ReferenceType, dst.Target, dst.Path, src.Value);
+            commands.Append(
+                "{}data modify {} {} {} set value {}",
+                prefix,
+                dst.ReferenceType,
+                dst.Target,
+                dst.Path,
+                src.Value);
             break;
 
         case ResultType_Reference:
@@ -58,7 +70,8 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
             }
 
             commands.Append(
-                "data modify {} {} {} set from {} {} {}",
+                "{}data modify {} {} {} set from {} {} {}",
+                prefix,
                 dst.ReferenceType,
                 dst.Target,
                 dst.Path,

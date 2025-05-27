@@ -47,15 +47,24 @@ mcc::ThrowInstruction::~ThrowInstruction()
 
 void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    switch (auto value = Value->GenerateResult(); value.Type)
+    auto value = Value->GenerateResult();
+
+    std::string value_prefix;
+    if (value.WithArgument)
+    {
+        value_prefix = "$";
+    }
+
+    switch (value.Type)
     {
         case ResultType_Value:
-            commands.Append("data modify storage {} result set value {}", Location, value.Value);
+            commands.Append("{}data modify storage {} result set value {}", value_prefix, Location, value.Value);
             break;
 
         case ResultType_Reference:
             commands.Append(
-                "data modify storage {} result set from {} {} {}",
+                "{}data modify storage {} result set from {} {} {}",
+                value_prefix,
                 Location,
                 value.ReferenceType,
                 value.Target,

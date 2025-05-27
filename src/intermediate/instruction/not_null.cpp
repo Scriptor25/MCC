@@ -36,9 +36,16 @@ void mcc::NotNullInstruction::Generate(CommandVector &commands, bool stack) cons
 
     auto stack_path = GetStackPath();
 
+    std::string prefix;
+    if (value.WithArgument)
+    {
+        prefix = "$";
+    }
+
     commands.Append("data remove storage {} {}", Location, stack_path);
     commands.Append(
-        "execute if data {} {} {} run data modify storage {} {} set value 1",
+        "{}execute if data {} {} {} run data modify storage {} {} set value 1",
+        prefix,
         value.ReferenceType,
         value.Target,
         value.Path,

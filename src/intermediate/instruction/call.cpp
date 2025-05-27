@@ -99,11 +99,20 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
 
             for (auto &[key_, argument_]: Arguments)
             {
-                switch (auto value = argument_->GenerateResult(); value.Type)
+                auto value = argument_->GenerateResult();
+
+                std::string value_prefix;
+                if (value.WithArgument)
+                {
+                    value_prefix = "$";
+                }
+
+                switch (value.Type)
                 {
                     case ResultType_Value:
                         commands.Append(
-                            "data modify storage {} {}.{} set value {}",
+                            "{}data modify storage {} {}.{} set value {}",
+                            value_prefix,
                             Location,
                             stack_path,
                             key_,
@@ -112,7 +121,8 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
 
                     case ResultType_Reference:
                         commands.Append(
-                            "data modify storage {} {}.{} set from {} {} {}",
+                            "{}data modify storage {} {}.{} set from {} {} {}",
+                            value_prefix,
                             Location,
                             stack_path,
                             key_,

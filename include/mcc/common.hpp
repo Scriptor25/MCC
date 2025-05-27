@@ -109,6 +109,8 @@ namespace mcc
 
         ResultTypeE Type;
 
+        bool WithArgument = false;
+
         /* Value */
         std::string Value;
         bool NotNull;

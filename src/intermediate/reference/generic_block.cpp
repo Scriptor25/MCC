@@ -48,14 +48,59 @@ mcc::Result mcc::GenericBlockReference::GenerateResult() const
     auto y = PositionY->GenerateResultUnwrap();
     auto z = PositionZ->GenerateResultUnwrap();
 
-    Assert(x.Type == ResultType_Value, Where, "x must be {}, but is {}", ResultType_Value, x.Type);
-    Assert(y.Type == ResultType_Value, Where, "y must be {}, but is {}", ResultType_Value, y.Type);
-    Assert(z.Type == ResultType_Value, Where, "z must be {}, but is {}", ResultType_Value, z.Type);
+    auto with_argument = x.WithArgument || y.WithArgument || z.WithArgument;
+    std::string x_value, y_value, z_value;
+
+    switch (x.Type)
+    {
+        case ResultType_Value:
+            x_value = x.Value;
+            break;
+
+        case ResultType_Argument:
+            with_argument = true;
+            x_value = x.Name;
+            break;
+
+        default:
+            Error(Where, "x must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, x.Type);
+    }
+
+    switch (y.Type)
+    {
+        case ResultType_Value:
+            y_value = y.Value;
+            break;
+
+        case ResultType_Argument:
+            with_argument = true;
+            y_value = y.Name;
+            break;
+
+        default:
+            Error(Where, "y must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, y.Type);
+    }
+
+    switch (z.Type)
+    {
+        case ResultType_Value:
+            z_value = z.Value;
+            break;
+
+        case ResultType_Argument:
+            with_argument = true;
+            z_value = z.Name;
+            break;
+
+        default:
+            Error(Where, "z must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, z.Type);
+    }
 
     return {
         .Type = ResultType_Reference,
+        .WithArgument = with_argument,
         .ReferenceType = ReferenceType_Block,
-        .Target = std::format("{} {} {}", x.Value, y.Value, z.Value),
+        .Target = std::format("{} {} {}", x_value, y_value, z_value),
         .Path = Path,
     };
 }

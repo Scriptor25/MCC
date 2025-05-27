@@ -6,10 +6,18 @@
 
 static void generate_macro_print(const mcc::MacroInstruction &self, mcc::CommandVector &commands)
 {
-    const auto targets = std::dynamic_pointer_cast<mcc::ConstantString>(self.Arguments.at(0));
+    mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
 
-    std::string message_value;
-    switch (auto message = self.Arguments.at(1)->GenerateResult(); message.Type)
+    const auto targets = std::dynamic_pointer_cast<mcc::ConstantString>(self.Arguments.at(0))->Value;
+    const auto message = self.Arguments.at(1)->GenerateResult();
+
+    std::string message_value, prefix;
+    if (message.WithArgument)
+    {
+        prefix = "$";
+    }
+
+    switch (message.Type)
     {
         case mcc::ResultType_Value:
             message_value = message.Value;
@@ -23,6 +31,11 @@ static void generate_macro_print(const mcc::MacroInstruction &self, mcc::Command
                 message.Path);
             break;
 
+        case mcc::ResultType_Argument:
+            message_value = message.Name;
+            prefix = "$";
+            break;
+
         default:
             mcc::Error(
                 self.Where,
@@ -32,11 +45,13 @@ static void generate_macro_print(const mcc::MacroInstruction &self, mcc::Command
                 message.Type);
     }
 
-    commands.Append("tellraw {} {}", targets->Value, message_value);
+    commands.Append("{}tellraw {} {}", prefix, targets, message_value);
 }
 
 static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandVector &commands)
 {
+    mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
+
     auto value1 = self.Arguments.at(0)->GenerateResult();
     auto value2 = self.Arguments.at(1)->GenerateResult();
 
@@ -55,15 +70,31 @@ static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandV
 
     auto tmp_name = self.GetTmpName();
 
+    std::string prefix1, prefix2, prefix3;
+    if (value1.WithArgument)
+    {
+        prefix1 = "$";
+    }
+    if (value1.WithArgument || value2.WithArgument)
+    {
+        prefix2 = "$";
+    }
+    if (value2.WithArgument)
+    {
+        prefix3 = "$";
+    }
+
     commands.Append(
-        "data modify storage {} {} set from {} {} {}",
+        "{}data modify storage {} {} set from {} {} {}",
+        prefix1,
         self.Location,
         tmp_name,
         value1.ReferenceType,
         value1.Target,
         value1.Path);
     commands.Append(
-        "data modify {} {} {} set from {} {} {}",
+        "{}data modify {} {} {} set from {} {} {}",
+        prefix2,
         value1.ReferenceType,
         value1.Target,
         value1.Path,
@@ -71,7 +102,8 @@ static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandV
         value2.Target,
         value2.Path);
     commands.Append(
-        "data modify {} {} {} set from storage {} {}",
+        "{}data modify {} {} {} set from storage {} {}",
+        prefix3,
         value2.ReferenceType,
         value2.Target,
         value2.Path,
@@ -100,8 +132,15 @@ static void generate_macro_data(const mcc::MacroInstruction &self, mcc::CommandV
         mcc::ResultType_Reference,
         dst_value.Type);
 
+    std::string prefix;
+    if (dst_value.WithArgument || src_value.WithArgument)
+    {
+        prefix = "$";
+    }
+
     commands.Append(
-        "data modify {} {} {} set from {}",
+        "{}data modify {} {} {} set from {}",
+        prefix,
         dst_value.ReferenceType,
         dst_value.Target,
         dst_value.Path,
@@ -127,8 +166,15 @@ static void generate_macro_store(const mcc::MacroInstruction &self, mcc::Command
         mcc::ResultType_Reference,
         dst_value.Type);
 
+    std::string prefix;
+    if (dst_value.WithArgument || src_value.WithArgument)
+    {
+        prefix = "$";
+    }
+
     commands.Append(
-        "execute store result {} {} {} double 1 run {}",
+        "{}execute store result {} {} {} double 1 run {}",
+        prefix,
         dst_value.ReferenceType,
         dst_value.Target,
         dst_value.Path,

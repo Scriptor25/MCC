@@ -2,19 +2,39 @@ include "std.mcc"
 
 namespace example
 
-define pos(): position {
-    return ref<position>(entity, "@s", "Pos")
+define pos(target: string): position {
+    return ref<position>(entity, target, "Pos")
 }
 
-define on_ground(): boolean {
-    return ref<boolean>(entity, "@s", "OnGround")
+define on_ground(target: string): boolean {
+    return ref<boolean>(entity, target, "OnGround")
 }
 
-define spawn_tnt() {
-    std:summon(pos(), "minecraft:tnt")
+define summon_tnt(target: string) {
+    std:summon(pos(target), "minecraft:tnt")
 }
 
-define bomb() {
-    unless (on_ground())
-        spawn_tnt()
+define bomb_tick() #minecraft:tick {
+    let& counter = ref<number>(storage, example:bomb, "counter")
+    let& enable = ref<boolean>(storage, example:bomb, "enable")
+    let& target = ref<string>(storage, example:bomb, "target")
+
+    if (enable)
+        unless (++counter % 20)
+            unless (on_ground(target))
+                summon_tnt(target)
+}
+
+define bomb(target: string) {
+    let& counter = ref<number>(storage, example:bomb, "counter")
+    let& enable = ref<boolean>(storage, example:bomb, "enable")
+    let& target_ref = ref<string>(storage, example:bomb, "target")
+
+    if (enable) {
+        enable = false
+    } else {
+        counter = 0
+        enable = true
+        target_ref = target
+    }
 }

@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::GenericStorageReference::Create(
@@ -12,11 +13,11 @@ mcc::ValuePtr mcc::GenericStorageReference::Create(
 mcc::GenericStorageReference::GenericStorageReference(
     const SourceLocation &where,
     const TypePtr &type,
-    const ResourceLocation &location,
-    const std::string &path)
+    ResourceLocation location,
+    std::string path)
     : Value(where, type, true),
-      Location(location),
-      Path(path)
+      Location(std::move(location)),
+      Path(std::move(path))
 {
 }
 

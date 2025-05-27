@@ -35,12 +35,30 @@ bool mcc::GenericEntityReference::RequireStack() const
 mcc::Result mcc::GenericEntityReference::GenerateResult() const
 {
     auto name = Name->GenerateResultUnwrap();
-    Assert(name.Type == ResultType_Value, Where, "name must be {}, but is {}", ResultType_Value, name.Type);
+
+    auto with_argument = name.WithArgument;
+    std::string name_value;
+
+    switch (name.Type)
+    {
+        case ResultType_Value:
+            name_value = name.Value;
+            break;
+
+        case ResultType_Argument:
+            with_argument = true;
+            name_value = name.Name;
+            break;
+
+        default:
+            Error(Where, "name must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, name.Type);
+    }
 
     return {
         .Type = ResultType_Reference,
-        .ReferenceType = ReferenceType_Storage,
-        .Target = name.Value,
+        .WithArgument = with_argument,
+        .ReferenceType = ReferenceType_Entity,
+        .Target = name_value,
         .Path = Path,
     };
 }
