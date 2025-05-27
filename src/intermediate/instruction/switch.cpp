@@ -100,16 +100,17 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
             }
             break;
 
-        case ResultType_Storage:
+        case ResultType_Reference:
             for (auto &[case_, target_]: CaseTargets)
             {
                 auto case_value = case_->GenerateResult();
 
                 commands.Append(CreateTmpScore());
                 commands.Append(
-                    "execute store result score %c {} run data get storage {} {}",
+                    "execute store result score %c {} run data get {} {} {}",
                     tmp_name,
-                    condition.Location,
+                    condition.ReferenceType,
+                    condition.Target,
                     condition.Path);
                 commands.Append("data remove storage {} {}", Location, stack_path);
                 commands.Append(
@@ -171,7 +172,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                 Where,
                 "condition must be {}, {} or {}, but is {}",
                 ResultType_Value,
-                ResultType_Storage,
+                ResultType_Reference,
                 ResultType_Argument,
                 condition.Type);
     }

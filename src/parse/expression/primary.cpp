@@ -16,6 +16,11 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         return ParseSwitchExpression();
     }
 
+    if (At(TokenType_Symbol, "ref"))
+    {
+        return ParseRefExpression();
+    }
+
     if (AtEnum("true", "false"))
     {
         auto token = Skip();
@@ -63,6 +68,13 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     if (At(TokenType_Other, "{"))
     {
         return ParseObjectExpression();
+    }
+
+    if (SkipIf(TokenType_Other, "("))
+    {
+        auto expression = ParseExpression();
+        Expect(TokenType_Other, ")");
+        return expression;
     }
 
     if (At(TokenType_Operator))

@@ -23,8 +23,9 @@ bool mcc::FunctionResult::RequireStack() const
 mcc::Result mcc::FunctionResult::GenerateResult() const
 {
     return {
-        .Type = ResultType_Storage,
-        .Location = Location,
+        .Type = ResultType_Reference,
+        .ReferenceType = ReferenceType_Storage,
+        .Target = Location.String(),
         .Path = "result",
     };
 }

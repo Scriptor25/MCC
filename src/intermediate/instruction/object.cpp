@@ -51,27 +51,31 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
     {
         case ResultType_Value:
             commands.Append(
-                "data modify storage {} {}.{} set value {}",
-                object.Location,
+                "data modify {} {} {}.{} set value {}",
+                object.ReferenceType,
+                object.Target,
                 object.Path,
                 Key,
                 value.Value);
             break;
 
-        case ResultType_Storage:
+        case ResultType_Reference:
             commands.Append(
-                "data modify storage {} {}.{} set from storage {} {}",
-                object.Location,
+                "data modify {} {} {}.{} set from {} {} {}",
+                object.ReferenceType,
+                object.Target,
                 object.Path,
                 Key,
-                value.Location,
+                value.ReferenceType,
+                value.Target,
                 value.Path);
             break;
 
         case ResultType_Argument:
             commands.Append(
-                "$data modify storage {} {}.{} set value {}",
-                object.Location,
+                "$data modify {} {} {}.{} set value {}",
+                object.ReferenceType,
+                object.Target,
                 object.Path,
                 Key,
                 value.Name);
@@ -82,7 +86,7 @@ void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
                 Where,
                 "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
-                ResultType_Storage,
+                ResultType_Reference,
                 value.Type);
     }
 }

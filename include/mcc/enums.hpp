@@ -6,6 +6,13 @@
 
 namespace mcc
 {
+    enum ReferenceTypeE
+    {
+        ReferenceType_Block,
+        ReferenceType_Entity,
+        ReferenceType_Storage,
+    };
+
     enum FrameFlagE
     {
         FrameFlag_RequireHead = 0b001,
@@ -16,7 +23,7 @@ namespace mcc
     enum ResultTypeE
     {
         ResultType_Value,
-        ResultType_Storage,
+        ResultType_Reference,
         ResultType_Argument,
     };
 
@@ -47,12 +54,36 @@ namespace mcc
         ArrayOperation_Insert,
     };
 
+    inline ReferenceTypeE ToTargetType(const std::string_view &string_)
+    {
+        static const std::map<std::string_view, ReferenceTypeE> map
+        {
+            {"block", ReferenceType_Block},
+            {"entity", ReferenceType_Entity},
+            {"storage", ReferenceType_Storage},
+        };
+
+        return map.at(string_);
+    }
+
+    inline const char *ToString(const ReferenceTypeE enum_)
+    {
+        static const std::map<ReferenceTypeE, const char *> map
+        {
+            {ReferenceType_Block, "block"},
+            {ReferenceType_Entity, "entity"},
+            {ReferenceType_Storage, "storage"},
+        };
+
+        return map.at(enum_);
+    }
+
     inline const char *ToString(const ResultTypeE enum_)
     {
         static const std::map<ResultTypeE, const char *> map
         {
             {ResultType_Value, "value"},
-            {ResultType_Storage, "storage"},
+            {ResultType_Reference, "storage"},
             {ResultType_Argument, "argument"},
         };
 
@@ -92,6 +123,16 @@ namespace mcc
 
 namespace std
 {
+    template<>
+    struct formatter<mcc::ReferenceTypeE> final : formatter<string>
+    {
+        template<typename FormatContext>
+        auto format(const mcc::ReferenceTypeE &type, FormatContext &ctx) const
+        {
+            return formatter<string>::format(mcc::ToString(type), ctx);
+        }
+    };
+
     template<>
     struct formatter<mcc::ResultTypeE> final : formatter<string>
     {

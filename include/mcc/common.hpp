@@ -109,12 +109,13 @@ namespace mcc
 
         ResultTypeE Type;
 
-        /* Constant */
+        /* Value */
         std::string Value;
         bool NotNull;
 
-        /* Storage */
-        ResourceLocation Location;
+        /* Reference */
+        ReferenceTypeE ReferenceType;
+        std::string Target;
         std::string Path;
 
         /* Argument */

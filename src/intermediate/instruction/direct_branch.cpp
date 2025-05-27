@@ -71,28 +71,31 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
         auto branch_result = BranchResult->GenerateResult();
 
         Assert(
-            branch_result.Type == ResultType_Storage,
+            branch_result.Type == ResultType_Reference,
             Where,
             "branch result must be {}, but is {}",
-            ResultType_Storage,
+            ResultType_Reference,
             branch_result.Type);
 
         switch (auto result = Result->GenerateResult(); result.Type)
         {
             case ResultType_Value:
                 commands.Append(
-                    "data modify storage {} {} set value {}",
-                    branch_result.Location,
+                    "data modify {} {} {} set value {}",
+                    branch_result.ReferenceType,
+                    branch_result.Target,
                     branch_result.Path,
                     result.Value);
                 break;
 
-            case ResultType_Storage:
+            case ResultType_Reference:
                 commands.Append(
-                    "data modify storage {} {} set from storage {} {}",
-                    branch_result.Location,
+                    "data modify {} {} {} set from {} {} {}",
+                    branch_result.ReferenceType,
+                    branch_result.Target,
                     branch_result.Path,
-                    result.Location,
+                    result.ReferenceType,
+                    result.Target,
                     result.Path);
                 break;
 
@@ -101,7 +104,7 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
                     Where,
                     "result must be {} or {}, but is {}",
                     ResultType_Value,
-                    ResultType_Storage,
+                    ResultType_Reference,
                     result.Type);
         }
     }

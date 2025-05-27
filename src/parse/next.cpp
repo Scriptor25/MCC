@@ -58,6 +58,7 @@ mcc::Token &mcc::Parser::Next()
                     case '!':
                     case '@':
                     case '.':
+                    case '&':
                         where = m_Where;
                         raw += static_cast<char>(m_Buf);
                         value += static_cast<char>(m_Buf);

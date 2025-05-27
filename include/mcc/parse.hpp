@@ -72,6 +72,7 @@ namespace mcc
         StatementPtr ParseStatement();
         StatementPtr ParseBreakStatement();
         StatementPtr ParseContinueStatement();
+        StatementPtr ParseDeleteStatement();
         StatementPtr ParseForStatement();
         StatementPtr ParseForEachStatement();
         StatementPtr ParseIfUnlessStatement();
@@ -86,7 +87,7 @@ namespace mcc
         ExpressionPtr ParseArrayExpression();
         ExpressionPtr ParseBinaryExpression(ExpressionPtr left, unsigned min_pre);
         ExpressionPtr ParseCommandExpression();
-        ExpressionPtr ParseFloatExpression();
+        ExpressionPtr ParseRefExpression();
         ExpressionPtr ParseFormatExpression();
         ExpressionPtr ParseIfUnlessExpression();
         ExpressionPtr ParseNumberExpression();

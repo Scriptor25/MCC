@@ -53,11 +53,12 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
             commands.Append("data modify storage {} result set value {}", Location, value.Value);
             break;
 
-        case ResultType_Storage:
+        case ResultType_Reference:
             commands.Append(
-                "data modify storage {} result set from storage {} {}",
+                "data modify storage {} result set from {} {} {}",
                 Location,
-                value.Location,
+                value.ReferenceType,
+                value.Target,
                 value.Path);
             break;
 
@@ -70,7 +71,7 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
                 Where,
                 "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
-                ResultType_Storage,
+                ResultType_Reference,
                 ResultType_Argument,
                 value.Type);
     }

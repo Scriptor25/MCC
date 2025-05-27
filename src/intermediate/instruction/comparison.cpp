@@ -54,11 +54,12 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
             commands.Append("scoreboard players set %a {} {}", objective, left.Value);
             break;
 
-        case ResultType_Storage:
+        case ResultType_Reference:
             commands.Append(
-                "execute store result score %a {} run data get storage {} {}",
+                "execute store result score %a {} run data get {} {} {}",
                 objective,
-                left.Location,
+                left.ReferenceType,
+                left.Target,
                 left.Path);
             break;
 
@@ -71,7 +72,7 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
                 Where,
                 "left must be {}, {} or {}, but is {}",
                 ResultType_Value,
-                ResultType_Storage,
+                ResultType_Reference,
                 ResultType_Argument,
                 left.Type);
     }
@@ -84,11 +85,12 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
                 commands.Append("scoreboard players set %b {} {}", objective, right.Value);
                 break;
 
-            case ResultType_Storage:
+            case ResultType_Reference:
                 commands.Append(
-                    "execute store result score %b {} run data get storage {} {}",
+                    "execute store result score %b {} run data get {} {} {}",
                     objective,
-                    right.Location,
+                    right.ReferenceType,
+                    right.Target,
                     right.Path);
                 break;
 
@@ -101,7 +103,7 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
                     Where,
                     "right must be {}, {} or {}, but is {}",
                     ResultType_Value,
-                    ResultType_Storage,
+                    ResultType_Reference,
                     ResultType_Argument,
                     right.Type);
         }
@@ -155,8 +157,9 @@ bool mcc::ComparisonInstruction::RequireStack() const
 mcc::Result mcc::ComparisonInstruction::GenerateResult() const
 {
     return {
-        .Type = ResultType_Storage,
-        .Location = Location,
+        .Type = ResultType_Reference,
+        .ReferenceType = ReferenceType_Storage,
+        .Target = Location.String(),
         .Path = GetStackPath(),
     };
 }

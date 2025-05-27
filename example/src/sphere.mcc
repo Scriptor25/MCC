@@ -19,7 +19,7 @@ define sphere(cx: number, cy: number, cz: number, r: number, block: string, mode
                 const d2 = dx2 + dy2 + dz2
 
                 if (d2 < r2)
-                    std:setblock(x, y, z, block, mode)
+                    std:setblock([x, y, z]:position, block, mode)
             }
         }
     }

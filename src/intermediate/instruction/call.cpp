@@ -110,13 +110,14 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                             value.Value);
                         break;
 
-                    case ResultType_Storage:
+                    case ResultType_Reference:
                         commands.Append(
-                            "data modify storage {} {}.{} set from storage {} {}",
+                            "data modify storage {} {}.{} set from {} {} {}",
                             Location,
                             stack_path,
                             key_,
-                            value.Location,
+                            value.ReferenceType,
+                            value.Target,
                             value.Path);
                         break;
 
@@ -134,7 +135,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                             Where,
                             "value must be {}, {} or {}, but is {}",
                             ResultType_Value,
-                            ResultType_Storage,
+                            ResultType_Reference,
                             ResultType_Argument,
                             value.Type);
                 }
@@ -234,8 +235,9 @@ bool mcc::CallInstruction::RequireStack() const
 mcc::Result mcc::CallInstruction::GenerateResult() const
 {
     return {
-        .Type = ResultType_Storage,
-        .Location = Location,
+        .Type = ResultType_Reference,
+        .ReferenceType = ReferenceType_Storage,
+        .Target = Location.String(),
         .Path = GetStackPath(),
     };
 }

@@ -32,14 +32,15 @@ mcc::NotNullInstruction::~NotNullInstruction()
 void mcc::NotNullInstruction::Generate(CommandVector &commands, bool stack) const
 {
     auto value = Value->GenerateResult();
-    Assert(value.Type == ResultType_Storage, Where, "value must be {}, but is {}", ResultType_Storage, value.Type);
+    Assert(value.Type == ResultType_Reference, Where, "value must be {}, but is {}", ResultType_Reference, value.Type);
 
     auto stack_path = GetStackPath();
 
     commands.Append("data remove storage {} {}", Location, stack_path);
     commands.Append(
-        "execute if data storage {} {} run data modify storage {} {} set value 1",
-        value.Location,
+        "execute if data {} {} {} run data modify storage {} {} set value 1",
+        value.ReferenceType,
+        value.Target,
         value.Path,
         Location,
         stack_path);
@@ -53,8 +54,9 @@ bool mcc::NotNullInstruction::RequireStack() const
 mcc::Result mcc::NotNullInstruction::GenerateResult() const
 {
     return {
-        .Type = ResultType_Storage,
-        .Location = Location,
+        .Type = ResultType_Reference,
+        .ReferenceType = ReferenceType_Storage,
+        .Target = Location.String(),
         .Path = GetStackPath(),
     };
 }

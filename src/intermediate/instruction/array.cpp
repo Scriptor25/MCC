@@ -71,10 +71,10 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
     auto value = Value->GenerateResult();
 
     Assert(
-        array.Type == ResultType_Storage,
+        array.Type == ResultType_Reference,
         Where,
         "array must be {}, but is {}",
-        ResultType_Storage,
+        ResultType_Reference,
         array.Type);
 
     std::string operation;
@@ -97,27 +97,31 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
     {
         case ResultType_Value:
             commands.Append(
-                "data modify storage {} {} {} value {}",
-                array.Location,
+                "data modify {} {} {} {} value {}",
+                array.ReferenceType,
+                array.Target,
                 array.Path,
                 operation,
                 value.Value);
             break;
 
-        case ResultType_Storage:
+        case ResultType_Reference:
             commands.Append(
-                "data modify storage {} {} {} from storage {} {}",
-                array.Location,
+                "data modify {} {} {} {} from {} {} {}",
+                array.ReferenceType,
+                array.Target,
                 array.Path,
                 operation,
-                value.Location,
+                value.ReferenceType,
+                value.Target,
                 value.Path);
             break;
 
         case ResultType_Argument:
             commands.Append(
-                "$data modify storage {} {} {} value {}",
-                array.Location,
+                "$data modify {} {} {} {} value {}",
+                array.ReferenceType,
+                array.Target,
                 array.Path,
                 operation,
                 value.Name);
@@ -128,7 +132,7 @@ void mcc::ArrayInstruction::Generate(CommandVector &commands, bool stack) const
                 Where,
                 "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
-                ResultType_Storage,
+                ResultType_Reference,
                 ResultType_Argument,
                 value.Type);
     }

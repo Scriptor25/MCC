@@ -35,6 +35,16 @@ namespace mcc
         void Generate(Builder &builder, Frame &frame) const override;
     };
 
+    struct DeleteStatement final : Statement
+    {
+        DeleteStatement(const SourceLocation &where, ExpressionPtr value);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder, Frame &frame) const override;
+
+        ExpressionPtr Value;
+    };
+
     struct ForStatement final : Statement
     {
         ForStatement(
@@ -154,6 +164,7 @@ namespace mcc
         VariableStatement(
             const SourceLocation &where,
             bool is_constant,
+            bool is_reference,
             std::vector<std::string> names,
             TypePtr type,
             ExpressionPtr value);
@@ -162,6 +173,7 @@ namespace mcc
         void Generate(Builder &builder, Frame &frame) const override;
 
         bool IsConstant;
+        bool IsReference;
         std::vector<std::string> Names;
         TypePtr Type;
         ExpressionPtr Value;

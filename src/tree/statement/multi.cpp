@@ -14,7 +14,9 @@ std::ostream &mcc::MultiStatement::Print(std::ostream &stream) const
     stream << '{' << std::endl;
     indentation.append(2, ' ');
     for (auto &statement: Statements)
+    {
         statement->Print(stream << indentation) << std::endl;
+    }
     indentation.erase(0, 2);
     return stream << indentation << '}';
 }
@@ -24,7 +26,9 @@ void mcc::MultiStatement::Generate(Builder &builder, Frame &frame) const
     builder.PushVariables();
 
     for (auto &statement: Statements)
+    {
         statement->Generate(builder, frame);
+    }
 
     builder.PopVariables();
 }

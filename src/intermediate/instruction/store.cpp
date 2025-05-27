@@ -38,30 +38,37 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
     auto dst = Dst->GenerateResult();
     auto src = Src->GenerateResult();
 
-    Assert(dst.Type == ResultType_Storage, Where, "destination must be {}, but is {}", ResultType_Storage, dst.Type);
+    Assert(
+        dst.Type == ResultType_Reference,
+        Where,
+        "destination must be {}, but is {}",
+        ResultType_Reference,
+        dst.Type);
 
     switch (src.Type)
     {
         case ResultType_Value:
-            commands.Append("data modify storage {} {} set value {}", dst.Location, dst.Path, src.Value);
+            commands.Append("data modify {} {} {} set value {}", dst.ReferenceType, dst.Target, dst.Path, src.Value);
             break;
 
-        case ResultType_Storage:
-            if (dst.Location == src.Location && dst.Path == src.Path)
+        case ResultType_Reference:
+            if (dst.Target == src.Target && dst.Path == src.Path)
             {
                 break;
             }
 
             commands.Append(
-                "data modify storage {} {} set from storage {} {}",
-                dst.Location,
+                "data modify {} {} {} set from {} {} {}",
+                dst.ReferenceType,
+                dst.Target,
                 dst.Path,
-                src.Location,
+                src.ReferenceType,
+                src.Target,
                 src.Path);
             break;
 
         case ResultType_Argument:
-            commands.Append("$data modify storage {} {} set value {}", dst.Location, dst.Path, src.Name);
+            commands.Append("$data modify {} {} {} set value {}", dst.ReferenceType, dst.Target, dst.Path, src.Name);
             break;
 
         default:
@@ -69,7 +76,7 @@ void mcc::StoreInstruction::Generate(CommandVector &commands, bool stack) const
                 Where,
                 "src must be {}, {} or {}, but is {}",
                 ResultType_Value,
-                ResultType_Storage,
+                ResultType_Reference,
                 ResultType_Argument,
                 src.Type);
     }

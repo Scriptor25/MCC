@@ -39,8 +39,8 @@ mcc::Result mcc::StringifyValue::GenerateResult() const
             value = std::format("\"{}\"", target.Value);
             break;
 
-        case ResultType_Storage:
-            value = std::format("{{\"storage\":\"{}\",\"nbt\":\"{}\"}}", target.Location, target.Path);
+        case ResultType_Reference:
+            value = std::format("{{\"{}\":\"{}\",\"nbt\":\"{}\"}}", target.ReferenceType, target.Target, target.Path);
             break;
 
         case ResultType_Argument:
@@ -54,7 +54,7 @@ mcc::Result mcc::StringifyValue::GenerateResult() const
                 Where,
                 "value must be {}, {} or {}, but is {}",
                 ResultType_Value,
-                ResultType_Storage,
+                ResultType_Reference,
                 ResultType_Argument,
                 target.Type);
     }

@@ -98,12 +98,13 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
                         operand.Value);
                     break;
 
-                case ResultType_Storage:
+                case ResultType_Reference:
                     commands.Append(
-                        "execute store result score {} {} run data get storage {} {}",
+                        "execute store result score {} {} run data get {} {} {}",
                         player,
                         objective,
-                        operand.Location,
+                        operand.ReferenceType,
+                        operand.Target,
                         operand.Path);
                     break;
 
@@ -116,7 +117,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
                         Where,
                         "operand must be {}, {} or {}, but is {}",
                         ResultType_Value,
-                        ResultType_Storage,
+                        ResultType_Reference,
                         ResultType_Argument,
                         operand.Type);
             }
@@ -134,7 +135,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
 
     Assert(stack, Where, "operation instruction requires stack");
     commands.Append(
-        "execute store result storage {} {} long 1 run scoreboard players get %a {}",
+        "execute store result storage {} {} double 1 run scoreboard players get %a {}",
         Location,
         GetStackPath(),
         objective);
@@ -150,8 +151,9 @@ bool mcc::OperationInstruction::RequireStack() const
 mcc::Result mcc::OperationInstruction::GenerateResult() const
 {
     return {
-        .Type = ResultType_Storage,
-        .Location = Location,
+        .Type = ResultType_Reference,
+        .ReferenceType = ReferenceType_Storage,
+        .Target = Location.String(),
         .Path = GetStackPath(),
     };
 }

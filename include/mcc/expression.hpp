@@ -20,12 +20,13 @@ namespace mcc
 
     struct ArrayExpression final : Expression
     {
-        ArrayExpression(const SourceLocation &where, std::vector<ExpressionPtr> elements);
+        ArrayExpression(const SourceLocation &where, std::vector<ExpressionPtr> elements, TypePtr type);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
 
         std::vector<ExpressionPtr> Elements;
+        TypePtr Type;
     };
 
     struct BinaryExpression final : Expression
@@ -136,6 +137,32 @@ namespace mcc
         std::map<std::string, ExpressionPtr> Elements;
     };
 
+    struct RefExpression final : Expression
+    {
+        RefExpression(
+            const SourceLocation &where,
+            TypePtr type,
+            ReferenceTypeE target_type,
+            ExpressionPtr target_position_x,
+            ExpressionPtr target_position_y,
+            ExpressionPtr target_position_z,
+            ExpressionPtr target_name,
+            ResourceLocation target_location,
+            std::string path);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
+
+        TypePtr Type;
+        ReferenceTypeE TargetType;
+        ExpressionPtr TargetPositionX;
+        ExpressionPtr TargetPositionY;
+        ExpressionPtr TargetPositionZ;
+        ExpressionPtr TargetName;
+        ResourceLocation TargetLocation;
+        std::string Path;
+    };
+
     struct ResourceExpression final : Expression
     {
         ResourceExpression(const SourceLocation &where, ResourceLocation location);
@@ -148,12 +175,12 @@ namespace mcc
 
     struct SubscriptExpression final : Expression
     {
-        SubscriptExpression(const SourceLocation &where, ExpressionPtr array, ExpressionPtr index);
+        SubscriptExpression(const SourceLocation &where, ExpressionPtr base, ExpressionPtr index);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
 
-        ExpressionPtr Array, Index;
+        ExpressionPtr Base, Index;
     };
 
     struct SwitchExpression final : Expression

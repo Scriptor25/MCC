@@ -40,11 +40,17 @@ bool mcc::MemberReference::RequireStack() const
 mcc::Result mcc::MemberReference::GenerateResult() const
 {
     auto object = Object->GenerateResult();
-    Assert(object.Type == ResultType_Storage, Where, "object must be {}, but is {}", ResultType_Storage, object.Type);
+    Assert(
+        object.Type == ResultType_Reference,
+        Where,
+        "object must be {}, but is {}",
+        ResultType_Reference,
+        object.Type);
 
     return {
-        .Type = ResultType_Storage,
-        .Location = object.Location,
+        .Type = ResultType_Reference,
+        .ReferenceType = object.ReferenceType,
+        .Target = object.Target,
         .Path = std::format("{}.{}", object.Path, Member),
     };
 }

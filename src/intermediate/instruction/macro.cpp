@@ -15,10 +15,11 @@ static void generate_macro_print(const mcc::MacroInstruction &self, mcc::Command
             message_value = message.Value;
             break;
 
-        case mcc::ResultType_Storage:
+        case mcc::ResultType_Reference:
             message_value = std::format(
-                "{{\"storage\":\"{}\",\"nbt\":\"{}\",\"interpret\":true}}",
-                message.Location,
+                "{{\"{}\":\"{}\",\"nbt\":\"{}\",\"interpret\":true}}",
+                message.ReferenceType,
+                message.Target,
                 message.Path);
             break;
 
@@ -27,7 +28,7 @@ static void generate_macro_print(const mcc::MacroInstruction &self, mcc::Command
                 self.Where,
                 "message must be {} or {}, but is {}",
                 mcc::ResultType_Value,
-                mcc::ResultType_Storage,
+                mcc::ResultType_Reference,
                 message.Type);
     }
 
@@ -40,35 +41,39 @@ static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandV
     auto value2 = self.Arguments.at(1)->GenerateResult();
 
     mcc::Assert(
-        value1.Type == mcc::ResultType_Storage,
+        value1.Type == mcc::ResultType_Reference,
         self.Where,
         "first value must be {}, but is {}",
-        mcc::ResultType_Storage,
+        mcc::ResultType_Reference,
         value1.Type);
     mcc::Assert(
-        value2.Type == mcc::ResultType_Storage,
+        value2.Type == mcc::ResultType_Reference,
         self.Where,
         "second value must be {}, but is {}",
-        mcc::ResultType_Storage,
+        mcc::ResultType_Reference,
         value2.Type);
 
     auto tmp_name = self.GetTmpName();
 
     commands.Append(
-        "data modify storage {} {} set from storage {} {}",
+        "data modify storage {} {} set from {} {} {}",
         self.Location,
         tmp_name,
-        value1.Location,
+        value1.ReferenceType,
+        value1.Target,
         value1.Path);
     commands.Append(
-        "data modify storage {} {} set from storage {} {}",
-        value1.Location,
+        "data modify {} {} {} set from {} {} {}",
+        value1.ReferenceType,
+        value1.Target,
         value1.Path,
-        value2.Location,
+        value2.ReferenceType,
+        value2.Target,
         value2.Path);
     commands.Append(
-        "data modify storage {} {} set from storage {} {}",
-        value2.Location,
+        "data modify {} {} {} set from storage {} {}",
+        value2.ReferenceType,
+        value2.Target,
         value2.Path,
         self.Location,
         tmp_name);
@@ -78,18 +83,56 @@ static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandV
 
 static void generate_macro_data(const mcc::MacroInstruction &self, mcc::CommandVector &commands)
 {
-    auto dst = self.Arguments.at(0)->GenerateResult();
-    auto src = self.Arguments.at(1)->GenerateResultUnwrap();
+    mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
 
-    commands.Append("data modify storage {} {} set from {}", dst.Location, dst.Path, src.Value);
+    const auto dst = self.Arguments.at(0);
+    const auto src = self.Arguments.at(1);
+
+    mcc::Assert(dst->IsMutable, self.Where, "dst must be mutable");
+
+    auto dst_value = dst->GenerateResult();
+    auto src_value = src->GenerateResultUnwrap();
+
+    mcc::Assert(
+        dst_value.Type == mcc::ResultType_Reference,
+        self.Where,
+        "dst must be {}, but is {}",
+        mcc::ResultType_Reference,
+        dst_value.Type);
+
+    commands.Append(
+        "data modify {} {} {} set from {}",
+        dst_value.ReferenceType,
+        dst_value.Target,
+        dst_value.Path,
+        src_value.Value);
 }
 
 static void generate_macro_store(const mcc::MacroInstruction &self, mcc::CommandVector &commands)
 {
-    auto dst = self.Arguments.at(0)->GenerateResult();
-    auto src = self.Arguments.at(1)->GenerateResultUnwrap();
+    mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
 
-    commands.Append("execute store result storage {} {} long 1 run {}", dst.Location, dst.Path, src.Value);
+    const auto dst = self.Arguments.at(0);
+    const auto src = self.Arguments.at(1);
+
+    mcc::Assert(dst->IsMutable, self.Where, "dst must be mutable");
+
+    auto dst_value = dst->GenerateResult();
+    auto src_value = src->GenerateResultUnwrap();
+
+    mcc::Assert(
+        dst_value.Type == mcc::ResultType_Reference,
+        self.Where,
+        "dst must be {}, but is {}",
+        mcc::ResultType_Reference,
+        dst_value.Type);
+
+    commands.Append(
+        "execute store result {} {} {} double 1 run {}",
+        dst_value.ReferenceType,
+        dst_value.Target,
+        dst_value.Path,
+        src_value.Value);
 }
 
 using Generator = std::function<void(const mcc::MacroInstruction &, mcc::CommandVector &)>;

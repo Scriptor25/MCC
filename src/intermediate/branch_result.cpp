@@ -23,8 +23,9 @@ bool mcc::BranchResult::RequireStack() const
 mcc::Result mcc::BranchResult::GenerateResult() const
 {
     return {
-        .Type = ResultType_Storage,
-        .Location = Location,
+        .Type = ResultType_Reference,
+        .ReferenceType = ReferenceType_Storage,
+        .Target = Location.String(),
         .Path = std::format("stack[0].result.{}", reinterpret_cast<uintptr_t>(this)),
     };
 }

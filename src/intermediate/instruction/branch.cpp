@@ -68,12 +68,13 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
                 arguments);
             break;
 
-        case ResultType_Storage:
+        case ResultType_Reference:
             commands.Append(CreateTmpScore());
             commands.Append(
-                "execute store result score %c {} run data get storage {} {}",
+                "execute store result score %c {} run data get {} {} {}",
                 tmp_name,
-                condition.Location,
+                condition.ReferenceType,
+                condition.Target,
                 condition.Path);
             commands.Append(
                 "data remove storage {} {}",
@@ -133,7 +134,7 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
                 Where,
                 "condition must be {}, {} or {}, but is {}",
                 ResultType_Value,
-                ResultType_Storage,
+                ResultType_Reference,
                 ResultType_Argument,
                 condition.Type);
     }

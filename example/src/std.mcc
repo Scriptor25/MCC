@@ -1,16 +1,50 @@
 namespace std
 
+type position = [number, number, number]
+
 define assert(x: boolean, message: string) throws {
     unless (x)
         throw message
 }
 
-define setblock(x: number, y: number, z: number, block: string, mode: string) {
+define floor(x: number): number {
+    let result: number
+
+    let& tmp = ref<number>(storage, std:floor, "tmp") = x
+    !store(result, "data get storage std:floor tmp 1")
+    delete tmp
+
+    return result
+}
+
+define setblock_direct(x: number, y: number, z: number, block: string, mode: string) {
     ?`$setblock $(x) $(y) $(z) $(block) $(mode)`
 }
 
-define summon(x: number, y: number, z: number, type: string) {
+define setblock(pos: position, block: string, mode: string) {
+    let x, y, z : number
+    {
+        const pos = pos
+        x = floor(pos[0])
+        y = floor(pos[1])
+        z = floor(pos[2])
+    }
+    setblock_direct(x, y, z, block, mode)
+}
+
+define summon_direct(x: number, y: number, z: number, type: string) {
     ?`$summon $(type) $(x) $(y) $(z)`
+}
+
+define summon(pos: position, type: string) {
+    let x, y, z : number
+    {
+        const pos = pos
+        x = floor(pos[0])
+        y = floor(pos[1])
+        z = floor(pos[2])
+    }
+    summon_direct(x, y, z, type)
 }
 
 define random(min: number, max: number): number {
