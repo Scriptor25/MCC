@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <fstream>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
@@ -22,6 +23,7 @@ void mcc::IncludeNode::Generate(Builder &builder) const
     Assert(stream.is_open(), Where, "failed to open file {}", Filepath.string());
 
     std::set<std::filesystem::path> include_chain;
+    include_chain.insert(std::filesystem::canonical(Where.Filename));
     include_chain.insert(canonical(Filepath));
 
     Parser parser(builder.GetContext(), stream, Filepath.string());
