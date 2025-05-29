@@ -9,7 +9,7 @@ mcc::FunctionPtr mcc::Function::Create(
     TypeContext &context,
     const ResourceLocation &location,
     const ParameterList &parameters,
-    const TypePtr &result,
+    const TypePtr &result_type,
     const bool throws)
 {
     std::vector<TypePtr> parameter_types;
@@ -18,8 +18,8 @@ mcc::FunctionPtr mcc::Function::Create(
         parameter_types.emplace_back(type_);
     }
 
-    auto type = context.GetFunction(parameter_types, result, throws);
-    return std::make_shared<Function>(where, type, location, parameters, result, throws);
+    auto type = context.GetFunction(parameter_types, result_type, throws);
+    return std::make_shared<Function>(where, type, location, parameters, result_type, throws);
 }
 
 mcc::Function::Function(
@@ -27,12 +27,12 @@ mcc::Function::Function(
     const TypePtr &type,
     ResourceLocation location,
     const ParameterList &parameters,
-    TypePtr result,
+    TypePtr result_type,
     const bool throws)
     : Value(where, type, false),
       Location(std::move(location)),
       Parameters(parameters),
-      Result(std::move(result)),
+      ResultType(std::move(result_type)),
       Throws(throws)
 {
 }

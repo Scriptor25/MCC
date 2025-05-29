@@ -90,7 +90,7 @@ namespace mcc
             TypeContext &context,
             const ResourceLocation &location,
             const ParameterList &parameters,
-            const TypePtr &result,
+            const TypePtr &result_type,
             bool throws);
 
         Function(
@@ -98,7 +98,7 @@ namespace mcc
             const TypePtr &type,
             ResourceLocation location,
             const ParameterList &parameters,
-            TypePtr result,
+            TypePtr result_type,
             bool throws);
 
         void Generate(CommandVector &commands, bool stack) const override;
@@ -114,7 +114,7 @@ namespace mcc
 
         ResourceLocation Location;
         ParameterList Parameters;
-        TypePtr Result;
+        TypePtr ResultType;
         bool Throws;
 
         IndexT StackIndex = 0;

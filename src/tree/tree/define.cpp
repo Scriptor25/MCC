@@ -64,7 +64,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
     {
         function = builder.GetFunction(Where, Location);
         Assert(!Body || function->Blocks.empty(), Where, "already implemented function {}", Location);
-        Assert(function->Result == Result, Where, "cannot implement function with different result type");
+        Assert(function->ResultType == Result, Where, "cannot implement function with different result type");
         Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
         Assert(
             function->Parameters.size() == Parameters.size(),
@@ -147,7 +147,7 @@ void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem
     }
 
     const auto function = builder.GetFunction(Where, Location);
-    Assert(function->Result == Result, Where, "cannot implement function with different result type");
+    Assert(function->ResultType == Result, Where, "cannot implement function with different result type");
     Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
     Assert(
         function->Parameters.size() == Parameters.size(),

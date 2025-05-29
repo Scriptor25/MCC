@@ -24,7 +24,7 @@ mcc::CallInstruction::CallInstruction(
     const FunctionPtr &callee,
     const std::vector<std::pair<std::string, ValuePtr>> &arguments,
     BlockPtr landing_pad)
-    : Instruction(where, callee->Result, false),
+    : Instruction(where, callee->ResultType, false),
       Location(std::move(location)),
       Callee(callee),
       Arguments(arguments),
