@@ -1,8 +1,7 @@
 #include <mcc/type.hpp>
 
 mcc::UnionType::UnionType(TypeContext &context, const std::set<TypePtr> &elements)
-    : Type(context),
-      Elements(elements)
+    : Type(context), Elements(elements)
 {
 }
 
@@ -12,7 +11,7 @@ std::string mcc::UnionType::String() const
     result += '(';
 
     auto first = true;
-    for (auto &element: Elements)
+    for (auto &element : Elements)
     {
         if (first)
             first = false;
@@ -30,7 +29,7 @@ std::ostream &mcc::UnionType::Print(std::ostream &stream) const
     stream << '(';
 
     auto first = true;
-    for (auto &element: Elements)
+    for (auto &element : Elements)
     {
         if (first)
             first = false;

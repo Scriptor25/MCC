@@ -38,9 +38,5 @@ mcc::StatementPtr mcc::Parser::ParseSwitchStatement()
     }
     Expect(TokenType_Other, "}");
 
-    return std::make_unique<SwitchStatement>(
-        where,
-        std::move(condition),
-        std::move(default_),
-        std::move(cases));
+    return std::make_unique<SwitchStatement>(where, std::move(condition), std::move(default_), std::move(cases));
 }

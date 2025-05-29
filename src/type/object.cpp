@@ -2,8 +2,7 @@
 #include <mcc/type.hpp>
 
 mcc::ObjectType::ObjectType(TypeContext &context, const std::map<std::string, TypePtr> &elements)
-    : Type(context),
-      Elements(elements)
+    : Type(context), Elements(elements)
 {
 }
 
@@ -13,7 +12,7 @@ std::string mcc::ObjectType::String() const
     result += "{ ";
 
     auto first = true;
-    for (auto &[key, element]: Elements)
+    for (auto &[key, element] : Elements)
     {
         if (first)
             first = false;
@@ -31,7 +30,7 @@ std::ostream &mcc::ObjectType::Print(std::ostream &stream) const
     stream << "{ ";
 
     auto first = true;
-    for (auto &[key, element]: Elements)
+    for (auto &[key, element] : Elements)
     {
         if (first)
             first = false;
@@ -46,7 +45,7 @@ std::ostream &mcc::ObjectType::Print(std::ostream &stream) const
 mcc::ConstantPtr mcc::ObjectType::GetNull(const SourceLocation &where) const
 {
     std::map<std::string, ConstantPtr> values;
-    for (auto &[key_, element_]: Elements)
+    for (auto &[key_, element_] : Elements)
     {
         const auto value = element_->GetNull(where);
         if (!value)

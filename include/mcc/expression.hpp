@@ -2,10 +2,10 @@
 
 #include <iosfwd>
 #include <map>
-#include <string>
-#include <vector>
 #include <mcc/common.hpp>
 #include <mcc/statement.hpp>
+#include <string>
+#include <vector>
 
 namespace mcc
 {
@@ -31,11 +31,7 @@ namespace mcc
 
     struct BinaryExpression final : Expression
     {
-        BinaryExpression(
-            const SourceLocation &where,
-            const std::string &operator_,
-            ExpressionPtr left,
-            ExpressionPtr right);
+        BinaryExpression(const SourceLocation &where, const std::string &operator_, ExpressionPtr left, ExpressionPtr right);
 
         ExpressionPtr Merge();
 
@@ -92,12 +88,7 @@ namespace mcc
 
     struct IfUnlessExpression final : Expression
     {
-        IfUnlessExpression(
-            const SourceLocation &where,
-            bool unless,
-            ExpressionPtr condition,
-            ExpressionPtr then,
-            ExpressionPtr else_);
+        IfUnlessExpression(const SourceLocation &where, bool unless, ExpressionPtr condition, ExpressionPtr then, ExpressionPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -139,16 +130,7 @@ namespace mcc
 
     struct RefExpression final : Expression
     {
-        RefExpression(
-            const SourceLocation &where,
-            TypePtr type,
-            ReferenceTypeE target_type,
-            ExpressionPtr target_position_x,
-            ExpressionPtr target_position_y,
-            ExpressionPtr target_position_z,
-            ExpressionPtr target_name,
-            ResourceLocation target_location,
-            std::string path);
+        RefExpression(const SourceLocation &where, TypePtr type, ReferenceTypeE target_type, ExpressionPtr target_position_x, ExpressionPtr target_position_y, ExpressionPtr target_position_z, ExpressionPtr target_name, ResourceLocation target_location, std::string path);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -185,11 +167,7 @@ namespace mcc
 
     struct SwitchExpression final : Expression
     {
-        SwitchExpression(
-            const SourceLocation &where,
-            ExpressionPtr condition,
-            ExpressionPtr default_,
-            std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases);
+        SwitchExpression(const SourceLocation &where, ExpressionPtr condition, ExpressionPtr default_, std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -221,10 +199,7 @@ namespace mcc
 
     struct VectorExpression final : Expression
     {
-        VectorExpression(
-            const SourceLocation &where,
-            const std::string &operator_,
-            std::vector<ExpressionPtr> operands);
+        VectorExpression(const SourceLocation &where, const std::string &operator_, std::vector<ExpressionPtr> operands);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;

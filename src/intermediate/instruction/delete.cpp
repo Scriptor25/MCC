@@ -2,17 +2,13 @@
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 
-mcc::InstructionPtr mcc::DeleteInstruction::Create(
-    const SourceLocation &where,
-    TypeContext &context,
-    const ValuePtr &value)
+mcc::InstructionPtr mcc::DeleteInstruction::Create(const SourceLocation &where, TypeContext &context, const ValuePtr &value)
 {
     return std::make_shared<DeleteInstruction>(where, context, value);
 }
 
 mcc::DeleteInstruction::DeleteInstruction(const SourceLocation &where, TypeContext &context, const ValuePtr &value)
-    : Instruction(where, context.GetVoid(), false),
-      Value(value)
+    : Instruction(where, context.GetVoid(), false), Value(value)
 {
     value->Use();
 }
@@ -29,9 +25,7 @@ void mcc::DeleteInstruction::Generate(CommandVector &commands, bool stack) const
 
     std::string prefix;
     if (value.WithArgument)
-    {
         prefix = "$";
-    }
 
     commands.Append("{}data remove {} {} {}", prefix, value.ReferenceType, value.Target, value.Path);
 }

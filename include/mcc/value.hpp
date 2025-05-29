@@ -85,21 +85,9 @@ namespace mcc
 
     struct Function final : Value
     {
-        static FunctionPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const ResourceLocation &location,
-            const ParameterList &parameters,
-            const TypePtr &result_type,
-            bool throws);
+        static FunctionPtr Create(const SourceLocation &where, TypeContext &context, const ResourceLocation &location, const ParameterList &parameters, const TypePtr &result_type, bool throws);
 
-        Function(
-            const SourceLocation &where,
-            const TypePtr &type,
-            ResourceLocation location,
-            const ParameterList &parameters,
-            TypePtr result_type,
-            bool throws);
+        Function(const SourceLocation &where, const TypePtr &type, ResourceLocation location, const ParameterList &parameters, TypePtr result_type, bool throws);
 
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
@@ -135,21 +123,9 @@ namespace mcc
 
     struct GenericBlockReference final : Value
     {
-        static ValuePtr Create(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const ValuePtr &position_x,
-            const ValuePtr &position_y,
-            const ValuePtr &position_z,
-            const std::string &path);
+        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const ValuePtr &position_x, const ValuePtr &position_y, const ValuePtr &position_z, const std::string &path);
 
-        GenericBlockReference(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const ValuePtr &position_x,
-            const ValuePtr &position_y,
-            const ValuePtr &position_z,
-            const std::string &path);
+        GenericBlockReference(const SourceLocation &where, const TypePtr &type, const ValuePtr &position_x, const ValuePtr &position_y, const ValuePtr &position_z, const std::string &path);
         ~GenericBlockReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
@@ -161,17 +137,9 @@ namespace mcc
 
     struct GenericEntityReference final : Value
     {
-        static ValuePtr Create(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const ValuePtr &name,
-            const std::string &path);
+        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const ValuePtr &name, const std::string &path);
 
-        GenericEntityReference(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const ValuePtr &name,
-            const std::string &path);
+        GenericEntityReference(const SourceLocation &where, const TypePtr &type, const ValuePtr &name, const std::string &path);
         ~GenericEntityReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
@@ -183,17 +151,9 @@ namespace mcc
 
     struct GenericStorageReference final : Value
     {
-        static ValuePtr Create(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const ResourceLocation &location,
-            const std::string &path);
+        static ValuePtr Create(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location, const std::string &path);
 
-        GenericStorageReference(
-            const SourceLocation &where,
-            const TypePtr &type,
-            ResourceLocation location,
-            std::string path);
+        GenericStorageReference(const SourceLocation &where, const TypePtr &type, ResourceLocation location, std::string path);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;

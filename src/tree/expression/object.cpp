@@ -6,8 +6,7 @@
 #include <mcc/value.hpp>
 
 mcc::ObjectExpression::ObjectExpression(const SourceLocation &where, std::map<std::string, ExpressionPtr> elements)
-    : Expression(where),
-      Elements(std::move(elements))
+    : Expression(where), Elements(std::move(elements))
 {
 }
 
@@ -15,7 +14,7 @@ std::ostream &mcc::ObjectExpression::Print(std::ostream &stream) const
 {
     stream << "{ ";
     auto first = true;
-    for (auto &[key_, value_]: Elements)
+    for (auto &[key_, value_] : Elements)
     {
         if (first)
             first = false;
@@ -33,15 +32,13 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame
 
     std::map<std::string, TypePtr> elements;
 
-    for (auto &[key_, value_]: Elements)
+    for (auto &[key_, value_] : Elements)
     {
         const auto value = value_->GenerateValue(builder, frame);
-        values[key_] = value;
+        values[key_]     = value;
 
         if (const auto constant = std::dynamic_pointer_cast<Constant>(value))
-        {
             constants[key_] = constant;
-        }
 
         elements[key_] = value->Type;
     }
@@ -53,10 +50,8 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame
 
     auto object = builder.CreateAllocation(Where, type, false, nullptr);
 
-    for (auto &[key_, value_]: values)
-    {
+    for (auto &[key_, value_] : values)
         (void) builder.CreateInsert(Where, object, value_, key_);
-    }
 
     return object;
 }

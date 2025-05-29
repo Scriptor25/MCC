@@ -1,9 +1,9 @@
 #pragma once
 
 #include <map>
+#include <mcc/common.hpp>
 #include <set>
 #include <vector>
-#include <mcc/common.hpp>
 
 namespace mcc
 {
@@ -32,8 +32,7 @@ namespace mcc
         std::map<std::map<std::string, TypePtr>, std::shared_ptr<struct ObjectType>> m_Struct;
         std::map<std::vector<TypePtr>, std::shared_ptr<struct TupleType>> m_Tuple;
         std::map<std::set<TypePtr>, std::shared_ptr<struct UnionType>> m_Union;
-        std::map<std::vector<TypePtr>, std::map<TypePtr, std::map<bool, std::shared_ptr<struct FunctionType>>>>
-        m_Function;
+        std::map<std::vector<TypePtr>, std::map<TypePtr, std::map<bool, std::shared_ptr<struct FunctionType>>>> m_Function;
     };
 
     struct Type
@@ -41,7 +40,7 @@ namespace mcc
         explicit Type(TypeContext &context);
         virtual ~Type() = default;
 
-        virtual std::string String() const = 0;
+        virtual std::string String() const                      = 0;
         virtual std::ostream &Print(std::ostream &stream) const = 0;
 
         virtual ConstantPtr GetNull(const SourceLocation &where) const = 0;

@@ -2,17 +2,8 @@
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
-mcc::TryCatchStatement::TryCatchStatement(
-    const SourceLocation &where,
-    StatementPtr try_,
-    StatementPtr catch_,
-    const std::string &variable,
-    const TypePtr &error_type)
-    : Statement(where),
-      Try(std::move(try_)),
-      Catch(std::move(catch_)),
-      Variable(variable),
-      ErrorType(error_type)
+mcc::TryCatchStatement::TryCatchStatement(const SourceLocation &where, StatementPtr try_, StatementPtr catch_, const std::string &variable, const TypePtr &error_type)
+    : Statement(where), Try(std::move(try_)), Catch(std::move(catch_)), Variable(variable), ErrorType(error_type)
 {
 }
 
@@ -31,13 +22,13 @@ std::ostream &mcc::TryCatchStatement::Print(std::ostream &stream) const
 
 void mcc::TryCatchStatement::Generate(Builder &builder, Frame &frame) const
 {
-    const auto parent = builder.GetInsertBlock()->Parent;
-    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto parent       = builder.GetInsertBlock()->Parent;
+    const auto tail_target  = Block::Create(Where, builder.GetContext(), parent);
     const auto catch_target = Catch ? Block::Create(Catch->Where, builder.GetContext(), parent) : tail_target;
 
     auto require_tail = !Catch;
 
-    auto target_frame = frame;
+    auto target_frame       = frame;
     target_frame.LandingPad = catch_target;
 
     Try->Generate(builder, target_frame);
@@ -55,9 +46,7 @@ void mcc::TryCatchStatement::Generate(Builder &builder, Frame &frame) const
         builder.PushVariables();
 
         if (!Variable.empty())
-        {
             (void) builder.CreateStoreResult(Catch->Where, ErrorType, Variable);
-        }
 
         Catch->Generate(builder, frame);
 
@@ -76,7 +65,5 @@ void mcc::TryCatchStatement::Generate(Builder &builder, Frame &frame) const
         builder.SetInsertBlock(nullptr);
     }
     else
-    {
         builder.SetInsertBlock(tail_target);
-    }
 }

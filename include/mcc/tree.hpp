@@ -1,8 +1,8 @@
 #pragma once
 
 #include <filesystem>
-#include <set>
 #include <mcc/common.hpp>
+#include <set>
 
 namespace mcc
 {
@@ -13,7 +13,7 @@ namespace mcc
 
         virtual std::ostream &Print(std::ostream &stream) const = 0;
 
-        virtual void Generate(Builder &builder) const = 0;
+        virtual void Generate(Builder &builder) const                                                        = 0;
         virtual void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const = 0;
 
         SourceLocation Where;
@@ -21,14 +21,7 @@ namespace mcc
 
     struct DefineNode final : TreeNode
     {
-        DefineNode(
-            const SourceLocation &where,
-            ResourceLocation location,
-            ParameterList parameters,
-            TypePtr result,
-            bool throws,
-            const std::vector<ResourceLocation> &tags,
-            StatementPtr body);
+        DefineNode(const SourceLocation &where, ResourceLocation location, ParameterList parameters, TypePtr result, bool throws, const std::vector<ResourceLocation> &tags, StatementPtr body);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder) const override;

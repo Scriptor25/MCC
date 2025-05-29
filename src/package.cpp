@@ -16,8 +16,8 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     const auto data = path / "data";
     create_directories(data);
 
-    for (auto &[namespace_, functions_]: Functions)
-        for (auto &[path_, function_]: functions_)
+    for (auto &[namespace_, functions_] : Functions)
+        for (auto &[path_, function_] : functions_)
         {
             const auto file = data / namespace_ / "function" / (path_ + ".mcfunction");
             const auto directory = file.parent_path();
@@ -26,14 +26,14 @@ void mcc::Package::Write(const std::filesystem::path &path) const
             std::ofstream stream(file);
             Assert(stream.is_open(), "failed to open file {}", file.string());
 
-            for (auto &command: function_)
+            for (auto &command : function_)
                 stream << command << std::endl;
 
             stream.close();
         }
 
-    for (auto &[namespace_, tags_]: Tags)
-        for (auto &[path_, tag_]: tags_)
+    for (auto &[namespace_, tags_] : Tags)
+        for (auto &[path_, tag_] : tags_)
         {
             const auto file = data / namespace_ / "tags" / "function" / (path_ + ".json");
             const auto directory = file.parent_path();
@@ -51,16 +51,10 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     std::ofstream stream(package);
     Assert(stream.is_open(), "failed to open file {}", package.string());
 
-    stream << std::setw(2) << nlohmann::json(
-        {
-            {
-                "pack",
-                {
-                    {"description", Info.Description},
-                    {"pack_format", Info.Version}
-                }
-            }
-        });
+    nlohmann::json json{
+        { "pack", { { "description", Info.Description }, { "pack_format", Info.Version } } }
+    };
+    stream << std::setw(2) << json;
     stream.close();
 }
 
@@ -98,7 +92,10 @@ void mcc::from_json(const nlohmann::json &json, ResourceLocation &location)
 
 void mcc::to_json(nlohmann::json &json, const Tag &tag)
 {
-    json = {{"id", tag.Location}, {"required", tag.Required}};
+    json = {
+        {       "id", tag.Location },
+        { "required", tag.Required },
+    };
 }
 
 void mcc::from_json(const nlohmann::json &json, Tag &tag)
@@ -109,7 +106,10 @@ void mcc::from_json(const nlohmann::json &json, Tag &tag)
 
 void mcc::to_json(nlohmann::json &json, const TagInfo &info)
 {
-    json = {{"replace", info.Replace}, {"values", info.Values}};
+    json = {
+        { "replace", info.Replace },
+        {  "values",  info.Values },
+    };
 }
 
 void mcc::from_json(const nlohmann::json &json, TagInfo &info)
@@ -120,7 +120,11 @@ void mcc::from_json(const nlohmann::json &json, TagInfo &info)
 
 void mcc::to_json(nlohmann::json &json, const PackageInfo &info)
 {
-    json = {{"name", info.Name}, {"description", info.Description}, {"version", info.Version}};
+    json = {
+        {        "name",        info.Name },
+        { "description", info.Description },
+        {     "version",     info.Version },
+    };
 }
 
 void mcc::from_json(const nlohmann::json &json, PackageInfo &info)

@@ -14,7 +14,7 @@ mcc::ConstantNull::ConstantNull(const SourceLocation &where, TypeContext &contex
 mcc::Result mcc::ConstantNull::GenerateResult() const
 {
     return {
-        .Type = ResultType_Value,
+        .Type    = ResultType_Value,
         .NotNull = false,
     };
 }

@@ -15,8 +15,8 @@ namespace mcc
 
     enum FrameFlagE
     {
-        FrameFlag_RequireHead = 0b001,
-        FrameFlag_RequireTail = 0b010,
+        FrameFlag_RequireHead       = 0b001,
+        FrameFlag_RequireTail       = 0b010,
         FrameFlag_RequireLandingPad = 0b100,
     };
 
@@ -56,11 +56,10 @@ namespace mcc
 
     inline ReferenceTypeE ToTargetType(const std::string_view &string_)
     {
-        static const std::map<std::string_view, ReferenceTypeE> map
-        {
-            {"block", ReferenceType_Block},
-            {"entity", ReferenceType_Entity},
-            {"storage", ReferenceType_Storage},
+        static const std::map<std::string_view, ReferenceTypeE> map{
+            {   "block",   ReferenceType_Block },
+            {  "entity",  ReferenceType_Entity },
+            { "storage", ReferenceType_Storage },
         };
 
         return map.at(string_);
@@ -68,11 +67,10 @@ namespace mcc
 
     inline const char *ToString(const ReferenceTypeE enum_)
     {
-        static const std::map<ReferenceTypeE, const char *> map
-        {
-            {ReferenceType_Block, "block"},
-            {ReferenceType_Entity, "entity"},
-            {ReferenceType_Storage, "storage"},
+        static const std::map<ReferenceTypeE, const char *> map{
+            {   ReferenceType_Block,   "block" },
+            {  ReferenceType_Entity,  "entity" },
+            { ReferenceType_Storage, "storage" },
         };
 
         return map.at(enum_);
@@ -80,11 +78,10 @@ namespace mcc
 
     inline const char *ToString(const ResultTypeE enum_)
     {
-        static const std::map<ResultTypeE, const char *> map
-        {
-            {ResultType_Value, "value"},
-            {ResultType_Reference, "reference"},
-            {ResultType_Argument, "argument"},
+        static const std::map<ResultTypeE, const char *> map{
+            {     ResultType_Value,     "value" },
+            { ResultType_Reference, "reference" },
+            {  ResultType_Argument,  "argument" },
         };
 
         return map.at(enum_);
@@ -92,14 +89,13 @@ namespace mcc
 
     inline const char *ToString(const ComparatorE enum_)
     {
-        static const std::map<ComparatorE, const char *> map
-        {
-            {Comparator_None, "none"},
-            {Comparator_LT, "lt"},
-            {Comparator_GT, "gt"},
-            {Comparator_LE, "le"},
-            {Comparator_GE, "ge"},
-            {Comparator_EQ, "eq"},
+        static const std::map<ComparatorE, const char *> map{
+            { Comparator_None, "none" },
+            {   Comparator_LT,   "lt" },
+            {   Comparator_GT,   "gt" },
+            {   Comparator_LE,   "le" },
+            {   Comparator_GE,   "ge" },
+            {   Comparator_EQ,   "eq" },
         };
 
         return map.at(enum_);
@@ -107,14 +103,13 @@ namespace mcc
 
     inline const char *ToString(const OperatorE enum_)
     {
-        static const std::map<OperatorE, const char *> map
-        {
-            {Operator_None, "none"},
-            {Operator_Add, "add"},
-            {Operator_Sub, "sub"},
-            {Operator_Mul, "mul"},
-            {Operator_Div, "div"},
-            {Operator_Rem, "rem"},
+        static const std::map<OperatorE, const char *> map{
+            { Operator_None, "none" },
+            {  Operator_Add,  "add" },
+            {  Operator_Sub,  "sub" },
+            {  Operator_Mul,  "mul" },
+            {  Operator_Div,  "div" },
+            {  Operator_Rem,  "rem" },
         };
 
         return map.at(enum_);

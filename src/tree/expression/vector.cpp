@@ -4,20 +4,15 @@
 #include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
 
-mcc::VectorExpression::VectorExpression(
-    const SourceLocation &where,
-    const std::string &operator_,
-    std::vector<ExpressionPtr> operands)
-    : Expression(where),
-      Operator(operator_),
-      Operands(std::move(operands))
+mcc::VectorExpression::VectorExpression(const SourceLocation &where, const std::string &operator_, std::vector<ExpressionPtr> operands)
+    : Expression(where), Operator(operator_), Operands(std::move(operands))
 {
 }
 
 std::ostream &mcc::VectorExpression::Print(std::ostream &stream) const
 {
     auto first = true;
-    for (auto &operand: Operands)
+    for (auto &operand : Operands)
     {
         if (first)
             first = false;
@@ -31,7 +26,7 @@ std::ostream &mcc::VectorExpression::Print(std::ostream &stream) const
 mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     std::vector<ValuePtr> operands;
-    for (auto &operand: Operands)
+    for (auto &operand : Operands)
         operands.emplace_back(operand->GenerateValue(builder, frame));
 
     auto operator_ = Operator_None;

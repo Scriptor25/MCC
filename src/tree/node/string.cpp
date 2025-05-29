@@ -3,8 +3,7 @@
 #include <mcc/format.hpp>
 
 mcc::StringNode::StringNode(const SourceLocation &where, const std::string &value)
-    : FormatNode(where),
-      Value(value)
+    : FormatNode(where), Value(value)
 {
 }
 

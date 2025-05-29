@@ -3,17 +3,8 @@
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
-mcc::ForStatement::ForStatement(
-    const SourceLocation &where,
-    StatementPtr prefix,
-    ExpressionPtr condition,
-    StatementPtr suffix,
-    StatementPtr do_)
-    : Statement(where),
-      Condition(std::move(condition)),
-      Prefix(std::move(prefix)),
-      Suffix(std::move(suffix)),
-      Do(std::move(do_))
+mcc::ForStatement::ForStatement(const SourceLocation &where, StatementPtr prefix, ExpressionPtr condition, StatementPtr suffix, StatementPtr do_)
+    : Statement(where), Condition(std::move(condition)), Prefix(std::move(prefix)), Suffix(std::move(suffix)), Do(std::move(do_))
 {
 }
 
@@ -24,7 +15,7 @@ std::ostream &mcc::ForStatement::Print(std::ostream &stream) const
 
 void mcc::ForStatement::Generate(Builder &builder, Frame &frame) const
 {
-    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto parent      = builder.GetInsertBlock()->Parent;
     const auto head_target = Block::Create(Where, builder.GetContext(), parent);
     const auto loop_target = Block::Create(Do->Where, builder.GetContext(), parent);
     const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
@@ -36,9 +27,7 @@ void mcc::ForStatement::Generate(Builder &builder, Frame &frame) const
     builder.PushVariables();
 
     if (Prefix)
-    {
         Prefix->Generate(builder, frame);
-    }
     (void) builder.CreateDirect(Where, head_target);
 
     builder.SetInsertBlock(head_target);
@@ -48,9 +37,7 @@ void mcc::ForStatement::Generate(Builder &builder, Frame &frame) const
         (void) builder.CreateBranch(Condition->Where, condition, loop_target, tail_target);
     }
     else
-    {
         (void) builder.CreateDirect(Where, loop_target);
-    }
 
     builder.SetInsertBlock(loop_target);
     Do->Generate(builder, target_frame);
@@ -69,7 +56,5 @@ void mcc::ForStatement::Generate(Builder &builder, Frame &frame) const
         builder.SetInsertBlock(nullptr);
     }
     else
-    {
         builder.SetInsertBlock(tail_target);
-    }
 }

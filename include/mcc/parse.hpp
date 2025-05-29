@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 #include <mcc/common.hpp>
 #include <mcc/lex.hpp>
 
@@ -28,13 +27,13 @@ namespace mcc
         template<typename... Args>
         [[nodiscard]] bool AtEnum(Args... args) const
         {
-            return AtEnum({args...});
+            return AtEnum({ args... });
         }
 
         template<typename... Args>
         [[nodiscard]] bool AtAny(Args... args) const
         {
-            return AtAny({args...});
+            return AtAny({ args... });
         }
 
         bool SkipIf(TokenType type, const std::string &value = {});
@@ -47,13 +46,13 @@ namespace mcc
         template<typename... Args>
         Token ExpectEnum(Args... args)
         {
-            return ExpectEnum({args...});
+            return ExpectEnum({ args... });
         }
 
         template<typename... Args>
         Token ExpectAny(Args... args)
         {
-            return ExpectAny({args...});
+            return ExpectAny({ args... });
         }
 
         ResourceLocation ParseResourceLocation(const std::string &default_namespace = {});

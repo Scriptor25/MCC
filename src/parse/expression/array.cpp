@@ -11,17 +11,13 @@ mcc::ExpressionPtr mcc::Parser::ParseArrayExpression()
     {
         elements.emplace_back(ParseExpression());
         if (!At(TokenType_Other, "]"))
-        {
             Expect(TokenType_Other, ",");
-        }
     }
     Expect(TokenType_Other, "]");
 
     TypePtr type;
     if (SkipIf(TokenType_Other, ":"))
-    {
         type = ParseType();
-    }
 
     return std::make_unique<ArrayExpression>(where, std::move(elements), type);
 }

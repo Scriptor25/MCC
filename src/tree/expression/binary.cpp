@@ -1,30 +1,18 @@
-#include <set>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
+#include <set>
 
-mcc::BinaryExpression::BinaryExpression(
-    const SourceLocation &where,
-    const std::string &operator_,
-    ExpressionPtr left,
-    ExpressionPtr right)
-    : Expression(where),
-      Operator(operator_),
-      Left(std::move(left)),
-      Right(std::move(right))
+mcc::BinaryExpression::BinaryExpression(const SourceLocation &where, const std::string &operator_, ExpressionPtr left, ExpressionPtr right)
+    : Expression(where), Operator(operator_), Left(std::move(left)), Right(std::move(right))
 {
 }
 
 mcc::ExpressionPtr mcc::BinaryExpression::Merge()
 {
-    static const std::set<std::string_view> mergeable
-    {
-        "+",
-        "-",
-        "*",
-        "/",
-        "%",
+    static const std::set<std::string_view> mergeable{
+        "+", "-", "*", "/", "%",
     };
 
     if (!mergeable.contains(Operator))
@@ -40,9 +28,7 @@ mcc::ExpressionPtr mcc::BinaryExpression::Merge()
         operands.emplace_back(std::move(left->Right));
     }
     else
-    {
         operands.emplace_back(std::move(Left));
-    }
 
     if (const auto right = dynamic_cast<BinaryExpression *>(Right.get()); right && right->Operator == Operator)
     {
@@ -51,13 +37,11 @@ mcc::ExpressionPtr mcc::BinaryExpression::Merge()
         operands.emplace_back(std::move(right->Right));
     }
     else
-    {
         operands.emplace_back(std::move(Right));
-    }
 
     if (!merged)
     {
-        Left = std::move(operands.front());
+        Left  = std::move(operands.front());
         Right = std::move(operands.back());
         return nullptr;
     }
@@ -72,7 +56,7 @@ std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    auto left = Left->GenerateValue(builder, frame);
+    auto left  = Left->GenerateValue(builder, frame);
     auto right = Right->GenerateValue(builder, frame);
 
     if (Operator == "=")
@@ -91,11 +75,9 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame
         comparator = Comparator_EQ;
 
     if (comparator)
-    {
         return builder.CreateComparison(Where, comparator, left, right);
-    }
 
-    const auto store = Operator.back() == '=';
+    const auto store     = Operator.back() == '=';
     auto operator_string = Operator;
     if (store)
         operator_string.pop_back();
@@ -114,11 +96,10 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame
 
     if (operator_)
     {
-        auto operation = builder.CreateOperation(Where, operator_, {left, right});
+        auto operation = builder.CreateOperation(Where, operator_, { left, right });
         if (store)
-        {
             return builder.CreateStore(Where, left, operation);
-        }
+
         return operation;
     }
 

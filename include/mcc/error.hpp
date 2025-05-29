@@ -12,25 +12,25 @@ namespace mcc
     void Warning(const SourceLocation &where, const char *message);
 
     template<typename... Args>
-    [[noreturn]] void Error(const char *format, Args &&... args) noexcept(false)
+    [[noreturn]] void Error(const char *format, Args &&...args) noexcept(false)
     {
         Error(std::vformat(format, std::make_format_args(args...)));
     }
 
     template<typename... Args>
-    [[noreturn]] void Error(std::string_view format, Args &&... args) noexcept(false)
+    [[noreturn]] void Error(std::string_view format, Args &&...args) noexcept(false)
     {
         Error(std::vformat(std::move(format), std::make_format_args(args...)));
     }
 
     template<typename... Args>
-    [[noreturn]] void Error(const SourceLocation &where, const char *format, Args &&... args) noexcept(false)
+    [[noreturn]] void Error(const SourceLocation &where, const char *format, Args &&...args) noexcept(false)
     {
         Error(where, std::vformat(format, std::make_format_args(args...)));
     }
 
     template<typename... Args>
-    [[noreturn]] void Error(const SourceLocation &where, std::string_view format, Args &&... args) noexcept(false)
+    [[noreturn]] void Error(const SourceLocation &where, std::string_view format, Args &&...args) noexcept(false)
     {
         Error(where, std::vformat(std::move(format), std::make_format_args(args...)));
     }
@@ -41,7 +41,7 @@ namespace mcc
     void Assert(bool condition, const SourceLocation &where, const std::string &message) noexcept(false);
 
     template<typename... Args>
-    void Assert(const bool condition, const char *format, Args &&... args) noexcept(false)
+    void Assert(const bool condition, const char *format, Args &&...args) noexcept(false)
     {
         if (condition)
             return;
@@ -49,7 +49,7 @@ namespace mcc
     }
 
     template<typename... Args>
-    void Assert(const bool condition, const std::string_view &format, Args &&... args) noexcept(false)
+    void Assert(const bool condition, const std::string_view &format, Args &&...args) noexcept(false)
     {
         if (condition)
             return;
@@ -57,7 +57,7 @@ namespace mcc
     }
 
     template<typename... Args>
-    void Assert(const bool condition, const SourceLocation &where, const char *format, Args &&... args) noexcept(false)
+    void Assert(const bool condition, const SourceLocation &where, const char *format, Args &&...args) noexcept(false)
     {
         if (condition)
             return;
@@ -65,11 +65,7 @@ namespace mcc
     }
 
     template<typename... Args>
-    void Assert(
-        const bool condition,
-        const SourceLocation &where,
-        const std::string_view &format,
-        Args &&... args) noexcept(false)
+    void Assert(const bool condition, const SourceLocation &where, const std::string_view &format, Args &&...args) noexcept(false)
     {
         if (condition)
             return;

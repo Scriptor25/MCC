@@ -1,14 +1,7 @@
 #include <mcc/type.hpp>
 
-mcc::FunctionType::FunctionType(
-    TypeContext &context,
-    const std::vector<TypePtr> &parameters,
-    const TypePtr &result,
-    const bool throws)
-    : Type(context),
-      Parameters(parameters),
-      Result(result),
-      Throws(throws)
+mcc::FunctionType::FunctionType(TypeContext &context, const std::vector<TypePtr> &parameters, const TypePtr &result, const bool throws)
+    : Type(context), Parameters(parameters), Result(result), Throws(throws)
 {
 }
 
@@ -21,7 +14,7 @@ std::string mcc::FunctionType::String() const
     result += '(';
 
     auto first = true;
-    for (auto &parameter: Parameters)
+    for (auto &parameter : Parameters)
     {
         if (first)
             first = false;
@@ -42,7 +35,7 @@ std::ostream &mcc::FunctionType::Print(std::ostream &stream) const
     stream << '(';
 
     auto first = true;
-    for (auto &parameter: Parameters)
+    for (auto &parameter : Parameters)
     {
         if (first)
             first = false;

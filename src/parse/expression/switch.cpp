@@ -33,9 +33,5 @@ mcc::ExpressionPtr mcc::Parser::ParseSwitchExpression()
 
     Assert(!!default_, where, "switch expression must specify exactly one default case");
 
-    return std::make_unique<SwitchExpression>(
-        where,
-        std::move(condition),
-        std::move(default_),
-        std::move(cases));
+    return std::make_unique<SwitchExpression>(where, std::move(condition), std::move(default_), std::move(cases));
 }

@@ -15,22 +15,10 @@ namespace mcc
 
     struct ConstantArray final : Constant
     {
-        static ConstantPtr Create(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
-        static ConstantPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
+        static ConstantPtr Create(const SourceLocation &where, const TypePtr &type, const std::vector<ConstantPtr> &values, bool stringify);
+        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, const std::vector<ConstantPtr> &values, bool stringify);
 
-        ConstantArray(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
+        ConstantArray(const SourceLocation &where, const TypePtr &type, const std::vector<ConstantPtr> &values, bool stringify);
         ~ConstantArray() override;
 
         [[nodiscard]] Result GenerateResult() const override;
@@ -72,19 +60,10 @@ namespace mcc
 
     struct ConstantObject final : Constant
     {
-        static ConstantPtr Create(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const std::map<std::string, ConstantPtr> &values);
-        static ConstantPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const std::map<std::string, ConstantPtr> &values);
+        static ConstantPtr Create(const SourceLocation &where, const TypePtr &type, const std::map<std::string, ConstantPtr> &values);
+        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, const std::map<std::string, ConstantPtr> &values);
 
-        ConstantObject(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const std::map<std::string, ConstantPtr> &values);
+        ConstantObject(const SourceLocation &where, const TypePtr &type, const std::map<std::string, ConstantPtr> &values);
         ~ConstantObject() override;
 
         [[nodiscard]] Result GenerateResult() const override;

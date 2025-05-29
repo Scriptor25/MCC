@@ -16,9 +16,5 @@ mcc::TreeNodePtr mcc::Parser::ParseTreeNode()
     if (At(TokenType_Symbol, "type"))
         return ParseTypeNode();
 
-    Error(
-        m_Token.Where,
-        "cannot parse {} '{}'",
-        m_Token.Type,
-        m_Token.Value);
+    Error(m_Token.Where, "cannot parse {} '{}'", m_Token.Type, m_Token.Value);
 }

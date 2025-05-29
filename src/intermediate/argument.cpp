@@ -1,6 +1,6 @@
-#include <utility>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
+#include <utility>
 
 mcc::ValuePtr mcc::ArgumentValue::Create(const SourceLocation &where, const TypePtr &type, const std::string &name)
 {
@@ -8,8 +8,7 @@ mcc::ValuePtr mcc::ArgumentValue::Create(const SourceLocation &where, const Type
 }
 
 mcc::ArgumentValue::ArgumentValue(const SourceLocation &where, const TypePtr &type, std::string name)
-    : Value(where, type, false),
-      Name(std::move(name))
+    : Value(where, type, false), Name(std::move(name))
 {
 }
 

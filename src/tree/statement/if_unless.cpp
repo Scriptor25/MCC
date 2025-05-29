@@ -3,17 +3,8 @@
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
-mcc::IfUnlessStatement::IfUnlessStatement(
-    const SourceLocation &where,
-    const bool unless,
-    ExpressionPtr condition,
-    StatementPtr then,
-    StatementPtr else_)
-    : Statement(where),
-      Unless(unless),
-      Condition(std::move(condition)),
-      Then(std::move(then)),
-      Else(std::move(else_))
+mcc::IfUnlessStatement::IfUnlessStatement(const SourceLocation &where, const bool unless, ExpressionPtr condition, StatementPtr then, StatementPtr else_)
+    : Statement(where), Unless(unless), Condition(std::move(condition)), Then(std::move(then)), Else(std::move(else_))
 {
 }
 
@@ -27,7 +18,7 @@ std::ostream &mcc::IfUnlessStatement::Print(std::ostream &stream) const
 
 void mcc::IfUnlessStatement::Generate(Builder &builder, Frame &frame) const
 {
-    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto parent      = builder.GetInsertBlock()->Parent;
     const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
     const auto then_target = Block::Create(Where, builder.GetContext(), parent);
     const auto else_target = Else ? Block::Create(Where, builder.GetContext(), parent) : tail_target;
@@ -35,11 +26,7 @@ void mcc::IfUnlessStatement::Generate(Builder &builder, Frame &frame) const
     auto require_tail = !Else;
 
     const auto condition = Condition->GenerateValue(builder, frame);
-    (void) builder.CreateBranch(
-        Where,
-        condition,
-        Unless ? else_target : then_target,
-        Unless ? then_target : else_target);
+    (void) builder.CreateBranch(Where, condition, Unless ? else_target : then_target, Unless ? then_target : else_target);
 
     builder.SetInsertBlock(then_target);
     Then->Generate(builder, frame);
@@ -66,7 +53,5 @@ void mcc::IfUnlessStatement::Generate(Builder &builder, Frame &frame) const
         builder.SetInsertBlock(nullptr);
     }
     else
-    {
         builder.SetInsertBlock(tail_target);
-    }
 }

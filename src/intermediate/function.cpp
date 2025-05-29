@@ -1,39 +1,21 @@
-#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
+#include <utility>
 
-mcc::FunctionPtr mcc::Function::Create(
-    const SourceLocation &where,
-    TypeContext &context,
-    const ResourceLocation &location,
-    const ParameterList &parameters,
-    const TypePtr &result_type,
-    const bool throws)
+mcc::FunctionPtr mcc::Function::Create(const SourceLocation &where, TypeContext &context, const ResourceLocation &location, const ParameterList &parameters, const TypePtr &result_type, const bool throws)
 {
     std::vector<TypePtr> parameter_types;
-    for (const auto &[name_, type_]: parameters)
-    {
+    for (const auto &[name_, type_] : parameters)
         parameter_types.emplace_back(type_);
-    }
 
     auto type = context.GetFunction(parameter_types, result_type, throws);
     return std::make_shared<Function>(where, type, location, parameters, result_type, throws);
 }
 
-mcc::Function::Function(
-    const SourceLocation &where,
-    const TypePtr &type,
-    ResourceLocation location,
-    const ParameterList &parameters,
-    TypePtr result_type,
-    const bool throws)
-    : Value(where, type, false),
-      Location(std::move(location)),
-      Parameters(parameters),
-      ResultType(std::move(result_type)),
-      Throws(throws)
+mcc::Function::Function(const SourceLocation &where, const TypePtr &type, ResourceLocation location, const ParameterList &parameters, TypePtr result_type, const bool throws)
+    : Value(where, type, false), Location(std::move(location)), Parameters(parameters), ResultType(std::move(result_type)), Throws(throws)
 {
 }
 
@@ -45,17 +27,11 @@ void mcc::Function::Generate(CommandVector &commands, const bool stack) const
 bool mcc::Function::RequireStack() const
 {
     if (StackIndex)
-    {
         return true;
-    }
 
-    for (auto &block: Blocks)
-    {
+    for (auto &block : Blocks)
         if (block->RequireStack())
-        {
             return true;
-        }
-    }
 
     return false;
 }
@@ -63,8 +39,8 @@ bool mcc::Function::RequireStack() const
 mcc::Result mcc::Function::GenerateResult() const
 {
     return {
-        .Type = ResultType_Value,
-        .Value = '"' + Location.String() + '"',
+        .Type    = ResultType_Value,
+        .Value   = '"' + Location.String() + '"',
         .NotNull = true,
     };
 }
@@ -77,9 +53,7 @@ void mcc::Function::GenerateFunction(Package &package) const
     {
         auto [namespace_, path_] = Location;
         if (i)
-        {
             path_ += '/' + std::to_string(i);
-        }
 
         CommandVector commands(package.Functions[namespace_][path_]);
 
@@ -88,9 +62,7 @@ void mcc::Function::GenerateFunction(Package &package) const
             commands.Append("data modify storage {} stack prepend value {{}}", Location);
 
             for (unsigned s = 0; s < StackIndex; ++s)
-            {
                 commands.Append("data modify storage {} stack[0].val append value 0", Location);
-            }
         }
 
         Blocks.at(i)->Generate(commands, require_stack);
@@ -100,26 +72,18 @@ void mcc::Function::GenerateFunction(Package &package) const
 void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments) const
 {
     if (Parameters.empty())
-    {
         return;
-    }
 
     prefix = "$";
     arguments += " {";
     for (unsigned i = 0; i < Parameters.size(); ++i)
     {
         if (i)
-        {
             arguments += ',';
-        }
         if (Parameters.at(i).Type->IsString())
-        {
             arguments += std::format("\"{0}\":\"$({0})\"", Parameters.at(i).Name);
-        }
         else
-        {
             arguments += std::format("\"{0}\":$({0})", Parameters.at(i).Name);
-        }
     }
     arguments += '}';
 }
@@ -127,24 +91,20 @@ void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments
 mcc::ResourceLocation mcc::Function::GetLocation(const BlockPtr &target_block) const
 {
     for (unsigned i = 0; i < Blocks.size(); ++i)
-    {
         if (Blocks.at(i) == target_block)
-        {
-            return {Location.Namespace, Location.Path + '/' + std::to_string(i)};
-        }
-    }
+            return { Location.Namespace, Location.Path + '/' + std::to_string(i) };
+
     Error("mcc::Function::GetLocation");
 }
 
 mcc::BlockPtr mcc::Function::Erase(const BlockPtr &target_block)
 {
     for (auto i = Blocks.begin(); i != Blocks.end(); ++i)
-    {
         if (*i == target_block)
         {
             Blocks.erase(i);
             return target_block;
         }
-    }
+
     return nullptr;
 }

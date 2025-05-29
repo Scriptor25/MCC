@@ -2,10 +2,10 @@
 
 #include <filesystem>
 #include <iosfwd>
-#include <string>
-#include <vector>
 #include <mcc/common.hpp>
 #include <mcc/tree.hpp>
+#include <string>
+#include <vector>
 
 namespace mcc
 {
@@ -47,12 +47,7 @@ namespace mcc
 
     struct ForStatement final : Statement
     {
-        ForStatement(
-            const SourceLocation &where,
-            StatementPtr prefix,
-            ExpressionPtr condition,
-            StatementPtr suffix,
-            StatementPtr do_);
+        ForStatement(const SourceLocation &where, StatementPtr prefix, ExpressionPtr condition, StatementPtr suffix, StatementPtr do_);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
@@ -63,12 +58,7 @@ namespace mcc
 
     struct ForEachStatement final : Statement
     {
-        ForEachStatement(
-            const SourceLocation &where,
-            bool is_constant,
-            std::string name,
-            ExpressionPtr iterable,
-            StatementPtr do_);
+        ForEachStatement(const SourceLocation &where, bool is_constant, std::string name, ExpressionPtr iterable, StatementPtr do_);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
@@ -81,12 +71,7 @@ namespace mcc
 
     struct IfUnlessStatement final : Statement
     {
-        IfUnlessStatement(
-            const SourceLocation &where,
-            bool unless,
-            ExpressionPtr condition,
-            StatementPtr then,
-            StatementPtr else_);
+        IfUnlessStatement(const SourceLocation &where, bool unless, ExpressionPtr condition, StatementPtr then, StatementPtr else_);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
@@ -118,11 +103,7 @@ namespace mcc
 
     struct SwitchStatement final : Statement
     {
-        SwitchStatement(
-            const SourceLocation &where,
-            ExpressionPtr condition,
-            StatementPtr default_,
-            std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases);
+        SwitchStatement(const SourceLocation &where, ExpressionPtr condition, StatementPtr default_, std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
@@ -144,12 +125,7 @@ namespace mcc
 
     struct TryCatchStatement final : Statement
     {
-        TryCatchStatement(
-            const SourceLocation &where,
-            StatementPtr try_,
-            StatementPtr catch_,
-            const std::string &variable,
-            const TypePtr &error_type);
+        TryCatchStatement(const SourceLocation &where, StatementPtr try_, StatementPtr catch_, const std::string &variable, const TypePtr &error_type);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
@@ -161,13 +137,7 @@ namespace mcc
 
     struct VariableStatement final : Statement
     {
-        VariableStatement(
-            const SourceLocation &where,
-            bool is_constant,
-            bool is_reference,
-            std::vector<std::string> names,
-            TypePtr type,
-            ExpressionPtr value);
+        VariableStatement(const SourceLocation &where, bool is_constant, bool is_reference, std::vector<std::string> names, TypePtr type, ExpressionPtr value);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;

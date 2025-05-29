@@ -1,4 +1,3 @@
-#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
@@ -7,22 +6,10 @@
 #include <mcc/tree.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
+#include <utility>
 
-mcc::DefineNode::DefineNode(
-    const SourceLocation &where,
-    ResourceLocation location,
-    ParameterList parameters,
-    TypePtr result,
-    const bool throws,
-    const std::vector<ResourceLocation> &tags,
-    StatementPtr body)
-    : TreeNode(where),
-      Location(std::move(location)),
-      Parameters(std::move(parameters)),
-      Result(std::move(result)),
-      Throws(throws),
-      Tags(tags),
-      Body(std::move(body))
+mcc::DefineNode::DefineNode(const SourceLocation &where, ResourceLocation location, ParameterList parameters, TypePtr result, const bool throws, const std::vector<ResourceLocation> &tags, StatementPtr body)
+    : TreeNode(where), Location(std::move(location)), Parameters(std::move(parameters)), Result(std::move(result)), Throws(throws), Tags(tags), Body(std::move(body))
 {
 }
 
@@ -57,30 +44,19 @@ void mcc::DefineNode::Generate(Builder &builder) const
     FunctionPtr function;
 
     if (!builder.HasFunction(Location))
-    {
         function = builder.CreateFunction(Where, Location, Parameters, Result, Throws);
-    }
     else
     {
         function = builder.GetFunction(Where, Location);
         Assert(!Body || function->Blocks.empty(), Where, "already implemented function {}", Location);
         Assert(function->ResultType == Result, Where, "cannot implement function with different result type");
         Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
-        Assert(
-            function->Parameters.size() == Parameters.size(),
-            Where,
-            "cannot implement function with different parameter count");
+        Assert(function->Parameters.size() == Parameters.size(), Where, "cannot implement function with different parameter count");
         for (unsigned i = 0; i < Parameters.size(); ++i)
-        {
-            Assert(
-                function->Parameters.at(i).Type == Parameters.at(i).Type,
-                Where,
-                "cannot implement function with different parameter type for offset {}",
-                i);
-        }
+            Assert(function->Parameters.at(i).Type == Parameters.at(i).Type, Where, "cannot implement function with different parameter type for offset {}", i);
     }
 
-    for (auto [tag_namespace_, tag_path_]: Tags)
+    for (auto [tag_namespace_, tag_path_] : Tags)
     {
         if (tag_namespace_.empty())
             tag_namespace_ = builder.GetNamespace();
@@ -90,18 +66,14 @@ void mcc::DefineNode::Generate(Builder &builder) const
     }
 
     if (!Body)
-    {
         return;
-    }
 
     builder.SetInsertBlock(Block::Create(Where, builder.GetContext(), function));
 
     builder.PushVariables();
 
-    for (auto &[name_, type_]: function->Parameters)
-    {
+    for (auto &[name_, type_] : function->Parameters)
         builder.InsertVariable(Where, name_, ArgumentValue::Create(Where, type_, name_));
-    }
 
     Frame target_frame;
     Body->Generate(builder, target_frame);
@@ -109,19 +81,13 @@ void mcc::DefineNode::Generate(Builder &builder) const
     builder.PopVariables();
 
     auto result = Result;
-    for (auto &block: function->Blocks)
-    {
+    for (auto &block : function->Blocks)
         if (auto terminator = block->GetTerminator())
         {
             if (const auto instruction = std::dynamic_pointer_cast<ReturnInstruction>(terminator))
             {
                 auto type = instruction->Value ? instruction->Value->Type : builder.GetContext().GetVoid();
-                Assert(
-                    type == result,
-                    Where,
-                    "cannot return value of type {} for result type {}",
-                    type,
-                    result);
+                Assert(type == result, Where, "cannot return value of type {} for result type {}", type, result);
             }
         }
         else if (result == builder.GetContext().GetVoid())
@@ -130,10 +96,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
             (void) builder.CreateReturnVoid(Where);
         }
         else
-        {
             Error(Where, "not all paths return");
-        }
-    }
 
     builder.SetInsertBlock(nullptr);
 }
@@ -149,16 +112,7 @@ void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem
     const auto function = builder.GetFunction(Where, Location);
     Assert(function->ResultType == Result, Where, "cannot implement function with different result type");
     Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
-    Assert(
-        function->Parameters.size() == Parameters.size(),
-        Where,
-        "cannot implement function with different parameter count");
+    Assert(function->Parameters.size() == Parameters.size(), Where, "cannot implement function with different parameter count");
     for (unsigned i = 0; i < Parameters.size(); ++i)
-    {
-        Assert(
-            function->Parameters.at(i).Type == Parameters.at(i).Type,
-            Where,
-            "cannot implement function with different parameter type for offset {}",
-            i);
-    }
+        Assert(function->Parameters.at(i).Type == Parameters.at(i).Type, Where, "cannot implement function with different parameter type for offset {}", i);
 }

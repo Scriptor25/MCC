@@ -3,71 +3,41 @@
 #include <mcc/instruction.hpp>
 #include <utility>
 
-mcc::InstructionPtr mcc::CallInstruction::Create(
-    const SourceLocation &where,
-    const ResourceLocation &location,
-    const FunctionPtr &callee,
-    const std::vector<std::pair<std::string, ValuePtr>> &arguments,
-    const BlockPtr &landing_pad)
+mcc::InstructionPtr mcc::CallInstruction::Create(const SourceLocation &where, const ResourceLocation &location, const FunctionPtr &callee, const std::vector<std::pair<std::string, ValuePtr>> &arguments, const BlockPtr &landing_pad)
 {
-    return std::make_shared<CallInstruction>(
-        where,
-        location,
-        callee,
-        arguments,
-        landing_pad);
+    return std::make_shared<CallInstruction>(where, location, callee, arguments, landing_pad);
 }
 
-mcc::CallInstruction::CallInstruction(
-    const SourceLocation &where,
-    ResourceLocation location,
-    const FunctionPtr &callee,
-    const std::vector<std::pair<std::string, ValuePtr>> &arguments,
-    BlockPtr landing_pad)
-    : Instruction(where, callee->ResultType, false),
-      Location(std::move(location)),
-      Callee(callee),
-      Arguments(arguments),
-      LandingPad(std::move(landing_pad))
+mcc::CallInstruction::CallInstruction(const SourceLocation &where, ResourceLocation location, const FunctionPtr &callee, const std::vector<std::pair<std::string, ValuePtr>> &arguments, BlockPtr landing_pad)
+    : Instruction(where, callee->ResultType, false), Location(std::move(location)), Callee(callee), Arguments(arguments), LandingPad(std::move(landing_pad))
 {
-    for (const auto &argument: Arguments | std::views::values)
-    {
+    for (const auto &argument : Arguments | std::views::values)
         argument->Use();
-    }
     if (LandingPad)
-    {
         LandingPad->Use();
-    }
 }
 
 mcc::CallInstruction::~CallInstruction()
 {
-    for (const auto &argument: Arguments | std::views::values)
-    {
+    for (const auto &argument : Arguments | std::views::values)
         argument->Drop();
-    }
     if (LandingPad)
-    {
         LandingPad->Drop();
-    }
 }
 
 void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) const
 {
     auto stack_path = GetStackPath();
-    auto tmp_name = GetTmpName();
+    auto tmp_name   = GetTmpName();
 
     std::string argument_prefix;
     std::string argument_object;
     auto require_cleanup = false;
     if (!Arguments.empty())
     {
-        const auto constant = !std::ranges::any_of(
-            Arguments | std::views::values,
-            [](auto &argument)
-            {
-                return !std::dynamic_pointer_cast<Constant>(argument);
-            });
+        const auto constant = !std::ranges::any_of(Arguments | std::views::values,
+                                                   [](auto &argument)
+                                                   { return !std::dynamic_pointer_cast<Constant>(argument); });
 
         if (constant)
         {
@@ -86,9 +56,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                     argument_object += std::format("\"{}\":{}", key, value.Name);
                 }
                 else
-                {
                     argument_object += std::format("\"{}\":{}", key, value.Value);
-                }
             }
 
             argument_object += '}';
@@ -97,57 +65,47 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
         {
             commands.Append("data modify storage {} {} set value {{}}", Location, stack_path);
 
-            for (auto &[key_, argument_]: Arguments)
+            for (auto &[key_, argument_] : Arguments)
             {
                 auto value = argument_->GenerateResult();
 
                 std::string value_prefix;
                 if (value.WithArgument)
-                {
                     value_prefix = "$";
-                }
 
                 switch (value.Type)
                 {
-                    case ResultType_Value:
-                        commands.Append(
-                            "{}data modify storage {} {}.{} set value {}",
-                            value_prefix,
-                            Location,
-                            stack_path,
-                            key_,
-                            value.Value);
-                        break;
+                case ResultType_Value:
+                    commands.Append("{}data modify storage {} {}.{} set value {}",
+                                    value_prefix,
+                                    Location,
+                                    stack_path,
+                                    key_,
+                                    value.Value);
+                    break;
 
-                    case ResultType_Reference:
-                        commands.Append(
-                            "{}data modify storage {} {}.{} set from {} {} {}",
-                            value_prefix,
-                            Location,
-                            stack_path,
-                            key_,
-                            value.ReferenceType,
-                            value.Target,
-                            value.Path);
-                        break;
+                case ResultType_Reference:
+                    commands.Append("{}data modify storage {} {}.{} set from {} {} {}",
+                                    value_prefix,
+                                    Location,
+                                    stack_path,
+                                    key_,
+                                    value.ReferenceType,
+                                    value.Target,
+                                    value.Path);
+                    break;
 
-                    case ResultType_Argument:
-                        commands.Append(
-                            "$data modify storage {} {}.{} set value {}",
-                            Location,
-                            stack_path,
-                            key_,
-                            value.Name);
-                        break;
+                case ResultType_Argument:
+                    commands.Append("$data modify storage {} {}.{} set value {}", Location, stack_path, key_, value.Name);
+                    break;
 
-                    default:
-                        Error(
-                            Where,
-                            "value must be {}, {} or {}, but is {}",
-                            ResultType_Value,
-                            ResultType_Reference,
-                            ResultType_Argument,
-                            value.Type);
+                default:
+                    Error(Where,
+                          "value must be {}, {} or {}, but is {}",
+                          ResultType_Value,
+                          ResultType_Reference,
+                          ResultType_Argument,
+                          value.Type);
                 }
             }
 
@@ -159,95 +117,59 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
     if (Callee->Throws)
     {
         commands.Append(CreateTmpScore());
-        commands.Append(
-            "{}execute store result score %c {} run function {}{}",
-            argument_prefix,
-            tmp_name,
-            Callee->Location,
-            argument_object);
-        commands.Append(
-            "data remove storage {} {}",
-            Location,
-            stack_path);
-        commands.Append(
-            "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
-            tmp_name,
-            Location,
-            stack_path);
+        commands.Append("{}execute store result score %c {} run function {}{}", argument_prefix, tmp_name, Callee->Location, argument_object);
+        commands.Append("data remove storage {} {}", Location, stack_path);
+        commands.Append("execute unless score %c {} matches 0 run data modify storage {} {} set value 1", tmp_name, Location, stack_path);
         commands.Append(RemoveTmpScore());
 
-        commands.Append(
-            "data remove storage {} result",
-            Location);
-        commands.Append(
-            "execute if data storage {0} {1} run data modify storage {0} result set from storage {2} result",
-            Location,
-            stack_path,
-            Callee->Location);
+        commands.Append("data remove storage {} result", Location);
+        commands.Append("execute if data storage {0} {1} run data modify storage {0} result set from storage {2} "
+                        "result",
+                        Location,
+                        stack_path,
+                        Callee->Location);
 
         if (LandingPad)
         {
             std::string prefix, arguments;
             LandingPad->Parent->ForwardArguments(prefix, arguments);
 
-            commands.Append(
-                "{}execute if data storage {} result run return run function {}{}",
-                prefix,
-                Location,
-                LandingPad->Parent->GetLocation(LandingPad),
-                arguments);
+            commands.Append("{}execute if data storage {} result run return run function {}{}",
+                            prefix,
+                            Location,
+                            LandingPad->Parent->GetLocation(LandingPad),
+                            arguments);
         }
         else
         {
-            commands.Append(
-                "execute if data storage {0} result run data remove storage {0} stack[0]",
-                Location);
-            commands.Append(
-                "execute if data storage {} result run return 1",
-                Location);
+            commands.Append("execute if data storage {0} result run data remove storage {0} stack[0]", Location);
+            commands.Append("execute if data storage {} result run return 1", Location);
         }
     }
     else
-    {
-        commands.Append(
-            "{}function {}{}",
-            argument_prefix,
-            Callee->Location,
-            argument_object);
-    }
+        commands.Append("{}function {}{}", argument_prefix, Callee->Location, argument_object);
 
     if (UseCount)
     {
         Assert(stack, Where, "call instruction with result requires stack");
-        commands.Append(
-            "data modify storage {} {} set from storage {} result",
-            Location,
-            stack_path,
-            Callee->Location);
+        commands.Append("data modify storage {} {} set from storage {} result", Location, stack_path, Callee->Location);
     }
     else if (require_cleanup)
-    {
         commands.Append("data remove storage {} {}", Location, stack_path);
-    }
 }
 
 bool mcc::CallInstruction::RequireStack() const
 {
     return UseCount
-           || std::ranges::any_of(
-               Arguments | std::views::values,
-               [](auto &argument)
-               {
-                   return argument->RequireStack();
-               });
+        || std::ranges::any_of(Arguments | std::views::values, [](auto &argument) { return argument->RequireStack(); });
 }
 
 mcc::Result mcc::CallInstruction::GenerateResult() const
 {
     return {
-        .Type = ResultType_Reference,
+        .Type          = ResultType_Reference,
         .ReferenceType = ReferenceType_Storage,
-        .Target = Location.String(),
-        .Path = GetStackPath(),
+        .Target        = Location.String(),
+        .Path          = GetStackPath(),
     };
 }

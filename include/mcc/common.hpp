@@ -1,28 +1,28 @@
 #pragma once
 
 #include <format>
+#include <mcc/enums.hpp>
 #include <memory>
 #include <string>
 #include <vector>
-#include <mcc/enums.hpp>
 
 namespace mcc
 {
     using IntegerT = long long;
-    using FloatT = long double;
-    using IndexT = unsigned long long;
+    using FloatT   = long double;
+    using IndexT   = unsigned long long;
     using CommandT = std::string;
 
-    using TreeNodePtr = std::unique_ptr<struct TreeNode>;
-    using StatementPtr = std::unique_ptr<struct Statement>;
+    using TreeNodePtr   = std::unique_ptr<struct TreeNode>;
+    using StatementPtr  = std::unique_ptr<struct Statement>;
     using ExpressionPtr = std::unique_ptr<struct Expression>;
     using FormatNodePtr = std::unique_ptr<struct FormatNode>;
 
-    using ValuePtr = std::shared_ptr<struct Value>;
-    using ConstantPtr = std::shared_ptr<struct Constant>;
+    using ValuePtr       = std::shared_ptr<struct Value>;
+    using ConstantPtr    = std::shared_ptr<struct Constant>;
     using InstructionPtr = std::shared_ptr<struct Instruction>;
-    using BlockPtr = std::shared_ptr<struct Block>;
-    using FunctionPtr = std::shared_ptr<struct Function>;
+    using BlockPtr       = std::shared_ptr<struct Block>;
+    using FunctionPtr    = std::shared_ptr<struct Function>;
 
     using TypePtr = std::shared_ptr<struct Type>;
 
@@ -69,7 +69,7 @@ namespace mcc
         }
 
         template<typename... Args>
-        CommandVector &Append(std::string_view format, Args &&... args)
+        CommandVector &Append(std::string_view format, Args &&...args)
         {
             return Append(std::vformat(std::move(format), std::make_format_args(args...)));
         }
@@ -86,22 +86,16 @@ namespace mcc
             return stream << (TAG ? "#" : "") << Namespace << ':' << Path;
         }
 
-        [[nodiscard]] std::string String() const
-        {
-            return (TAG ? "#" : "") + Namespace + ':' + Path;
-        }
+        [[nodiscard]] std::string String() const { return (TAG ? "#" : "") + Namespace + ':' + Path; }
 
-        bool operator==(const Resource &other) const
-        {
-            return Namespace == other.Namespace && Path == other.Path;
-        }
+        bool operator==(const Resource &other) const { return Namespace == other.Namespace && Path == other.Path; }
 
         std::string Namespace;
         std::string Path;
     };
 
     using ResourceLocation = Resource<false>;
-    using ResourceTag = Resource<true>;
+    using ResourceTag      = Resource<true>;
 
     struct Result
     {

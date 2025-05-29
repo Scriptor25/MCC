@@ -4,8 +4,7 @@
 #include <mcc/value.hpp>
 
 mcc::ReturnStatement::ReturnStatement(const SourceLocation &where, ExpressionPtr value)
-    : Statement(where),
-      Value(std::move(value))
+    : Statement(where), Value(std::move(value))
 {
 }
 

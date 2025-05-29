@@ -5,13 +5,8 @@
 #include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
 
-mcc::UnaryExpression::UnaryExpression(
-    const SourceLocation &where,
-    const std::string &operator_,
-    ExpressionPtr operand)
-    : Expression(where),
-      Operator(operator_),
-      Operand(std::move(operand))
+mcc::UnaryExpression::UnaryExpression(const SourceLocation &where, const std::string &operator_, ExpressionPtr operand)
+    : Expression(where), Operator(operator_), Operand(std::move(operand))
 {
 }
 
@@ -20,10 +15,7 @@ std::ostream &mcc::UnaryExpression::Print(std::ostream &stream) const
     return Operand->Print(stream << Operator);
 }
 
-using UnaryOperation = std::function<mcc::ValuePtr(
-    const mcc::SourceLocation &where,
-    mcc::Builder &builder,
-    const mcc::ValuePtr &operand)>;
+using UnaryOperation = std::function<mcc::ValuePtr(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)>;
 
 struct UnaryOperator
 {
@@ -34,35 +26,34 @@ struct UnaryOperator
 static mcc::ValuePtr inc(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
     const auto one = mcc::ConstantNumber::Create(where, builder.GetContext(), 1);
-    return builder.CreateOperation(where, mcc::Operator_Add, {operand, one});
+    return builder.CreateOperation(where, mcc::Operator_Add, { operand, one });
 };
 
 static mcc::ValuePtr dec(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
     const auto one = mcc::ConstantNumber::Create(where, builder.GetContext(), 1);
-    return builder.CreateOperation(where, mcc::Operator_Sub, {operand, one});
+    return builder.CreateOperation(where, mcc::Operator_Sub, { operand, one });
 };
 
 static mcc::ValuePtr neg(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
     const auto zero = mcc::ConstantNumber::Create(where, builder.GetContext(), 0);
-    return builder.CreateOperation(where, mcc::Operator_Sub, {zero, operand});
+    return builder.CreateOperation(where, mcc::Operator_Sub, { zero, operand });
 };
 
 mcc::ValuePtr mcc::UnaryExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    static const std::map<std::string_view, UnaryOperator> operators
-    {
-        {"++", {true, inc}},
-        {"--", {true, dec}},
-        {"-", {false, neg}},
+    static const std::map<std::string_view, UnaryOperator> operators{
+        { "++",  { true, inc } },
+        { "--",  { true, dec } },
+        {  "-", { false, neg } },
     };
 
     Assert(operators.contains(Operator), Where, "undefined unary operator {}", Operator);
     const auto &[store_, operation_] = operators.at(Operator);
 
     const auto operand = Operand->GenerateValue(builder, frame);
-    const auto value = operation_(Where, builder, operand);
+    const auto value   = operation_(Where, builder, operand);
 
     if (store_)
         return builder.CreateStore(Where, operand, value);

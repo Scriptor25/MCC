@@ -3,8 +3,7 @@
 #include <mcc/statement.hpp>
 
 mcc::DeleteStatement::DeleteStatement(const SourceLocation &where, ExpressionPtr value)
-    : Statement(where),
-      Value(std::move(value))
+    : Statement(where), Value(std::move(value))
 {
 }
 
