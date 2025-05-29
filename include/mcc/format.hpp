@@ -2,7 +2,6 @@
 
 #include <iosfwd>
 #include <mcc/common.hpp>
-#include <mcc/lex.hpp>
 #include <string>
 
 namespace mcc
