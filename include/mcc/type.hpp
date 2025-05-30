@@ -21,6 +21,8 @@ namespace mcc
         TypePtr GetUnion(const std::set<TypePtr> &elements);
         TypePtr GetFunction(const std::vector<TypePtr> &parameters, const TypePtr &result, bool throws);
 
+        TypePtr GetUnionOrSingle(const std::set<TypePtr> &elements);
+
         TypePtr SetNamed(const std::string &name, const TypePtr &type);
         TypePtr GetNamed(const std::string &name) const;
 

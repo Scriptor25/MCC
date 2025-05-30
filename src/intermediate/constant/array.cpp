@@ -20,10 +20,7 @@ mcc::ConstantPtr mcc::ConstantArray::Create(
     for (auto &value : values)
         elements.insert(value->Type);
 
-    auto type = context.GetArray(
-        elements.size() == 1
-            ? *elements.begin()
-            : context.GetUnion(elements));
+    auto type = context.GetArray(context.GetUnionOrSingle(elements));
 
     return std::make_shared<ConstantArray>(where, type, values, stringify);
 }

@@ -56,9 +56,7 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Fra
     else_target = builder.GetInsertBlock();
 
     builder.SetInsertBlock(tail_target);
-    const auto type = then_value->Type == else_value->Type
-                          ? then_value->Type
-                          : builder.GetContext().GetUnion({ then_value->Type, else_value->Type });
+    const auto type = builder.GetContext().GetUnionOrSingle({ then_value->Type, else_value->Type });
     auto branch_result = builder.CreateBranchResult(Where, type);
 
     builder.SetInsertBlock(then_target);

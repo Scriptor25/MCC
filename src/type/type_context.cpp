@@ -105,6 +105,13 @@ mcc::TypePtr mcc::TypeContext::GetFunction(const std::vector<TypePtr> &parameter
     return type;
 }
 
+mcc::TypePtr mcc::TypeContext::GetUnionOrSingle(const std::set<TypePtr> &elements)
+{
+    return elements.size() == 1
+               ? *elements.begin()
+               : GetUnion(elements);
+}
+
 mcc::TypePtr mcc::TypeContext::SetNamed(const std::string &name, const TypePtr &type)
 {
     auto pre = m_Named[name];

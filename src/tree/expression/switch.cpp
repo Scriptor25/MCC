@@ -116,9 +116,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     (void) builder.CreateSwitch(Where, condition, default_target, case_targets);
 
     builder.SetInsertBlock(tail_target);
-    const auto type = elements.size() == 1
-                          ? *elements.begin()
-                          : builder.GetContext().GetUnion(elements);
+    const auto type = builder.GetContext().GetUnionOrSingle(elements);
     const auto branch_result = builder.CreateBranchResult(Where, type);
 
     for (auto &[target_, value_] : case_values)

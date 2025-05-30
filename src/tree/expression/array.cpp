@@ -45,12 +45,7 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
             constants.emplace_back(constant);
     }
 
-    const auto type = Type
-                          ? Type
-                          : builder.GetContext().GetArray(
-                              elements.size() == 1
-                                  ? *elements.begin()
-                                  : builder.GetContext().GetUnion(elements));
+    const auto type = Type ? Type : builder.GetContext().GetArray(builder.GetContext().GetUnionOrSingle(elements));
 
     if (values.size() == constants.size())
         return ConstantArray::Create(Where, type, constants, false);

@@ -40,10 +40,7 @@ mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const Frame
     if (values.size() == constants.size())
         return ConstantArray::Create(Where, builder.GetContext(), constants, true);
 
-    const auto type = builder.GetContext().GetArray(
-        elements.size() == 1
-            ? *elements.begin()
-            : builder.GetContext().GetUnion(elements));
+    const auto type = builder.GetContext().GetArray(builder.GetContext().GetUnionOrSingle(elements));
 
     auto array = builder.Allocate(Where, type, false);
     for (auto value : values)
