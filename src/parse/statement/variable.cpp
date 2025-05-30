@@ -24,5 +24,11 @@ mcc::StatementPtr mcc::Parser::ParseVariableStatement()
 
     Assert(type || value, where, "variable definition must at least specify either a type or a value");
 
-    return std::make_unique<VariableStatement>(where, is_constant, is_reference, names, std::move(type), std::move(value));
+    return std::make_unique<VariableStatement>(
+        where,
+        is_constant,
+        is_reference,
+        names,
+        std::move(type),
+        std::move(value));
 }

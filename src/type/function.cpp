@@ -1,7 +1,14 @@
 #include <mcc/type.hpp>
 
-mcc::FunctionType::FunctionType(TypeContext &context, const std::vector<TypePtr> &parameters, const TypePtr &result, const bool throws)
-    : Type(context), Parameters(parameters), Result(result), Throws(throws)
+mcc::FunctionType::FunctionType(
+    TypeContext &context,
+    const std::vector<TypePtr> &parameters,
+    const TypePtr &result,
+    const bool throws)
+    : Type(context),
+      Parameters(parameters),
+      Result(result),
+      Throws(throws)
 {
 }
 

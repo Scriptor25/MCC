@@ -2,8 +2,17 @@
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
-mcc::TryCatchStatement::TryCatchStatement(const SourceLocation &where, StatementPtr try_, StatementPtr catch_, const std::string &variable, const TypePtr &error_type)
-    : Statement(where), Try(std::move(try_)), Catch(std::move(catch_)), Variable(variable), ErrorType(error_type)
+mcc::TryCatchStatement::TryCatchStatement(
+    const SourceLocation &where,
+    StatementPtr try_,
+    StatementPtr catch_,
+    const std::string &variable,
+    const TypePtr &error_type)
+    : Statement(where),
+      Try(std::move(try_)),
+      Catch(std::move(catch_)),
+      Variable(variable),
+      ErrorType(error_type)
 {
 }
 

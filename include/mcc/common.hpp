@@ -1,10 +1,10 @@
 #pragma once
 
 #include <format>
-#include <mcc/enums.hpp>
 #include <memory>
 #include <string>
 #include <vector>
+#include <mcc/enums.hpp>
 
 namespace mcc
 {
@@ -69,7 +69,7 @@ namespace mcc
         }
 
         template<typename... Args>
-        CommandVector &Append(std::string_view format, Args &&...args)
+        CommandVector &Append(std::string_view format, Args &&... args)
         {
             return Append(std::vformat(std::move(format), std::make_format_args(args...)));
         }
@@ -86,9 +86,15 @@ namespace mcc
             return stream << (TAG ? "#" : "") << Namespace << ':' << Path;
         }
 
-        [[nodiscard]] std::string String() const { return (TAG ? "#" : "") + Namespace + ':' + Path; }
+        [[nodiscard]] std::string String() const
+        {
+            return (TAG ? "#" : "") + Namespace + ':' + Path;
+        }
 
-        bool operator==(const Resource &other) const { return Namespace == other.Namespace && Path == other.Path; }
+        bool operator==(const Resource &other) const
+        {
+            return Namespace == other.Namespace && Path == other.Path;
+        }
 
         std::string Namespace;
         std::string Path;

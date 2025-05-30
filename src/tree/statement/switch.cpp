@@ -5,8 +5,15 @@
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
-mcc::SwitchStatement::SwitchStatement(const SourceLocation &where, ExpressionPtr condition, StatementPtr default_, std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases)
-    : Statement(where), Condition(std::move(condition)), Default(std::move(default_)), Cases(std::move(cases))
+mcc::SwitchStatement::SwitchStatement(
+    const SourceLocation &where,
+    ExpressionPtr condition,
+    StatementPtr default_,
+    std::vector<std::pair<std::vector<ExpressionPtr>, StatementPtr>> cases)
+    : Statement(where),
+      Condition(std::move(condition)),
+      Default(std::move(default_)),
+      Cases(std::move(cases))
 {
 }
 

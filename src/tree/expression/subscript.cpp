@@ -4,7 +4,9 @@
 #include <mcc/value.hpp>
 
 mcc::SubscriptExpression::SubscriptExpression(const SourceLocation &where, ExpressionPtr base, ExpressionPtr index)
-    : Expression(where), Base(std::move(base)), Index(std::move(index))
+    : Expression(where),
+      Base(std::move(base)),
+      Index(std::move(index))
 {
 }
 

@@ -57,8 +57,8 @@ namespace mcc
     inline ReferenceTypeE ToTargetType(const std::string_view &string_)
     {
         static const std::map<std::string_view, ReferenceTypeE> map{
-            {   "block",   ReferenceType_Block },
-            {  "entity",  ReferenceType_Entity },
+            { "block", ReferenceType_Block },
+            { "entity", ReferenceType_Entity },
             { "storage", ReferenceType_Storage },
         };
 
@@ -68,8 +68,8 @@ namespace mcc
     inline const char *ToString(const ReferenceTypeE enum_)
     {
         static const std::map<ReferenceTypeE, const char *> map{
-            {   ReferenceType_Block,   "block" },
-            {  ReferenceType_Entity,  "entity" },
+            { ReferenceType_Block, "block" },
+            { ReferenceType_Entity, "entity" },
             { ReferenceType_Storage, "storage" },
         };
 
@@ -79,9 +79,9 @@ namespace mcc
     inline const char *ToString(const ResultTypeE enum_)
     {
         static const std::map<ResultTypeE, const char *> map{
-            {     ResultType_Value,     "value" },
+            { ResultType_Value, "value" },
             { ResultType_Reference, "reference" },
-            {  ResultType_Argument,  "argument" },
+            { ResultType_Argument, "argument" },
         };
 
         return map.at(enum_);
@@ -91,11 +91,11 @@ namespace mcc
     {
         static const std::map<ComparatorE, const char *> map{
             { Comparator_None, "none" },
-            {   Comparator_LT,   "lt" },
-            {   Comparator_GT,   "gt" },
-            {   Comparator_LE,   "le" },
-            {   Comparator_GE,   "ge" },
-            {   Comparator_EQ,   "eq" },
+            { Comparator_LT, "lt" },
+            { Comparator_GT, "gt" },
+            { Comparator_LE, "le" },
+            { Comparator_GE, "ge" },
+            { Comparator_EQ, "eq" },
         };
 
         return map.at(enum_);
@@ -105,11 +105,11 @@ namespace mcc
     {
         static const std::map<OperatorE, const char *> map{
             { Operator_None, "none" },
-            {  Operator_Add,  "add" },
-            {  Operator_Sub,  "sub" },
-            {  Operator_Mul,  "mul" },
-            {  Operator_Div,  "div" },
-            {  Operator_Rem,  "rem" },
+            { Operator_Add, "add" },
+            { Operator_Sub, "sub" },
+            { Operator_Mul, "mul" },
+            { Operator_Div, "div" },
+            { Operator_Rem, "rem" },
         };
 
         return map.at(enum_);

@@ -1,15 +1,31 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
-#include <utility>
 
-mcc::InstructionPtr mcc::BranchInstruction::Create(const SourceLocation &where, TypeContext &context, const ResourceLocation &location, const ValuePtr &condition, const BlockPtr &then_target, const BlockPtr &else_target)
+mcc::InstructionPtr mcc::BranchInstruction::Create(
+    const SourceLocation &where,
+    TypeContext &context,
+    const ResourceLocation &location,
+    const ValuePtr &condition,
+    const BlockPtr &then_target,
+    const BlockPtr &else_target)
 {
     return std::make_shared<BranchInstruction>(where, context, location, condition, then_target, else_target);
 }
 
-mcc::BranchInstruction::BranchInstruction(const SourceLocation &where, TypeContext &context, ResourceLocation location, ValuePtr condition, BlockPtr then_target, BlockPtr else_target)
-    : Instruction(where, context.GetVoid(), false), Location(std::move(location)), Condition(std::move(condition)), ThenTarget(std::move(then_target)), ElseTarget(std::move(else_target))
+mcc::BranchInstruction::BranchInstruction(
+    const SourceLocation &where,
+    TypeContext &context,
+    ResourceLocation location,
+    ValuePtr condition,
+    BlockPtr then_target,
+    BlockPtr else_target)
+    : Instruction(where, context.GetVoid(), false),
+      Location(std::move(location)),
+      Condition(std::move(condition)),
+      ThenTarget(std::move(then_target)),
+      ElseTarget(std::move(else_target))
 {
     Condition->Use();
     ThenTarget->Use();
@@ -48,17 +64,28 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
 
     case ResultType_Reference:
         commands.Append(CreateTmpScore());
-        commands.Append("{}execute store result score %c {} run data get {} {} {}",
-                        condition_prefix,
-                        tmp_name,
-                        condition.ReferenceType,
-                        condition.Target,
-                        condition.Path);
+        commands.Append(
+            "{}execute store result score %c {} run data get {} {} {}",
+            condition_prefix,
+            tmp_name,
+            condition.ReferenceType,
+            condition.Target,
+            condition.Path);
         commands.Append("data remove storage {} {}", Location, stack_path);
-        commands.Append("execute unless score %c {} matches 0 run data modify storage {} {} set value 1", tmp_name, Location, stack_path);
+        commands.Append(
+            "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
+            tmp_name,
+            Location,
+            stack_path);
         commands.Append(RemoveTmpScore());
 
-        commands.Append("{}execute if data storage {} {} run return run function {}{}", prefix, Location, stack_path, then, arguments);
+        commands.Append(
+            "{}execute if data storage {} {} run return run function {}{}",
+            prefix,
+            Location,
+            stack_path,
+            then,
+            arguments);
         commands.Append("{}return run function {}{}", prefix, else_, arguments);
         break;
 
@@ -66,20 +93,31 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
         commands.Append(CreateTmpScore());
         commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);
         commands.Append("data remove storage {} {}", Location, stack_path);
-        commands.Append("execute unless score %c {} matches 0 run data modify storage {} {} set value 1", tmp_name, Location, stack_path);
+        commands.Append(
+            "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
+            tmp_name,
+            Location,
+            stack_path);
         commands.Append(RemoveTmpScore());
 
-        commands.Append("{}execute if data storage {} {} run return run function {}{}", prefix, Location, stack_path, then, arguments);
+        commands.Append(
+            "{}execute if data storage {} {} run return run function {}{}",
+            prefix,
+            Location,
+            stack_path,
+            then,
+            arguments);
         commands.Append("{}return run function {}{}", prefix, else_, arguments);
         break;
 
     default:
-        Error(Where,
-              "condition must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
-              condition.Type);
+        Error(
+            Where,
+            "condition must be {}, {} or {}, but is {}",
+            ResultType_Value,
+            ResultType_Reference,
+            ResultType_Argument,
+            condition.Type);
     }
 }
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <format>
-#include <mcc/common.hpp>
 #include <string>
+#include <mcc/common.hpp>
 
 namespace mcc
 {
@@ -37,14 +37,14 @@ namespace std
         auto format(const mcc::TokenType &type, FormatContext &ctx) const
         {
             static const std::map<mcc::TokenType, std::string> types{
-                {          mcc::TokenType_EOF,           "eof" },
-                {       mcc::TokenType_Symbol,        "symbol" },
-                {     mcc::TokenType_Operator,      "operator" },
-                {       mcc::TokenType_Number,        "number" },
-                {       mcc::TokenType_String,        "string" },
+                { mcc::TokenType_EOF, "eof" },
+                { mcc::TokenType_Symbol, "symbol" },
+                { mcc::TokenType_Operator, "operator" },
+                { mcc::TokenType_Number, "number" },
+                { mcc::TokenType_String, "string" },
                 { mcc::TokenType_FormatString, "format string" },
-                {        mcc::TokenType_Other,         "other" },
-                {    mcc::TokenType_Undefined,     "undefined" },
+                { mcc::TokenType_Other, "other" },
+                { mcc::TokenType_Undefined, "undefined" },
             };
 
             return formatter<string>::format(types.contains(type) ? types.at(type) : "<undefined>", ctx);

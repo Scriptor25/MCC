@@ -1,10 +1,16 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
-#include <utility>
 
-mcc::FunctionPtr mcc::Function::Create(const SourceLocation &where, TypeContext &context, const ResourceLocation &location, const ParameterList &parameters, const TypePtr &result_type, const bool throws)
+mcc::FunctionPtr mcc::Function::Create(
+    const SourceLocation &where,
+    TypeContext &context,
+    const ResourceLocation &location,
+    const ParameterList &parameters,
+    const TypePtr &result_type,
+    const bool throws)
 {
     std::vector<TypePtr> parameter_types;
     for (const auto &[name_, type_] : parameters)
@@ -14,8 +20,18 @@ mcc::FunctionPtr mcc::Function::Create(const SourceLocation &where, TypeContext 
     return std::make_shared<Function>(where, type, location, parameters, result_type, throws);
 }
 
-mcc::Function::Function(const SourceLocation &where, const TypePtr &type, ResourceLocation location, const ParameterList &parameters, TypePtr result_type, const bool throws)
-    : Value(where, type, false), Location(std::move(location)), Parameters(parameters), ResultType(std::move(result_type)), Throws(throws)
+mcc::Function::Function(
+    const SourceLocation &where,
+    const TypePtr &type,
+    ResourceLocation location,
+    const ParameterList &parameters,
+    TypePtr result_type,
+    const bool throws)
+    : Value(where, type, false),
+      Location(std::move(location)),
+      Parameters(parameters),
+      ResultType(std::move(result_type)),
+      Throws(throws)
 {
 }
 
@@ -39,8 +55,8 @@ bool mcc::Function::RequireStack() const
 mcc::Result mcc::Function::GenerateResult() const
 {
     return {
-        .Type    = ResultType_Value,
-        .Value   = '"' + Location.String() + '"',
+        .Type = ResultType_Value,
+        .Value = '"' + Location.String() + '"',
         .NotNull = true,
     };
 }

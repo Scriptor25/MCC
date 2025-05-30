@@ -2,7 +2,8 @@
 #include <mcc/type.hpp>
 
 mcc::ObjectType::ObjectType(TypeContext &context, const std::map<std::string, TypePtr> &elements)
-    : Type(context), Elements(elements)
+    : Type(context),
+      Elements(elements)
 {
 }
 

@@ -4,8 +4,13 @@
 #include <mcc/instruction.hpp>
 #include <mcc/value.hpp>
 
-mcc::VectorExpression::VectorExpression(const SourceLocation &where, const std::string &operator_, std::vector<ExpressionPtr> operands)
-    : Expression(where), Operator(operator_), Operands(std::move(operands))
+mcc::VectorExpression::VectorExpression(
+    const SourceLocation &where,
+    const std::string &operator_,
+    std::vector<ExpressionPtr> operands)
+    : Expression(where),
+      Operator(operator_),
+      Operands(std::move(operands))
 {
 }
 

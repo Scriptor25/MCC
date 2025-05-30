@@ -3,8 +3,17 @@
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
-mcc::ForStatement::ForStatement(const SourceLocation &where, StatementPtr prefix, ExpressionPtr condition, StatementPtr suffix, StatementPtr do_)
-    : Statement(where), Condition(std::move(condition)), Prefix(std::move(prefix)), Suffix(std::move(suffix)), Do(std::move(do_))
+mcc::ForStatement::ForStatement(
+    const SourceLocation &where,
+    StatementPtr prefix,
+    ExpressionPtr condition,
+    StatementPtr suffix,
+    StatementPtr do_)
+    : Statement(where),
+      Condition(std::move(condition)),
+      Prefix(std::move(prefix)),
+      Suffix(std::move(suffix)),
+      Do(std::move(do_))
 {
 }
 

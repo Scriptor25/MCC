@@ -1,3 +1,4 @@
+#include <set>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
@@ -5,10 +6,10 @@
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
-#include <set>
 
 mcc::FormatExpression::FormatExpression(const SourceLocation &where, std::vector<FormatNodePtr> nodes)
-    : Expression(where), Nodes(std::move(nodes))
+    : Expression(where),
+      Nodes(std::move(nodes))
 {
 }
 
@@ -41,7 +42,8 @@ mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const Frame
     if (values.size() == constants.size())
         return ConstantArray::Create(Where, builder.GetContext(), constants, true);
 
-    const auto type = builder.GetContext().GetArray(elements.size() == 1 ? *elements.begin() : builder.GetContext().GetUnion(elements));
+    const auto type = builder.GetContext().GetArray(
+        elements.size() == 1 ? *elements.begin() : builder.GetContext().GetUnion(elements));
 
     auto array = builder.CreateAllocation(Where, type, false, nullptr);
 

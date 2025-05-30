@@ -1,19 +1,29 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
-#include <utility>
 
-mcc::ForEachStatement::ForEachStatement(const SourceLocation &where, const bool is_constant, std::string name, ExpressionPtr iterable, StatementPtr do_)
-    : Statement(where), IsConstant(is_constant), Name(std::move(name)), Iterable(std::move(iterable)), Do(std::move(do_))
+mcc::ForEachStatement::ForEachStatement(
+    const SourceLocation &where,
+    const bool is_constant,
+    std::string name,
+    ExpressionPtr iterable,
+    StatementPtr do_)
+    : Statement(where),
+      IsConstant(is_constant),
+      Name(std::move(name)),
+      Iterable(std::move(iterable)),
+      Do(std::move(do_))
 {
 }
 
 std::ostream &mcc::ForEachStatement::Print(std::ostream &stream) const
 {
-    return Do->Print(Iterable->Print(stream << "foreach (" << (IsConstant ? "const" : "let") << ' ' << Name << " : ") << ") ");
+    return Do->Print(
+        Iterable->Print(stream << "foreach (" << (IsConstant ? "const" : "let") << ' ' << Name << " : ") << ") ");
 }
 
 void mcc::ForEachStatement::Generate(Builder &builder, Frame &frame) const

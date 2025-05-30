@@ -1,18 +1,29 @@
+#include <set>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
-#include <set>
 
-mcc::BinaryExpression::BinaryExpression(const SourceLocation &where, const std::string &operator_, ExpressionPtr left, ExpressionPtr right)
-    : Expression(where), Operator(operator_), Left(std::move(left)), Right(std::move(right))
+mcc::BinaryExpression::BinaryExpression(
+    const SourceLocation &where,
+    const std::string &operator_,
+    ExpressionPtr left,
+    ExpressionPtr right)
+    : Expression(where),
+      Operator(operator_),
+      Left(std::move(left)),
+      Right(std::move(right))
 {
 }
 
 mcc::ExpressionPtr mcc::BinaryExpression::Merge()
 {
     static const std::set<std::string_view> mergeable{
-        "+", "-", "*", "/", "%",
+        "+",
+        "-",
+        "*",
+        "/",
+        "%",
     };
 
     if (!mergeable.contains(Operator))

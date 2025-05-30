@@ -2,8 +2,13 @@
 #include <mcc/expression.hpp>
 #include <mcc/value.hpp>
 
-mcc::ConstantExpression::ConstantExpression(const SourceLocation &where, const ConstantPtr &value, const std::string &view)
-    : Expression(where), Value(value), View(view)
+mcc::ConstantExpression::ConstantExpression(
+    const SourceLocation &where,
+    const ConstantPtr &value,
+    const std::string &view)
+    : Expression(where),
+      Value(value),
+      View(view)
 {
 }
 

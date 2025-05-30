@@ -6,7 +6,9 @@
 #include <mcc/value.hpp>
 
 mcc::UnaryExpression::UnaryExpression(const SourceLocation &where, const std::string &operator_, ExpressionPtr operand)
-    : Expression(where), Operator(operator_), Operand(std::move(operand))
+    : Expression(where),
+      Operator(operator_),
+      Operand(std::move(operand))
 {
 }
 
@@ -15,7 +17,10 @@ std::ostream &mcc::UnaryExpression::Print(std::ostream &stream) const
     return Operand->Print(stream << Operator);
 }
 
-using UnaryOperation = std::function<mcc::ValuePtr(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)>;
+using UnaryOperation = std::function<mcc::ValuePtr(
+    const mcc::SourceLocation &where,
+    mcc::Builder &builder,
+    const mcc::ValuePtr &operand)>;
 
 struct UnaryOperator
 {
@@ -44,9 +49,9 @@ static mcc::ValuePtr neg(const mcc::SourceLocation &where, mcc::Builder &builder
 mcc::ValuePtr mcc::UnaryExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     static const std::map<std::string_view, UnaryOperator> operators{
-        { "++",  { true, inc } },
-        { "--",  { true, dec } },
-        {  "-", { false, neg } },
+        { "++", { true, inc } },
+        { "--", { true, dec } },
+        { "-", { false, neg } },
     };
 
     Assert(operators.contains(Operator), Where, "undefined unary operator {}", Operator);

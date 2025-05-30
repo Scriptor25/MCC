@@ -1,13 +1,23 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
-mcc::ValuePtr mcc::GenericEntityReference::Create(const SourceLocation &where, const TypePtr &type, const ValuePtr &name, const std::string &path)
+mcc::ValuePtr mcc::GenericEntityReference::Create(
+    const SourceLocation &where,
+    const TypePtr &type,
+    const ValuePtr &name,
+    const std::string &path)
 {
     return std::make_shared<GenericEntityReference>(where, type, name, path);
 }
 
-mcc::GenericEntityReference::GenericEntityReference(const SourceLocation &where, const TypePtr &type, const ValuePtr &name, const std::string &path)
-    : Value(where, type, true), Name(name), Path(path)
+mcc::GenericEntityReference::GenericEntityReference(
+    const SourceLocation &where,
+    const TypePtr &type,
+    const ValuePtr &name,
+    const std::string &path)
+    : Value(where, type, true),
+      Name(name),
+      Path(path)
 {
     Name->Use();
 }
@@ -37,7 +47,7 @@ mcc::Result mcc::GenericEntityReference::GenerateResult() const
 
     case ResultType_Argument:
         with_argument = true;
-        name_value    = name.Name;
+        name_value = name.Name;
         break;
 
     default:
@@ -45,10 +55,10 @@ mcc::Result mcc::GenericEntityReference::GenerateResult() const
     }
 
     return {
-        .Type          = ResultType_Reference,
-        .WithArgument  = with_argument,
+        .Type = ResultType_Reference,
+        .WithArgument = with_argument,
         .ReferenceType = ReferenceType_Entity,
-        .Target        = name_value,
-        .Path          = Path,
+        .Target = name_value,
+        .Path = Path,
     };
 }

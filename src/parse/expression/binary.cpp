@@ -4,7 +4,7 @@
 mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const unsigned min_pre)
 {
     static const std::map<std::string, unsigned> pres{
-        {  "=", 0 },
+        { "=", 0 },
         { "+=", 0 },
         { "-=", 0 },
         { "*=", 0 },
@@ -13,13 +13,13 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
         { "==", 1 },
         { "<=", 1 },
         { ">=", 1 },
-        {  "<", 1 },
-        {  ">", 1 },
-        {  "+", 2 },
-        {  "-", 2 },
-        {  "*", 3 },
-        {  "/", 3 },
-        {  "%", 3 },
+        { "<", 1 },
+        { ">", 1 },
+        { "+", 2 },
+        { "-", 2 },
+        { "*", 3 },
+        { "/", 3 },
+        { "%", 3 },
     };
 
     auto has_pre = [this]
@@ -44,7 +44,7 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
 
     if (const auto binary = dynamic_cast<BinaryExpression *>(left.get()))
         if (auto merged = binary->Merge())
-            left = std::move(merged);
+            left        = std::move(merged);
 
     return left;
 }

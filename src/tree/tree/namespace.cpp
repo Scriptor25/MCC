@@ -1,9 +1,10 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/tree.hpp>
-#include <utility>
 
 mcc::NamespaceNode::NamespaceNode(const SourceLocation &where, std::string namespace_)
-    : TreeNode(where), Namespace(std::move(namespace_))
+    : TreeNode(where),
+      Namespace(std::move(namespace_))
 {
 }
 

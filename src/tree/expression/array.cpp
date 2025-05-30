@@ -1,13 +1,15 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
-#include <utility>
 
 mcc::ArrayExpression::ArrayExpression(const SourceLocation &where, std::vector<ExpressionPtr> elements, TypePtr type)
-    : Expression(where), Elements(std::move(elements)), Type(std::move(type))
+    : Expression(where),
+      Elements(std::move(elements)),
+      Type(std::move(type))
 {
 }
 
@@ -46,9 +48,12 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
         elements.insert(value->Type);
     }
 
-    const auto type = Type ? Type
-                           : builder.GetContext().GetArray((elements.size() == 1) ? *elements.begin()
-                                                                                  : builder.GetContext().GetUnion(elements));
+    const auto type = Type
+                          ? Type
+                          : builder.GetContext().GetArray(
+                              (elements.size() == 1)
+                                  ? *elements.begin()
+                                  : builder.GetContext().GetUnion(elements));
 
     if (values.size() == constants.size())
         return ConstantArray::Create(Where, type, constants, false);

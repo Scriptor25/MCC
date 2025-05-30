@@ -1,18 +1,18 @@
+#include <set>
 #include <mcc/error.hpp>
 #include <mcc/parse.hpp>
-#include <set>
 
 mcc::Token &mcc::Parser::Next()
 {
     static const std::map<std::string, std::set<int>> operator_map{
-        { "=",      { '=', '>' } },
-        { "<",           { '=' } },
-        { ">",           { '=' } },
-        { "+",      { '=', '+' } },
+        { "=", { '=', '>' } },
+        { "<", { '=' } },
+        { ">", { '=' } },
+        { "+", { '=', '+' } },
         { "-", { '=', '-', '>' } },
-        { "*",           { '=' } },
-        { "/",           { '=' } },
-        { "%",           { '=' } },
+        { "*", { '=' } },
+        { "/", { '=' } },
+        { "%", { '=' } },
     };
 
     enum LexState
@@ -63,11 +63,11 @@ mcc::Token &mcc::Parser::Next()
                 value += static_cast<char>(m_Buf);
                 Get();
                 return m_Token = {
-                    .Type  = TokenType_Other,
-                    .Where = std::move(where),
-                    .Raw   = std::move(raw),
-                    .Value = std::move(value),
-                };
+                           .Type = TokenType_Other,
+                           .Where = std::move(where),
+                           .Raw = std::move(raw),
+                           .Value = std::move(value),
+                       };
 
             case '=':
             case '<':
@@ -120,22 +120,22 @@ mcc::Token &mcc::Parser::Next()
                 value += static_cast<char>(m_Buf);
                 Get();
                 return m_Token = {
-                    .Type  = TokenType_Undefined,
-                    .Where = std::move(where),
-                    .Raw   = std::move(raw),
-                    .Value = std::move(value),
-                };
+                           .Type = TokenType_Undefined,
+                           .Where = std::move(where),
+                           .Raw = std::move(raw),
+                           .Value = std::move(value),
+                       };
             }
             break;
 
         case LexState_Symbol:
             if (!std::isalnum(m_Buf) && m_Buf != '_')
                 return m_Token = {
-                    .Type  = TokenType_Symbol,
-                    .Where = std::move(where),
-                    .Raw   = std::move(raw),
-                    .Value = std::move(value),
-                };
+                           .Type = TokenType_Symbol,
+                           .Where = std::move(where),
+                           .Raw = std::move(raw),
+                           .Value = std::move(value),
+                       };
 
             raw += static_cast<char>(m_Buf);
             value += static_cast<char>(m_Buf);
@@ -146,12 +146,12 @@ mcc::Token &mcc::Parser::Next()
             if (!std::isdigit(m_Buf))
             {
                 return m_Token = {
-                    .Type   = TokenType_Number,
-                    .Where  = std::move(where),
-                    .Raw    = std::move(raw),
-                    .Value  = value,
-                    .Number = std::stoull(value),
-                };
+                           .Type = TokenType_Number,
+                           .Where = std::move(where),
+                           .Raw = std::move(raw),
+                           .Value = value,
+                           .Number = std::stoull(value),
+                       };
             }
 
             raw += static_cast<char>(m_Buf);
@@ -165,11 +165,11 @@ mcc::Token &mcc::Parser::Next()
                 raw += static_cast<char>(m_Buf);
                 Get();
                 return m_Token = {
-                    .Type  = formatted ? TokenType_FormatString : TokenType_String,
-                    .Where = std::move(where),
-                    .Raw   = std::move(raw),
-                    .Value = std::move(value),
-                };
+                           .Type = formatted ? TokenType_FormatString : TokenType_String,
+                           .Where = std::move(where),
+                           .Raw = std::move(raw),
+                           .Value = std::move(value),
+                       };
             }
 
             raw += static_cast<char>(m_Buf);
@@ -188,11 +188,11 @@ mcc::Token &mcc::Parser::Next()
 
             if (!operator_map.contains(value) || !operator_map.at(value).contains(m_Buf))
                 return m_Token = {
-                    .Type  = TokenType_Operator,
-                    .Where = std::move(where),
-                    .Raw   = std::move(raw),
-                    .Value = std::move(value),
-                };
+                           .Type = TokenType_Operator,
+                           .Where = std::move(where),
+                           .Raw = std::move(raw),
+                           .Value = std::move(value),
+                       };
 
             raw += static_cast<char>(m_Buf);
             value += static_cast<char>(m_Buf);
@@ -223,7 +223,7 @@ mcc::Token &mcc::Parser::Next()
     }
 
     return m_Token = {
-        .Type  = TokenType_EOF,
-        .Where = std::move(where),
-    };
+               .Type = TokenType_EOF,
+               .Where = std::move(where),
+           };
 }

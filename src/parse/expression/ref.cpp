@@ -37,5 +37,14 @@ mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
     auto path = Expect(TokenType_String).Value;
     Expect(TokenType_Other, ")");
 
-    return std::make_unique<RefExpression>(where, type, target_type, std::move(target_position_x), std::move(target_position_y), std::move(target_position_z), std::move(target_name), target_location, path);
+    return std::make_unique<RefExpression>(
+        where,
+        type,
+        target_type,
+        std::move(target_position_x),
+        std::move(target_position_y),
+        std::move(target_position_z),
+        std::move(target_name),
+        target_location,
+        path);
 }

@@ -1,15 +1,31 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
-#include <utility>
 
-mcc::InstructionPtr mcc::ComparisonInstruction::Create(const SourceLocation &where, TypeContext &context, const ComparatorE &comparator, const ResourceLocation &location, const ValuePtr &left, const ValuePtr &right)
+mcc::InstructionPtr mcc::ComparisonInstruction::Create(
+    const SourceLocation &where,
+    TypeContext &context,
+    const ComparatorE &comparator,
+    const ResourceLocation &location,
+    const ValuePtr &left,
+    const ValuePtr &right)
 {
     return std::make_shared<ComparisonInstruction>(where, context, comparator, location, left, right);
 }
 
-mcc::ComparisonInstruction::ComparisonInstruction(const SourceLocation &where, TypeContext &context, const ComparatorE comparator, ResourceLocation location, ValuePtr left, ValuePtr right)
-    : Instruction(where, context.GetBoolean(), false), Comparator(comparator), Location(std::move(location)), Left(std::move(left)), Right(std::move(right))
+mcc::ComparisonInstruction::ComparisonInstruction(
+    const SourceLocation &where,
+    TypeContext &context,
+    const ComparatorE comparator,
+    ResourceLocation location,
+    ValuePtr left,
+    ValuePtr right)
+    : Instruction(where, context.GetBoolean(), false),
+      Comparator(comparator),
+      Location(std::move(location)),
+      Left(std::move(left)),
+      Right(std::move(right))
 {
     Left->Use();
     Right->Use();
@@ -43,7 +59,13 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
         break;
 
     case ResultType_Reference:
-        commands.Append("{}execute store result score %a {} run data get {} {} {}", prefix, objective, left.ReferenceType, left.Target, left.Path);
+        commands.Append(
+            "{}execute store result score %a {} run data get {} {} {}",
+            prefix,
+            objective,
+            left.ReferenceType,
+            left.Target,
+            left.Path);
         break;
 
     case ResultType_Argument:
@@ -51,7 +73,13 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
         break;
 
     default:
-        Error(Where, "left must be {}, {} or {}, but is {}", ResultType_Value, ResultType_Reference, ResultType_Argument, left.Type);
+        Error(
+            Where,
+            "left must be {}, {} or {}, but is {}",
+            ResultType_Value,
+            ResultType_Reference,
+            ResultType_Argument,
+            left.Type);
     }
 
     if (require_right)
@@ -67,12 +95,13 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
             break;
 
         case ResultType_Reference:
-            commands.Append("{}execute store result score %b {} run data get {} {} {}",
-                            prefix,
-                            objective,
-                            right.ReferenceType,
-                            right.Target,
-                            right.Path);
+            commands.Append(
+                "{}execute store result score %b {} run data get {} {} {}",
+                prefix,
+                objective,
+                right.ReferenceType,
+                right.Target,
+                right.Path);
             break;
 
         case ResultType_Argument:
@@ -80,12 +109,13 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
             break;
 
         default:
-            Error(Where,
-                  "right must be {}, {} or {}, but is {}",
-                  ResultType_Value,
-                  ResultType_Reference,
-                  ResultType_Argument,
-                  right.Type);
+            Error(
+                Where,
+                "right must be {}, {} or {}, but is {}",
+                ResultType_Value,
+                ResultType_Reference,
+                ResultType_Argument,
+                right.Type);
         }
     }
 
@@ -117,7 +147,14 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
     }
 
     Assert(stack, Where, "comparison instruction requires stack");
-    commands.Append("execute store result storage {} {} byte 1 if score %a {} {} {} {}", Location, GetStackPath(), objective, operator_, require_right ? "%b" : "%a", objective);
+    commands.Append(
+        "execute store result storage {} {} byte 1 if score %a {} {} {} {}",
+        Location,
+        GetStackPath(),
+        objective,
+        operator_,
+        require_right ? "%b" : "%a",
+        objective);
 
     commands.Append(RemoveTmpScore());
 }
@@ -130,9 +167,9 @@ bool mcc::ComparisonInstruction::RequireStack() const
 mcc::Result mcc::ComparisonInstruction::GenerateResult() const
 {
     return {
-        .Type          = ResultType_Reference,
+        .Type = ResultType_Reference,
         .ReferenceType = ReferenceType_Storage,
-        .Target        = Location.String(),
-        .Path          = GetStackPath(),
+        .Target = Location.String(),
+        .Path = GetStackPath(),
     };
 }

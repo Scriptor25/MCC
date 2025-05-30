@@ -2,7 +2,9 @@
 #include <mcc/value.hpp>
 
 mcc::MemberExpression::MemberExpression(const SourceLocation &where, ExpressionPtr object, const std::string &member)
-    : Expression(where), Object(std::move(object)), Member(member)
+    : Expression(where),
+      Object(std::move(object)),
+      Member(member)
 {
 }
 

@@ -2,7 +2,8 @@
 #include <mcc/format.hpp>
 
 mcc::ExpressionNode::ExpressionNode(const SourceLocation &where, ExpressionPtr expression)
-    : FormatNode(where), Expression(std::move(expression))
+    : FormatNode(where),
+      Expression(std::move(expression))
 {
 }
 

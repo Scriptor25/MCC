@@ -6,7 +6,8 @@
 #include <mcc/value.hpp>
 
 mcc::ObjectExpression::ObjectExpression(const SourceLocation &where, std::map<std::string, ExpressionPtr> elements)
-    : Expression(where), Elements(std::move(elements))
+    : Expression(where),
+      Elements(std::move(elements))
 {
 }
 
@@ -38,7 +39,7 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame
         values[key_]     = value;
 
         if (const auto constant = std::dynamic_pointer_cast<Constant>(value))
-            constants[key_] = constant;
+            constants[key_]     = constant;
 
         elements[key_] = value->Type;
     }

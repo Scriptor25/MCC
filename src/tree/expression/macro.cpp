@@ -2,7 +2,8 @@
 #include <mcc/expression.hpp>
 
 mcc::MacroExpression::MacroExpression(const SourceLocation &where, const std::string &name)
-    : Expression(where), Name(name)
+    : Expression(where),
+      Name(name)
 {
 }
 

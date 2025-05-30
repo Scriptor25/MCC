@@ -1,7 +1,7 @@
 #include <iomanip>
 #include <iostream>
-#include <mcc/actions.hpp>
 #include <ranges>
+#include <mcc/actions.hpp>
 
 mcc::Actions::Actions(const std::vector<Action> &actions)
 {

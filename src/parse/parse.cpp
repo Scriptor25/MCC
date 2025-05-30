@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <istream>
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
-#include <utility>
 
 mcc::Parser::Parser(TypeContext &context, std::istream &stream, const std::string &filename)
     : Parser(context, stream, SourceLocation(filename, 1, 0))
@@ -11,7 +11,9 @@ mcc::Parser::Parser(TypeContext &context, std::istream &stream, const std::strin
 }
 
 mcc::Parser::Parser(TypeContext &context, std::istream &stream, SourceLocation location)
-    : m_Context(context), m_Stream(stream), m_Where(std::move(location))
+    : m_Context(context),
+      m_Stream(stream),
+      m_Where(std::move(location))
 {
     Get();
     Next();
@@ -58,12 +60,22 @@ bool mcc::Parser::At(const TokenType type, const std::string &value) const
 
 bool mcc::Parser::AtAny(const std::vector<TokenType> &types) const
 {
-    return std::ranges::any_of(types, [this](auto &type) { return At(type); });
+    return std::ranges::any_of(
+        types,
+        [this](auto &type)
+        {
+            return At(type);
+        });
 }
 
 bool mcc::Parser::AtEnum(const std::vector<const char *> &values) const
 {
-    return std::ranges::any_of(values, [this](auto &value) { return At(TokenType_Symbol, value); });
+    return std::ranges::any_of(
+        values,
+        [this](auto &value)
+        {
+            return At(TokenType_Symbol, value);
+        });
 }
 
 bool mcc::Parser::SkipIf(const TokenType type, const std::string &value)

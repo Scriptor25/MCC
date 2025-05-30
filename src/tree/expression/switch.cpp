@@ -5,8 +5,15 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::SwitchExpression::SwitchExpression(const SourceLocation &where, ExpressionPtr condition, ExpressionPtr default_, std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases)
-    : Expression(where), Condition(std::move(condition)), Default(std::move(default_)), Cases(std::move(cases))
+mcc::SwitchExpression::SwitchExpression(
+    const SourceLocation &where,
+    ExpressionPtr condition,
+    ExpressionPtr default_,
+    std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases)
+    : Expression(where),
+      Condition(std::move(condition)),
+      Default(std::move(default_)),
+      Cases(std::move(cases))
 {
 }
 

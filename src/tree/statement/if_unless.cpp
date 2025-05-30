@@ -3,8 +3,17 @@
 #include <mcc/statement.hpp>
 #include <mcc/value.hpp>
 
-mcc::IfUnlessStatement::IfUnlessStatement(const SourceLocation &where, const bool unless, ExpressionPtr condition, StatementPtr then, StatementPtr else_)
-    : Statement(where), Unless(unless), Condition(std::move(condition)), Then(std::move(then)), Else(std::move(else_))
+mcc::IfUnlessStatement::IfUnlessStatement(
+    const SourceLocation &where,
+    const bool unless,
+    ExpressionPtr condition,
+    StatementPtr then,
+    StatementPtr else_)
+    : Statement(where),
+      Unless(unless),
+      Condition(std::move(condition)),
+      Then(std::move(then)),
+      Else(std::move(else_))
 {
 }
 
@@ -26,7 +35,11 @@ void mcc::IfUnlessStatement::Generate(Builder &builder, Frame &frame) const
     auto require_tail = !Else;
 
     const auto condition = Condition->GenerateValue(builder, frame);
-    (void) builder.CreateBranch(Where, condition, Unless ? else_target : then_target, Unless ? then_target : else_target);
+    (void) builder.CreateBranch(
+        Where,
+        condition,
+        Unless ? else_target : then_target,
+        Unless ? then_target : else_target);
 
     builder.SetInsertBlock(then_target);
     Then->Generate(builder, frame);

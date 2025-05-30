@@ -6,7 +6,8 @@
 mcc::ExpressionPtr mcc::Parser::ParseStringExpression()
 {
     auto token = Expect(TokenType_String);
-    return std::make_unique<ConstantExpression>(token.Where,
-                                                ConstantString::Create(token.Where, m_Context, token.Value),
-                                                '"' + token.Value + '"');
+    return std::make_unique<ConstantExpression>(
+        token.Where,
+        ConstantString::Create(token.Where, m_Context, token.Value),
+        '"' + token.Value + '"');
 }

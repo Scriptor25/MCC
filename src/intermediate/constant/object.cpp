@@ -1,12 +1,18 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::ConstantPtr mcc::ConstantObject::Create(const SourceLocation &where, const TypePtr &type, const std::map<std::string, ConstantPtr> &values)
+mcc::ConstantPtr mcc::ConstantObject::Create(
+    const SourceLocation &where,
+    const TypePtr &type,
+    const std::map<std::string, ConstantPtr> &values)
 {
     return std::make_shared<ConstantObject>(where, type, values);
 }
 
-mcc::ConstantPtr mcc::ConstantObject::Create(const SourceLocation &where, TypeContext &context, const std::map<std::string, ConstantPtr> &values)
+mcc::ConstantPtr mcc::ConstantObject::Create(
+    const SourceLocation &where,
+    TypeContext &context,
+    const std::map<std::string, ConstantPtr> &values)
 {
     std::map<std::string, TypePtr> elements;
     for (const auto &[name_, value_] : values)
@@ -15,8 +21,12 @@ mcc::ConstantPtr mcc::ConstantObject::Create(const SourceLocation &where, TypeCo
     return std::make_shared<ConstantObject>(where, context.GetObject(elements), values);
 }
 
-mcc::ConstantObject::ConstantObject(const SourceLocation &where, const TypePtr &type, const std::map<std::string, ConstantPtr> &values)
-    : Constant(where, type), Values(values)
+mcc::ConstantObject::ConstantObject(
+    const SourceLocation &where,
+    const TypePtr &type,
+    const std::map<std::string, ConstantPtr> &values)
+    : Constant(where, type),
+      Values(values)
 {
     for (const auto &value : Values | std::views::values)
         value->Use();
@@ -46,8 +56,8 @@ mcc::Result mcc::ConstantObject::GenerateResult() const
     result += '}';
 
     return {
-        .Type    = ResultType_Value,
-        .Value   = std::move(result),
+        .Type = ResultType_Value,
+        .Value = std::move(result),
         .NotNull = true,
     };
 }

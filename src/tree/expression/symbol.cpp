@@ -3,7 +3,8 @@
 #include <mcc/value.hpp>
 
 mcc::SymbolExpression::SymbolExpression(const SourceLocation &where, const std::string &name)
-    : Expression(where), Name(name)
+    : Expression(where),
+      Name(name)
 {
 }
 

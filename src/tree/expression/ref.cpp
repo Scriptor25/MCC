@@ -1,11 +1,28 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
-#include <utility>
 
-mcc::RefExpression::RefExpression(const SourceLocation &where, TypePtr type, const ReferenceTypeE target_type, ExpressionPtr target_position_x, ExpressionPtr target_position_y, ExpressionPtr target_position_z, ExpressionPtr target_name, ResourceLocation target_location, std::string path)
-    : Expression(where), Type(std::move(type)), TargetType(target_type), TargetPositionX(std::move(target_position_x)), TargetPositionY(std::move(target_position_y)), TargetPositionZ(std::move(target_position_z)), TargetName(std::move(target_name)), TargetLocation(std::move(target_location)), Path(std::move(path))
+mcc::RefExpression::RefExpression(
+    const SourceLocation &where,
+    TypePtr type,
+    const ReferenceTypeE target_type,
+    ExpressionPtr target_position_x,
+    ExpressionPtr target_position_y,
+    ExpressionPtr target_position_z,
+    ExpressionPtr target_name,
+    ResourceLocation target_location,
+    std::string path)
+    : Expression(where),
+      Type(std::move(type)),
+      TargetType(target_type),
+      TargetPositionX(std::move(target_position_x)),
+      TargetPositionY(std::move(target_position_y)),
+      TargetPositionZ(std::move(target_position_z)),
+      TargetName(std::move(target_name)),
+      TargetLocation(std::move(target_location)),
+      Path(std::move(path))
 {
 }
 

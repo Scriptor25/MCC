@@ -1,5 +1,8 @@
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 #include <mcc/actions.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
@@ -7,9 +10,6 @@
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
 #include <mcc/type.hpp>
-#include <memory>
-#include <string>
-#include <vector>
 
 static void parse_file(mcc::Package &package, const std::filesystem::path &path)
 {
@@ -50,21 +50,45 @@ int main(const int argc, const char **argv)
     // https://minecraft.fandom.com/wiki/Commands
     // https://minecraft.fandom.com/wiki/Data_pack
 
-    mcc::Actions actions({
-        { 0, "help", "display help text and program description" },
-        // mcc init [-name <package name>] [-version <package version>]
-        // [-description <package description>]
-        //  -> initialize a new package with a given name, version and
-        //  description
-        { 1, "init", "initialize a new package", { { false, "-name", "package name (default: 'example')" }, { false, "-description", "package description (default: 'the example package')" }, { false, "-version", "package version (default: '71')" } } },
-        // mcc compile [-pkg <package file>] [-target <target directory>]
-        //  -> compile a package to a target directory
-        { 2, "compile", "compile a package into the target directory", { { false, "-pkg", "package file (default: 'info.json')" }, { false, "-target", "target directory (default: 'target')" } } },
-        // mcc package [-pkg <package file>] [-target <target directory>]
-        // [-destination <destination file name>]
-        //  -> package a package into a zip destination file
-        { 3, "package", "compress a package into a zip file, into the target directory", { { false, "-pkg", "package file (default: 'info.json')" }, { false, "-target", "taget directory (default: 'target')" }, { false, "-destination", "destination file name (default: '<package name>.zip')" } } }
-    });
+    mcc::Actions actions(
+        {
+            { 0, "help", "display help text and program description" },
+            // mcc init [-name <package name>] [-version <package version>] [-description <package description>]
+            //  -> initialize a new package with a given name, version and description
+            {
+                1,
+                "init",
+                "initialize a new package",
+                {
+                    { false, "-name", "package name (default: 'example')" },
+                    { false, "-description", "package description (default: 'the example package')" },
+                    { false, "-version", "package version (default: '71')" }
+                }
+            },
+            // mcc compile [-pkg <package file>] [-target <target directory>]
+            //  -> compile a package to a target directory
+            {
+                2,
+                "compile",
+                "compile a package into the target directory",
+                {
+                    { false, "-pkg", "package file (default: 'info.json')" },
+                    { false, "-target", "target directory (default: 'target')" }
+                }
+            },
+            // mcc package [-pkg <package file>] [-target <target directory>] [-destination <destination file name>]
+            //  -> package a package into a zip destination file
+            {
+                3,
+                "package",
+                "compress a package into a zip file, into the target directory",
+                {
+                    { false, "-pkg", "package file (default: 'info.json')" },
+                    { false, "-target", "taget directory (default: 'target')" },
+                    { false, "-destination", "destination file name (default: '<package name>.zip')" }
+                }
+            }
+        });
     actions(argc, argv);
 
     switch (actions.ActionID())
@@ -80,9 +104,9 @@ int main(const int argc, const char **argv)
         (void) actions.String(2, version);
 
         mcc::PackageInfo info{
-            .Name        = name,
+            .Name = name,
             .Description = description,
-            .Version     = std::stoul(version),
+            .Version = std::stoul(version),
         };
 
         info.Serialize(std::filesystem::path(name) / "info.json");

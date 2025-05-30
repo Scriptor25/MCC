@@ -2,7 +2,8 @@
 #include <mcc/statement.hpp>
 
 mcc::MultiStatement::MultiStatement(const SourceLocation &where, std::vector<StatementPtr> statements)
-    : Statement(where), Statements(std::move(statements))
+    : Statement(where),
+      Statements(std::move(statements))
 {
 }
 

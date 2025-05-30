@@ -5,8 +5,13 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::CallExpression::CallExpression(const SourceLocation &where, ExpressionPtr callee, std::vector<ExpressionPtr> arguments)
-    : Expression(where), Callee(std::move(callee)), Arguments(std::move(arguments))
+mcc::CallExpression::CallExpression(
+    const SourceLocation &where,
+    ExpressionPtr callee,
+    std::vector<ExpressionPtr> arguments)
+    : Expression(where),
+      Callee(std::move(callee)),
+      Arguments(std::move(arguments))
 {
 }
 
@@ -38,7 +43,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
 
     ResourceLocation callee;
     if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
-        callee = { default_namespace, symbol->Name };
+        callee            = { default_namespace, symbol->Name };
     else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))
     {
         callee = resource->Location;
@@ -53,12 +58,22 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
 
     auto argument_size  = arguments.size();
     auto parameter_size = function->Parameters.size();
-    Assert(argument_size == parameter_size, Where, "invalid number of arguments, got {}, require {}", argument_size, parameter_size);
+    Assert(
+        argument_size == parameter_size,
+        Where,
+        "invalid number of arguments, got {}, require {}",
+        argument_size,
+        parameter_size);
     for (unsigned i = 0; i < argument_size; ++i)
     {
         auto argument  = arguments[i]->Type;
         auto parameter = function->Parameters[i].Type;
-        Assert(argument == parameter, Where, "cannot assign value of type {} to argument of type {}", argument, parameter);
+        Assert(
+            argument == parameter,
+            Where,
+            "cannot assign value of type {} to argument of type {}",
+            argument,
+            parameter);
     }
 
     return builder.CreateCall(Where, function, arguments, frame.LandingPad);

@@ -93,7 +93,7 @@ void mcc::from_json(const nlohmann::json &json, ResourceLocation &location)
 void mcc::to_json(nlohmann::json &json, const Tag &tag)
 {
     json = {
-        {       "id", tag.Location },
+        { "id", tag.Location },
         { "required", tag.Required },
     };
 }
@@ -108,7 +108,7 @@ void mcc::to_json(nlohmann::json &json, const TagInfo &info)
 {
     json = {
         { "replace", info.Replace },
-        {  "values",  info.Values },
+        { "values", info.Values },
     };
 }
 
@@ -121,9 +121,9 @@ void mcc::from_json(const nlohmann::json &json, TagInfo &info)
 void mcc::to_json(nlohmann::json &json, const PackageInfo &info)
 {
     json = {
-        {        "name",        info.Name },
+        { "name", info.Name },
         { "description", info.Description },
-        {     "version",     info.Version },
+        { "version", info.Version },
     };
 }
 

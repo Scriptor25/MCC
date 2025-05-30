@@ -1,10 +1,11 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
-#include <utility>
 
 mcc::ResourceExpression::ResourceExpression(const SourceLocation &where, ResourceLocation location)
-    : Expression(where), Location(std::move(location))
+    : Expression(where),
+      Location(std::move(location))
 {
 }
 

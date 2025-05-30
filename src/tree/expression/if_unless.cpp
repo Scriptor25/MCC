@@ -3,8 +3,17 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::IfUnlessExpression::IfUnlessExpression(const SourceLocation &where, const bool unless, ExpressionPtr condition, ExpressionPtr then, ExpressionPtr else_)
-    : Expression(where), Unless(unless), Condition(std::move(condition)), Then(std::move(then)), Else(std::move(else_))
+mcc::IfUnlessExpression::IfUnlessExpression(
+    const SourceLocation &where,
+    const bool unless,
+    ExpressionPtr condition,
+    ExpressionPtr then,
+    ExpressionPtr else_)
+    : Expression(where),
+      Unless(unless),
+      Condition(std::move(condition)),
+      Then(std::move(then)),
+      Else(std::move(else_))
 {
 }
 
@@ -21,7 +30,11 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Fra
     const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
 
     const auto condition = Condition->GenerateValue(builder, frame);
-    (void) builder.CreateBranch(Where, condition, Unless ? else_target : then_target, Unless ? then_target : else_target);
+    (void) builder.CreateBranch(
+        Where,
+        condition,
+        Unless ? else_target : then_target,
+        Unless ? then_target : else_target);
 
     builder.SetInsertBlock(then_target);
     const auto then_value = Then->GenerateValue(builder, frame);
@@ -32,9 +45,9 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Fra
     else_target           = builder.GetInsertBlock();
 
     builder.SetInsertBlock(tail_target);
-    const auto type    = (then_value->Type == else_value->Type)
-                           ? then_value->Type
-                           : builder.GetContext().GetUnion({ then_value->Type, else_value->Type });
+    const auto type = (then_value->Type == else_value->Type)
+                          ? then_value->Type
+                          : builder.GetContext().GetUnion({ then_value->Type, else_value->Type });
     auto branch_result = builder.CreateBranchResult(Where, type);
 
     builder.SetInsertBlock(then_target);
