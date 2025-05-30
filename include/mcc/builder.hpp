@@ -110,7 +110,8 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateAppend(
             const SourceLocation &where,
             const ValuePtr &array,
-            const ValuePtr &value) const;
+            const ValuePtr &value,
+            bool force = false) const;
         [[nodiscard]] InstructionPtr CreatePrepend(
             const SourceLocation &where,
             const ValuePtr &array,
@@ -125,7 +126,8 @@ namespace mcc
             const SourceLocation &where,
             const ValuePtr &object,
             const ValuePtr &value,
-            const std::string &key) const;
+            const std::string &key,
+            bool force = false) const;
 
         ValuePtr CreateStoreResult(const SourceLocation &where, const TypePtr &type, const std::string &name);
 

@@ -1,6 +1,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::SubscriptExpression::SubscriptExpression(const SourceLocation &where, ExpressionPtr base, ExpressionPtr index)
@@ -20,11 +21,16 @@ mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder, const Fr
     const auto base = Base->GenerateValue(builder, frame);
     const auto index = Index->GenerateValue(builder, frame);
 
-    const auto constant_base = std::dynamic_pointer_cast<ConstantArray>(base);
-    const auto constant_index = std::dynamic_pointer_cast<ConstantNumber>(index);
+    Assert(
+        base->Type->IsArray() || base->Type->IsTuple(),
+        Where,
+        "base must be of type array or tuple, but is {}",
+        base->Type);
+    Assert(index->Type->IsNumber(), Where, "index must be of type number, but is {}", index->Type);
 
-    if (constant_base)
+    if (const auto constant_base = std::dynamic_pointer_cast<ConstantArray>(base))
     {
+        const auto constant_index = std::dynamic_pointer_cast<ConstantNumber>(index);
         Assert(!!constant_index, Where, "index must be a constant number");
         return constant_base->Values[constant_index->Value];
     }

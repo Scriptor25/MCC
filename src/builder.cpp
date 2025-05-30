@@ -347,11 +347,12 @@ mcc::ValuePtr mcc::Builder::Allocate(
 mcc::InstructionPtr mcc::Builder::CreateAppend(
     const SourceLocation &where,
     const ValuePtr &array,
-    const ValuePtr &value) const
+    const ValuePtr &value,
+    const bool force) const
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
-    Assert(array->IsMutable, where, "array must be mutable");
+    Assert(force || array->IsMutable, where, "array must be mutable");
 
     return Insert(
         where,
@@ -391,12 +392,13 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
     const SourceLocation &where,
     const ValuePtr &object,
     const ValuePtr &value,
-    const std::string &key) const
+    const std::string &key,
+    const bool force) const
 {
     Assert(!!object, where, "object must not be null");
     Assert(!!value, where, "value must not be null");
     Assert(!key.empty(), where, "key must not be empty");
-    Assert(object->IsMutable, where, "object must be mutable");
+    Assert(force || object->IsMutable, where, "object must be mutable");
 
     return Insert(
         where,

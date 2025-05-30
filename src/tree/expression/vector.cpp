@@ -3,6 +3,7 @@
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::VectorExpression::VectorExpression(
@@ -31,15 +32,20 @@ std::ostream &mcc::VectorExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    std::vector<ValuePtr> operands;
-    std::vector<std::shared_ptr<ConstantNumber>> constant_operands;
+    std::vector<ValuePtr> operand_values;
+    std::vector<std::shared_ptr<ConstantNumber>> operand_constants;
 
     for (auto &operand : Operands)
     {
-        auto value = operand->GenerateValue(builder, frame);
-        operands.emplace_back(value);
-        if (auto constant = std::dynamic_pointer_cast<ConstantNumber>(value))
-            constant_operands.emplace_back(constant);
+        auto operand_value = operand->GenerateValue(builder, frame);
+        Assert(
+            operand_value->Type->IsNumber(),
+            operand->Where,
+            "operand must be of type number, but is {}",
+            operand_value->Type);
+        operand_values.emplace_back(operand_value);
+        if (auto constant = std::dynamic_pointer_cast<ConstantNumber>(operand_value))
+            operand_constants.emplace_back(constant);
     }
 
     auto operator_ = Operator_None;
@@ -57,27 +63,27 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame
     if (!operator_)
         Error(Where, "undefined binary operator {}", Operator);
 
-    if (operands.size() == constant_operands.size())
+    if (operand_values.size() == operand_constants.size())
     {
-        auto value = constant_operands.front()->Value;
-        for (unsigned i = 1; i < constant_operands.size(); ++i)
+        auto value = operand_constants.front()->Value;
+        for (unsigned i = 1; i < operand_constants.size(); ++i)
         {
             switch (operator_)
             {
             case Operator_Add:
-                value += constant_operands[i]->Value;
+                value += operand_constants[i]->Value;
                 break;
             case Operator_Sub:
-                value -= constant_operands[i]->Value;
+                value -= operand_constants[i]->Value;
                 break;
             case Operator_Mul:
-                value *= constant_operands[i]->Value;
+                value *= operand_constants[i]->Value;
                 break;
             case Operator_Div:
-                value /= constant_operands[i]->Value;
+                value /= operand_constants[i]->Value;
                 break;
             case Operator_Rem:
-                value %= constant_operands[i]->Value;
+                value %= operand_constants[i]->Value;
                 break;
             default:
                 break;
@@ -86,5 +92,5 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame
         return ConstantNumber::Create(Where, builder.GetContext(), value);
     }
 
-    return builder.CreateOperation(Where, operator_, operands);
+    return builder.CreateOperation(Where, operator_, operand_values);
 }

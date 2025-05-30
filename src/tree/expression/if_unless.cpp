@@ -1,4 +1,6 @@
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
+#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
@@ -24,12 +26,21 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
+    const auto condition = Condition->GenerateValue(builder, frame);
+    Assert(condition->Type->IsBoolean(), Where, "condition must be of type boolean, but is {}", condition->Type);
+
+    if (const auto constant_condition = std::dynamic_pointer_cast<ConstantBoolean>(condition))
+    {
+        if (Unless != constant_condition->Value)
+            return Then->GenerateValue(builder, frame);
+        return Else->GenerateValue(builder, frame);
+    }
+
     const auto parent = builder.GetInsertBlock()->Parent;
     auto then_target = Block::Create(Then->Where, builder.GetContext(), parent);
     auto else_target = Block::Create(Else->Where, builder.GetContext(), parent);
     const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
 
-    const auto condition = Condition->GenerateValue(builder, frame);
     (void) builder.CreateBranch(
         Where,
         condition,
@@ -45,7 +56,7 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Fra
     else_target = builder.GetInsertBlock();
 
     builder.SetInsertBlock(tail_target);
-    const auto type = (then_value->Type == else_value->Type)
+    const auto type = then_value->Type == else_value->Type
                           ? then_value->Type
                           : builder.GetContext().GetUnion({ then_value->Type, else_value->Type });
     auto branch_result = builder.CreateBranchResult(Where, type);

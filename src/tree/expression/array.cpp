@@ -34,34 +34,29 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
 {
     std::vector<ValuePtr> values;
     std::vector<ConstantPtr> constants;
-
     std::set<TypePtr> elements;
 
     for (auto &element : Elements)
     {
         auto value = element->GenerateValue(builder, frame);
         values.emplace_back(value);
-
+        elements.insert(value->Type);
         if (auto constant = std::dynamic_pointer_cast<Constant>(value))
             constants.emplace_back(constant);
-
-        elements.insert(value->Type);
     }
 
     const auto type = Type
                           ? Type
                           : builder.GetContext().GetArray(
-                              (elements.size() == 1)
+                              elements.size() == 1
                                   ? *elements.begin()
                                   : builder.GetContext().GetUnion(elements));
 
     if (values.size() == constants.size())
         return ConstantArray::Create(Where, type, constants, false);
 
-    auto array = builder.Allocate(Where, type, true);
-
-    for (const auto &value : values)
-        (void) builder.CreateAppend(Where, array, value);
-
+    auto array = builder.Allocate(Where, type, false);
+    for (auto value : values)
+        (void) builder.CreateAppend(Where, array, value, true);
     return array;
 }

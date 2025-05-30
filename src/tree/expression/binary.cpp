@@ -4,6 +4,7 @@
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::BinaryExpression::BinaryExpression(
     const SourceLocation &where,
@@ -131,6 +132,9 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame
 
     if (Operator == "=")
         return builder.CreateStore(Where, left, right);
+
+    Assert(left->Type->IsNumber(), Left->Where, "left must be of type number, but is {}", left->Type);
+    Assert(right->Type->IsNumber(), Right->Where, "right must be of type number, but is {}", right->Type);
 
     auto comparator = Comparator_None;
     if (Operator == "<")

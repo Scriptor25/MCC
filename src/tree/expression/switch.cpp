@@ -44,48 +44,81 @@ std::ostream &mcc::SwitchExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    const auto start_target = builder.GetInsertBlock();
+    const auto condition = Condition->GenerateValue(builder, frame);
+    Assert(
+        condition->Type->IsNumber(),
+        condition->Where,
+        "condition must be of type number, but is {}",
+        condition->Type);
 
-    const auto parent = builder.GetInsertBlock()->Parent;
+    if (const auto constant_condition = std::dynamic_pointer_cast<ConstantNumber>(condition))
+    {
+        for (auto &[case_conditions_, case_] : Cases)
+            for (auto &case_condition : case_conditions_)
+            {
+                auto case_condition_value = case_condition->GenerateValue(builder, frame);
+                Assert(
+                    case_condition_value->Type->IsNumber(),
+                    case_condition->Where,
+                    "case condition must be of type number, but is {}",
+                    case_condition_value->Type);
+
+                auto constant_case_condition = std::dynamic_pointer_cast<ConstantNumber>(case_condition_value);
+                Assert(!!constant_case_condition, case_condition->Where, "case condition must be a constant number");
+
+                if (constant_case_condition->Value == constant_condition->Value)
+                    return case_->GenerateValue(builder, frame);
+            }
+        return Default->GenerateValue(builder, frame);
+    }
+
+    const auto pre_target = builder.GetInsertBlock();
+
+    const auto parent = pre_target->Parent;
     const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
     const auto default_target = Block::Create(Default->Where, builder.GetContext(), parent);
-
-    auto target_frame = frame;
-    target_frame.Tail = tail_target;
 
     std::set<TypePtr> elements;
     std::vector<std::pair<BlockPtr, ValuePtr>> case_values;
 
     builder.SetInsertBlock(default_target);
-    const auto default_value = Default->GenerateValue(builder, target_frame);
+    const auto default_value = Default->GenerateValue(builder, frame);
     elements.insert(default_value->Type);
     case_values.emplace_back(default_target, default_value);
 
     std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets;
-    for (auto &[cases_, value_] : Cases)
+    for (auto &[case_conditions_, case_] : Cases)
     {
-        auto case_target = Block::Create(value_->Where, builder.GetContext(), parent);
+        auto case_target = Block::Create(case_->Where, builder.GetContext(), parent);
 
-        for (auto &case_ : cases_)
+        for (auto &case_condition : case_conditions_)
         {
-            auto value = case_->GenerateValue(builder, frame);
-            auto constant = std::dynamic_pointer_cast<Constant>(value);
-            Assert(!!constant, case_->Where, "case entry must be constant");
-            case_targets.emplace_back(constant, case_target);
+            auto case_condition_value = case_condition->GenerateValue(builder, frame);
+            Assert(
+                case_condition_value->Type->IsNumber(),
+                case_condition->Where,
+                "case condition must be of type number, but is {}",
+                case_condition_value->Type);
+
+            auto constant_case_condition = std::dynamic_pointer_cast<ConstantNumber>(case_condition_value);
+            Assert(!!constant_case_condition, case_condition->Where, "case condition must be a constant number");
+
+            case_targets.emplace_back(constant_case_condition, case_target);
         }
 
         builder.SetInsertBlock(case_target);
-        const auto case_value = value_->GenerateValue(builder, target_frame);
+        const auto case_value = case_->GenerateValue(builder, frame);
         elements.insert(case_value->Type);
         case_values.emplace_back(case_target, case_value);
     }
 
-    builder.SetInsertBlock(start_target);
-    const auto condition = Condition->GenerateValue(builder, frame);
+    builder.SetInsertBlock(pre_target);
     (void) builder.CreateSwitch(Where, condition, default_target, case_targets);
 
     builder.SetInsertBlock(tail_target);
-    const auto type = (elements.size() == 1) ? *elements.begin() : builder.GetContext().GetUnion(elements);
+    const auto type = elements.size() == 1
+                          ? *elements.begin()
+                          : builder.GetContext().GetUnion(elements);
     const auto branch_result = builder.CreateBranchResult(Where, type);
 
     for (auto &[target_, value_] : case_values)

@@ -3,6 +3,7 @@
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::UnaryExpression::UnaryExpression(const SourceLocation &where, const std::string &operator_, ExpressionPtr operand)
@@ -57,14 +58,14 @@ mcc::ValuePtr mcc::UnaryExpression::GenerateValue(Builder &builder, const Frame 
         { "-", { false, neg } },
     };
 
+    const auto operand = Operand->GenerateValue(builder, frame);
+    Assert(operand->Type->IsNumber(), operand->Where, "operand must be of type number, but is {}", operand->Type);
+
     Assert(operators.contains(Operator), Where, "undefined unary operator {}", Operator);
     const auto &[store_, operation_] = operators.at(Operator);
 
-    const auto operand = Operand->GenerateValue(builder, frame);
-    const auto value = operation_(Where, builder, operand);
-
+    const auto result = operation_(Where, builder, operand);
     if (store_)
-        return builder.CreateStore(Where, operand, value);
-
-    return value;
+        return builder.CreateStore(Where, operand, result);
+    return result;
 }
