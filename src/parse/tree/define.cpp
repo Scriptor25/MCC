@@ -9,7 +9,7 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
     auto location = ParseResourceLocation();
 
     ParameterList parameters;
-    std::vector<ResourceLocation> tags;
+    std::vector<ResourceTag> tags;
     std::vector<ExpressionPtr> expressions;
 
     Expect(TokenType_Other, "(");

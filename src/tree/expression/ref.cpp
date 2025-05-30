@@ -38,7 +38,7 @@ std::ostream &mcc::RefExpression::Print(std::ostream &stream) const
         TargetName->Print(stream << "entity, ");
         break;
     case ReferenceType_Storage:
-        TargetLocation.Print(stream << "storage, ");
+        stream << "storage, " << TargetLocation;
         break;
     }
     return stream << ", \"" << Path << "\")";

@@ -116,7 +116,7 @@ void mcc::Function::GenerateFunction(Package &package) const
     {
         auto [namespace_, path_] = Location;
         if (i)
-            path_ += '/' + std::to_string(i);
+            path_.emplace_back(std::to_string(i));
 
         CommandVector commands(package.Functions[namespace_][path_]);
 
@@ -155,7 +155,7 @@ mcc::ResourceLocation mcc::Function::GetLocation(const BlockPtr &target_block) c
 {
     for (unsigned i = 0; i < Blocks.size(); ++i)
         if (Blocks[i] == target_block)
-            return { Location.Namespace, Location.Path + '/' + std::to_string(i) };
+            return Location.Child(std::to_string(i));
 
     Error(Where, "cannot get location for non-child block");
 }

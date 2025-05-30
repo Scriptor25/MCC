@@ -41,16 +41,14 @@ namespace mcc
         void Write(const std::filesystem::path &path) const;
 
         const PackageInfo &Info;
-        std::map<std::string, std::map<std::string, FunctionInfo>> Functions;
-        std::map<std::string, std::map<std::string, TagInfo>> Tags;
+        std::map<std::string, std::map<std::vector<std::string>, FunctionInfo>> Functions;
+        std::map<std::string, std::map<std::vector<std::string>, TagInfo>> Tags;
     };
 
     void to_json(nlohmann::json &json, const ResourceLocation &location);
-    void from_json(const nlohmann::json &json, ResourceLocation &location);
     void to_json(nlohmann::json &json, const Tag &tag);
-    void from_json(const nlohmann::json &json, Tag &tag);
     void to_json(nlohmann::json &json, const TagInfo &info);
-    void from_json(const nlohmann::json &json, TagInfo &info);
+
     void to_json(nlohmann::json &json, const PackageInfo &info);
     void from_json(const nlohmann::json &json, PackageInfo &info);
 }

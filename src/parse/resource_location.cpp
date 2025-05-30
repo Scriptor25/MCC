@@ -1,24 +1,24 @@
 #include <mcc/parse.hpp>
 
-mcc::ResourceLocation mcc::Parser::ParseResourceLocation(const std::string &default_namespace)
+mcc::ResourceLocation mcc::Parser::ParseResourceLocation(const bool simple_path)
 {
-    const auto use_default = !SkipIf(TokenType_Other, ":");
-    auto namespace_ = use_default ? default_namespace : "";
+    std::string namespace_;
+    std::vector<std::string> path;
 
-    auto path = Expect(TokenType_Symbol).Value;
-    while (SkipIf(TokenType_Operator, "/"))
-        path += '/' + Expect(TokenType_Symbol).Value;
+    const auto use_default = !SkipIf(TokenType_Other, ":");
+
+    do
+        path.emplace_back(Expect(TokenType_Symbol).Value);
+    while (!simple_path && SkipIf(TokenType_Operator, "/"));
 
     if (use_default && SkipIf(TokenType_Other, ":"))
     {
-        namespace_ = path;
+        namespace_ = path.front();
 
-        path = Expect(TokenType_Symbol).Value;
-        while (SkipIf(TokenType_Operator, "/"))
-        {
-            path += '/';
-            path += Expect(TokenType_Symbol).Value;
-        }
+        path.clear();
+        do
+            path.emplace_back(Expect(TokenType_Symbol).Value);
+        while (!simple_path && SkipIf(TokenType_Operator, "/"));
     }
 
     return { namespace_, path };

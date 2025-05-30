@@ -1,7 +1,13 @@
+include "std.mcc"
+
 namespace example
 
+global gold_counter => number
+
 define gold() {
-    ?`give @s minecraft:gold_ingot 1`
     ?`execute anchored eyes run setblock ^ ^ ^2 minecraft:gold_block`
-    ?`tellraw @s GOLD`
+    std:give("@s", "minecraft:gold_ingot", 1)
+    std:print("@s", "GOLD")
+
+    ++gold_counter
 }

@@ -7,12 +7,10 @@ mcc::ExpressionPtr mcc::Parser::ParseSymbolExpression()
     if (!SkipIf(TokenType_Other, ":"))
         return std::make_unique<SymbolExpression>(token.Where, token.Value);
 
-    auto path = Expect(TokenType_Symbol).Value;
-    while (SkipIf(TokenType_Operator, "/"))
-    {
-        path += '/';
-        path += Expect(TokenType_Symbol).Value;
-    }
+    std::vector<std::string> path;
+    do
+        path.emplace_back(Expect(TokenType_Symbol).Value);
+    while (SkipIf(TokenType_Operator, "/"));
 
     return std::make_unique<ResourceExpression>(token.Where, ResourceLocation(token.Value, path));
 }

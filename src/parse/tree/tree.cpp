@@ -9,6 +9,8 @@ mcc::TreeNodePtr mcc::Parser::ParseTreeNode()
 
     if (At(TokenType_Symbol, "define"))
         return ParseDefineNode();
+    if (At(TokenType_Symbol, "global"))
+        return ParseGlobalNode();
     if (At(TokenType_Symbol, "include"))
         return ParseIncludeNode();
     if (At(TokenType_Symbol, "namespace"))

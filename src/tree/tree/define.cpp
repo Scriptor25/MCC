@@ -14,7 +14,7 @@ mcc::DefineNode::DefineNode(
     ParameterList parameters,
     TypePtr result,
     const bool throws,
-    const std::vector<ResourceLocation> &tags,
+    const std::vector<ResourceTag> &tags,
     StatementPtr body)
     : TreeNode(where),
       Location(std::move(location)),
@@ -28,7 +28,7 @@ mcc::DefineNode::DefineNode(
 
 std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
 {
-    Location.Print(stream << "define ") << '(';
+    stream << "define " << Location << '(';
     for (unsigned i = 0; i < Parameters.size(); ++i)
     {
         if (i > 0)
@@ -45,7 +45,7 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
     {
         if (i > 0)
             stream << ", ";
-        Tags[i].Print(stream << '#');
+        stream << Tags[i];
     }
     if (!Tags.empty())
         stream << ' ';

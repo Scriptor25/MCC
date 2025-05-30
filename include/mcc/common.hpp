@@ -1,7 +1,9 @@
 #pragma once
 
+#include <filesystem>
 #include <format>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <mcc/enums.hpp>
@@ -9,20 +11,20 @@
 namespace mcc
 {
     using IntegerT = long long;
-    using FloatT   = long double;
-    using IndexT   = unsigned long long;
+    using FloatT = long double;
+    using IndexT = unsigned long long;
     using CommandT = std::string;
 
-    using TreeNodePtr   = std::unique_ptr<struct TreeNode>;
-    using StatementPtr  = std::unique_ptr<struct Statement>;
+    using TreeNodePtr = std::unique_ptr<struct TreeNode>;
+    using StatementPtr = std::unique_ptr<struct Statement>;
     using ExpressionPtr = std::unique_ptr<struct Expression>;
     using FormatNodePtr = std::unique_ptr<struct FormatNode>;
 
-    using ValuePtr       = std::shared_ptr<struct Value>;
-    using ConstantPtr    = std::shared_ptr<struct Constant>;
+    using ValuePtr = std::shared_ptr<struct Value>;
+    using ConstantPtr = std::shared_ptr<struct Constant>;
     using InstructionPtr = std::shared_ptr<struct Instruction>;
-    using BlockPtr       = std::shared_ptr<struct Block>;
-    using FunctionPtr    = std::shared_ptr<struct Function>;
+    using BlockPtr = std::shared_ptr<struct Block>;
+    using FunctionPtr = std::shared_ptr<struct Function>;
 
     using TypePtr = std::shared_ptr<struct Type>;
 
@@ -81,14 +83,81 @@ namespace mcc
     template<bool TAG>
     struct Resource
     {
+        Resource() = default;
+
+        Resource(const std::vector<std::string> &path)
+            : Path(path)
+        {
+        }
+
+        Resource(const std::string &namespace_, const std::vector<std::string> &path)
+            : Namespace(namespace_),
+              Path(path)
+        {
+        }
+
+        Resource(const Resource &other)
+            : Namespace(other.Namespace),
+              Path(other.Path)
+        {
+        }
+
+        Resource &operator=(const Resource &other)
+        {
+            Namespace = other.Namespace;
+            Path = other.Path;
+            return *this;
+        }
+
+        Resource(Resource &&other) noexcept
+            : Namespace(std::move(other.Namespace)),
+              Path(std::move(other.Path))
+        {
+        }
+
+        Resource &operator=(Resource &&other) noexcept
+        {
+            Namespace = std::move(other.Namespace);
+            Path = std::move(other.Path);
+            return *this;
+        }
+
+        Resource(const Resource<!TAG> &other)
+            : Namespace(other.Namespace),
+              Path(other.Path)
+        {
+        }
+
+        Resource(Resource<!TAG> &&other)
+            : Namespace(std::move(other.Namespace)),
+              Path(std::move(other.Path))
+        {
+        }
+
+        Resource &operator=(Resource<!TAG> &&other)
+        {
+            Namespace = std::move(other.Namespace);
+            Path = std::move(other.Path);
+            return *this;
+        }
+
         std::ostream &Print(std::ostream &stream) const
         {
-            return stream << (TAG ? "#" : "") << Namespace << ':' << Path;
+            stream << (TAG ? "#" : "") << Namespace << ':';
+            for (unsigned i = 0; i < Path.size(); ++i)
+            {
+                if (i)
+                    stream << '/';
+                stream << Path[i];
+            }
+            return stream;
         }
 
         [[nodiscard]] std::string String() const
         {
-            return (TAG ? "#" : "") + Namespace + ':' + Path;
+            std::stringstream stream;
+            Print(stream);
+            return stream.str();
         }
 
         bool operator==(const Resource &other) const
@@ -96,12 +165,19 @@ namespace mcc
             return Namespace == other.Namespace && Path == other.Path;
         }
 
+        [[nodiscard]] Resource Child(const std::string &path_segment) const
+        {
+            auto path = Path;
+            path.emplace_back(path_segment);
+            return { Namespace, path };
+        }
+
         std::string Namespace;
-        std::string Path;
+        std::vector<std::string> Path;
     };
 
     using ResourceLocation = Resource<false>;
-    using ResourceTag      = Resource<true>;
+    using ResourceTag = Resource<true>;
 
     struct Result
     {
@@ -124,7 +200,21 @@ namespace mcc
         std::string Name;
     };
 
+    template<bool TAG>
+    std::ostream &operator<<(std::ostream &stream, const Resource<TAG> &resource)
+    {
+        return resource.Print(stream);
+    }
+
     std::ostream &operator<<(std::ostream &stream, const TypePtr &type);
+
+    template<typename T>
+    std::filesystem::path operator/(std::filesystem::path first, const std::vector<T> &second)
+    {
+        for (const auto &segment : second)
+            first /= segment;
+        return first;
+    }
 }
 
 namespace std

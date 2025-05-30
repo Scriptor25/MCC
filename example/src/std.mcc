@@ -56,3 +56,7 @@ define summon(pos: position, type: string) {
     }
     summon_direct(x, y, z, type)
 }
+
+define give(target: string, type: string, amount: number) {
+    ?`$give $(target) $(type) $(amount)`
+}

@@ -43,7 +43,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
 
     ResourceLocation callee;
     if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
-        callee = { default_namespace, symbol->Name };
+        callee = ResourceLocation(default_namespace, { symbol->Name });
     else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))
     {
         callee = resource->Location;

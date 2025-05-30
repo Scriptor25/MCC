@@ -11,11 +11,14 @@ mcc::ResourceExpression::ResourceExpression(const SourceLocation &where, Resourc
 
 std::ostream &mcc::ResourceExpression::Print(std::ostream &stream) const
 {
-    return Location.Print(stream);
+    return stream << Location;
 }
 
 mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
+    if (builder.HasGlobal(Location))
+        return builder.GetGlobal(Where, Location);
+
     if (builder.HasFunction(Location))
         return builder.GetFunction(Where, Location);
 

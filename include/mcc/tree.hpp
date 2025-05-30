@@ -27,7 +27,7 @@ namespace mcc
             ParameterList parameters,
             TypePtr result,
             bool throws,
-            const std::vector<ResourceLocation> &tags,
+            const std::vector<ResourceTag> &tags,
             StatementPtr body);
 
         std::ostream &Print(std::ostream &stream) const override;
@@ -38,8 +38,20 @@ namespace mcc
         ParameterList Parameters;
         TypePtr Result;
         bool Throws;
-        std::vector<ResourceLocation> Tags;
+        std::vector<ResourceTag> Tags;
         StatementPtr Body;
+    };
+
+    struct GlobalNode final : TreeNode
+    {
+        GlobalNode(const SourceLocation &where, const ResourceLocation &location, const TypePtr &type);
+
+        std::ostream &Print(std::ostream &stream) const override;
+        void Generate(Builder &builder) const override;
+        void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const override;
+
+        ResourceLocation Location;
+        TypePtr Type;
     };
 
     struct IncludeNode final : TreeNode

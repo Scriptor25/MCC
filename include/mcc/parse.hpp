@@ -55,7 +55,7 @@ namespace mcc
             return ExpectAny({ args... });
         }
 
-        ResourceLocation ParseResourceLocation(const std::string &default_namespace = {});
+        ResourceLocation ParseResourceLocation(bool simple_path = false);
 
         TypePtr ParseType();
         TypePtr ParseBaseType();
@@ -64,6 +64,7 @@ namespace mcc
 
         TreeNodePtr ParseTreeNode();
         TreeNodePtr ParseDefineNode();
+        TreeNodePtr ParseGlobalNode();
         TreeNodePtr ParseIncludeNode();
         TreeNodePtr ParseNamespaceNode();
         TreeNodePtr ParseTypeNode();

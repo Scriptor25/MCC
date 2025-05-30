@@ -26,6 +26,13 @@ namespace mcc
             bool throws);
         [[nodiscard]] FunctionPtr GetFunction(const SourceLocation &where, ResourceLocation location) const;
 
+        [[nodiscard]] bool HasGlobal(ResourceLocation location) const;
+        ValuePtr CreateGlobal(
+            const SourceLocation &where,
+            ResourceLocation location,
+            const TypePtr &type);
+        [[nodiscard]] ValuePtr GetGlobal(const SourceLocation &where, ResourceLocation location) const;
+
         void SetInsertBlock(const BlockPtr &block);
         [[nodiscard]] BlockPtr GetInsertBlock() const;
 
@@ -143,7 +150,8 @@ namespace mcc
         Package &m_Package;
 
         std::string m_Namespace;
-        std::map<std::string, std::map<std::string, FunctionPtr>> m_Functions;
+        std::map<std::string, std::map<std::vector<std::string>, FunctionPtr>> m_Functions;
+        std::map<std::string, std::map<std::vector<std::string>, ValuePtr>> m_Globals;
 
         BlockPtr m_InsertBlock;
         std::vector<std::map<std::string, ValuePtr>> m_Variables;

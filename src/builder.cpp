@@ -66,6 +66,40 @@ mcc::FunctionPtr mcc::Builder::GetFunction(const SourceLocation &where, Resource
     return m_Functions.at(location.Namespace).at(location.Path);
 }
 
+bool mcc::Builder::HasGlobal(ResourceLocation location) const
+{
+    if (location.Namespace.empty())
+        location.Namespace = m_Namespace;
+
+    return m_Globals.contains(location.Namespace) && m_Globals.at(location.Namespace).contains(location.Path);
+}
+
+mcc::ValuePtr mcc::Builder::CreateGlobal(const SourceLocation &where, ResourceLocation location, const TypePtr &type)
+{
+    if (location.Namespace.empty())
+        location.Namespace = m_Namespace;
+
+    auto &global = m_Globals[location.Namespace][location.Path];
+    Assert(!global, where, "already defined global {}", location);
+    return global = GenericStorageReference::Create(
+               where,
+               type,
+               { location.Namespace, { "__storage__" } },
+               location.Path.front(),
+               true);
+}
+
+mcc::ValuePtr mcc::Builder::GetGlobal(const SourceLocation &where, ResourceLocation location) const
+{
+    if (location.Namespace.empty())
+        location.Namespace = m_Namespace;
+
+    Assert(m_Globals.contains(location.Namespace), where, "undefined namespace {}", location.Namespace);
+    Assert(m_Globals.at(location.Namespace).contains(location.Path), where, "undefined global {}", location);
+
+    return m_Globals.at(location.Namespace).at(location.Path);
+}
+
 void mcc::Builder::SetInsertBlock(const BlockPtr &block)
 {
     m_InsertBlock = block;
@@ -129,8 +163,13 @@ mcc::ValuePtr mcc::Builder::GetVariable(const SourceLocation &where, const std::
         if (variables.contains(name))
             return variables.at(name);
 
-    if (HasFunction({ .Path = name }))
-        return GetFunction(where, { .Path = name });
+    const ResourceLocation location{ { name } };
+
+    if (HasGlobal(location))
+        return GetGlobal(where, location);
+
+    if (HasFunction(location))
+        return GetFunction(where, location);
 
     Error(where, "undefined variable {}", name);
 }

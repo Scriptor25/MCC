@@ -19,7 +19,11 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     for (auto &[namespace_, functions_] : Functions)
         for (auto &[path_, function_] : functions_)
         {
-            const auto file = data / namespace_ / "function" / (path_ + ".mcfunction");
+            const auto file = data
+                              / namespace_
+                              / "function"
+                              / std::vector(path_.begin(), path_.end() - 1)
+                              / (path_.back() + ".mcfunction");
             const auto directory = file.parent_path();
             create_directories(directory);
 
@@ -35,7 +39,12 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     for (auto &[namespace_, tags_] : Tags)
         for (auto &[path_, tag_] : tags_)
         {
-            const auto file = data / namespace_ / "tags" / "function" / (path_ + ".json");
+            const auto file = data
+                              / namespace_
+                              / "tags"
+                              / "function"
+                              / std::vector(path_.begin(), path_.end() - 1)
+                              / (path_.back() + ".json");
             const auto directory = file.parent_path();
             create_directories(directory);
 
@@ -82,14 +91,6 @@ void mcc::to_json(nlohmann::json &json, const ResourceLocation &location)
     json = location.String();
 }
 
-void mcc::from_json(const nlohmann::json &json, ResourceLocation &location)
-{
-    const auto value = std::string(json);
-    const auto split = value.find(':');
-    location.Namespace = value.substr(0, split);
-    location.Path = value.substr(split + 1);
-}
-
 void mcc::to_json(nlohmann::json &json, const Tag &tag)
 {
     json = {
@@ -98,24 +99,12 @@ void mcc::to_json(nlohmann::json &json, const Tag &tag)
     };
 }
 
-void mcc::from_json(const nlohmann::json &json, Tag &tag)
-{
-    json.at("id").get_to(tag.Location);
-    json.at("required").get_to(tag.Required);
-}
-
 void mcc::to_json(nlohmann::json &json, const TagInfo &info)
 {
     json = {
         { "replace", info.Replace },
         { "values", info.Values },
     };
-}
-
-void mcc::from_json(const nlohmann::json &json, TagInfo &info)
-{
-    json.at("replace").get_to(info.Replace);
-    json.at("values").get_to(info.Values);
 }
 
 void mcc::to_json(nlohmann::json &json, const PackageInfo &info)
