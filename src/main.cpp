@@ -95,9 +95,9 @@ int main(const int argc, const char **argv)
     {
     case 1: // init
     {
-        std::string name        = "package";
+        std::string name = "package";
         std::string description = "the package description";
-        std::string version     = "71";
+        std::string version = "71";
 
         (void) actions.String(0, name);
         (void) actions.String(1, description);
@@ -118,7 +118,7 @@ int main(const int argc, const char **argv)
 
     case 2: // compile
     {
-        std::string pkg    = "info.json";
+        std::string pkg = "info.json";
         std::string target = "target";
 
         (void) actions.String(0, pkg);

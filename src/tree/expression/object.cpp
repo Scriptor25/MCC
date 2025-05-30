@@ -36,10 +36,10 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame
     for (auto &[key_, value_] : Elements)
     {
         const auto value = value_->GenerateValue(builder, frame);
-        values[key_]     = value;
+        values[key_] = value;
 
         if (const auto constant = std::dynamic_pointer_cast<Constant>(value))
-            constants[key_]     = constant;
+            constants[key_] = constant;
 
         elements[key_] = value->Type;
     }
@@ -49,7 +49,7 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame
     if (values.size() == constants.size())
         return ConstantObject::Create(Where, type, constants);
 
-    auto object = builder.CreateAllocation(Where, type, false, nullptr);
+    auto object = builder.Allocate(Where, type, true);
 
     for (auto &[key_, value_] : values)
         (void) builder.CreateInsert(Where, object, value_, key_);

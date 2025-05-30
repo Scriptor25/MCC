@@ -3,26 +3,26 @@ include "std.mcc"
 namespace example
 
 define test_assert() throws {
-    const a = 2
-    const b = 2
-    const c = a + b
+    constexpr a = 2
+    constexpr b = 2
+    constexpr c = a + b
     std:assert(c == 3, "c must be equal to 3")
 }
 
 define test_try_catch() {
     try {
-        const a = 1
-        const b = 2
-        const c = a + b
+        constexpr a = 1
+        constexpr b = 2
+        constexpr c = a + b
         std:assert(c == 3, "c must be equal to 3")
     } catch (e: string) {
         !print("@s", `catched error: ${e}`)
     }
 
     try {
-        const a = 1
-        const b = 2
-        const c = a + b
+        constexpr a = 1
+        constexpr b = 2
+        constexpr c = a + b
         std:assert(c == 4, "c must be equal to 4")
     } catch (e: string) {
         !print("@s", `catched error: ${e}`)

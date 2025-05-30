@@ -33,7 +33,7 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
     {
         if (i > 0)
             stream << ", ";
-        stream << Parameters.at(i).Name << ": " << Parameters.at(i).Type;
+        stream << Parameters[i].Name << ": " << Parameters[i].Type;
     }
     stream << ')';
     if (Result)
@@ -45,7 +45,7 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
     {
         if (i > 0)
             stream << ", ";
-        Tags.at(i).Print(stream << '#');
+        Tags[i].Print(stream << '#');
     }
     if (!Tags.empty())
         stream << ' ';
@@ -70,7 +70,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
             "cannot implement function with different parameter count");
         for (unsigned i = 0; i < Parameters.size(); ++i)
             Assert(
-                function->Parameters.at(i).Type == Parameters.at(i).Type,
+                function->Parameters[i].Type == Parameters[i].Type,
                 Where,
                 "cannot implement function with different parameter type for offset {}",
                 i);
@@ -138,7 +138,7 @@ void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem
         "cannot implement function with different parameter count");
     for (unsigned i = 0; i < Parameters.size(); ++i)
         Assert(
-            function->Parameters.at(i).Type == Parameters.at(i).Type,
+            function->Parameters[i].Type == Parameters[i].Type,
             Where,
             "cannot implement function with different parameter type for offset {}",
             i);

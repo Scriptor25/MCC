@@ -36,7 +36,7 @@ namespace mcc
             const SourceLocation &where,
             const TypePtr &type,
             const std::string &name,
-            bool is_constant,
+            bool is_mutable,
             const ValuePtr &initializer);
         ValuePtr InsertVariable(const SourceLocation &where, const std::string &name, const ValuePtr &value);
         [[nodiscard]] ValuePtr GetVariable(const SourceLocation &where, const std::string &name) const;
@@ -102,11 +102,10 @@ namespace mcc
             const std::string &name,
             const std::vector<ValuePtr> &arguments) const;
 
-        [[nodiscard]] InstructionPtr CreateAllocation(
+        [[nodiscard]] ValuePtr Allocate(
             const SourceLocation &where,
             const TypePtr &type,
-            bool is_constant,
-            const ConstantPtr &initializer) const;
+            bool is_mutable) const;
 
         [[nodiscard]] InstructionPtr CreateAppend(
             const SourceLocation &where,

@@ -7,7 +7,7 @@ mcc::StatementPtr mcc::Parser::ParseForEachStatement()
     auto where = Expect(TokenType_Symbol, "foreach").Where;
     Expect(TokenType_Other, "(");
     auto constant = SkipIf(TokenType_Symbol, "const") || (Expect(TokenType_Symbol, "let"), false);
-    auto name     = Expect(TokenType_Symbol).Value;
+    auto name = Expect(TokenType_Symbol).Value;
     Expect(TokenType_Other, ":");
     auto iterable = ParseExpression();
     Expect(TokenType_Other, ")");

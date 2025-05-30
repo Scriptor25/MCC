@@ -71,16 +71,16 @@ namespace mcc
 
     struct ElementReference final : Value
     {
-        static ValuePtr Create(const SourceLocation &where, const ValuePtr &base, IndexT index);
+        static ValuePtr Create(const SourceLocation &where, const ValuePtr &base, const ValuePtr &index);
 
-        ElementReference(const SourceLocation &where, const TypePtr &type, const ValuePtr &base, IndexT index);
+        ElementReference(const SourceLocation &where, const TypePtr &type, const ValuePtr &base, const ValuePtr &index);
         ~ElementReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
         ValuePtr Base;
-        IndexT Index;
+        ValuePtr Index;
     };
 
     struct Function final : Value
@@ -187,13 +187,15 @@ namespace mcc
             const SourceLocation &where,
             const TypePtr &type,
             const ResourceLocation &location,
-            const std::string &path);
+            const std::string &path,
+            bool is_mutable);
 
         GenericStorageReference(
             const SourceLocation &where,
             const TypePtr &type,
             ResourceLocation location,
-            std::string path);
+            std::string path,
+            bool is_mutable);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;

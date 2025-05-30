@@ -36,7 +36,7 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
     {
         const auto pre = get_pre();
         auto operator_ = Skip();
-        auto right     = ParseOperandExpression();
+        auto right = ParseOperandExpression();
         while (At(TokenType_Operator) && has_pre() && (get_pre() > pre || (!get_pre() && !pre)))
             right = ParseBinaryExpression(std::move(right), pre + (get_pre() > pre ? 1 : 0));
         left = std::make_unique<BinaryExpression>(operator_.Where, operator_.Value, std::move(left), std::move(right));
@@ -44,7 +44,7 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
 
     if (const auto binary = dynamic_cast<BinaryExpression *>(left.get()))
         if (auto merged = binary->Merge())
-            left        = std::move(merged);
+            left = std::move(merged);
 
     return left;
 }

@@ -5,7 +5,7 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
 {
-    auto where  = m_Token.Where;
+    auto where = m_Token.Where;
     auto format = Expect(TokenType_FormatString).Value;
 
     std::vector<FormatNodePtr> nodes;
@@ -42,7 +42,7 @@ mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
         nodes.emplace_back(std::make_unique<ExpressionNode>(node_where, std::move(expression)));
 
         auto count = parser.Count();
-        format     = format.substr(count);
+        format = format.substr(count);
         offset += count;
     }
 

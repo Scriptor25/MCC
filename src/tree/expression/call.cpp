@@ -43,7 +43,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
 
     ResourceLocation callee;
     if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
-        callee            = { default_namespace, symbol->Name };
+        callee = { default_namespace, symbol->Name };
     else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))
     {
         callee = resource->Location;
@@ -56,7 +56,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
     Assert(builder.HasFunction(callee), Where, "undefined function {}", callee);
     const auto function = builder.GetFunction(Where, callee);
 
-    auto argument_size  = arguments.size();
+    auto argument_size = arguments.size();
     auto parameter_size = function->Parameters.size();
     Assert(
         argument_size == parameter_size,
@@ -66,7 +66,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
         parameter_size);
     for (unsigned i = 0; i < argument_size; ++i)
     {
-        auto argument  = arguments[i]->Type;
+        auto argument = arguments[i]->Type;
         auto parameter = function->Parameters[i].Type;
         Assert(
             argument == parameter,

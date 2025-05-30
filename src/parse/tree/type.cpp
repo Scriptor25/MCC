@@ -4,7 +4,7 @@
 
 mcc::TreeNodePtr mcc::Parser::ParseTypeNode()
 {
-    auto where      = Expect(TokenType_Symbol, "type").Where;
+    auto where = Expect(TokenType_Symbol, "type").Where;
     const auto name = Expect(TokenType_Symbol).Value;
     Expect(TokenType_Operator, "=");
     const auto type = ParseType();

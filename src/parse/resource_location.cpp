@@ -3,7 +3,7 @@
 mcc::ResourceLocation mcc::Parser::ParseResourceLocation(const std::string &default_namespace)
 {
     const auto use_default = !SkipIf(TokenType_Other, ":");
-    auto namespace_        = use_default ? default_namespace : "";
+    auto namespace_ = use_default ? default_namespace : "";
 
     auto path = Expect(TokenType_Symbol).Value;
     while (SkipIf(TokenType_Operator, "/"))

@@ -45,69 +45,63 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
     ThenTarget->Parent->ForwardArguments(prefix, arguments);
 
     auto stack_path = GetStackPath();
-    auto tmp_name   = GetTmpName();
+    auto temp = GetTemp();
 
-    auto then  = ThenTarget->Parent->GetLocation(ThenTarget);
-    auto else_ = ElseTarget->Parent->GetLocation(ElseTarget);
+    auto then_target = ThenTarget->Parent->GetLocation(ThenTarget);
+    auto else_target = ElseTarget->Parent->GetLocation(ElseTarget);
 
-    auto condition = Condition->GenerateResult();
-
-    std::string condition_prefix;
-    if (condition.WithArgument)
-        condition_prefix = "$";
-
-    switch (condition.Type)
+    switch (auto condition = Condition->GenerateResult(); condition.Type)
     {
     case ResultType_Value:
-        commands.Append("{}return run function {}{}", prefix, condition.NotNull ? then : else_, arguments);
+        commands.Append("{}return run function {}{}", prefix, condition.NotNull ? then_target : else_target, arguments);
         break;
 
     case ResultType_Reference:
-        commands.Append(CreateTmpScore());
+        commands.Append(CreateScore());
         commands.Append(
             "{}execute store result score %c {} run data get {} {} {}",
-            condition_prefix,
-            tmp_name,
+            condition.WithArgument ? "$" : "",
+            temp,
             condition.ReferenceType,
             condition.Target,
             condition.Path);
         commands.Append("data remove storage {} {}", Location, stack_path);
         commands.Append(
             "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
-            tmp_name,
+            temp,
             Location,
             stack_path);
-        commands.Append(RemoveTmpScore());
+        commands.Append(RemoveScore());
 
         commands.Append(
             "{}execute if data storage {} {} run return run function {}{}",
             prefix,
             Location,
             stack_path,
-            then,
+            then_target,
             arguments);
-        commands.Append("{}return run function {}{}", prefix, else_, arguments);
+        commands.Append("{}return run function {}{}", prefix, else_target, arguments);
         break;
 
     case ResultType_Argument:
-        commands.Append(CreateTmpScore());
-        commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);
+        commands.Append(CreateScore());
+        commands.Append("$scoreboard players set %c {} {}", temp, condition.Name);
         commands.Append("data remove storage {} {}", Location, stack_path);
         commands.Append(
             "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
-            tmp_name,
+            temp,
             Location,
             stack_path);
-        commands.Append(RemoveTmpScore());
+        commands.Append(RemoveScore());
 
         commands.Append(
             "{}execute if data storage {} {} run return run function {}{}",
             prefix,
             Location,
             stack_path,
-            then,
+            then_target,
             arguments);
-        commands.Append("{}return run function {}{}", prefix, else_, arguments);
+        commands.Append("{}return run function {}{}", prefix, else_target, arguments);
         break;
 
     default:

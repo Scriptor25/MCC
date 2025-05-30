@@ -31,13 +31,13 @@ std::ostream &mcc::TryCatchStatement::Print(std::ostream &stream) const
 
 void mcc::TryCatchStatement::Generate(Builder &builder, Frame &frame) const
 {
-    const auto parent       = builder.GetInsertBlock()->Parent;
-    const auto tail_target  = Block::Create(Where, builder.GetContext(), parent);
+    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
     const auto catch_target = Catch ? Block::Create(Catch->Where, builder.GetContext(), parent) : tail_target;
 
     auto require_tail = !Catch;
 
-    auto target_frame       = frame;
+    auto target_frame = frame;
     target_frame.LandingPad = catch_target;
 
     Try->Generate(builder, target_frame);

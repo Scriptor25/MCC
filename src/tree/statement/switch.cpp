@@ -46,8 +46,8 @@ void mcc::SwitchStatement::Generate(Builder &builder, Frame &frame) const
 {
     const auto start_target = builder.GetInsertBlock();
 
-    const auto parent         = builder.GetInsertBlock()->Parent;
-    const auto tail_target    = Block::Create(Where, builder.GetContext(), parent);
+    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
     const auto default_target = Default ? Block::Create(Default->Where, builder.GetContext(), parent) : tail_target;
 
     auto require_tail = !Default;
@@ -74,7 +74,7 @@ void mcc::SwitchStatement::Generate(Builder &builder, Frame &frame) const
 
         for (auto &case_ : cases_)
         {
-            auto value    = case_->GenerateValue(builder, frame);
+            auto value = case_->GenerateValue(builder, frame);
             auto constant = std::dynamic_pointer_cast<Constant>(value);
             Assert(!!constant, case_->Where, "case entry must be constant");
             case_targets.emplace_back(constant, case_target);

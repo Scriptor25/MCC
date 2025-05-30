@@ -1,4 +1,5 @@
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
@@ -31,8 +32,15 @@ std::ostream &mcc::VectorExpression::Print(std::ostream &stream) const
 mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
     std::vector<ValuePtr> operands;
+    std::vector<std::shared_ptr<ConstantNumber>> constant_operands;
+
     for (auto &operand : Operands)
-        operands.emplace_back(operand->GenerateValue(builder, frame));
+    {
+        auto value = operand->GenerateValue(builder, frame);
+        operands.emplace_back(value);
+        if (auto constant = std::dynamic_pointer_cast<ConstantNumber>(value))
+            constant_operands.emplace_back(constant);
+    }
 
     auto operator_ = Operator_None;
     if (Operator == "+")
@@ -46,8 +54,37 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame
     if (Operator == "%")
         operator_ = Operator_Rem;
 
-    if (operator_)
-        return builder.CreateOperation(Where, operator_, operands);
+    if (!operator_)
+        Error(Where, "undefined binary operator {}", Operator);
 
-    Error(Where, "undefined binary operator {}", Operator);
+    if (operands.size() == constant_operands.size())
+    {
+        auto value = constant_operands.front()->Value;
+        for (unsigned i = 1; i < constant_operands.size(); ++i)
+        {
+            switch (operator_)
+            {
+            case Operator_Add:
+                value += constant_operands[i]->Value;
+                break;
+            case Operator_Sub:
+                value -= constant_operands[i]->Value;
+                break;
+            case Operator_Mul:
+                value *= constant_operands[i]->Value;
+                break;
+            case Operator_Div:
+                value /= constant_operands[i]->Value;
+                break;
+            case Operator_Rem:
+                value %= constant_operands[i]->Value;
+                break;
+            default:
+                break;
+            }
+        }
+        return ConstantNumber::Create(Where, builder.GetContext(), value);
+    }
+
+    return builder.CreateOperation(Where, operator_, operands);
 }

@@ -90,7 +90,7 @@ mcc::ValuePtr mcc::Builder::CreateVariable(
     const SourceLocation &where,
     const TypePtr &type,
     const std::string &name,
-    const bool is_constant,
+    const bool is_mutable,
     const ValuePtr &initializer)
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
@@ -98,19 +98,12 @@ mcc::ValuePtr mcc::Builder::CreateVariable(
     Assert(!!type, where, "type must not be null");
     Assert(!name.empty(), where, "name must not be empty");
 
-    auto &variables = m_Variables.back();
-    auto &variable  = variables[name];
+    auto &variable = m_Variables.back()[name];
     Assert(!variable, where, "already defined variable {}", name);
 
-    const auto constant_initializer = std::dynamic_pointer_cast<Constant>(initializer);
-    if (is_constant && initializer && constant_initializer)
-        return variable = constant_initializer;
-
-    variable = CreateAllocation(where, type, is_constant, constant_initializer);
-
-    if (initializer && !constant_initializer)
+    variable = Allocate(where, type, is_mutable);
+    if (initializer)
         (void) CreateStore(where, variable, initializer, true);
-
     return variable;
 }
 
@@ -122,7 +115,7 @@ mcc::ValuePtr mcc::Builder::InsertVariable(const SourceLocation &where, const st
     Assert(!!value, where, "value must not be null");
 
     auto &variables = m_Variables.back();
-    auto &variable  = variables[name];
+    auto &variable = variables[name];
     Assert(!variable, where, "already defined variable {}", name);
 
     return variable = value;
@@ -321,7 +314,7 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
 
     std::vector<std::pair<std::string, ValuePtr>> argument_pairs;
     for (unsigned i = 0; i < arguments.size(); ++i)
-        argument_pairs.emplace_back(callee->Parameters.at(i).Name, arguments.at(i));
+        argument_pairs.emplace_back(callee->Parameters[i].Name, arguments[i]);
 
     return Insert(
         where,
@@ -338,18 +331,17 @@ mcc::InstructionPtr mcc::Builder::CreateMacro(
     return Insert(where, MacroInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, name, arguments));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateAllocation(
+mcc::ValuePtr mcc::Builder::Allocate(
     const SourceLocation &where,
     const TypePtr &type,
-    const bool is_constant,
-    const ConstantPtr &initializer) const
+    const bool is_mutable) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
     const auto location = m_InsertBlock->Parent->Location;
-    const auto index    = m_InsertBlock->Parent->StackIndex++;
+    const auto index = m_InsertBlock->Parent->StackIndex++;
 
-    return Insert(where, AllocationInstruction::Create(where, type, location, index, !is_constant, initializer));
+    return GenericStorageReference::Create(where, type, location, std::format("stack[0].val[{}]", index), is_mutable);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateAppend(

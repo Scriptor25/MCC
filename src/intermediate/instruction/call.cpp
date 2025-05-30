@@ -42,7 +42,7 @@ mcc::CallInstruction::~CallInstruction()
 void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) const
 {
     auto stack_path = GetStackPath();
-    auto tmp_name   = GetTmpName();
+    auto tmp_name   = GetTemp();
 
     std::string argument_prefix;
     std::string argument_object;
@@ -65,7 +65,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                 if (i > 0)
                     argument_object += ',';
 
-                auto [key, argument] = Arguments.at(i);
+                auto [key, argument] = Arguments[i];
 
                 if (auto value = argument->GenerateResult(); value.Type == ResultType_Argument)
                 {
@@ -141,7 +141,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
 
     if (Callee->Throws)
     {
-        commands.Append(CreateTmpScore());
+        commands.Append(CreateScore());
         commands.Append(
             "{}execute store result score %c {} run function {}{}",
             argument_prefix,
@@ -154,7 +154,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
             tmp_name,
             Location,
             stack_path);
-        commands.Append(RemoveTmpScore());
+        commands.Append(RemoveScore());
 
         commands.Append("data remove storage {} result", Location);
         commands.Append(

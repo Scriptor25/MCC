@@ -12,37 +12,10 @@ namespace mcc
         [[nodiscard]] virtual bool IsTerminator() const;
 
         [[nodiscard]] std::string GetStackPath() const;
-        [[nodiscard]] std::string GetTmpName() const;
+        [[nodiscard]] std::string GetTemp() const;
 
-        [[nodiscard]] std::string CreateTmpScore() const;
-        [[nodiscard]] std::string RemoveTmpScore() const;
-    };
-
-    struct AllocationInstruction final : Instruction
-    {
-        static InstructionPtr Create(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const ResourceLocation &location,
-            IndexT index,
-            bool is_mutable,
-            const ConstantPtr &initializer);
-
-        AllocationInstruction(
-            const SourceLocation &where,
-            const TypePtr &type,
-            ResourceLocation location,
-            IndexT index,
-            bool is_mutable,
-            ConstantPtr initializer);
-
-        void Generate(CommandVector &commands, bool stack) const override;
-        [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult() const override;
-
-        ResourceLocation Location;
-        IndexT Index;
-        ConstantPtr Initializer;
+        [[nodiscard]] std::string CreateScore() const;
+        [[nodiscard]] std::string RemoveScore() const;
     };
 
     struct ArrayInstruction final : Instruction

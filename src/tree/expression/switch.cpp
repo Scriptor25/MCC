@@ -46,8 +46,8 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
 {
     const auto start_target = builder.GetInsertBlock();
 
-    const auto parent         = builder.GetInsertBlock()->Parent;
-    const auto tail_target    = Block::Create(Where, builder.GetContext(), parent);
+    const auto parent = builder.GetInsertBlock()->Parent;
+    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
     const auto default_target = Block::Create(Default->Where, builder.GetContext(), parent);
 
     auto target_frame = frame;
@@ -68,7 +68,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
 
         for (auto &case_ : cases_)
         {
-            auto value    = case_->GenerateValue(builder, frame);
+            auto value = case_->GenerateValue(builder, frame);
             auto constant = std::dynamic_pointer_cast<Constant>(value);
             Assert(!!constant, case_->Where, "case entry must be constant");
             case_targets.emplace_back(constant, case_target);
@@ -85,7 +85,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     (void) builder.CreateSwitch(Where, condition, default_target, case_targets);
 
     builder.SetInsertBlock(tail_target);
-    const auto type          = (elements.size() == 1) ? *elements.begin() : builder.GetContext().GetUnion(elements);
+    const auto type = (elements.size() == 1) ? *elements.begin() : builder.GetContext().GetUnion(elements);
     const auto branch_result = builder.CreateBranchResult(Where, type);
 
     for (auto &[target_, value_] : case_values)

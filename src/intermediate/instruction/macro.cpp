@@ -8,8 +8,8 @@ static void generate_macro_print(const mcc::MacroInstruction &self, mcc::Command
 {
     mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
 
-    const auto targets = std::dynamic_pointer_cast<mcc::ConstantString>(self.Arguments.at(0))->Value;
-    const auto message = self.Arguments.at(1)->GenerateResult();
+    const auto targets = std::dynamic_pointer_cast<mcc::ConstantString>(self.Arguments[0])->Value;
+    const auto message = self.Arguments[1]->GenerateResult();
 
     std::string message_value, prefix;
     if (message.WithArgument)
@@ -50,8 +50,8 @@ static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandV
 {
     mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
 
-    auto value1 = self.Arguments.at(0)->GenerateResult();
-    auto value2 = self.Arguments.at(1)->GenerateResult();
+    auto value1 = self.Arguments[0]->GenerateResult();
+    auto value2 = self.Arguments[1]->GenerateResult();
 
     mcc::Assert(
         value1.Type == mcc::ResultType_Reference,
@@ -66,7 +66,7 @@ static void generate_macro_swap(const mcc::MacroInstruction &self, mcc::CommandV
         mcc::ResultType_Reference,
         value2.Type);
 
-    auto tmp_name = self.GetTmpName();
+    auto tmp_name = self.GetTemp();
 
     std::string prefix1, prefix2, prefix3;
     if (value1.WithArgument)
@@ -110,8 +110,8 @@ static void generate_macro_data(const mcc::MacroInstruction &self, mcc::CommandV
 {
     mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
 
-    const auto dst = self.Arguments.at(0);
-    const auto src = self.Arguments.at(1);
+    const auto dst = self.Arguments[0];
+    const auto src = self.Arguments[1];
 
     mcc::Assert(dst->IsMutable, self.Where, "dst must be mutable");
 
@@ -142,8 +142,8 @@ static void generate_macro_store(const mcc::MacroInstruction &self, mcc::Command
 {
     mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
 
-    const auto dst = self.Arguments.at(0);
-    const auto src = self.Arguments.at(1);
+    const auto dst = self.Arguments[0];
+    const auto src = self.Arguments[1];
 
     mcc::Assert(dst->IsMutable, self.Where, "dst must be mutable");
 

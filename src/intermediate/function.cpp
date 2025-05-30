@@ -81,7 +81,7 @@ void mcc::Function::GenerateFunction(Package &package) const
                 commands.Append("data modify storage {} stack[0].val append value 0", Location);
         }
 
-        Blocks.at(i)->Generate(commands, require_stack);
+        Blocks[i]->Generate(commands, require_stack);
     }
 }
 
@@ -96,10 +96,10 @@ void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments
     {
         if (i)
             arguments += ',';
-        if (Parameters.at(i).Type->IsString())
-            arguments += std::format("\"{0}\":\"$({0})\"", Parameters.at(i).Name);
+        if (Parameters[i].Type->IsString())
+            arguments += std::format("\"{0}\":\"$({0})\"", Parameters[i].Name);
         else
-            arguments += std::format("\"{0}\":$({0})", Parameters.at(i).Name);
+            arguments += std::format("\"{0}\":$({0})", Parameters[i].Name);
     }
     arguments += '}';
 }
@@ -107,7 +107,7 @@ void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments
 mcc::ResourceLocation mcc::Function::GetLocation(const BlockPtr &target_block) const
 {
     for (unsigned i = 0; i < Blocks.size(); ++i)
-        if (Blocks.at(i) == target_block)
+        if (Blocks[i] == target_block)
             return { Location.Namespace, Location.Path + '/' + std::to_string(i) };
 
     Error("mcc::Function::GetLocation");

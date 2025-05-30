@@ -17,11 +17,17 @@ std::ostream &mcc::SubscriptExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::SubscriptExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    const auto base  = Base->GenerateValue(builder, frame);
+    const auto base = Base->GenerateValue(builder, frame);
     const auto index = Index->GenerateValue(builder, frame);
 
+    const auto constant_base = std::dynamic_pointer_cast<ConstantArray>(base);
     const auto constant_index = std::dynamic_pointer_cast<ConstantNumber>(index);
-    Assert(!!constant_index, Index->Where, "index must be a constant number");
 
-    return ElementReference::Create(Where, base, static_cast<IndexT>(constant_index->Value));
+    if (constant_base)
+    {
+        Assert(!!constant_index, Where, "index must be a constant number");
+        return constant_base->Values[constant_index->Value];
+    }
+
+    return ElementReference::Create(Where, base, index);
 }

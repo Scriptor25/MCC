@@ -44,9 +44,9 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
 
     const auto require_right = Left != Right && left != right;
 
-    auto objective = GetTmpName();
+    auto objective = GetTemp();
 
-    commands.Append(CreateTmpScore());
+    commands.Append(CreateScore());
 
     std::string prefix;
     if (left.WithArgument)
@@ -156,7 +156,7 @@ void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) c
         require_right ? "%b" : "%a",
         objective);
 
-    commands.Append(RemoveTmpScore());
+    commands.Append(RemoveScore());
 }
 
 bool mcc::ComparisonInstruction::RequireStack() const

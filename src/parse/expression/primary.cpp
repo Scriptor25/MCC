@@ -43,7 +43,7 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
     }
     if (At(TokenType_Operator))
     {
-        auto token   = Skip();
+        auto token = Skip();
         auto operand = ParseOperandExpression();
         return std::make_unique<UnaryExpression>(token.Where, token.Value, std::move(operand));
     }

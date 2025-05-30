@@ -26,7 +26,7 @@ mcc::StatementPtr mcc::Parser::ParseStatement()
         return ParseThrowStatement();
     if (At(TokenType_Symbol, "try"))
         return ParseTryCatchStatement();
-    if (AtEnum("const", "let"))
+    if (AtEnum("let", "const", "constexpr"))
         return ParseVariableStatement();
     return ParseExpression();
 }

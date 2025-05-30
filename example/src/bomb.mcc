@@ -14,27 +14,40 @@ define summon_tnt(target: string) {
     std:summon(pos(target), "minecraft:tnt")
 }
 
+/*
+ * drop a live tnt every second if enabled
+ */
 define bomb_tick() #minecraft:tick {
-    let& counter = ref<number>(storage, example:bomb, "counter")
-    let& enable = ref<boolean>(storage, example:bomb, "enable")
-    let& target = ref<string>(storage, example:bomb, "target")
-
-    if (enable)
-        unless (++counter % 20)
-            unless (on_ground(target))
-                summon_tnt(target)
-}
-
-define bomb(target: string) {
-    let& counter = ref<number>(storage, example:bomb, "counter")
-    let& enable = ref<boolean>(storage, example:bomb, "enable")
+    let& enable_ref = ref<boolean>(storage, example:bomb, "enable")
+    let& counter_ref = ref<number>(storage, example:bomb, "counter")
     let& target_ref = ref<string>(storage, example:bomb, "target")
 
-    if (enable) {
-        enable = false
-    } else {
-        counter = 0
-        enable = true
+    if (enable_ref)
+        unless (++counter_ref % 20)
+            unless (on_ground(target_ref))
+                summon_tnt(target_ref)
+}
+
+/*
+ * enable dropping tnt every second for the specified target
+ */
+define enable_bomb(target: string) {
+    let& enable_ref = ref<boolean>(storage, example:bomb, "enable")
+    let& counter_ref = ref<number>(storage, example:bomb, "counter")
+    let& target_ref = ref<string>(storage, example:bomb, "target")
+
+    unless (enable_ref) {
+        enable_ref = true
+        counter_ref = 0
         target_ref = target
     }
+}
+
+/*
+ * disable dropping tnt
+ */
+define disable_bomb() {
+    let& enable_ref = ref<boolean>(storage, example:bomb, "enable")
+
+    enable_ref = false
 }

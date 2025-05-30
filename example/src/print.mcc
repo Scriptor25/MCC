@@ -1,12 +1,10 @@
-namespace example
+include "std.mcc"
 
-define print(targets: string, message: string) {
-    ?`$tellraw $(targets) "$(message)"`
-}
+namespace example
 
 define test_print(builtin: boolean) {
     if (builtin)
         !print("@s", "Hello World!")
     else
-        print("@s", "Hello World!")
+        std:print("@s", "Hello World!")
 }

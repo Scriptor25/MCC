@@ -64,7 +64,7 @@ mcc::ValuePtr mcc::RefExpression::GenerateValue(Builder &builder, const Frame &f
     }
     // ... storage <target location> <path>
     case ReferenceType_Storage:
-        return GenericStorageReference::Create(Where, Type, TargetLocation, Path);
+        return GenericStorageReference::Create(Where, Type, TargetLocation, Path, true);
     }
 
     Error(Where, "TODO");

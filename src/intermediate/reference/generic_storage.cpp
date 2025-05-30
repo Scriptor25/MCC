@@ -5,17 +5,19 @@ mcc::ValuePtr mcc::GenericStorageReference::Create(
     const SourceLocation &where,
     const TypePtr &type,
     const ResourceLocation &location,
-    const std::string &path)
+    const std::string &path,
+    const bool is_mutable)
 {
-    return std::make_shared<GenericStorageReference>(where, type, location, path);
+    return std::make_shared<GenericStorageReference>(where, type, location, path, is_mutable);
 }
 
 mcc::GenericStorageReference::GenericStorageReference(
     const SourceLocation &where,
     const TypePtr &type,
     ResourceLocation location,
-    std::string path)
-    : Value(where, type, true),
+    std::string path,
+    const bool is_mutable)
+    : Value(where, type, is_mutable),
       Location(std::move(location)),
       Path(std::move(path))
 {

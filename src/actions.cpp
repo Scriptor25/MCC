@@ -12,7 +12,7 @@ mcc::Actions::Actions(const std::vector<Action> &actions)
 void mcc::Actions::operator()(const int argc, const char **argv)
 {
     m_Executable = argv[0];
-    m_Action     = argc >= 2 && m_Actions.contains(argv[1]) ? &m_Actions.at(argv[1]) : nullptr;
+    m_Action = argc >= 2 && m_Actions.contains(argv[1]) ? &m_Actions.at(argv[1]) : nullptr;
     m_Strings.clear();
     m_Flags.clear();
 

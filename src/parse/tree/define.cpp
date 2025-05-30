@@ -5,7 +5,7 @@
 
 mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
 {
-    auto where    = Expect(TokenType_Symbol, "define").Where;
+    auto where = Expect(TokenType_Symbol, "define").Where;
     auto location = ParseResourceLocation();
 
     ParameterList parameters;

@@ -15,17 +15,17 @@ std::string mcc::Instruction::GetStackPath() const
     return std::format("stack[0].result.{}", reinterpret_cast<uintptr_t>(this));
 }
 
-std::string mcc::Instruction::GetTmpName() const
+std::string mcc::Instruction::GetTemp() const
 {
-    return std::format("tmp.{}", reinterpret_cast<uintptr_t>(this));
+    return std::format("{}", reinterpret_cast<uintptr_t>(this));
 }
 
-std::string mcc::Instruction::CreateTmpScore() const
+std::string mcc::Instruction::CreateScore() const
 {
-    return std::format("scoreboard objectives add tmp.{} dummy", reinterpret_cast<uintptr_t>(this));
+    return std::format("scoreboard objectives add {} dummy", reinterpret_cast<uintptr_t>(this));
 }
 
-std::string mcc::Instruction::RemoveTmpScore() const
+std::string mcc::Instruction::RemoveScore() const
 {
-    return std::format("scoreboard objectives remove tmp.{}", reinterpret_cast<uintptr_t>(this));
+    return std::format("scoreboard objectives remove {}", reinterpret_cast<uintptr_t>(this));
 }

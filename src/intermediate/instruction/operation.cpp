@@ -36,9 +36,9 @@ mcc::OperationInstruction::~OperationInstruction()
 
 void mcc::OperationInstruction::Generate(CommandVector &commands, const bool stack) const
 {
-    auto objective = GetTmpName();
+    auto objective = GetTemp();
 
-    commands.Append(CreateTmpScore());
+    commands.Append(CreateScore());
 
     std::string operator_;
     switch (Operator)
@@ -74,7 +74,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
     {
         auto player = i == 0 ? "%a" : "%b";
 
-        auto operand_value = Operands.at(i);
+        auto operand_value = Operands[i];
         auto operand       = operand_value->GenerateResult();
 
         auto require_operand = operand_value != pre_operand_value && operand != pre_operand;
@@ -141,7 +141,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
         GetStackPath(),
         objective);
 
-    commands.Append(RemoveTmpScore());
+    commands.Append(RemoveScore());
 }
 
 bool mcc::OperationInstruction::RequireStack() const

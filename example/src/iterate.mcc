@@ -1,7 +1,7 @@
 namespace example
 
 define test_iterate() {
-    const array = [ 123, 456, "abc", "def", 789, { name: "max", age: 21 } ]
+    constexpr array = [ 123, 456, "abc", "def", 789, { name: "max", age: 21 } ]
     foreach (const element : array) {
         !print("@s", `element: ${element}`)
     }

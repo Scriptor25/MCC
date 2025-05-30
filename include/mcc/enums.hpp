@@ -54,6 +54,13 @@ namespace mcc
         ArrayOperation_Insert,
     };
 
+    enum DeclaratorE
+    {
+        Declarator_Let,
+        Declarator_Const,
+        Declarator_ConstExpr,
+    };
+
     inline ReferenceTypeE ToTargetType(const std::string_view &string_)
     {
         static const std::map<std::string_view, ReferenceTypeE> map{
@@ -65,12 +72,34 @@ namespace mcc
         return map.at(string_);
     }
 
+    inline DeclaratorE ToDeclarator(const std::string_view &string_)
+    {
+        static const std::map<std::string_view, DeclaratorE> map{
+            { "let", Declarator_Let },
+            { "const", Declarator_Const },
+            { "constexpr", Declarator_ConstExpr },
+        };
+
+        return map.at(string_);
+    }
+
     inline const char *ToString(const ReferenceTypeE enum_)
     {
         static const std::map<ReferenceTypeE, const char *> map{
             { ReferenceType_Block, "block" },
             { ReferenceType_Entity, "entity" },
             { ReferenceType_Storage, "storage" },
+        };
+
+        return map.at(enum_);
+    }
+
+    inline const char *ToString(const DeclaratorE enum_)
+    {
+        static const std::map<DeclaratorE, const char *> map{
+            { Declarator_Let, "let" },
+            { Declarator_Const, "const" },
+            { Declarator_ConstExpr, "constexpr" },
         };
 
         return map.at(enum_);
@@ -125,6 +154,16 @@ namespace std
         auto format(const mcc::ReferenceTypeE &type, FormatContext &ctx) const
         {
             return formatter<string>::format(mcc::ToString(type), ctx);
+        }
+    };
+
+    template<>
+    struct formatter<mcc::DeclaratorE> final : formatter<string>
+    {
+        template<typename FormatContext>
+        auto format(const mcc::DeclaratorE &declarator, FormatContext &ctx) const
+        {
+            return formatter<string>::format(mcc::ToString(declarator), ctx);
         }
     };
 

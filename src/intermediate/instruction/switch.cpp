@@ -54,7 +54,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
     (DefaultTarget ? DefaultTarget : CaseTargets.front().second)->Parent->ForwardArguments(prefix, arguments);
 
     auto stack_path = GetStackPath();
-    auto tmp_name   = GetTmpName();
+    auto tmp_name   = GetTemp();
 
     auto take_default = true;
 
@@ -105,7 +105,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                 ResultType_Value,
                 case_value.Type);
 
-            commands.Append(CreateTmpScore());
+            commands.Append(CreateScore());
             commands.Append(
                 "{}execute store result score %c {} run data get {} {} {}",
                 condition_prefix,
@@ -120,7 +120,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                 case_value.Value,
                 Location,
                 stack_path);
-            commands.Append(RemoveTmpScore());
+            commands.Append(RemoveScore());
 
             commands.Append(
                 "{}execute if data storage {} {} run return run function {}{}",
@@ -142,7 +142,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
         {
             auto case_value = case_->GenerateResult();
 
-            commands.Append(CreateTmpScore());
+            commands.Append(CreateScore());
             commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);
             commands.Append("data remove storage {} {}", Location, stack_path);
             commands.Append(
@@ -151,7 +151,7 @@ void mcc::SwitchInstruction::Generate(CommandVector &commands, bool stack) const
                 case_value.Value,
                 Location,
                 stack_path);
-            commands.Append(RemoveTmpScore());
+            commands.Append(RemoveScore());
 
             commands.Append(
                 "{}execute if data storage {} {} run return run function {}{}",

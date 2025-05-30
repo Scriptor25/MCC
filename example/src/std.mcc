@@ -7,6 +7,16 @@ define assert(x: boolean, message: string) throws {
         throw message
 }
 
+define print(targets: string, message: string) {
+    ?`$tellraw $(targets) "$(message)"`
+}
+
+define random(min: number, max: number): number {
+    if (min > max)
+        return random(max, min)
+    return ?:number`$random value $(min)..$(max)`
+}
+
 define floor(x: number): number {
     let result: number
 
@@ -21,6 +31,10 @@ define setblock_direct(x: number, y: number, z: number, block: string, mode: str
     ?`$setblock $(x) $(y) $(z) $(block) $(mode)`
 }
 
+define summon_direct(x: number, y: number, z: number, type: string) {
+    ?`$summon $(type) $(x) $(y) $(z)`
+}
+
 define setblock(pos: position, block: string, mode: string) {
     let x, y, z : number
     {
@@ -32,10 +46,6 @@ define setblock(pos: position, block: string, mode: string) {
     setblock_direct(x, y, z, block, mode)
 }
 
-define summon_direct(x: number, y: number, z: number, type: string) {
-    ?`$summon $(type) $(x) $(y) $(z)`
-}
-
 define summon(pos: position, type: string) {
     let x, y, z : number
     {
@@ -45,10 +55,4 @@ define summon(pos: position, type: string) {
         z = floor(pos[2])
     }
     summon_direct(x, y, z, type)
-}
-
-define random(min: number, max: number): number {
-    if (min > max)
-        return random(max, min)
-    return ?:number`$random value $(min)..$(max)`
 }

@@ -19,7 +19,7 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     for (auto &[namespace_, functions_] : Functions)
         for (auto &[path_, function_] : functions_)
         {
-            const auto file      = data / namespace_ / "function" / (path_ + ".mcfunction");
+            const auto file = data / namespace_ / "function" / (path_ + ".mcfunction");
             const auto directory = file.parent_path();
             create_directories(directory);
 
@@ -35,7 +35,7 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     for (auto &[namespace_, tags_] : Tags)
         for (auto &[path_, tag_] : tags_)
         {
-            const auto file      = data / namespace_ / "tags" / "function" / (path_ + ".json");
+            const auto file = data / namespace_ / "tags" / "function" / (path_ + ".json");
             const auto directory = file.parent_path();
             create_directories(directory);
 
@@ -84,10 +84,10 @@ void mcc::to_json(nlohmann::json &json, const ResourceLocation &location)
 
 void mcc::from_json(const nlohmann::json &json, ResourceLocation &location)
 {
-    const auto value   = std::string(json);
-    const auto split   = value.find(':');
+    const auto value = std::string(json);
+    const auto split = value.find(':');
     location.Namespace = value.substr(0, split);
-    location.Path      = value.substr(split + 1);
+    location.Path = value.substr(split + 1);
 }
 
 void mcc::to_json(nlohmann::json &json, const Tag &tag)

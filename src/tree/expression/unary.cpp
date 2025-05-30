@@ -42,6 +42,9 @@ static mcc::ValuePtr dec(const mcc::SourceLocation &where, mcc::Builder &builder
 
 static mcc::ValuePtr neg(const mcc::SourceLocation &where, mcc::Builder &builder, const mcc::ValuePtr &operand)
 {
+    if (const auto constant_operand = std::dynamic_pointer_cast<mcc::ConstantNumber>(operand))
+        return mcc::ConstantNumber::Create(where, builder.GetContext(), -constant_operand->Value);
+
     const auto zero = mcc::ConstantNumber::Create(where, builder.GetContext(), 0);
     return builder.CreateOperation(where, mcc::Operator_Sub, { zero, operand });
 };
@@ -58,7 +61,7 @@ mcc::ValuePtr mcc::UnaryExpression::GenerateValue(Builder &builder, const Frame 
     const auto &[store_, operation_] = operators.at(Operator);
 
     const auto operand = Operand->GenerateValue(builder, frame);
-    const auto value   = operation_(Where, builder, operand);
+    const auto value = operation_(Where, builder, operand);
 
     if (store_)
         return builder.CreateStore(Where, operand, value);

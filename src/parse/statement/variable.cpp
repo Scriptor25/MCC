@@ -5,9 +5,10 @@
 
 mcc::StatementPtr mcc::Parser::ParseVariableStatement()
 {
-    auto where        = m_Token.Where;
-    auto is_constant  = SkipIf(TokenType_Symbol, "const") || (Expect(TokenType_Symbol, "let"), false);
-    auto is_reference = !is_constant && SkipIf(TokenType_Other, "&");
+    auto token = ExpectEnum("let", "const", "constexpr");
+
+    auto declarator = ToDeclarator(token.Value);
+    auto is_reference = declarator == Declarator_Let && SkipIf(TokenType_Other, "&");
 
     std::vector<std::string> names;
     do
@@ -19,14 +20,14 @@ mcc::StatementPtr mcc::Parser::ParseVariableStatement()
         type = ParseType();
 
     ExpressionPtr value;
-    if (SkipIf(TokenType_Operator, "=") || (is_constant && (Expect(TokenType_Operator, "="), true)))
+    if (SkipIf(TokenType_Operator, "=") || (declarator != Declarator_Let && (Expect(TokenType_Operator, "="), true)))
         value = ParseExpression();
 
-    Assert(type || value, where, "variable definition must at least specify either a type or a value");
+    Assert(type || value, token.Where, "variable definition must at least specify either its type or initializer");
 
     return std::make_unique<VariableStatement>(
-        where,
-        is_constant,
+        token.Where,
+        declarator,
         is_reference,
         names,
         std::move(type),

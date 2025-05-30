@@ -163,7 +163,7 @@ namespace mcc
     {
         VariableStatement(
             const SourceLocation &where,
-            bool is_constant,
+            DeclaratorE declarator,
             bool is_reference,
             std::vector<std::string> names,
             TypePtr type,
@@ -172,7 +172,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
 
-        bool IsConstant;
+        DeclaratorE Declarator;
         bool IsReference;
         std::vector<std::string> Names;
         TypePtr Type;
