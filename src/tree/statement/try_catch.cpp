@@ -70,7 +70,7 @@ void mcc::TryCatchStatement::Generate(Builder &builder, Frame &frame) const
 
     if (!require_tail)
     {
-        tail_target->Parent->Erase(tail_target);
+        tail_target->Erase();
         builder.SetInsertBlock(nullptr);
     }
     else

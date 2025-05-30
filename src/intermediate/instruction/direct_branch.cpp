@@ -116,7 +116,7 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
     std::string prefix, arguments;
     Target->Parent->ForwardArguments(prefix, arguments);
 
-    commands.Append("{}return run function {}{}", prefix, Target->Parent->GetLocation(Target), arguments);
+    commands.Append("{}return run function {}{}", prefix, Target->GetLocation(), arguments);
 }
 
 bool mcc::DirectBranchInstruction::RequireStack() const

@@ -47,8 +47,8 @@ void mcc::BranchInstruction::Generate(CommandVector &commands, bool stack) const
     auto stack_path = GetStackPath();
     auto temp = GetTemp();
 
-    auto then_target = ThenTarget->Parent->GetLocation(ThenTarget);
-    auto else_target = ElseTarget->Parent->GetLocation(ElseTarget);
+    auto then_target = ThenTarget->GetLocation();
+    auto else_target = ElseTarget->GetLocation();
 
     switch (auto condition = Condition->GenerateResult(); condition.Type)
     {

@@ -17,11 +17,9 @@ std::ostream &mcc::ReturnStatement::Print(std::ostream &stream) const
 void mcc::ReturnStatement::Generate(Builder &builder, Frame &frame) const
 {
     if (!Value)
-    {
-        (void) builder.CreateReturnVoid(Where);
-        return;
-    }
+        return (void) builder.CreateReturnVoid(Where);
 
     const auto value = Value->GenerateValue(builder, frame);
+    // TODO: check against function result type
     (void) builder.CreateReturn(Where, value);
 }

@@ -23,7 +23,7 @@ define bomb_tick() #minecraft:tick {
     let& target_ref = ref<string>(storage, example:bomb, "target")
 
     if (enable_ref)
-        unless (++counter_ref % 20)
+        if (++counter_ref % 20 == 0)
             unless (on_ground(target_ref))
                 summon_tnt(target_ref)
 }

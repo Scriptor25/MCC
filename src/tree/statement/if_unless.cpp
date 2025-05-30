@@ -1,6 +1,9 @@
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
+#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/statement.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::IfUnlessStatement::IfUnlessStatement(
@@ -27,14 +30,52 @@ std::ostream &mcc::IfUnlessStatement::Print(std::ostream &stream) const
 
 void mcc::IfUnlessStatement::Generate(Builder &builder, Frame &frame) const
 {
+    const auto condition = Condition->GenerateValue(builder, frame);
+    Assert(
+        condition->Type->IsBoolean(),
+        Condition->Where,
+        "condition must be of type boolean, but is {}",
+        condition->Type);
+
     const auto parent = builder.GetInsertBlock()->Parent;
     const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
-    const auto then_target = Block::Create(Where, builder.GetContext(), parent);
-    const auto else_target = Else ? Block::Create(Where, builder.GetContext(), parent) : tail_target;
 
     auto require_tail = !Else;
 
-    const auto condition = Condition->GenerateValue(builder, frame);
+    if (const auto constant_condition = std::dynamic_pointer_cast<ConstantBoolean>(condition))
+    {
+        if (Unless != constant_condition->Value)
+        {
+            Then->Generate(builder, frame);
+            if (!builder.GetInsertBlock()->GetTerminator())
+            {
+                require_tail = true;
+                (void) builder.CreateDirect(Where, tail_target);
+            }
+        }
+        else if (Else)
+        {
+            Else->Generate(builder, frame);
+            if (!builder.GetInsertBlock()->GetTerminator())
+            {
+                require_tail = true;
+                (void) builder.CreateDirect(Where, tail_target);
+            }
+        }
+
+        if (!require_tail)
+        {
+            tail_target->Erase();
+            builder.SetInsertBlock(nullptr);
+        }
+        else
+            builder.SetInsertBlock(tail_target);
+        return;
+    }
+
+    const auto then_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto else_target = Else ? Block::Create(Where, builder.GetContext(), parent) : tail_target;
+
     (void) builder.CreateBranch(
         Where,
         condition,
@@ -62,7 +103,7 @@ void mcc::IfUnlessStatement::Generate(Builder &builder, Frame &frame) const
 
     if (!require_tail)
     {
-        tail_target->Parent->Erase(tail_target);
+        tail_target->Erase();
         builder.SetInsertBlock(nullptr);
     }
     else

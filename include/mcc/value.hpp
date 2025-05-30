@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <mcc/common.hpp>
 #include <mcc/package.hpp>
 
@@ -61,10 +62,15 @@ namespace mcc
 
         [[nodiscard]] InstructionPtr GetTerminator() const;
 
+        ResourceLocation GetLocation() const;
+        void Erase() const;
+
+        std::weak_ptr<Block> Self;
+
         FunctionPtr Parent;
 
-        std::vector<BlockPtr> Predecessors;
-        BlockPtr Successor;
+        std::set<BlockPtr> Predecessors;
+        std::set<BlockPtr> Successors;
 
         std::vector<InstructionPtr> Instructions;
     };
@@ -105,6 +111,10 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
+        bool RemoveUnreferencedBlocks();
+        bool MergeConsecutiveBlocks();
+
+        void OptimizeBlocks();
         void GenerateFunction(Package &package) const;
 
         void ForwardArguments(std::string &prefix, std::string &arguments) const;

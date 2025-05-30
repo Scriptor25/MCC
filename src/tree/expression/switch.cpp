@@ -47,7 +47,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     const auto condition = Condition->GenerateValue(builder, frame);
     Assert(
         condition->Type->IsNumber(),
-        condition->Where,
+        Condition->Where,
         "condition must be of type number, but is {}",
         condition->Type);
 
@@ -124,7 +124,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     for (auto &[target_, value_] : case_values)
     {
         builder.SetInsertBlock(target_);
-        (void) builder.CreateDirect(value_->Where, tail_target, value_, branch_result);
+        (void) builder.CreateDirect(target_->Where, tail_target, value_, branch_result);
     }
 
     builder.SetInsertBlock(tail_target);

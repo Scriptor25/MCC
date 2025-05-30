@@ -61,7 +61,7 @@ void mcc::ForStatement::Generate(Builder &builder, Frame &frame) const
 
     if (!Condition && !(target_frame.Flags & FrameFlag_RequireTail))
     {
-        tail_target->Parent->Erase(tail_target);
+        tail_target->Erase();
         builder.SetInsertBlock(nullptr);
     }
     else

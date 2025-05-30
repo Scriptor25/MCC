@@ -216,6 +216,11 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(
     Assert(!!then_target, where, "then target must not be null");
     Assert(!!else_target, where, "else target must not be null");
 
+    m_InsertBlock->Successors.insert(then_target);
+    m_InsertBlock->Successors.insert(else_target);
+    then_target->Predecessors.insert(m_InsertBlock);
+    else_target->Predecessors.insert(m_InsertBlock);
+
     return Insert(
         where,
         BranchInstruction::Create(
@@ -232,6 +237,9 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(const SourceLocation &where, cons
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!target, where, "target must not be null");
 
+    m_InsertBlock->Successors.insert(target);
+    target->Predecessors.insert(m_InsertBlock);
+
     return Insert(where, DirectBranchInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, target));
 }
 
@@ -245,6 +253,9 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(
     Assert(!!target, where, "target must not be null");
     Assert(!!result, where, "result must not be null");
     Assert(!!branch_result, where, "branch result must not be null");
+
+    m_InsertBlock->Successors.insert(target);
+    target->Predecessors.insert(m_InsertBlock);
 
     return Insert(
         where,
@@ -271,7 +282,13 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
     {
         Assert(!!condition_, where, "case condition must not be null");
         Assert(!!target_, where, "case target must not be null");
+
+        m_InsertBlock->Successors.insert(target_);
+        target_->Predecessors.insert(m_InsertBlock);
     }
+
+    m_InsertBlock->Successors.insert(default_target);
+    default_target->Predecessors.insert(m_InsertBlock);
 
     return Insert(
         where,
@@ -291,6 +308,12 @@ mcc::InstructionPtr mcc::Builder::CreateThrow(
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!value, where, "value must not be null");
+
+    if (landing_pad)
+    {
+        m_InsertBlock->Successors.insert(landing_pad);
+        landing_pad->Predecessors.insert(m_InsertBlock);
+    }
 
     return Insert(
         where,
@@ -315,6 +338,12 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
     std::vector<std::pair<std::string, ValuePtr>> argument_pairs;
     for (unsigned i = 0; i < arguments.size(); ++i)
         argument_pairs.emplace_back(callee->Parameters[i].Name, arguments[i]);
+
+    if (landing_pad)
+    {
+        m_InsertBlock->Successors.insert(landing_pad);
+        landing_pad->Predecessors.insert(m_InsertBlock);
+    }
 
     return Insert(
         where,
@@ -441,5 +470,8 @@ void mcc::Builder::Generate() const
 {
     for (auto &functions : m_Functions | std::views::values)
         for (auto &function : functions | std::views::values)
+        {
+            function->OptimizeBlocks();
             function->GenerateFunction(m_Package);
+        }
 }

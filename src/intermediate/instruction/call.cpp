@@ -42,7 +42,7 @@ mcc::CallInstruction::~CallInstruction()
 void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) const
 {
     auto stack_path = GetStackPath();
-    auto tmp_name   = GetTemp();
+    auto temp = GetTemp();
 
     std::string argument_prefix;
     std::string argument_object;
@@ -83,19 +83,12 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
             commands.Append("data modify storage {} {} set value {{}}", Location, stack_path);
 
             for (auto &[key_, argument_] : Arguments)
-            {
-                auto value = argument_->GenerateResult();
-
-                std::string value_prefix;
-                if (value.WithArgument)
-                    value_prefix = "$";
-
-                switch (value.Type)
+                switch (auto value = argument_->GenerateResult(); value.Type)
                 {
                 case ResultType_Value:
                     commands.Append(
                         "{}data modify storage {} {}.{} set value {}",
-                        value_prefix,
+                        value.WithArgument ? "$" : "",
                         Location,
                         stack_path,
                         key_,
@@ -105,7 +98,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                 case ResultType_Reference:
                     commands.Append(
                         "{}data modify storage {} {}.{} set from {} {} {}",
-                        value_prefix,
+                        value.WithArgument ? "$" : "",
                         Location,
                         stack_path,
                         key_,
@@ -132,7 +125,6 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                         ResultType_Argument,
                         value.Type);
                 }
-            }
 
             argument_object = std::format(" with storage {} {}", Location, stack_path);
             require_cleanup = true;
@@ -145,13 +137,13 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
         commands.Append(
             "{}execute store result score %c {} run function {}{}",
             argument_prefix,
-            tmp_name,
+            temp,
             Callee->Location,
             argument_object);
         commands.Append("data remove storage {} {}", Location, stack_path);
         commands.Append(
             "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
-            tmp_name,
+            temp,
             Location,
             stack_path);
         commands.Append(RemoveScore());
@@ -173,7 +165,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                 "{}execute if data storage {} result run return run function {}{}",
                 prefix,
                 Location,
-                LandingPad->Parent->GetLocation(LandingPad),
+                LandingPad->GetLocation(),
                 arguments);
         }
         else

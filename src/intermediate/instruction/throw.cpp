@@ -79,7 +79,7 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
         std::string prefix, arguments;
         LandingPad->Parent->ForwardArguments(prefix, arguments);
 
-        commands.Append("{}return run function {}{}", prefix, LandingPad->Parent->GetLocation(LandingPad), arguments);
+        commands.Append("{}return run function {}{}", prefix, LandingPad->GetLocation(), arguments);
         return;
     }
 

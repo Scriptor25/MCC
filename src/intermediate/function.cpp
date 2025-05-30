@@ -61,6 +61,53 @@ mcc::Result mcc::Function::GenerateResult() const
     };
 }
 
+bool mcc::Function::RemoveUnreferencedBlocks()
+{
+    std::vector<BlockPtr> blocks;
+    for (unsigned i = 1; i < Blocks.size(); ++i)
+        if (Blocks[i]->Predecessors.empty())
+            blocks.emplace_back(Blocks[i]);
+
+    for (auto block : blocks)
+        Erase(block);
+
+    return !blocks.empty();
+}
+
+bool mcc::Function::MergeConsecutiveBlocks()
+{
+    std::vector<BlockPtr> blocks;
+    for (auto &block : Blocks)
+        if (block->Successors.size() == 1)
+            if (auto successor = *block->Successors.begin(); successor->Predecessors.size() == 1)
+            {
+                block->Instructions.pop_back();
+                successor->Predecessors.erase(block);
+
+                for (auto &instruction : successor->Instructions)
+                    block->Instructions.emplace_back(instruction);
+
+                blocks.emplace_back(successor);
+            }
+
+    for (auto block : blocks)
+        Erase(block);
+
+    return !blocks.empty();
+}
+
+void mcc::Function::OptimizeBlocks()
+{
+    bool recycle;
+    do
+    {
+        recycle = false;
+        recycle |= RemoveUnreferencedBlocks();
+        recycle |= MergeConsecutiveBlocks();
+    }
+    while (recycle);
+}
+
 void mcc::Function::GenerateFunction(Package &package) const
 {
     const auto require_stack = RequireStack();
@@ -110,7 +157,7 @@ mcc::ResourceLocation mcc::Function::GetLocation(const BlockPtr &target_block) c
         if (Blocks[i] == target_block)
             return { Location.Namespace, Location.Path + '/' + std::to_string(i) };
 
-    Error("mcc::Function::GetLocation");
+    Error(Where, "cannot get location for non-child block");
 }
 
 mcc::BlockPtr mcc::Function::Erase(const BlockPtr &target_block)
@@ -118,7 +165,10 @@ mcc::BlockPtr mcc::Function::Erase(const BlockPtr &target_block)
     for (auto i = Blocks.begin(); i != Blocks.end(); ++i)
         if (*i == target_block)
         {
+            Assert(target_block->Predecessors.empty(), target_block->Where, "cannot erase referenced block");
             Blocks.erase(i);
+            for (auto &successor : target_block->Successors)
+                successor->Predecessors.erase(target_block);
             return target_block;
         }
 
