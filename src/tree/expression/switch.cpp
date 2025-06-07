@@ -1,3 +1,4 @@
+#include <mcc/block.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>

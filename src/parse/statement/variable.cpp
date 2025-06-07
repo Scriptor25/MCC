@@ -7,7 +7,7 @@ mcc::StatementPtr mcc::Parser::ParseVariableStatement()
 {
     auto token = ExpectEnum("let", "const", "constexpr");
 
-    auto declarator = ToDeclarator(token.Value);
+    auto declarator = *ToDeclarator(token.Value);
     auto is_reference = declarator == Declarator_Let && SkipIf(TokenType_Other, "&");
 
     std::vector<std::string> names;

@@ -13,24 +13,24 @@ namespace mcc
 
         [[nodiscard]] TypeContext &GetContext() const;
         [[nodiscard]] Package &GetPackage() const;
-        [[nodiscard]] std::string GetNamespace() const;
 
+        [[nodiscard]] std::string GetNamespace() const;
         void SetNamespace(const std::string &namespace_);
 
-        [[nodiscard]] bool HasFunction(ResourceLocation location) const;
         FunctionPtr CreateFunction(
             const SourceLocation &where,
             ResourceLocation location,
             const ParameterList &parameters,
             const TypePtr &result,
             bool throws);
+        [[nodiscard]] bool HasFunction(ResourceLocation location) const;
         [[nodiscard]] FunctionPtr GetFunction(const SourceLocation &where, ResourceLocation location) const;
 
-        [[nodiscard]] bool HasGlobal(ResourceLocation location) const;
         ValuePtr CreateGlobal(
             const SourceLocation &where,
             ResourceLocation location,
             const TypePtr &type);
+        [[nodiscard]] bool HasGlobal(ResourceLocation location) const;
         [[nodiscard]] ValuePtr GetGlobal(const SourceLocation &where, ResourceLocation location) const;
 
         void SetInsertBlock(const BlockPtr &block);
@@ -46,23 +46,24 @@ namespace mcc
             bool is_mutable,
             const ValuePtr &initializer);
         ValuePtr InsertVariable(const SourceLocation &where, const std::string &name, const ValuePtr &value);
+        [[nodiscard]] bool HasVariable(const std::string &name) const;
         [[nodiscard]] ValuePtr GetVariable(const SourceLocation &where, const std::string &name) const;
 
         [[nodiscard]] InstructionPtr CreateStore(
             const SourceLocation &where,
             const ValuePtr &dst,
             const ValuePtr &src,
-            bool force = false) const;
+            bool ignore_mutability = false) const;
 
         [[nodiscard]] InstructionPtr CreateComparison(
             const SourceLocation &where,
-            ComparatorE comparator,
+            E_Comparator comparator,
             const ValuePtr &left,
             const ValuePtr &right) const;
 
         [[nodiscard]] InstructionPtr CreateOperation(
             const SourceLocation &where,
-            OperatorE operator_,
+            E_Operator operator_,
             const std::vector<ValuePtr> &operands) const;
 
         [[nodiscard]] InstructionPtr CreateCommand(
@@ -70,7 +71,7 @@ namespace mcc
             const TypePtr &type,
             const CommandT &command) const;
 
-        [[nodiscard]] InstructionPtr CreateReturnVoid(const SourceLocation &where) const;
+        [[nodiscard]] InstructionPtr CreateReturn(const SourceLocation &where) const;
         [[nodiscard]] InstructionPtr CreateReturn(const SourceLocation &where, const ValuePtr &value) const;
 
         [[nodiscard]] InstructionPtr CreateBranch(
@@ -104,6 +105,7 @@ namespace mcc
             const FunctionPtr &callee,
             const std::vector<ValuePtr> &arguments,
             const BlockPtr &landing_pad) const;
+
         [[nodiscard]] InstructionPtr CreateMacro(
             const SourceLocation &where,
             const std::string &name,

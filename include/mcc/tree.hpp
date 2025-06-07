@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <set>
 #include <mcc/common.hpp>
+#include <mcc/resource.hpp>
 
 namespace mcc
 {
@@ -25,7 +26,7 @@ namespace mcc
             const SourceLocation &where,
             ResourceLocation location,
             ParameterList parameters,
-            TypePtr result,
+            TypePtr result_type,
             bool throws,
             const std::vector<ResourceTag> &tags,
             StatementPtr body);
@@ -36,7 +37,7 @@ namespace mcc
 
         ResourceLocation Location;
         ParameterList Parameters;
-        TypePtr Result;
+        TypePtr ResultType;
         bool Throws;
         std::vector<ResourceTag> Tags;
         StatementPtr Body;
@@ -44,7 +45,7 @@ namespace mcc
 
     struct GlobalNode final : TreeNode
     {
-        GlobalNode(const SourceLocation &where, const ResourceLocation &location, const TypePtr &type);
+        GlobalNode(const SourceLocation &where, ResourceLocation location, TypePtr type);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder) const override;

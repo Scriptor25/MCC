@@ -2,6 +2,7 @@
 
 #include <mcc/common.hpp>
 #include <mcc/lex.hpp>
+#include <mcc/resource.hpp>
 
 namespace mcc
 {

@@ -1,10 +1,11 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/value.hpp>
 
-mcc::SymbolExpression::SymbolExpression(const SourceLocation &where, const std::string &name)
+mcc::SymbolExpression::SymbolExpression(const SourceLocation &where, std::string name)
     : Expression(where),
-      Name(name)
+      Name(std::move(name))
 {
 }
 

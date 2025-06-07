@@ -36,25 +36,11 @@ define summon_direct(x: number, y: number, z: number, type: string) {
 }
 
 define setblock(pos: position, block: string, mode: string) {
-    let x, y, z : number
-    {
-        const pos = pos
-        x = floor(pos[0])
-        y = floor(pos[1])
-        z = floor(pos[2])
-    }
-    setblock_direct(x, y, z, block, mode)
+    setblock_direct(pos[0], pos[1], pos[2], block, mode)
 }
 
 define summon(pos: position, type: string) {
-    let x, y, z : number
-    {
-        const pos = pos
-        x = floor(pos[0])
-        y = floor(pos[1])
-        z = floor(pos[2])
-    }
-    summon_direct(x, y, z, type)
+    summon_direct(pos[0], pos[1], pos[2], type)
 }
 
 define give(target: string, type: string, amount: number) {

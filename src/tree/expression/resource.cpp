@@ -1,7 +1,9 @@
 #include <utility>
+#include <mcc/block.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
+#include <mcc/function.hpp>
 
 mcc::ResourceExpression::ResourceExpression(const SourceLocation &where, ResourceLocation location)
     : Expression(where),

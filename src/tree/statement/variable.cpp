@@ -9,7 +9,7 @@
 
 mcc::VariableStatement::VariableStatement(
     const SourceLocation &where,
-    const DeclaratorE declarator,
+    const E_Declarator declarator,
     const bool is_reference,
     std::vector<std::string> names,
     TypePtr type,

@@ -23,8 +23,7 @@ define user_call_wrapper(func: user_print_func, self: user) {
 }
 
 define user_call(self: user) {
-    const copy = self
-    user_call_wrapper(copy.func, self)
+    user_call_wrapper(self.func, self)
 }
 
 define user_print(age: number, name: string, email: string) {

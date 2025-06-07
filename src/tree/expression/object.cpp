@@ -1,7 +1,6 @@
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
-#include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 

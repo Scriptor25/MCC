@@ -1,6 +1,8 @@
 #include <utility>
+#include <mcc/block.hpp>
+#include <mcc/command.hpp>
 #include <mcc/error.hpp>
-#include <mcc/instruction.hpp>
+#include <mcc/function.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
@@ -24,12 +26,12 @@ mcc::Function::Function(
     const SourceLocation &where,
     const TypePtr &type,
     ResourceLocation location,
-    const ParameterList &parameters,
+    ParameterList parameters,
     TypePtr result_type,
     const bool throws)
     : Value(where, type, false),
       Location(std::move(location)),
-      Parameters(parameters),
+      Parameters(std::move(parameters)),
       ResultType(std::move(result_type)),
       Throws(throws)
 {
@@ -45,11 +47,12 @@ bool mcc::Function::RequireStack() const
     if (StackIndex)
         return true;
 
-    for (auto &block : Blocks)
-        if (block->RequireStack())
-            return true;
-
-    return false;
+    return std::ranges::any_of(
+        Blocks,
+        [](const auto &block)
+        {
+            return block->RequireStack();
+        });
 }
 
 mcc::Result mcc::Function::GenerateResult() const
@@ -68,7 +71,7 @@ bool mcc::Function::RemoveUnreferencedBlocks()
         if (Blocks[i]->Predecessors.empty())
             blocks.emplace_back(Blocks[i]);
 
-    for (auto block : blocks)
+    for (const auto &block : blocks)
         Erase(block);
 
     return !blocks.empty();
@@ -90,7 +93,7 @@ bool mcc::Function::MergeConsecutiveBlocks()
                 blocks.emplace_back(successor);
             }
 
-    for (auto block : blocks)
+    for (const auto &block : blocks)
         Erase(block);
 
     return !blocks.empty();

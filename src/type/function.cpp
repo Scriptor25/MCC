@@ -1,13 +1,14 @@
+#include <utility>
 #include <mcc/type.hpp>
 
 mcc::FunctionType::FunctionType(
     TypeContext &context,
     const std::vector<TypePtr> &parameters,
-    const TypePtr &result,
+    TypePtr result,
     const bool throws)
     : Type(context),
       Parameters(parameters),
-      Result(result),
+      Result(std::move(result)),
       Throws(throws)
 {
 }

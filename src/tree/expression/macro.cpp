@@ -1,9 +1,10 @@
+#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 
-mcc::MacroExpression::MacroExpression(const SourceLocation &where, const std::string &name)
+mcc::MacroExpression::MacroExpression(const SourceLocation &where, std::string name)
     : Expression(where),
-      Name(name)
+      Name(std::move(name))
 {
 }
 

@@ -1,13 +1,14 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/tree.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::GlobalNode::GlobalNode(const SourceLocation &where, const ResourceLocation &location, const TypePtr &type)
+mcc::GlobalNode::GlobalNode(const SourceLocation &where, ResourceLocation location, TypePtr type)
     : TreeNode(where),
-      Location(location),
-      Type(type)
+      Location(std::move(location)),
+      Type(std::move(type))
 {
 }
 

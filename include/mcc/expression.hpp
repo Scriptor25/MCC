@@ -33,7 +33,7 @@ namespace mcc
     {
         BinaryExpression(
             const SourceLocation &where,
-            const std::string &operator_,
+            std::string operator_,
             ExpressionPtr left,
             ExpressionPtr right);
 
@@ -60,7 +60,7 @@ namespace mcc
 
     struct CommandExpression final : Expression
     {
-        CommandExpression(const SourceLocation &where, const TypePtr &type, const CommandT &command);
+        CommandExpression(const SourceLocation &where, TypePtr type, CommandT command);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -71,7 +71,7 @@ namespace mcc
 
     struct ConstantExpression final : Expression
     {
-        ConstantExpression(const SourceLocation &where, const ConstantPtr &value, const std::string &view);
+        ConstantExpression(const SourceLocation &where, ConstantPtr value, std::string view);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -108,7 +108,7 @@ namespace mcc
 
     struct MacroExpression final : Expression
     {
-        MacroExpression(const SourceLocation &where, const std::string &name);
+        MacroExpression(const SourceLocation &where, std::string name);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -118,7 +118,7 @@ namespace mcc
 
     struct MemberExpression final : Expression
     {
-        MemberExpression(const SourceLocation &where, ExpressionPtr object, const std::string &member);
+        MemberExpression(const SourceLocation &where, ExpressionPtr object, std::string member);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -142,25 +142,25 @@ namespace mcc
         RefExpression(
             const SourceLocation &where,
             TypePtr type,
-            ReferenceTypeE target_type,
+            E_ReferenceType target_type,
             ExpressionPtr target_position_x,
             ExpressionPtr target_position_y,
             ExpressionPtr target_position_z,
             ExpressionPtr target_name,
-            ResourceLocation target_location,
-            std::string path);
+            ExpressionPtr target_location,
+            ExpressionPtr path);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
 
         TypePtr Type;
-        ReferenceTypeE TargetType;
+        E_ReferenceType TargetType;
         ExpressionPtr TargetPositionX;
         ExpressionPtr TargetPositionY;
         ExpressionPtr TargetPositionZ;
         ExpressionPtr TargetName;
-        ResourceLocation TargetLocation;
-        std::string Path;
+        ExpressionPtr TargetLocation;
+        ExpressionPtr Path;
     };
 
     struct ResourceExpression final : Expression
@@ -200,7 +200,7 @@ namespace mcc
 
     struct SymbolExpression final : Expression
     {
-        SymbolExpression(const SourceLocation &where, const std::string &name);
+        SymbolExpression(const SourceLocation &where, std::string name);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -210,7 +210,7 @@ namespace mcc
 
     struct UnaryExpression final : Expression
     {
-        UnaryExpression(const SourceLocation &where, const std::string &operator_, ExpressionPtr operand);
+        UnaryExpression(const SourceLocation &where, std::string operator_, ExpressionPtr operand);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr GenerateValue(Builder &builder, const Frame &frame) const override;
@@ -223,7 +223,7 @@ namespace mcc
     {
         VectorExpression(
             const SourceLocation &where,
-            const std::string &operator_,
+            std::string operator_,
             std::vector<ExpressionPtr> operands);
 
         std::ostream &Print(std::ostream &stream) const override;

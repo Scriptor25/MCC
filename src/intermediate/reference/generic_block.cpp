@@ -7,7 +7,7 @@ mcc::ValuePtr mcc::GenericBlockReference::Create(
     const ValuePtr &position_x,
     const ValuePtr &position_y,
     const ValuePtr &position_z,
-    const std::string &path)
+    const ValuePtr &path)
 {
     return std::make_shared<GenericBlockReference>(where, type, position_x, position_y, position_z, path);
 }
@@ -18,7 +18,7 @@ mcc::GenericBlockReference::GenericBlockReference(
     const ValuePtr &position_x,
     const ValuePtr &position_y,
     const ValuePtr &position_z,
-    const std::string &path)
+    const ValuePtr &path)
     : Value(where, type, true),
       PositionX(position_x),
       PositionY(position_y),
@@ -47,9 +47,10 @@ mcc::Result mcc::GenericBlockReference::GenerateResult() const
     auto x = PositionX->GenerateResultUnwrap();
     auto y = PositionY->GenerateResultUnwrap();
     auto z = PositionZ->GenerateResultUnwrap();
+    auto path = Path->GenerateResultUnwrap();
 
-    auto with_argument = x.WithArgument || y.WithArgument || z.WithArgument;
-    std::string x_value, y_value, z_value;
+    auto with_argument = x.WithArgument || y.WithArgument || z.WithArgument || path.WithArgument;
+    std::string x_value, y_value, z_value, path_value;
 
     switch (x.Type)
     {
@@ -96,11 +97,26 @@ mcc::Result mcc::GenericBlockReference::GenerateResult() const
         Error(Where, "z must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, z.Type);
     }
 
+    switch (path.Type)
+    {
+    case ResultType_Value:
+        path_value = path.Value;
+        break;
+
+    case ResultType_Argument:
+        with_argument = true;
+        path_value = path.Name;
+        break;
+
+    default:
+        Error(Where, "path must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, path.Type);
+    }
+
     return {
         .Type = ResultType_Reference,
         .WithArgument = with_argument,
         .ReferenceType = ReferenceType_Block,
         .Target = std::format("{} {} {}", x_value, y_value, z_value),
-        .Path = Path,
+        .Path = std::move(path_value),
     };
 }

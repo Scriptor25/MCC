@@ -1,4 +1,5 @@
 #include <utility>
+#include <mcc/command.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
@@ -37,7 +38,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
 mcc::ArrayInstruction::ArrayInstruction(
     const SourceLocation &where,
     TypeContext &context,
-    const ArrayOperationE array_operation,
+    const E_ArrayOperation array_operation,
     ResourceLocation location,
     ValuePtr array,
     ValuePtr value,

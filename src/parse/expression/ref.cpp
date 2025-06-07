@@ -10,11 +10,10 @@ mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
     Expect(TokenType_Operator, ">");
 
     Expect(TokenType_Other, "(");
-    auto target_type = ToTargetType(ExpectEnum("block", "entity", "storage").Value);
+    auto target_type = *ToReferenceType(ExpectEnum("block", "entity", "storage").Value);
     Expect(TokenType_Other, ",");
 
-    ExpressionPtr target_position_x, target_position_y, target_position_z, target_name;
-    ResourceLocation target_location;
+    ExpressionPtr target_position_x, target_position_y, target_position_z, target_name, target_location;
 
     switch (target_type)
     {
@@ -29,12 +28,12 @@ mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
         target_name = ParseExpression();
         break;
     case ReferenceType_Storage:
-        target_location = ParseResourceLocation();
+        target_location = ParseExpression();
         break;
     }
 
     Expect(TokenType_Other, ",");
-    auto path = Expect(TokenType_String).Value;
+    auto path = ParseExpression();
     Expect(TokenType_Other, ")");
 
     return std::make_unique<RefExpression>(
@@ -45,6 +44,6 @@ mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
         std::move(target_position_y),
         std::move(target_position_z),
         std::move(target_name),
-        target_location,
-        path);
+        std::move(target_location),
+        std::move(path));
 }

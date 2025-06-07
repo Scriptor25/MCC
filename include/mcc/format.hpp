@@ -8,7 +8,7 @@ namespace mcc
 {
     struct FormatNode
     {
-        explicit FormatNode(const SourceLocation &where);
+        explicit FormatNode(SourceLocation where);
 
         virtual ~FormatNode() = default;
 
@@ -20,7 +20,7 @@ namespace mcc
 
     struct StringNode final : FormatNode
     {
-        StringNode(const SourceLocation &where, const std::string &value);
+        StringNode(const SourceLocation &where, std::string value);
 
         std::ostream &Print(std::ostream &stream) const override;
         [[nodiscard]] ValuePtr Generate(Builder &builder, const Frame &frame) const override;

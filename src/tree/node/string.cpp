@@ -1,10 +1,11 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/format.hpp>
 
-mcc::StringNode::StringNode(const SourceLocation &where, const std::string &value)
+mcc::StringNode::StringNode(const SourceLocation &where, std::string value)
     : FormatNode(where),
-      Value(value)
+      Value(std::move(value))
 {
 }
 

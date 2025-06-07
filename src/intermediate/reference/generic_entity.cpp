@@ -5,7 +5,7 @@ mcc::ValuePtr mcc::GenericEntityReference::Create(
     const SourceLocation &where,
     const TypePtr &type,
     const ValuePtr &name,
-    const std::string &path)
+    const ValuePtr &path)
 {
     return std::make_shared<GenericEntityReference>(where, type, name, path);
 }
@@ -14,7 +14,7 @@ mcc::GenericEntityReference::GenericEntityReference(
     const SourceLocation &where,
     const TypePtr &type,
     const ValuePtr &name,
-    const std::string &path)
+    const ValuePtr &path)
     : Value(where, type, true),
       Name(name),
       Path(path)
@@ -35,9 +35,10 @@ bool mcc::GenericEntityReference::RequireStack() const
 mcc::Result mcc::GenericEntityReference::GenerateResult() const
 {
     auto name = Name->GenerateResultUnwrap();
+    auto path = Path->GenerateResultUnwrap();
 
-    auto with_argument = name.WithArgument;
-    std::string name_value;
+    auto with_argument = name.WithArgument || path.WithArgument;
+    std::string name_value, path_value;
 
     switch (name.Type)
     {
@@ -54,11 +55,26 @@ mcc::Result mcc::GenericEntityReference::GenerateResult() const
         Error(Where, "name must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, name.Type);
     }
 
+    switch (path.Type)
+    {
+    case ResultType_Value:
+        path_value = path.Value;
+        break;
+
+    case ResultType_Argument:
+        with_argument = true;
+        path_value = path.Name;
+        break;
+
+    default:
+        Error(Where, "path must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, path.Type);
+    }
+
     return {
         .Type = ResultType_Reference,
         .WithArgument = with_argument,
         .ReferenceType = ReferenceType_Entity,
         .Target = name_value,
-        .Path = Path,
+        .Path = path_value,
     };
 }

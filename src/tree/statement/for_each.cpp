@@ -1,4 +1,5 @@
 #include <utility>
+#include <mcc/block.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>

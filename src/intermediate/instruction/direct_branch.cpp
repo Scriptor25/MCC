@@ -1,5 +1,8 @@
 #include <utility>
+#include <mcc/block.hpp>
+#include <mcc/command.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 
@@ -57,7 +60,7 @@ void mcc::DirectBranchInstruction::Generate(CommandVector &commands, bool stack)
     if (Result)
     {
         auto branch_result = BranchResult->GenerateResult();
-        auto result        = Result->GenerateResult();
+        auto result = Result->GenerateResult();
 
         Assert(
             branch_result.Type == ResultType_Reference,

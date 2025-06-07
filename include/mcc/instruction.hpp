@@ -43,7 +43,7 @@ namespace mcc
         ArrayInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            ArrayOperationE array_operation,
+            E_ArrayOperation array_operation,
             ResourceLocation location,
             ValuePtr array,
             ValuePtr value,
@@ -53,7 +53,7 @@ namespace mcc
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
 
-        ArrayOperationE ArrayOperation;
+        E_ArrayOperation ArrayOperation;
         ResourceLocation Location;
         ValuePtr Array, Value;
         IndexT Index;
@@ -142,7 +142,7 @@ namespace mcc
         static InstructionPtr Create(
             const SourceLocation &where,
             TypeContext &context,
-            const ComparatorE &comparator,
+            const E_Comparator &comparator,
             const ResourceLocation &location,
             const ValuePtr &left,
             const ValuePtr &right);
@@ -150,7 +150,7 @@ namespace mcc
         ComparisonInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            ComparatorE comparator,
+            E_Comparator comparator,
             ResourceLocation location,
             ValuePtr left,
             ValuePtr right);
@@ -160,7 +160,7 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        ComparatorE Comparator;
+        E_Comparator Comparator;
         ResourceLocation Location;
         ValuePtr Left, Right;
     };
@@ -292,14 +292,14 @@ namespace mcc
         static InstructionPtr Create(
             const SourceLocation &where,
             TypeContext &context,
-            OperatorE operator_,
+            E_Operator operator_,
             const ResourceLocation &location,
             const std::vector<ValuePtr> &operands);
 
         OperationInstruction(
             const SourceLocation &where,
             TypeContext &context,
-            OperatorE operator_,
+            E_Operator operator_,
             ResourceLocation location,
             const std::vector<ValuePtr> &operands);
         ~OperationInstruction() override;
@@ -308,7 +308,7 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        OperatorE Operator;
+        E_Operator Operator;
         ResourceLocation Location;
         std::vector<ValuePtr> Operands;
     };

@@ -1,6 +1,8 @@
+#include <mcc/block.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>

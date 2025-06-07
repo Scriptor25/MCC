@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <mcc/common.hpp>
+#include <mcc/resource.hpp>
 #include <nlohmann/json.hpp>
 
 namespace mcc

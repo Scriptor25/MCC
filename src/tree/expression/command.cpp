@@ -1,13 +1,14 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::CommandExpression::CommandExpression(const SourceLocation &where, const TypePtr &type, const CommandT &command)
+mcc::CommandExpression::CommandExpression(const SourceLocation &where, TypePtr type, CommandT command)
     : Expression(where),
-      Type(type),
-      Command(command)
+      Type(std::move(type)),
+      Command(std::move(command))
 {
 }
 

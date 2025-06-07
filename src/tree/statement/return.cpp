@@ -1,6 +1,8 @@
 #include <mcc/builder.hpp>
+#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/statement.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::ReturnStatement::ReturnStatement(const SourceLocation &where, ExpressionPtr value)
@@ -17,9 +19,25 @@ std::ostream &mcc::ReturnStatement::Print(std::ostream &stream) const
 void mcc::ReturnStatement::Generate(Builder &builder, Frame &frame) const
 {
     if (!Value)
-        return (void) builder.CreateReturnVoid(Where);
+    {
+        Assert(
+            frame.ResultType->IsVoid(),
+            Where,
+            "cannot return value of type {} for result type {}",
+            builder.GetContext().GetVoid(),
+            frame.ResultType);
+
+        return (void) builder.CreateReturn(Where);
+    }
 
     const auto value = Value->GenerateValue(builder, frame);
-    // TODO: check against function result type
+
+    Assert(
+        value->Type == frame.ResultType,
+        Where,
+        "cannot return value of type {} for result type {}",
+        value->Type,
+        frame.ResultType);
+
     (void) builder.CreateReturn(Where, value);
 }

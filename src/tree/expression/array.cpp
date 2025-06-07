@@ -2,7 +2,6 @@
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
-#include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
@@ -51,7 +50,9 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
         return ConstantArray::Create(Where, type, constants, false);
 
     auto array = builder.Allocate(Where, type, false);
-    for (auto value : values)
+
+    for (const auto &value : values)
         (void) builder.CreateAppend(Where, array, value, true);
+
     return array;
 }

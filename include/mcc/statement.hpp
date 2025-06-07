@@ -148,8 +148,8 @@ namespace mcc
             const SourceLocation &where,
             StatementPtr try_,
             StatementPtr catch_,
-            const std::string &variable,
-            const TypePtr &error_type);
+            std::string variable,
+            TypePtr error_type);
 
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
@@ -163,7 +163,7 @@ namespace mcc
     {
         VariableStatement(
             const SourceLocation &where,
-            DeclaratorE declarator,
+            E_Declarator declarator,
             bool is_reference,
             std::vector<std::string> names,
             TypePtr type,
@@ -172,7 +172,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
         void Generate(Builder &builder, Frame &frame) const override;
 
-        DeclaratorE Declarator;
+        E_Declarator Declarator;
         bool IsReference;
         std::vector<std::string> Names;
         TypePtr Type;

@@ -1,4 +1,4 @@
-#include <mcc/common.hpp>
+#include <mcc/result.hpp>
 
 bool mcc::Result::operator==(const Result &result) const
 {

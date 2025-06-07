@@ -2,6 +2,7 @@
 
 #include <map>
 #include <mcc/common.hpp>
+#include <mcc/result.hpp>
 #include <mcc/value.hpp>
 
 namespace mcc

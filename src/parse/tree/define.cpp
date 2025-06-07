@@ -26,11 +26,11 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
     }
     Expect(TokenType_Other, ")");
 
-    TypePtr result;
+    TypePtr result_type;
     if (SkipIf(TokenType_Other, ":"))
-        result = ParseType();
+        result_type = ParseType();
     else
-        result = m_Context.GetVoid();
+        result_type = m_Context.GetVoid();
 
     auto throws = SkipIf(TokenType_Symbol, "throws");
 
@@ -48,5 +48,5 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
     if (At(TokenType_Other, "{"))
         body = ParseMultiStatement();
 
-    return std::make_unique<DefineNode>(where, location, parameters, result, throws, tags, std::move(body));
+    return std::make_unique<DefineNode>(where, location, parameters, result_type, throws, tags, std::move(body));
 }

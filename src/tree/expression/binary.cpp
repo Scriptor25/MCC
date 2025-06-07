@@ -1,4 +1,5 @@
 #include <set>
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
@@ -8,11 +9,11 @@
 
 mcc::BinaryExpression::BinaryExpression(
     const SourceLocation &where,
-    const std::string &operator_,
+    std::string operator_,
     ExpressionPtr left,
     ExpressionPtr right)
     : Expression(where),
-      Operator(operator_),
+      Operator(std::move(operator_)),
       Left(std::move(left)),
       Right(std::move(right))
 {
@@ -20,7 +21,8 @@ mcc::BinaryExpression::BinaryExpression(
 
 mcc::ExpressionPtr mcc::BinaryExpression::Merge()
 {
-    static const std::set<std::string_view> mergeable{
+    static const std::set<std::string_view> mergeable
+    {
         "+",
         "-",
         "*",
@@ -156,21 +158,9 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame
     if (store)
         operator_string.pop_back();
 
-    auto operator_ = Operator_None;
-    if (operator_string == "+")
-        operator_ = Operator_Add;
-    if (operator_string == "-")
-        operator_ = Operator_Sub;
-    if (operator_string == "*")
-        operator_ = Operator_Mul;
-    if (operator_string == "/")
-        operator_ = Operator_Div;
-    if (operator_string == "%")
-        operator_ = Operator_Rem;
-
-    if (operator_)
+    if (const auto operator_ = ToOperator(operator_string))
     {
-        auto operation = builder.CreateOperation(Where, operator_, { left, right });
+        auto operation = builder.CreateOperation(Where, *operator_, { left, right });
         if (store)
             return builder.CreateStore(Where, left, operation);
         return operation;

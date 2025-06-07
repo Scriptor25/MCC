@@ -1,8 +1,8 @@
 #pragma once
 
-#include <set>
 #include <mcc/common.hpp>
 #include <mcc/package.hpp>
+#include <mcc/result.hpp>
 
 namespace mcc
 {
@@ -51,30 +51,6 @@ namespace mcc
         ResourceLocation Location;
     };
 
-    struct Block final : Value
-    {
-        static BlockPtr Create(const SourceLocation &where, TypeContext &context, const FunctionPtr &parent);
-
-        Block(const SourceLocation &where, TypeContext &context, FunctionPtr parent);
-
-        void Generate(CommandVector &commands, bool stack) const override;
-        [[nodiscard]] bool RequireStack() const override;
-
-        [[nodiscard]] InstructionPtr GetTerminator() const;
-
-        ResourceLocation GetLocation() const;
-        void Erase() const;
-
-        std::weak_ptr<Block> Self;
-
-        FunctionPtr Parent;
-
-        std::set<BlockPtr> Predecessors;
-        std::set<BlockPtr> Successors;
-
-        std::vector<InstructionPtr> Instructions;
-    };
-
     struct ElementReference final : Value
     {
         static ValuePtr Create(const SourceLocation &where, const ValuePtr &base, const ValuePtr &index);
@@ -87,48 +63,6 @@ namespace mcc
 
         ValuePtr Base;
         ValuePtr Index;
-    };
-
-    struct Function final : Value
-    {
-        static FunctionPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const ResourceLocation &location,
-            const ParameterList &parameters,
-            const TypePtr &result_type,
-            bool throws);
-
-        Function(
-            const SourceLocation &where,
-            const TypePtr &type,
-            ResourceLocation location,
-            const ParameterList &parameters,
-            TypePtr result_type,
-            bool throws);
-
-        void Generate(CommandVector &commands, bool stack) const override;
-        [[nodiscard]] bool RequireStack() const override;
-        [[nodiscard]] Result GenerateResult() const override;
-
-        bool RemoveUnreferencedBlocks();
-        bool MergeConsecutiveBlocks();
-
-        void OptimizeBlocks();
-        void GenerateFunction(Package &package) const;
-
-        void ForwardArguments(std::string &prefix, std::string &arguments) const;
-
-        [[nodiscard]] ResourceLocation GetLocation(const BlockPtr &target_block) const;
-        BlockPtr Erase(const BlockPtr &target_block);
-
-        ResourceLocation Location;
-        ParameterList Parameters;
-        TypePtr ResultType;
-        bool Throws;
-
-        IndexT StackIndex = 0;
-        std::vector<BlockPtr> Blocks;
     };
 
     struct FunctionResult final : Value
@@ -151,7 +85,7 @@ namespace mcc
             const ValuePtr &position_x,
             const ValuePtr &position_y,
             const ValuePtr &position_z,
-            const std::string &path);
+            const ValuePtr &path);
 
         GenericBlockReference(
             const SourceLocation &where,
@@ -159,14 +93,13 @@ namespace mcc
             const ValuePtr &position_x,
             const ValuePtr &position_y,
             const ValuePtr &position_z,
-            const std::string &path);
+            const ValuePtr &path);
         ~GenericBlockReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        ValuePtr PositionX, PositionY, PositionZ;
-        std::string Path;
+        ValuePtr PositionX, PositionY, PositionZ, Path;
     };
 
     struct GenericEntityReference final : Value
@@ -175,24 +108,30 @@ namespace mcc
             const SourceLocation &where,
             const TypePtr &type,
             const ValuePtr &name,
-            const std::string &path);
+            const ValuePtr &path);
 
         GenericEntityReference(
             const SourceLocation &where,
             const TypePtr &type,
             const ValuePtr &name,
-            const std::string &path);
+            const ValuePtr &path);
         ~GenericEntityReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        ValuePtr Name;
-        std::string Path;
+        ValuePtr Name, Path;
     };
 
     struct GenericStorageReference final : Value
     {
+        static ValuePtr Create(
+            const SourceLocation &where,
+            const TypePtr &type,
+            const ValuePtr &location,
+            const ValuePtr &path,
+            bool is_mutable);
+
         static ValuePtr Create(
             const SourceLocation &where,
             const TypePtr &type,
@@ -203,15 +142,14 @@ namespace mcc
         GenericStorageReference(
             const SourceLocation &where,
             const TypePtr &type,
-            ResourceLocation location,
-            std::string path,
+            ValuePtr location,
+            ValuePtr path,
             bool is_mutable);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        ResourceLocation Location;
-        std::string Path;
+        ValuePtr Location, Path;
     };
 
     struct MemberReference final : Value

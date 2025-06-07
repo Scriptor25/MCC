@@ -1,5 +1,8 @@
 #include <utility>
+#include <mcc/block.hpp>
+#include <mcc/command.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 

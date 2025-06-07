@@ -1,3 +1,4 @@
+#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
@@ -8,10 +9,10 @@
 
 mcc::VectorExpression::VectorExpression(
     const SourceLocation &where,
-    const std::string &operator_,
+    std::string operator_,
     std::vector<ExpressionPtr> operands)
     : Expression(where),
-      Operator(operator_),
+      Operator(std::move(operator_)),
       Operands(std::move(operands))
 {
 }
@@ -48,18 +49,7 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame
             operand_constants.emplace_back(constant);
     }
 
-    auto operator_ = Operator_None;
-    if (Operator == "+")
-        operator_ = Operator_Add;
-    if (Operator == "-")
-        operator_ = Operator_Sub;
-    if (Operator == "*")
-        operator_ = Operator_Mul;
-    if (Operator == "/")
-        operator_ = Operator_Div;
-    if (Operator == "%")
-        operator_ = Operator_Rem;
-
+    const auto operator_ = ToOperator(Operator);
     if (!operator_)
         Error(Where, "undefined binary operator {}", Operator);
 
@@ -67,8 +57,7 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame
     {
         auto value = operand_constants.front()->Value;
         for (unsigned i = 1; i < operand_constants.size(); ++i)
-        {
-            switch (operator_)
+            switch (*operator_)
             {
             case Operator_Add:
                 value += operand_constants[i]->Value;
@@ -85,12 +74,9 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame
             case Operator_Rem:
                 value %= operand_constants[i]->Value;
                 break;
-            default:
-                break;
             }
-        }
         return ConstantNumber::Create(Where, builder.GetContext(), value);
     }
 
-    return builder.CreateOperation(Where, operator_, operand_values);
+    return builder.CreateOperation(Where, *operator_, operand_values);
 }

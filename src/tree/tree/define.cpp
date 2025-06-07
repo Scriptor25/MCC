@@ -1,7 +1,9 @@
 #include <utility>
+#include <mcc/block.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/statement.hpp>
 #include <mcc/tree.hpp>
@@ -12,14 +14,14 @@ mcc::DefineNode::DefineNode(
     const SourceLocation &where,
     ResourceLocation location,
     ParameterList parameters,
-    TypePtr result,
+    TypePtr result_type,
     const bool throws,
     const std::vector<ResourceTag> &tags,
     StatementPtr body)
     : TreeNode(where),
       Location(std::move(location)),
       Parameters(std::move(parameters)),
-      Result(std::move(result)),
+      ResultType(std::move(result_type)),
       Throws(throws),
       Tags(tags),
       Body(std::move(body))
@@ -36,8 +38,8 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
         stream << Parameters[i].Name << ": " << Parameters[i].Type;
     }
     stream << ')';
-    if (Result)
-        stream << ": " << Result;
+    if (ResultType)
+        stream << ": " << ResultType;
     if (Throws)
         stream << " throws";
     stream << ' ';
@@ -57,12 +59,12 @@ void mcc::DefineNode::Generate(Builder &builder) const
     FunctionPtr function;
 
     if (!builder.HasFunction(Location))
-        function = builder.CreateFunction(Where, Location, Parameters, Result, Throws);
+        function = builder.CreateFunction(Where, Location, Parameters, ResultType, Throws);
     else
     {
         function = builder.GetFunction(Where, Location);
         Assert(!Body || function->Blocks.empty(), Where, "already implemented function {}", Location);
-        Assert(function->ResultType == Result, Where, "cannot implement function with different result type");
+        Assert(function->ResultType == ResultType, Where, "cannot implement function with different result type");
         Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
         Assert(
             function->Parameters.size() == Parameters.size(),
@@ -96,27 +98,27 @@ void mcc::DefineNode::Generate(Builder &builder) const
         builder.InsertVariable(Where, name_, ArgumentValue::Create(Where, type_, name_));
 
     Frame target_frame;
+    target_frame.ResultType = ResultType;
     Body->Generate(builder, target_frame);
 
     builder.PopVariables();
 
-    auto result = Result;
     for (auto &block : function->Blocks)
         if (auto terminator = block->GetTerminator())
         {
             if (const auto instruction = std::dynamic_pointer_cast<ReturnInstruction>(terminator))
             {
                 auto type = instruction->Value ? instruction->Value->Type : builder.GetContext().GetVoid();
-                Assert(type == result, Where, "cannot return value of type {} for result type {}", type, result);
+                Assert(type == ResultType, Where, "cannot return value of type {} for result type {}", type, ResultType);
             }
         }
-        else if (result == builder.GetContext().GetVoid())
+        else if (ResultType->IsVoid())
         {
             builder.SetInsertBlock(block);
-            (void) builder.CreateReturnVoid(Where);
+            (void) builder.CreateReturn(Where);
         }
         else
-            Error(Where, "not all paths return");
+            Error(Where, "not all paths return a value");
 
     builder.SetInsertBlock(nullptr);
 }
@@ -125,12 +127,12 @@ void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem
 {
     if (!builder.HasFunction(Location))
     {
-        builder.CreateFunction(Where, Location, Parameters, Result, Throws);
+        builder.CreateFunction(Where, Location, Parameters, ResultType, Throws);
         return;
     }
 
     const auto function = builder.GetFunction(Where, Location);
-    Assert(function->ResultType == Result, Where, "cannot implement function with different result type");
+    Assert(function->ResultType == ResultType, Where, "cannot implement function with different result type");
     Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
     Assert(
         function->Parameters.size() == Parameters.size(),

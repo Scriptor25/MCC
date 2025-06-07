@@ -1,4 +1,5 @@
 #include <utility>
+#include <mcc/command.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 
@@ -30,7 +31,7 @@ void mcc::CommandInstruction::Generate(CommandVector &commands, const bool stack
         return;
     }
 
-    auto command     = Command;
+    auto command = Command;
     const auto macro = command.front() == '$';
     if (macro)
         command.erase(command.begin());

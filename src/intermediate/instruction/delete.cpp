@@ -1,3 +1,4 @@
+#include <mcc/command.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
