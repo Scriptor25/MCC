@@ -1,4 +1,5 @@
 #include <utility>
+#include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
 mcc::FunctionType::FunctionType(
@@ -57,7 +58,7 @@ std::ostream &mcc::FunctionType::Print(std::ostream &stream) const
 
 mcc::ConstantPtr mcc::FunctionType::GetNull(const SourceLocation &where) const
 {
-    return nullptr;
+    return ConstantResource::Create(where, Context, {});
 }
 
 bool mcc::FunctionType::IsFunction() const

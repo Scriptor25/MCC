@@ -56,7 +56,7 @@ void mcc::TryCatchStatement::Generate(Builder &builder, Frame &frame) const
         builder.PushVariables();
 
         if (!Variable.empty())
-            (void) builder.CreateStoreResult(Catch->Where, ErrorType, Variable);
+            (void) builder.StoreResult(Catch->Where, ErrorType, Variable);
 
         Catch->Generate(builder, frame);
 

@@ -100,6 +100,7 @@ namespace mcc
         ConstantResource(const SourceLocation &where, TypeContext &context, ResourceLocation location);
 
         [[nodiscard]] Result GenerateResult() const override;
+        [[nodiscard]] Result GenerateResultUnwrap() const override;
 
         ResourceLocation Location;
     };

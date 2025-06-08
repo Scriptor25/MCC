@@ -39,14 +39,14 @@ void mcc::ForEachStatement::Generate(Builder &builder, Frame &frame) const
     target_frame.Tail = tail_target;
 
     const auto iterable = Iterable->GenerateValue(builder, frame);
-    const auto iterable_copy = builder.Allocate(Where, iterable->Type, true);
-    (void) builder.CreateStore(Where, iterable_copy, iterable);
+    const auto mutable_iterable = builder.Allocate(Where, iterable->Type, true);
+    (void) builder.CreateStore(Where, mutable_iterable, iterable);
     (void) builder.CreateDirect(Where, head_target);
 
     builder.SetInsertBlock(head_target);
     const auto first_element = ElementReference::Create(
         Where,
-        iterable_copy,
+        mutable_iterable,
         ConstantNumber::Create(Where, builder.GetContext(), 0));
     const auto condition = builder.CreateNotNull(Where, first_element);
     (void) builder.CreateBranch(Where, condition, loop_target, tail_target);

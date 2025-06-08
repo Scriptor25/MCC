@@ -25,6 +25,7 @@ namespace mcc
         void Generate(CommandVector &commands, bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
+        [[nodiscard]] Result GenerateResultUnwrap() const override;
 
         bool RemoveUnreferencedBlocks();
         bool MergeConsecutiveBlocks();

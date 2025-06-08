@@ -19,6 +19,7 @@ std::string mcc::ObjectType::String() const
             first = false;
         else
             result += ", ";
+
         result += key + ": " + element->String();
     }
 
@@ -37,6 +38,7 @@ std::ostream &mcc::ObjectType::Print(std::ostream &stream) const
             first = false;
         else
             stream << ", ";
+
         element->Print(stream << key << ": ");
     }
 
@@ -49,12 +51,13 @@ mcc::ConstantPtr mcc::ObjectType::GetNull(const SourceLocation &where) const
     for (auto &[key_, element_] : Elements)
     {
         const auto value = element_->GetNull(where);
+
         if (!value)
-        {
             return nullptr;
-        }
+
         values[key_] = value;
     }
+
     return ConstantObject::Create(where, Context, values);
 }
 

@@ -20,6 +20,15 @@ mcc::Result mcc::ConstantResource::GenerateResult() const
 {
     return {
         .Type = ResultType_Value,
+        .Value = '"' + Location.String() + '"',
+        .NotNull = true,
+    };
+}
+
+mcc::Result mcc::ConstantResource::GenerateResultUnwrap() const
+{
+    return {
+        .Type = ResultType_Value,
         .Value = Location.String(),
         .NotNull = true,
     };

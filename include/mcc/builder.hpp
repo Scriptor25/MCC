@@ -44,7 +44,7 @@ namespace mcc
             const TypePtr &type,
             const std::string &name,
             bool is_mutable,
-            const ValuePtr &initializer);
+            ValuePtr initializer);
         ValuePtr InsertVariable(const SourceLocation &where, const std::string &name, const ValuePtr &value);
         [[nodiscard]] bool HasVariable(const std::string &name) const;
         [[nodiscard]] ValuePtr GetVariable(const SourceLocation &where, const std::string &name) const;
@@ -138,7 +138,7 @@ namespace mcc
             const std::string &key,
             bool force = false) const;
 
-        ValuePtr CreateStoreResult(const SourceLocation &where, const TypePtr &type, const std::string &name);
+        ValuePtr StoreResult(const SourceLocation &where, const TypePtr &type, const std::string &name);
 
         [[nodiscard]] InstructionPtr CreateNotNull(const SourceLocation &where, const ValuePtr &value) const;
         [[nodiscard]] InstructionPtr CreateDelete(const SourceLocation &where, const ValuePtr &value) const;

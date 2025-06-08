@@ -231,19 +231,6 @@ mcc::InstructionPtr mcc::Builder::CreateMacro(
     return Insert(where, MacroInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, name, arguments));
 }
 
-mcc::ValuePtr mcc::Builder::Allocate(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const bool is_mutable) const
-{
-    Assert(!!m_InsertBlock, where, "insert block must not be null");
-
-    const auto location = m_InsertBlock->Parent->Location;
-    const auto index = m_InsertBlock->Parent->StackIndex++;
-
-    return GenericStorageReference::Create(where, type, location, std::format("stack[0].val[{}]", index), is_mutable);
-}
-
 mcc::InstructionPtr mcc::Builder::CreateAppend(
     const SourceLocation &where,
     const ValuePtr &array,
@@ -303,15 +290,6 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
     return Insert(
         where,
         ObjectInstruction::CreateInsert(where, m_Context, m_InsertBlock->Parent->Location, object, value, key));
-}
-
-mcc::ValuePtr mcc::Builder::CreateStoreResult(const SourceLocation &where, const TypePtr &type, const std::string &name)
-{
-    Assert(!!type, where, "type must not be null");
-    Assert(!name.empty(), where, "name must not be empty");
-
-    const auto result = FunctionResult::Create(where, type, m_InsertBlock->Parent->Location);
-    return CreateVariable(where, type, name, false, result);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateNotNull(const SourceLocation &where, const ValuePtr &value) const

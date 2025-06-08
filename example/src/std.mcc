@@ -20,7 +20,7 @@ define random(min: number, max: number): number {
 define floor(x: number): number {
     let result: number
 
-    let& tmp = ref<number>(storage, std:floor, "tmp") = x
+    let& tmp = ref<number>(storage, "std:floor", "tmp") = x
     !store(result, "data get storage std:floor tmp 1")
     delete tmp
 

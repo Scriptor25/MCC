@@ -20,7 +20,7 @@ bool mcc::ArgumentValue::RequireStack() const
 
 mcc::Result mcc::ArgumentValue::GenerateResult() const
 {
-    const auto stringify = Type->IsString();
+    const auto stringify = Type->IsString() || Type->IsFunction();
 
     return {
         .Type = ResultType_Argument,

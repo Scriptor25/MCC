@@ -64,6 +64,15 @@ mcc::Result mcc::Function::GenerateResult() const
     };
 }
 
+mcc::Result mcc::Function::GenerateResultUnwrap() const
+{
+    return {
+        .Type = ResultType_Value,
+        .Value = Location.String(),
+        .NotNull = true,
+    };
+}
+
 bool mcc::Function::RemoveUnreferencedBlocks()
 {
     std::vector<BlockPtr> blocks;
@@ -127,8 +136,18 @@ void mcc::Function::GenerateFunction(Package &package) const
         {
             commands.Append("data modify storage {} stack prepend value {{}}", Location);
 
-            for (unsigned s = 0; s < StackIndex; ++s)
-                commands.Append("data modify storage {} stack[0].val append value 0", Location);
+            if (StackIndex)
+            {
+                std::string values;
+                for (unsigned s = 0; s < StackIndex; ++s)
+                {
+                    if (s)
+                        values += ',';
+                    values += '0';
+                }
+
+                commands.Append("data modify storage {} stack[0].val set value [{}]", Location, values);
+            }
         }
 
         Blocks[i]->Generate(commands, require_stack);

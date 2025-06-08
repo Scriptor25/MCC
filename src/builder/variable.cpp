@@ -1,6 +1,8 @@
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/function.hpp>
+#include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::Builder::CreateVariable(
@@ -8,7 +10,7 @@ mcc::ValuePtr mcc::Builder::CreateVariable(
     const TypePtr &type,
     const std::string &name,
     const bool is_mutable,
-    const ValuePtr &initializer)
+    ValuePtr initializer)
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!m_Variables.empty(), where, "variables must not be empty");
@@ -18,9 +20,12 @@ mcc::ValuePtr mcc::Builder::CreateVariable(
     auto &variable = m_Variables.back()[name];
     Assert(!variable, where, "already defined variable {}", name);
 
+    if (!initializer)
+        initializer = type->GetNull(where);
+
     variable = Allocate(where, type, is_mutable);
-    if (initializer)
-        (void) CreateStore(where, variable, initializer, true);
+    (void) CreateStore(where, variable, initializer, true);
+
     return variable;
 }
 
