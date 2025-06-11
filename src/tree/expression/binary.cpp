@@ -80,27 +80,27 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame
     if (constant_left && constant_right)
     {
         if (Operator == "<")
-            return ConstantBoolean::Create(
+            return ConstantNumber::Create(
                 Where,
                 builder.GetContext(),
                 constant_left->Value < constant_right->Value);
         if (Operator == ">")
-            return ConstantBoolean::Create(
+            return ConstantNumber::Create(
                 Where,
                 builder.GetContext(),
                 constant_left->Value > constant_right->Value);
         if (Operator == "<=")
-            return ConstantBoolean::Create(
+            return ConstantNumber::Create(
                 Where,
                 builder.GetContext(),
                 constant_left->Value <= constant_right->Value);
         if (Operator == ">=")
-            return ConstantBoolean::Create(
+            return ConstantNumber::Create(
                 Where,
                 builder.GetContext(),
                 constant_left->Value >= constant_right->Value);
         if (Operator == "==")
-            return ConstantBoolean::Create(
+            return ConstantNumber::Create(
                 Where,
                 builder.GetContext(),
                 constant_left->Value == constant_right->Value);

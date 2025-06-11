@@ -17,14 +17,16 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
 
         if (name == "void")
             return m_Context.GetVoid();
-        if (name == "null")
-            return m_Context.GetNull();
-        if (name == "boolean")
-            return m_Context.GetBoolean();
         if (name == "number")
             return m_Context.GetNumber();
         if (name == "string")
             return m_Context.GetString();
+        if (name == "array")
+            return m_Context.GetAnyArray();
+        if (name == "object")
+            return m_Context.GetAnyObject();
+        if (name == "function")
+            return m_Context.GetAnyFunction();
 
         if (auto type = m_Context.GetNamed(name))
             return type;
@@ -115,14 +117,14 @@ mcc::TypePtr mcc::Parser::ParseUnionType()
 {
     auto type = ParseArrayType();
 
-    if (SkipIf(TokenType_Operator, "|"))
+    if (SkipIf(TokenType_Other, "|"))
     {
         std::set<TypePtr> elements;
         elements.insert(type);
 
         do
             elements.insert(ParseArrayType());
-        while (SkipIf(TokenType_Operator, "|"));
+        while (SkipIf(TokenType_Other, "|"));
 
         type = m_Context.GetUnion(elements);
     }

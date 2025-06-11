@@ -24,7 +24,7 @@ mcc::ValuePtr mcc::GenericStorageReference::Create(
     return std::make_shared<GenericStorageReference>(
         where,
         type,
-        ConstantResource::Create(where, type->Context, location),
+        ConstantResource::Create(where, type->Context.GetVoid(), location),
         ConstantString::Create(where, type->Context, path),
         is_mutable);
 }

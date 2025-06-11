@@ -71,7 +71,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
         auto argument = arguments[i]->Type;
         auto parameter = function->Parameters[i].Type;
         Assert(
-            argument == parameter,
+            SameOrSpecial(argument, parameter),
             Where,
             "cannot assign value of type {} to argument of type {}",
             argument,

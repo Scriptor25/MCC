@@ -18,7 +18,7 @@ mcc::NotNullInstruction::NotNullInstruction(
     TypeContext &context,
     ResourceLocation location,
     ValuePtr value)
-    : Instruction(where, context.GetBoolean(), false),
+    : Instruction(where, context.GetNumber(), false),
       Location(std::move(location)),
       Value(std::move(value))
 {

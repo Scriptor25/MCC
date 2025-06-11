@@ -49,16 +49,27 @@ mcc::ConstantPtr mcc::ObjectType::GetNull(const SourceLocation &where) const
 {
     std::map<std::string, ConstantPtr> values;
     for (auto &[key_, element_] : Elements)
+        values[key_] = element_->GetNull(where);
+
+    return ConstantObject::Create(where, Self.lock(), values);
+}
+
+bool mcc::ObjectType::HasSpecial(const TypePtr &other) const
+{
+    if (other->IsAny() || !other->IsObject())
+        return false;
+
+    const auto other_object = std::dynamic_pointer_cast<ObjectType>(other);
+    for (auto &[key_, element_] : Elements)
     {
-        const auto value = element_->GetNull(where);
+        if (!other_object->Elements.contains(key_))
+            return false;
 
-        if (!value)
-            return nullptr;
-
-        values[key_] = value;
+        if (!SameOrSpecial(other_object->Elements[key_], element_))
+            return false;
     }
 
-    return ConstantObject::Create(where, Context, values);
+    return true;
 }
 
 bool mcc::ObjectType::IsObject() const

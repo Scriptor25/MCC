@@ -46,17 +46,25 @@ std::ostream &mcc::TupleType::Print(std::ostream &stream) const
 mcc::ConstantPtr mcc::TupleType::GetNull(const SourceLocation &where) const
 {
     std::vector<ConstantPtr> values;
-
     for (auto &element : Elements)
-    {
-        auto value = element->GetNull(where);
-        if (!value)
-            return nullptr;
-
-        values.emplace_back(value);
-    }
+        values.emplace_back(element->GetNull(where));
 
     return ConstantArray::Create(where, Self.lock(), values, false);
+}
+
+bool mcc::TupleType::HasSpecial(const TypePtr &other) const
+{
+    if (other->IsAny() || !other->IsTuple())
+        return false;
+
+    const auto other_tuple = std::dynamic_pointer_cast<TupleType>(other);
+    if (other_tuple->Elements.size() != Elements.size())
+        return false;
+
+    for (unsigned i = 0; i < Elements.size(); ++i)
+        if (!SameOrSpecial(other_tuple->Elements[i], Elements[i]))
+            return false;
+    return true;
 }
 
 bool mcc::TupleType::IsTuple() const

@@ -1,3 +1,4 @@
+#include <mcc/error.hpp>
 #include <mcc/type.hpp>
 
 mcc::VoidType::VoidType(TypeContext &context)
@@ -17,7 +18,12 @@ std::ostream &mcc::VoidType::Print(std::ostream &stream) const
 
 mcc::ConstantPtr mcc::VoidType::GetNull(const SourceLocation &where) const
 {
-    return nullptr;
+    Error(where, "cannot get null value for type void");
+}
+
+bool mcc::VoidType::HasSpecial(const TypePtr &other) const
+{
+    return false;
 }
 
 bool mcc::VoidType::IsVoid() const

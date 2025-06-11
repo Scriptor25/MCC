@@ -20,11 +20,12 @@ void mcc::ReturnStatement::Generate(Builder &builder, Frame &frame) const
 {
     if (!Value)
     {
+        auto void_type = builder.GetContext().GetVoid();
         Assert(
-            frame.ResultType->IsVoid(),
+            SameOrSpecial(void_type, frame.ResultType),
             Where,
             "cannot return value of type {} for result type {}",
-            builder.GetContext().GetVoid(),
+            void_type,
             frame.ResultType);
 
         return (void) builder.CreateReturn(Where);
@@ -33,7 +34,7 @@ void mcc::ReturnStatement::Generate(Builder &builder, Frame &frame) const
     const auto value = Value->GenerateValue(builder, frame);
 
     Assert(
-        value->Type == frame.ResultType,
+        SameOrSpecial(value->Type, frame.ResultType),
         Where,
         "cannot return value of type {} for result type {}",
         value->Type,

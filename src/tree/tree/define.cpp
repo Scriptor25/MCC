@@ -109,7 +109,12 @@ void mcc::DefineNode::Generate(Builder &builder) const
             if (const auto instruction = std::dynamic_pointer_cast<ReturnInstruction>(terminator))
             {
                 auto type = instruction->Value ? instruction->Value->Type : builder.GetContext().GetVoid();
-                Assert(type == ResultType, Where, "cannot return value of type {} for result type {}", type, ResultType);
+                Assert(
+                    SameOrSpecial(type, ResultType),
+                    Where,
+                    "cannot return value of type {} for result type {}",
+                    type,
+                    ResultType);
             }
         }
         else if (ResultType->IsVoid())

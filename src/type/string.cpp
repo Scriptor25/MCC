@@ -21,6 +21,11 @@ mcc::ConstantPtr mcc::StringType::GetNull(const SourceLocation &where) const
     return ConstantString::Create(where, Context, "");
 }
 
+bool mcc::StringType::HasSpecial(const TypePtr &other) const
+{
+    return false;
+}
+
 bool mcc::StringType::IsString() const
 {
     return true;

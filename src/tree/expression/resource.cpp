@@ -2,8 +2,10 @@
 #include <mcc/block.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
+#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/function.hpp>
+#include <mcc/type.hpp>
 
 mcc::ResourceExpression::ResourceExpression(const SourceLocation &where, ResourceLocation location)
     : Expression(where),
@@ -24,9 +26,5 @@ mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder, const Fra
     if (builder.HasFunction(Location))
         return builder.GetFunction(Where, Location);
 
-    auto location = Location;
-    if (location.Namespace.empty())
-        location.Namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
-
-    return ConstantResource::Create(Where, builder.GetContext(), location);
+    Error(Where, "no global symbol or function at resource location {}", Location);
 }

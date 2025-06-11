@@ -10,26 +10,6 @@ mcc::TypePtr mcc::TypeContext::GetVoid()
     return m_Void;
 }
 
-mcc::TypePtr mcc::TypeContext::GetNull()
-{
-    if (!m_Null)
-    {
-        m_Null = std::make_shared<NullType>(*this);
-        m_Null->Self = m_Null;
-    }
-    return m_Null;
-}
-
-mcc::TypePtr mcc::TypeContext::GetBoolean()
-{
-    if (!m_Boolean)
-    {
-        m_Boolean = std::make_shared<BooleanType>(*this);
-        m_Boolean->Self = m_Boolean;
-    }
-    return m_Boolean;
-}
-
 mcc::TypePtr mcc::TypeContext::GetNumber()
 {
     if (!m_Number)
@@ -105,6 +85,36 @@ mcc::TypePtr mcc::TypeContext::GetFunction(const std::vector<TypePtr> &parameter
     return type;
 }
 
+mcc::TypePtr mcc::TypeContext::GetAnyArray()
+{
+    if (!m_AnyArray)
+    {
+        m_AnyArray = std::make_shared<AnyArrayType>(*this);
+        m_AnyArray->Self = m_AnyArray;
+    }
+    return m_AnyArray;
+}
+
+mcc::TypePtr mcc::TypeContext::GetAnyObject()
+{
+    if (!m_AnyObject)
+    {
+        m_AnyObject = std::make_shared<AnyObjectType>(*this);
+        m_AnyObject->Self = m_AnyObject;
+    }
+    return m_AnyObject;
+}
+
+mcc::TypePtr mcc::TypeContext::GetAnyFunction()
+{
+    if (!m_AnyFunction)
+    {
+        m_AnyFunction = std::make_shared<AnyFunctionType>(*this);
+        m_AnyFunction->Self = m_AnyFunction;
+    }
+    return m_AnyFunction;
+}
+
 mcc::TypePtr mcc::TypeContext::GetUnionOrSingle(const std::set<TypePtr> &elements)
 {
     return elements.size() == 1
@@ -121,5 +131,7 @@ mcc::TypePtr mcc::TypeContext::SetNamed(const std::string &name, const TypePtr &
 
 mcc::TypePtr mcc::TypeContext::GetNamed(const std::string &name) const
 {
-    return m_Named.at(name);
+    if (m_Named.contains(name))
+        return m_Named.at(name);
+    return nullptr;
 }

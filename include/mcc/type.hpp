@@ -7,12 +7,12 @@
 
 namespace mcc
 {
+    bool SameOrSpecial(const TypePtr &a, const TypePtr &b);
+
     class TypeContext
     {
     public:
         TypePtr GetVoid();
-        TypePtr GetNull();
-        TypePtr GetBoolean();
         TypePtr GetNumber();
         TypePtr GetString();
         TypePtr GetArray(const TypePtr &elements);
@@ -21,21 +21,24 @@ namespace mcc
         TypePtr GetUnion(const std::set<TypePtr> &elements);
         TypePtr GetFunction(const std::vector<TypePtr> &parameters, const TypePtr &result, bool throws);
 
+        TypePtr GetAnyArray();
+        TypePtr GetAnyObject();
+        TypePtr GetAnyFunction();
+
         TypePtr GetUnionOrSingle(const std::set<TypePtr> &elements);
 
         TypePtr SetNamed(const std::string &name, const TypePtr &type);
-        TypePtr GetNamed(const std::string &name) const;
+        [[nodiscard]] TypePtr GetNamed(const std::string &name) const;
 
     private:
         std::map<std::string, TypePtr> m_Named;
 
-        TypePtr m_Void, m_Null, m_Boolean, m_Number, m_String;
-        std::map<TypePtr, std::shared_ptr<struct ArrayType>> m_Array;
-        std::map<std::map<std::string, TypePtr>, std::shared_ptr<struct ObjectType>> m_Struct;
-        std::map<std::vector<TypePtr>, std::shared_ptr<struct TupleType>> m_Tuple;
-        std::map<std::set<TypePtr>, std::shared_ptr<struct UnionType>> m_Union;
-        std::map<std::vector<TypePtr>, std::map<TypePtr, std::map<bool, std::shared_ptr<struct FunctionType>>>>
-        m_Function;
+        TypePtr m_Void, m_Number, m_String, m_AnyArray, m_AnyObject,  m_AnyFunction;
+        std::map<TypePtr, TypePtr> m_Array;
+        std::map<std::map<std::string, TypePtr>, TypePtr> m_Struct;
+        std::map<std::vector<TypePtr>, TypePtr> m_Tuple;
+        std::map<std::set<TypePtr>, TypePtr> m_Union;
+        std::map<std::vector<TypePtr>, std::map<TypePtr, std::map<bool, TypePtr>>> m_Function;
     };
 
     struct Type
@@ -47,10 +50,10 @@ namespace mcc
         virtual std::ostream &Print(std::ostream &stream) const = 0;
 
         [[nodiscard]] virtual ConstantPtr GetNull(const SourceLocation &where) const = 0;
+        [[nodiscard]] virtual bool HasSpecial(const TypePtr &other) const = 0;
 
+        [[nodiscard]] virtual bool IsAny() const;
         [[nodiscard]] virtual bool IsVoid() const;
-        [[nodiscard]] virtual bool IsNull() const;
-        [[nodiscard]] virtual bool IsBoolean() const;
         [[nodiscard]] virtual bool IsNumber() const;
         [[nodiscard]] virtual bool IsString() const;
         [[nodiscard]] virtual bool IsArray() const;
@@ -71,32 +74,9 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsVoid() const override;
-    };
-
-    struct NullType final : Type
-    {
-        explicit NullType(TypeContext &context);
-
-        [[nodiscard]] std::string String() const override;
-        std::ostream &Print(std::ostream &stream) const override;
-
-        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-
-        [[nodiscard]] bool IsNull() const override;
-    };
-
-    struct BooleanType final : Type
-    {
-        explicit BooleanType(TypeContext &context);
-
-        [[nodiscard]] std::string String() const override;
-        std::ostream &Print(std::ostream &stream) const override;
-
-        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-
-        [[nodiscard]] bool IsBoolean() const override;
     };
 
     struct NumberType final : Type
@@ -107,6 +87,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsNumber() const override;
     };
@@ -119,6 +100,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsString() const override;
     };
@@ -132,6 +114,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsArray() const override;
 
@@ -147,6 +130,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsObject() const override;
 
@@ -162,6 +146,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsTuple() const override;
 
@@ -177,6 +162,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsUnion() const override;
 
@@ -192,12 +178,55 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsFunction() const override;
 
         std::vector<TypePtr> Parameters;
         TypePtr Result;
         bool Throws;
+    };
+
+    struct AnyArrayType final : Type
+    {
+        explicit AnyArrayType(TypeContext &context);
+
+        [[nodiscard]] std::string String() const override;
+        std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+
+        [[nodiscard]] bool IsAny() const override;
+        [[nodiscard]] bool IsArray() const override;
+    };
+
+    struct AnyObjectType final : Type
+    {
+        explicit AnyObjectType(TypeContext &context);
+
+        [[nodiscard]] std::string String() const override;
+        std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+
+        [[nodiscard]] bool IsAny() const override;
+        [[nodiscard]] bool IsObject() const override;
+    };
+
+    struct AnyFunctionType final : Type
+    {
+        explicit AnyFunctionType(TypeContext &context);
+
+        [[nodiscard]] std::string String() const override;
+        std::ostream &Print(std::ostream &stream) const override;
+
+        [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
+        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+
+        [[nodiscard]] bool IsAny() const override;
+        [[nodiscard]] bool IsFunction() const override;
     };
 }
 

@@ -1,8 +1,8 @@
 #include <mcc/block.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
-#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
+#include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
@@ -27,12 +27,13 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
 
 mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Frame &frame) const
 {
-    const auto condition = Condition->GenerateValue(builder, frame);
-    Assert(condition->Type->IsBoolean(), Where, "condition must be of type boolean, but is {}", condition->Type);
+    auto condition = Condition->GenerateValue(builder, frame);
+    if (!condition->Type->IsNumber())
+        condition = builder.CreateNotNull(Condition->Where, condition);
 
-    if (const auto constant_condition = std::dynamic_pointer_cast<ConstantBoolean>(condition))
+    if (const auto constant_condition = std::dynamic_pointer_cast<ConstantNumber>(condition))
     {
-        if (Unless != constant_condition->Value)
+        if (Unless == !constant_condition->Value)
             return Then->GenerateValue(builder, frame);
         return Else->GenerateValue(builder, frame);
     }

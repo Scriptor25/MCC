@@ -46,7 +46,7 @@ void mcc::VariableStatement::Generate(Builder &builder, Frame &frame) const
     {
         value = Value->GenerateValue(builder, frame);
         Assert(
-            !Type || (value->Type == Type),
+            !Type || SameOrSpecial(value->Type, Type),
             Where,
             "cannot assign value of type {} to variable of type {}",
             value->Type,

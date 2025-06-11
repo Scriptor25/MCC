@@ -11,14 +11,6 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         return ParseSwitchExpression();
     if (At(TokenType_Symbol, "ref"))
         return ParseRefExpression();
-    if (AtEnum("true", "false"))
-    {
-        auto token = Skip();
-        return std::make_unique<ConstantExpression>(
-            token.Where,
-            ConstantBoolean::Create(token.Where, m_Context, token.Value == "true"),
-            token.Value);
-    }
     if (At(TokenType_Number))
         return ParseNumberExpression();
     if (At(TokenType_String))

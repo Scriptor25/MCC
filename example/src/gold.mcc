@@ -7,7 +7,7 @@ global gold_counter => number
 define gold() {
     ?`execute anchored eyes run setblock ^ ^ ^2 minecraft:gold_block`
     std:give("@s", "minecraft:gold_ingot", 1)
-    std:print("@s", "GOLD")
+    std:print_format("@s", `GOLD #${gold_counter}`)
 
     ++gold_counter
 }

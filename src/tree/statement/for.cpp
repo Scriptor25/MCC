@@ -1,7 +1,10 @@
 #include <mcc/block.hpp>
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/expression.hpp>
+#include <mcc/instruction.hpp>
 #include <mcc/statement.hpp>
+#include <mcc/type.hpp>
 
 mcc::ForStatement::ForStatement(
     const SourceLocation &where,
@@ -42,8 +45,14 @@ void mcc::ForStatement::Generate(Builder &builder, Frame &frame) const
     builder.SetInsertBlock(head_target);
     if (Condition)
     {
-        const auto condition = Condition->GenerateValue(builder, frame);
-        (void) builder.CreateBranch(Condition->Where, condition, loop_target, tail_target);
+        auto condition = Condition->GenerateValue(builder, frame);
+        if (!condition->Type->IsNumber())
+            condition = builder.CreateNotNull(Condition->Where, condition);
+
+        if (const auto constant_condition = std::dynamic_pointer_cast<ConstantNumber>(condition))
+            (void) builder.CreateDirect(Condition->Where, constant_condition->Value ? loop_target : tail_target);
+        else
+            (void) builder.CreateBranch(Condition->Where, condition, loop_target, tail_target);
     }
     else
         (void) builder.CreateDirect(Where, loop_target);

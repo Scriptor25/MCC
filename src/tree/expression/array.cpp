@@ -50,7 +50,7 @@ mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame 
         return ConstantArray::Create(Where, type, constants, false);
 
     auto array = builder.Allocate(Where, type, false);
-    (void) builder.CreateStore(Where, array, type->GetNull(Where), true);
+    (void) builder.CreateStore(Where, array, ConstantArray::Create(Where, type, {}, false), true);
 
     for (const auto &value : values)
         (void) builder.CreateAppend(Where, array, value, true);

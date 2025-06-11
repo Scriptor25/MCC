@@ -22,7 +22,7 @@ mcc::ComparisonInstruction::ComparisonInstruction(
     ResourceLocation location,
     ValuePtr left,
     ValuePtr right)
-    : Instruction(where, context.GetBoolean(), false),
+    : Instruction(where, context.GetNumber(), false),
       Comparator(comparator),
       Location(std::move(location)),
       Left(std::move(left)),
@@ -40,7 +40,7 @@ mcc::ComparisonInstruction::~ComparisonInstruction()
 
 void mcc::ComparisonInstruction::Generate(CommandVector &commands, bool stack) const
 {
-    auto left  = Left->GenerateResult();
+    auto left = Left->GenerateResult();
     auto right = Right->GenerateResult();
 
     const auto require_right = Left != Right && left != right;

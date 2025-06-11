@@ -75,10 +75,10 @@ mcc::Result mcc::Function::GenerateResultUnwrap() const
 
 bool mcc::Function::RemoveUnreferencedBlocks()
 {
-    std::vector<BlockPtr> blocks;
+    std::set<BlockPtr> blocks;
     for (unsigned i = 1; i < Blocks.size(); ++i)
         if (Blocks[i]->Predecessors.empty())
-            blocks.emplace_back(Blocks[i]);
+            blocks.insert(Blocks[i]);
 
     for (const auto &block : blocks)
         Erase(block);
@@ -88,19 +88,37 @@ bool mcc::Function::RemoveUnreferencedBlocks()
 
 bool mcc::Function::MergeConsecutiveBlocks()
 {
-    std::vector<BlockPtr> blocks;
-    for (auto &block : Blocks)
+    std::set<BlockPtr> blocks;
+    for (const auto &block : Blocks)
+    {
+        if (blocks.contains(block))
+            continue;
+
         if (block->Successors.size() == 1)
             if (auto successor = *block->Successors.begin(); successor->Predecessors.size() == 1)
             {
+                Assert(!block->Instructions.empty(), "instructions must not be empty");
+
                 block->Instructions.pop_back();
-                successor->Predecessors.erase(block);
 
                 for (auto &instruction : successor->Instructions)
                     block->Instructions.emplace_back(instruction);
+                successor->Instructions.clear();
 
-                blocks.emplace_back(successor);
+                block->Successors.erase(successor);
+                for (auto &next : successor->Successors)
+                {
+                    next->Predecessors.erase(successor);
+                    next->Predecessors.insert(block);
+                    block->Successors.insert(next);
+                }
+
+                successor->Predecessors.clear();
+                successor->Successors.clear();
+
+                blocks.insert(successor);
             }
+    }
 
     for (const auto &block : blocks)
         Erase(block);
@@ -132,7 +150,7 @@ void mcc::Function::GenerateFunction(Package &package) const
 
         CommandVector commands(package.Functions[namespace_][path_]);
 
-        if (i == 0 && require_stack)
+        if (!i && require_stack)
         {
             commands.Append("data modify storage {} stack prepend value {{}}", Location);
 
@@ -191,6 +209,8 @@ mcc::BlockPtr mcc::Function::Erase(const BlockPtr &target_block)
             Blocks.erase(i);
             for (auto &successor : target_block->Successors)
                 successor->Predecessors.erase(target_block);
+            target_block->Successors.clear();
+            target_block->Parent = nullptr;
             return target_block;
         }
 

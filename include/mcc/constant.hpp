@@ -40,26 +40,6 @@ namespace mcc
         bool Stringify;
     };
 
-    struct ConstantBoolean final : Constant
-    {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, bool value);
-
-        ConstantBoolean(const SourceLocation &where, TypeContext &context, bool value);
-
-        [[nodiscard]] Result GenerateResult() const override;
-
-        bool Value;
-    };
-
-    struct ConstantNull final : Constant
-    {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context);
-
-        ConstantNull(const SourceLocation &where, TypeContext &context);
-
-        [[nodiscard]] Result GenerateResult() const override;
-    };
-
     struct ConstantNumber final : Constant
     {
         static ConstantPtr Create(const SourceLocation &where, TypeContext &context, IntegerT value);
@@ -95,9 +75,9 @@ namespace mcc
 
     struct ConstantResource final : Constant
     {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, const ResourceLocation &location);
+        static ConstantPtr Create(const SourceLocation &where, const TypePtr& type, const ResourceLocation &location);
 
-        ConstantResource(const SourceLocation &where, TypeContext &context, ResourceLocation location);
+        ConstantResource(const SourceLocation &where, const TypePtr& type, ResourceLocation location);
 
         [[nodiscard]] Result GenerateResult() const override;
         [[nodiscard]] Result GenerateResultUnwrap() const override;

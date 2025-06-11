@@ -67,6 +67,9 @@ void mcc::Builder::Generate() const
     for (auto &functions : m_Functions | std::views::values)
         for (auto &function : functions | std::views::values)
         {
+            if (function->Blocks.empty())
+                continue;
+
             function->OptimizeBlocks();
             function->GenerateFunction(m_Package);
         }
