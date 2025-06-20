@@ -35,10 +35,18 @@ mcc::GenericStorageReference::GenericStorageReference(
     ValuePtr location,
     ValuePtr path,
     const bool is_mutable)
-    : Value(where, type, is_mutable),
+    : Value(where, type, is_mutable ? FieldType_MutableReference : FieldType_ImmutableReference),
       Location(std::move(location)),
       Path(std::move(path))
 {
+    Location->Use();
+    Path->Use();
+}
+
+mcc::GenericStorageReference::~GenericStorageReference()
+{
+    Location->Drop();
+    Path->Drop();
 }
 
 bool mcc::GenericStorageReference::RequireStack() const

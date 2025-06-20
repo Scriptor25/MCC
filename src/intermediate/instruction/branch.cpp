@@ -24,7 +24,7 @@ mcc::BranchInstruction::BranchInstruction(
     ValuePtr condition,
     BlockPtr then_target,
     BlockPtr else_target)
-    : Instruction(where, context.GetVoid(), false),
+    : Instruction(where, context.GetVoid(), FieldType_Value),
       Location(std::move(location)),
       Condition(std::move(condition)),
       ThenTarget(std::move(then_target)),

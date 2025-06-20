@@ -60,6 +60,13 @@ namespace mcc
         ResultType_Argument,
     };
 
+    enum E_FieldType
+    {
+        FieldType_Value,
+        FieldType_ImmutableReference,
+        FieldType_MutableReference,
+    };
+
     inline std::optional<E_Declarator> ToDeclarator(const std::string_view &string_)
     {
         static const std::map<std::string_view, E_Declarator> map
@@ -171,6 +178,18 @@ namespace mcc
 
         return map.at(enum_);
     }
+
+    inline const char *ToString(const E_FieldType enum_)
+    {
+        static const std::map<E_FieldType, const char *> map
+        {
+            { FieldType_Value, "value" },
+            { FieldType_ImmutableReference, "immutable_reference" },
+            { FieldType_MutableReference, "mutable_reference" },
+        };
+
+        return map.at(enum_);
+    }
 }
 
 namespace std
@@ -220,6 +239,16 @@ namespace std
     {
         template<typename FormatContext>
         auto format(const mcc::E_ResultType &type, FormatContext &ctx) const
+        {
+            return formatter<string>::format(mcc::ToString(type), ctx);
+        }
+    };
+
+    template<>
+    struct formatter<mcc::E_FieldType> final : formatter<string>
+    {
+        template<typename FormatContext>
+        auto format(const mcc::E_FieldType &type, FormatContext &ctx) const
         {
             return formatter<string>::format(mcc::ToString(type), ctx);
         }

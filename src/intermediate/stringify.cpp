@@ -8,7 +8,7 @@ mcc::ValuePtr mcc::StringifyValue::Create(const SourceLocation &where, const Val
 }
 
 mcc::StringifyValue::StringifyValue(const SourceLocation &where, const ValuePtr &target)
-    : Value(where, target->Type->Context.GetString(), false),
+    : Value(where, target->Type->Context.GetString(), FieldType_Value),
       Target(target)
 {
     Target->Use();

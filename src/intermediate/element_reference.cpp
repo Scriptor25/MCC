@@ -9,8 +9,8 @@ mcc::ValuePtr mcc::ElementReference::Create(const SourceLocation &where, const V
     Assert(!!index, where, "index must not be null");
 
     const auto base_type = base->Type;
-    const auto is_array  = base_type->IsArray();
-    const auto is_tuple  = base_type->IsTuple();
+    const auto is_array = base_type->IsArray();
+    const auto is_tuple = base_type->IsTuple();
 
     TypePtr type;
     if (is_array)
@@ -32,16 +32,18 @@ mcc::ElementReference::ElementReference(
     const TypePtr &type,
     const ValuePtr &base,
     const ValuePtr &index)
-    : Value(where, type, base->IsMutable),
+    : Value(where, type, base->FieldType),
       Base(base),
       Index(index)
 {
     Base->Use();
+    Index->Use();
 }
 
 mcc::ElementReference::~ElementReference()
 {
     Base->Drop();
+    Index->Drop();
 }
 
 bool mcc::ElementReference::RequireStack() const
@@ -51,7 +53,7 @@ bool mcc::ElementReference::RequireStack() const
 
 mcc::Result mcc::ElementReference::GenerateResult() const
 {
-    auto base  = Base->GenerateResult();
+    auto base = Base->GenerateResult();
     auto index = Index->GenerateResult();
 
     Assert(base.Type == ResultType_Reference, Where, "base must be {}, but is {}", ResultType_Reference, base.Type);

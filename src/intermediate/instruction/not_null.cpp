@@ -18,7 +18,7 @@ mcc::NotNullInstruction::NotNullInstruction(
     TypeContext &context,
     ResourceLocation location,
     ValuePtr value)
-    : Instruction(where, context.GetNumber(), false),
+    : Instruction(where, context.GetNumber(), FieldType_ImmutableReference),
       Location(std::move(location)),
       Value(std::move(value))
 {
@@ -41,7 +41,7 @@ void mcc::NotNullInstruction::Generate(CommandVector &commands, bool stack) cons
     if (value.WithArgument)
         prefix = "$";
 
-    commands.Append("data remove storage {} {}", Location, stack_path);
+    commands.Append("data modify storage {} {} set value 0", Location, stack_path);
     commands.Append(
         "{}execute if data {} {} {} run data modify storage {} {} set value 1",
         prefix,

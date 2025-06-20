@@ -4,7 +4,6 @@
 #include <format>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 #include <mcc/enums.hpp>
 
@@ -37,6 +36,7 @@ namespace mcc
     {
         std::string Name;
         TypePtr Type;
+        E_FieldType FieldType;
     };
 
     using ParameterList = std::vector<Parameter>;
@@ -70,7 +70,7 @@ struct std::formatter<std::vector<T>> final : std::formatter<std::string>
 
         for (unsigned i = 0; i < elements.size(); ++i)
         {
-            if (i > 0)
+            if (i)
                 s += ", ";
             s += std::format("{}", elements[i]);
         }

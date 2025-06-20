@@ -9,7 +9,7 @@ mcc::InstructionPtr mcc::StoreInstruction::Create(const SourceLocation &where, c
 }
 
 mcc::StoreInstruction::StoreInstruction(const SourceLocation &where, const ValuePtr &dst, ValuePtr src)
-    : Instruction(where, dst->Type, dst->IsMutable),
+    : Instruction(where, dst->Type, dst->FieldType),
       Dst(dst),
       Src(std::move(src))
 {

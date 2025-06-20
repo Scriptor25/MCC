@@ -19,6 +19,6 @@ define fib(n: number): number {
 }
 
 define test_math() {
-    add(42, 17)
-    sub(42, 17)
+    add(42, 27)
+    sub(42, 27)
 }

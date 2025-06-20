@@ -7,7 +7,7 @@ namespace mcc
 {
     struct Instruction : Value
     {
-        Instruction(const SourceLocation &where, const TypePtr &type, bool is_mutable);
+        Instruction(const SourceLocation &where, const TypePtr &type, E_FieldType field_type);
 
         [[nodiscard]] virtual bool IsTerminator() const;
 
@@ -321,7 +321,11 @@ namespace mcc
             const ResourceLocation &location,
             const ValuePtr &value);
 
-        ReturnInstruction(const SourceLocation &where, TypeContext &context, ResourceLocation location, ValuePtr value);
+        ReturnInstruction(
+            const SourceLocation &where,
+            TypeContext &context,
+            ResourceLocation location,
+            ValuePtr value);
         ~ReturnInstruction() override;
 
         void Generate(CommandVector &commands, bool stack) const override;

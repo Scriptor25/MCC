@@ -20,7 +20,7 @@ mcc::MemberReference::MemberReference(
     const TypePtr &type,
     const ValuePtr &object,
     std::string member)
-    : Value(where, type, object->IsMutable),
+    : Value(where, type, object->FieldType),
       Object(object),
       Member(std::move(member))
 {
@@ -49,6 +49,7 @@ mcc::Result mcc::MemberReference::GenerateResult() const
 
     return {
         .Type = ResultType_Reference,
+        .WithArgument = object.WithArgument,
         .ReferenceType = object.ReferenceType,
         .Target = object.Target,
         .Path = std::format("{}.{}", object.Path, Member),

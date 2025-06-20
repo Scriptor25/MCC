@@ -2,10 +2,10 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
-mcc::Value::Value(SourceLocation where, TypePtr type, const bool is_mutable)
+mcc::Value::Value(SourceLocation where, TypePtr type, const E_FieldType field_type)
     : Where(std::move(where)),
       Type(std::move(type)),
-      IsMutable(is_mutable)
+      FieldType(field_type)
 {
 }
 
@@ -37,4 +37,9 @@ void mcc::Value::Use()
 void mcc::Value::Drop()
 {
     UseCount--;
+}
+
+bool mcc::Value::IsMutable() const
+{
+    return FieldType == FieldType_MutableReference;
 }

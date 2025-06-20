@@ -97,7 +97,7 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
         return type;
     }
 
-    Error(where, "TODO");
+    Error(where, "cannot parse {} '{}'", m_Token.Type, m_Token.Value);
 }
 
 mcc::TypePtr mcc::Parser::ParseArrayType()

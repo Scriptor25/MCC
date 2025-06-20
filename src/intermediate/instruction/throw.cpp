@@ -22,7 +22,7 @@ mcc::ThrowInstruction::ThrowInstruction(
     ResourceLocation location,
     ValuePtr value,
     BlockPtr landing_pad)
-    : Instruction(where, context.GetVoid(), false),
+    : Instruction(where, context.GetVoid(), FieldType_Value),
       Location(std::move(location)),
       Value(std::move(value)),
       LandingPad(std::move(landing_pad))

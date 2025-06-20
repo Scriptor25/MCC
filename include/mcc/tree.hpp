@@ -35,6 +35,8 @@ namespace mcc
         void Generate(Builder &builder) const override;
         void GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const override;
 
+        void Check(const FunctionPtr &function) const;
+
         ResourceLocation Location;
         ParameterList Parameters;
         TypePtr ResultType;

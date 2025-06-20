@@ -21,7 +21,7 @@ namespace mcc
             const SourceLocation &where,
             ResourceLocation location,
             const ParameterList &parameters,
-            const TypePtr &result,
+            const TypePtr &result_type,
             bool throws);
         [[nodiscard]] bool HasFunction(ResourceLocation location) const;
         [[nodiscard]] FunctionPtr GetFunction(const SourceLocation &where, ResourceLocation location) const;
@@ -72,7 +72,9 @@ namespace mcc
             const CommandT &command) const;
 
         [[nodiscard]] InstructionPtr CreateReturn(const SourceLocation &where) const;
-        [[nodiscard]] InstructionPtr CreateReturn(const SourceLocation &where, const ValuePtr &value) const;
+        [[nodiscard]] InstructionPtr CreateReturn(
+            const SourceLocation &where,
+            const ValuePtr &value) const;
 
         [[nodiscard]] InstructionPtr CreateBranch(
             const SourceLocation &where,

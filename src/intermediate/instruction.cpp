@@ -1,7 +1,7 @@
 #include <mcc/instruction.hpp>
 
-mcc::Instruction::Instruction(const SourceLocation &where, const TypePtr &type, const bool is_mutable)
-    : Value(where, type, is_mutable)
+mcc::Instruction::Instruction(const SourceLocation &where, const TypePtr &type, E_FieldType field_type)
+    : Value(where, type, field_type)
 {
 }
 
@@ -12,7 +12,7 @@ bool mcc::Instruction::IsTerminator() const
 
 std::string mcc::Instruction::GetStackPath() const
 {
-    return std::format("stack[0].result.{}", reinterpret_cast<uintptr_t>(this));
+    return std::format("stack[0].{}", reinterpret_cast<uintptr_t>(this));
 }
 
 std::string mcc::Instruction::GetTemp() const

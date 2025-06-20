@@ -22,7 +22,7 @@ mcc::ObjectInstruction::ObjectInstruction(
     ValuePtr object,
     ValuePtr value,
     std::string key)
-    : Instruction(where, context.GetVoid(), false),
+    : Instruction(where, context.GetVoid(), FieldType_Value),
       Location(std::move(location)),
       Object(std::move(object)),
       Value(std::move(value)),
@@ -41,7 +41,7 @@ mcc::ObjectInstruction::~ObjectInstruction()
 void mcc::ObjectInstruction::Generate(CommandVector &commands, bool stack) const
 {
     auto object = Object->GenerateResult();
-    auto value  = Value->GenerateResult();
+    auto value = Value->GenerateResult();
 
     std::string prefix;
     if (object.WithArgument || value.WithArgument)

@@ -8,7 +8,7 @@ namespace mcc
 {
     struct Value
     {
-        Value(SourceLocation where, TypePtr type, bool is_mutable);
+        Value(SourceLocation where, TypePtr type, E_FieldType field_type);
         virtual ~Value() = default;
 
         virtual void Generate(CommandVector &commands, bool stack) const;
@@ -19,9 +19,11 @@ namespace mcc
         void Use();
         void Drop();
 
+        bool IsMutable() const;
+
         SourceLocation Where;
         TypePtr Type;
-        bool IsMutable;
+        E_FieldType FieldType;
 
         IndexT UseCount = 0;
     };
@@ -145,6 +147,7 @@ namespace mcc
             ValuePtr location,
             ValuePtr path,
             bool is_mutable);
+        ~GenericStorageReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;

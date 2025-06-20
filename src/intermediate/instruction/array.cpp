@@ -43,7 +43,7 @@ mcc::ArrayInstruction::ArrayInstruction(
     ValuePtr array,
     ValuePtr value,
     const IndexT index)
-    : Instruction(where, context.GetVoid(), false),
+    : Instruction(where, context.GetVoid(), FieldType_Value),
       ArrayOperation(array_operation),
       Location(std::move(location)),
       Array(std::move(array)),

@@ -15,7 +15,7 @@ mcc::FunctionPtr mcc::Function::Create(
     const bool throws)
 {
     std::vector<TypePtr> parameter_types;
-    for (const auto &[name_, type_] : parameters)
+    for (const auto &[_0, type_, _1] : parameters)
         parameter_types.emplace_back(type_);
 
     auto type = context.GetFunction(parameter_types, result_type, throws);
@@ -29,7 +29,7 @@ mcc::Function::Function(
     ParameterList parameters,
     TypePtr result_type,
     const bool throws)
-    : Value(where, type, false),
+    : Value(where, type, FieldType_Value),
       Location(std::move(location)),
       Parameters(std::move(parameters)),
       ResultType(std::move(result_type)),
@@ -164,7 +164,7 @@ void mcc::Function::GenerateFunction(Package &package) const
                     values += '0';
                 }
 
-                commands.Append("data modify storage {} stack[0].val set value [{}]", Location, values);
+                commands.Append("data modify storage {} stack[0].v set value [{}]", Location, values);
             }
         }
 
@@ -185,6 +185,10 @@ void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments
             arguments += ',';
         if (Parameters[i].Type->IsString())
             arguments += std::format("\"{0}\":\"$({0})\"", Parameters[i].Name);
+        else if (Parameters[i].FieldType != FieldType_Value)
+            arguments += std::format(
+                "\"{0}_target\":\"$({0}_target)\",\"{0}_path\":\"$({0}_path)\"",
+                Parameters[i].Name);
         else
             arguments += std::format("\"{0}\":$({0})", Parameters[i].Name);
     }

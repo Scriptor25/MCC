@@ -15,7 +15,7 @@ mcc::GenericEntityReference::GenericEntityReference(
     const TypePtr &type,
     const ValuePtr &name,
     const ValuePtr &path)
-    : Value(where, type, true),
+    : Value(where, type, FieldType_MutableReference),
       Name(name),
       Path(path)
 {

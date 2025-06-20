@@ -5,9 +5,12 @@ namespace example
 global gold_counter => number
 
 define gold() {
+    unless (gold_counter)
+        gold_counter = 1
+    else
+        ++gold_counter
+
     ?`execute anchored eyes run setblock ^ ^ ^2 minecraft:gold_block`
     std:give("@s", "minecraft:gold_ingot", 1)
     std:print_format("@s", `GOLD #${gold_counter}`)
-
-    ++gold_counter
 }

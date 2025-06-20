@@ -12,7 +12,7 @@ mcc::InstructionPtr mcc::DeleteInstruction::Create(
 }
 
 mcc::DeleteInstruction::DeleteInstruction(const SourceLocation &where, TypeContext &context, const ValuePtr &value)
-    : Instruction(where, context.GetVoid(), false),
+    : Instruction(where, context.GetVoid(), FieldType_Value),
       Value(value)
 {
     value->Use();

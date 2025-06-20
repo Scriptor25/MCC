@@ -25,7 +25,7 @@ mcc::SwitchInstruction::SwitchInstruction(
     ValuePtr condition,
     BlockPtr default_target,
     const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets)
-    : Instruction(where, context.GetVoid(), false),
+    : Instruction(where, context.GetVoid(), FieldType_Value),
       Location(std::move(location)),
       Condition(std::move(condition)),
       DefaultTarget(std::move(default_target)),

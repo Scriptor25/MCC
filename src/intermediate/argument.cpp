@@ -8,7 +8,7 @@ mcc::ValuePtr mcc::ArgumentValue::Create(const SourceLocation &where, const Type
 }
 
 mcc::ArgumentValue::ArgumentValue(const SourceLocation &where, const TypePtr &type, std::string name)
-    : Value(where, type, false),
+    : Value(where, type, FieldType_Value),
       Name(std::move(name))
 {
 }
@@ -24,6 +24,7 @@ mcc::Result mcc::ArgumentValue::GenerateResult() const
 
     return {
         .Type = ResultType_Argument,
+        .WithArgument = true,
         .Name = std::format("{0}$({1}){0}", stringify ? "\"" : "", Name),
     };
 }
@@ -32,6 +33,7 @@ mcc::Result mcc::ArgumentValue::GenerateResultUnwrap() const
 {
     return {
         .Type = ResultType_Argument,
+        .WithArgument = true,
         .Name = std::format("$({})", Name),
     };
 }

@@ -10,7 +10,7 @@ mcc::ValuePtr mcc::BranchResult::Create(
 }
 
 mcc::BranchResult::BranchResult(const SourceLocation &where, const TypePtr &type, ResourceLocation location)
-    : Value(where, type, false),
+    : Value(where, type, FieldType_ImmutableReference),
       Location(std::move(location))
 {
 }
@@ -26,6 +26,6 @@ mcc::Result mcc::BranchResult::GenerateResult() const
         .Type = ResultType_Reference,
         .ReferenceType = ReferenceType_Storage,
         .Target = Location.String(),
-        .Path = std::format("stack[0].result.{}", reinterpret_cast<uintptr_t>(this)),
+        .Path = std::format("stack[0].{}", reinterpret_cast<uintptr_t>(this)),
     };
 }

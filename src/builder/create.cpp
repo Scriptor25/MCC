@@ -3,6 +3,7 @@
 #include <mcc/error.hpp>
 #include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
+#include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::Builder::CreateStore(
     const SourceLocation &where,
@@ -12,7 +13,7 @@ mcc::InstructionPtr mcc::Builder::CreateStore(
 {
     Assert(!!dst, where, "dst must not be null");
     Assert(!!src, where, "src must not be null");
-    Assert(ignore_mutability || dst->IsMutable, where, "dst must be mutable");
+    Assert(ignore_mutability || dst->IsMutable(), where, "dst must be mutable");
 
     return Insert(where, StoreInstruction::Create(where, dst, src));
 }
@@ -68,12 +69,16 @@ mcc::InstructionPtr mcc::Builder::CreateReturn(const SourceLocation &where) cons
     return Insert(where, ReturnInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, nullptr));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateReturn(const SourceLocation &where, const ValuePtr &value) const
+mcc::InstructionPtr mcc::Builder::CreateReturn(
+    const SourceLocation &where,
+    const ValuePtr &value) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!value, where, "value must not be null");
 
-    return Insert(where, ReturnInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, value));
+    return Insert(
+        where,
+        ReturnInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateBranch(
@@ -84,6 +89,7 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!condition, where, "condition must not be null");
+    Assert(condition->Type->IsNumber(), where, "condition must be number");
     Assert(!!then_target, where, "then target must not be null");
     Assert(!!else_target, where, "else target must not be null");
 
@@ -147,6 +153,7 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!condition, where, "condition must not be null");
+    Assert(condition->Type->IsNumber(), where, "condition must be number");
     Assert(!!default_target, where, "default target must not be null");
 
     for (auto &[condition_, target_] : case_targets)
@@ -239,7 +246,7 @@ mcc::InstructionPtr mcc::Builder::CreateAppend(
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
-    Assert(force || array->IsMutable, where, "array must be mutable");
+    Assert(force || array->IsMutable(), where, "array must be mutable");
 
     return Insert(
         where,
@@ -253,7 +260,7 @@ mcc::InstructionPtr mcc::Builder::CreatePrepend(
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
-    Assert(array->IsMutable, where, "array must be mutable");
+    Assert(array->IsMutable(), where, "array must be mutable");
 
     return Insert(
         where,
@@ -268,7 +275,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
-    Assert(array->IsMutable, where, "array must be mutable");
+    Assert(array->IsMutable(), where, "array must be mutable");
 
     return Insert(
         where,
@@ -285,7 +292,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
     Assert(!!object, where, "object must not be null");
     Assert(!!value, where, "value must not be null");
     Assert(!key.empty(), where, "key must not be empty");
-    Assert(force || object->IsMutable, where, "object must be mutable");
+    Assert(force || object->IsMutable(), where, "object must be mutable");
 
     return Insert(
         where,
@@ -302,7 +309,7 @@ mcc::InstructionPtr mcc::Builder::CreateNotNull(const SourceLocation &where, con
 mcc::InstructionPtr mcc::Builder::CreateDelete(const SourceLocation &where, const ValuePtr &value) const
 {
     Assert(!!value, where, "value must not be null");
-    Assert(value->IsMutable, where, "value must be mutable");
+    Assert(value->IsMutable(), where, "value must be mutable");
 
     return Insert(where, DeleteInstruction::Create(where, m_Context, value));
 }

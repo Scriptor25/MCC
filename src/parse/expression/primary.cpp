@@ -27,17 +27,20 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
         return ParseArrayExpression();
     if (At(TokenType_Other, "{"))
         return ParseObjectExpression();
+
     if (SkipIf(TokenType_Other, "("))
     {
         auto expression = ParseExpression();
         Expect(TokenType_Other, ")");
         return expression;
     }
+
     if (At(TokenType_Operator))
     {
         auto token = Skip();
         auto operand = ParseOperandExpression();
         return std::make_unique<UnaryExpression>(token.Where, token.Value, std::move(operand));
     }
+
     Error(m_Token.Where, "cannot parse {} '{}'", m_Token.Type, m_Token.Value);
 }

@@ -22,7 +22,7 @@ mcc::ComparisonInstruction::ComparisonInstruction(
     ResourceLocation location,
     ValuePtr left,
     ValuePtr right)
-    : Instruction(where, context.GetNumber(), false),
+    : Instruction(where, context.GetNumber(), FieldType_Value),
       Comparator(comparator),
       Location(std::move(location)),
       Left(std::move(left)),

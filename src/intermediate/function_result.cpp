@@ -10,7 +10,7 @@ mcc::ValuePtr mcc::FunctionResult::Create(
 }
 
 mcc::FunctionResult::FunctionResult(const SourceLocation &where, const TypePtr &type, ResourceLocation location)
-    : Value(where, type, false),
+    : Value(where, type, FieldType_ImmutableReference),
       Location(std::move(location))
 {
 }

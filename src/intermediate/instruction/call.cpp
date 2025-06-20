@@ -22,7 +22,7 @@ mcc::CallInstruction::CallInstruction(
     const FunctionPtr &callee,
     const std::vector<std::pair<std::string, ValuePtr>> &arguments,
     BlockPtr landing_pad)
-    : Instruction(where, callee->ResultType, false),
+    : Instruction(where, callee->ResultType, FieldType_ImmutableReference),
       Location(std::move(location)),
       Callee(callee),
       Arguments(arguments),
@@ -52,11 +52,12 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
     auto require_cleanup = false;
     if (!Arguments.empty())
     {
-        const auto constant = !std::ranges::any_of(
+        const auto constant = std::ranges::all_of(
             Arguments | std::views::values,
             [](auto &argument)
             {
-                return !std::dynamic_pointer_cast<Constant>(argument);
+                return std::dynamic_pointer_cast<Constant>(argument) ||
+                       std::dynamic_pointer_cast<ArgumentValue>(argument);
             });
 
         if (constant)
@@ -65,7 +66,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
 
             for (unsigned i = 0; i < Arguments.size(); ++i)
             {
-                if (i > 0)
+                if (i)
                     argument_object += ',';
 
                 auto [key, argument] = Arguments[i];
@@ -85,13 +86,19 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
         {
             commands.Append("data modify storage {} {} set value {{}}", Location, stack_path);
 
-            for (auto &[key_, argument_] : Arguments)
-                switch (auto value = argument_->GenerateResult(); value.Type)
+            for (unsigned i = 0; i < Arguments.size(); ++i)
+            {
+                auto &[key_, argument_] = Arguments[i];
+
+                auto value = argument_->GenerateResult();
+                auto prefix = value.WithArgument ? "$" : "";
+
+                switch (value.Type)
                 {
                 case ResultType_Value:
                     commands.Append(
                         "{}data modify storage {} {}.{} set value {}",
-                        value.WithArgument ? "$" : "",
+                        prefix,
                         Location,
                         stack_path,
                         key_,
@@ -99,15 +106,33 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                     break;
 
                 case ResultType_Reference:
-                    commands.Append(
-                        "{}data modify storage {} {}.{} set from {} {} {}",
-                        value.WithArgument ? "$" : "",
-                        Location,
-                        stack_path,
-                        key_,
-                        value.ReferenceType,
-                        value.Target,
-                        value.Path);
+                    if (Callee->Parameters[i].FieldType == FieldType_Value)
+                        commands.Append(
+                            "{}data modify storage {} {}.{} set from {} {} {}",
+                            prefix,
+                            Location,
+                            stack_path,
+                            key_,
+                            value.ReferenceType,
+                            value.Target,
+                            value.Path);
+                    else
+                    {
+                        commands.Append(
+                            "{}data modify storage {} {}.{}_target set value \"{}\"",
+                            prefix,
+                            Location,
+                            stack_path,
+                            key_,
+                            value.Target);
+                        commands.Append(
+                            "{}data modify storage {} {}.{}_path set value \"{}\"",
+                            prefix,
+                            Location,
+                            stack_path,
+                            key_,
+                            value.Path);
+                    }
                     break;
 
                 case ResultType_Argument:
@@ -128,6 +153,7 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
                         ResultType_Argument,
                         value.Type);
                 }
+            }
 
             argument_object = std::format(" with storage {} {}", Location, stack_path);
             require_cleanup = true;
@@ -173,7 +199,9 @@ void mcc::CallInstruction::Generate(CommandVector &commands, const bool stack) c
         }
         else
         {
-            commands.Append("execute if data storage {0} result run data remove storage {0} stack[0]", Location);
+            commands.Append(
+                "execute if data storage {0} result run data remove storage {0} stack[0]",
+                Location);
             commands.Append("execute if data storage {} result run return 1", Location);
         }
     }
@@ -197,6 +225,13 @@ bool mcc::CallInstruction::RequireStack() const
                [](auto &argument)
                {
                    return argument->RequireStack();
+               })
+           || !std::ranges::all_of(
+               Arguments | std::views::values,
+               [](auto &argument)
+               {
+                   return std::dynamic_pointer_cast<Constant>(argument) ||
+                          std::dynamic_pointer_cast<ArgumentValue>(argument);
                });
 }
 

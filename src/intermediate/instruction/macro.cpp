@@ -114,7 +114,7 @@ static void generate_macro_data(const mcc::MacroInstruction &self, mcc::CommandV
     const auto dst = self.Arguments[0];
     const auto src = self.Arguments[1];
 
-    mcc::Assert(dst->IsMutable, self.Where, "dst must be mutable");
+    mcc::Assert(dst->IsMutable(), self.Where, "dst must be mutable");
 
     auto dst_value = dst->GenerateResult();
     auto src_value = src->GenerateResultUnwrap();
@@ -146,7 +146,7 @@ static void generate_macro_store(const mcc::MacroInstruction &self, mcc::Command
     const auto dst = self.Arguments[0];
     const auto src = self.Arguments[1];
 
-    mcc::Assert(dst->IsMutable, self.Where, "dst must be mutable");
+    mcc::Assert(dst->IsMutable(), self.Where, "dst must be mutable");
 
     auto dst_value = dst->GenerateResult();
     auto src_value = src->GenerateResultUnwrap();
@@ -196,7 +196,7 @@ mcc::MacroInstruction::MacroInstruction(
     ResourceLocation location,
     std::string name,
     const std::vector<ValuePtr> &arguments)
-    : Instruction(where, context.GetVoid(), false),
+    : Instruction(where, context.GetVoid(), FieldType_Value),
       Location(std::move(location)),
       Name(std::move(name)),
       Arguments(arguments)

@@ -19,7 +19,7 @@ mcc::GenericBlockReference::GenericBlockReference(
     const ValuePtr &position_y,
     const ValuePtr &position_z,
     const ValuePtr &path)
-    : Value(where, type, true),
+    : Value(where, type, FieldType_ImmutableReference),
       PositionX(position_x),
       PositionY(position_y),
       PositionZ(position_z),

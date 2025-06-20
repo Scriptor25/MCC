@@ -22,7 +22,7 @@ define user_call_wrapper(func: user_print_func, self: user) {
     ?`$function $(func) $(self)`
 }
 
-define user_call(self: user) {
+define user_call(const &self: user) {
     user_call_wrapper(self.func, self)
 }
 
@@ -33,4 +33,8 @@ define user_print(age: number, name: string, email: string) {
 define user_test() {
     const user = user_create(19, "Max Mustermann", "max@mustermann.com", user_print)
     user_call(user)
+}
+
+define user_set_age(&self: user, age: number) {
+    self.age = age
 }

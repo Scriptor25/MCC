@@ -33,7 +33,7 @@ mcc::DirectBranchInstruction::DirectBranchInstruction(
     BlockPtr target,
     ValuePtr result,
     ValuePtr branch_result)
-    : Instruction(where, context.GetVoid(), false),
+    : Instruction(where, context.GetVoid(), FieldType_Value),
       Location(std::move(location)),
       Target(std::move(target)),
       Result(std::move(result)),

@@ -17,7 +17,7 @@ std::ostream &mcc::ArrayExpression::Print(std::ostream &stream) const
     stream << "[ ";
     for (unsigned i = 0; i < Elements.size(); ++i)
     {
-        if (i > 0)
+        if (i)
             stream << ", ";
         Elements[i]->Print(stream);
     }

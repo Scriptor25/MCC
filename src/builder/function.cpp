@@ -7,7 +7,7 @@ mcc::FunctionPtr mcc::Builder::CreateFunction(
     const SourceLocation &where,
     ResourceLocation location,
     const ParameterList &parameters,
-    const TypePtr &result,
+    const TypePtr &result_type,
     const bool throws)
 {
     if (location.Namespace.empty())
@@ -15,7 +15,7 @@ mcc::FunctionPtr mcc::Builder::CreateFunction(
 
     auto &function = m_Functions[location.Namespace][location.Path];
     Assert(!function, where, "already defined function {}", location);
-    return function = Function::Create(where, m_Context, location, parameters, result, throws);
+    return function = Function::Create(where, m_Context, location, parameters, result_type, throws);
 }
 
 bool mcc::Builder::HasFunction(ResourceLocation location) const

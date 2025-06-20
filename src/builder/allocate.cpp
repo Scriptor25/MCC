@@ -13,5 +13,10 @@ mcc::ValuePtr mcc::Builder::Allocate(
     const auto location = m_InsertBlock->Parent->Location;
     const auto index = m_InsertBlock->Parent->StackIndex++;
 
-    return GenericStorageReference::Create(where, type, location, std::format("stack[0].val[{}]", index), is_mutable);
+    return GenericStorageReference::Create(
+        where,
+        type,
+        location,
+        std::format("stack[0].v[{}]", index),
+        is_mutable);
 }

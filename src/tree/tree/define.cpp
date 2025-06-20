@@ -33,8 +33,17 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
     stream << "define " << Location << '(';
     for (unsigned i = 0; i < Parameters.size(); ++i)
     {
-        if (i > 0)
+        if (i)
             stream << ", ";
+        switch (Parameters[i].FieldType)
+        {
+        case FieldType_ImmutableReference:
+            stream << "const ";
+        case FieldType_MutableReference:
+            stream << "&";
+        default:
+            break;
+        }
         stream << Parameters[i].Name << ": " << Parameters[i].Type;
     }
     stream << ')';
@@ -45,7 +54,7 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
     stream << ' ';
     for (unsigned i = 0; i < Tags.size(); ++i)
     {
-        if (i > 0)
+        if (i)
             stream << ", ";
         stream << Tags[i];
     }
@@ -63,19 +72,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
     else
     {
         function = builder.GetFunction(Where, Location);
-        Assert(!Body || function->Blocks.empty(), Where, "already implemented function {}", Location);
-        Assert(function->ResultType == ResultType, Where, "cannot implement function with different result type");
-        Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
-        Assert(
-            function->Parameters.size() == Parameters.size(),
-            Where,
-            "cannot implement function with different parameter count");
-        for (unsigned i = 0; i < Parameters.size(); ++i)
-            Assert(
-                function->Parameters[i].Type == Parameters[i].Type,
-                Where,
-                "cannot implement function with different parameter type for offset {}",
-                i);
+        Check(function);
     }
 
     for (auto [tag_namespace_, tag_path_] : Tags)
@@ -94,8 +91,33 @@ void mcc::DefineNode::Generate(Builder &builder) const
 
     builder.PushVariables();
 
-    for (auto &[name_, type_] : function->Parameters)
-        builder.InsertVariable(Where, name_, ArgumentValue::Create(Where, type_, name_));
+    for (auto &[name_, type_, field_type_] : function->Parameters)
+    {
+        ValuePtr value;
+        switch (field_type_)
+        {
+        case FieldType_Value:
+            value = ArgumentValue::Create(Where, type_, name_);
+            break;
+        case FieldType_MutableReference:
+            value = GenericStorageReference::Create(
+                Where,
+                type_,
+                ArgumentValue::Create(Where, nullptr, name_ + "_target"),
+                ArgumentValue::Create(Where, nullptr, name_ + "_path"),
+                true);
+            break;
+        case FieldType_ImmutableReference:
+            value = GenericStorageReference::Create(
+                Where,
+                type_,
+                ArgumentValue::Create(Where, nullptr, name_ + "_target"),
+                ArgumentValue::Create(Where, nullptr, name_ + "_path"),
+                false);
+            break;
+        }
+        builder.InsertVariable(Where, name_, value);
+    }
 
     Frame target_frame;
     target_frame.ResultType = ResultType;
@@ -137,6 +159,11 @@ void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem
     }
 
     const auto function = builder.GetFunction(Where, Location);
+    Check(function);
+}
+
+void mcc::DefineNode::Check(const FunctionPtr &function) const
+{
     Assert(function->ResultType == ResultType, Where, "cannot implement function with different result type");
     Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
     Assert(
@@ -144,9 +171,16 @@ void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem
         Where,
         "cannot implement function with different parameter count");
     for (unsigned i = 0; i < Parameters.size(); ++i)
+    {
         Assert(
             function->Parameters[i].Type == Parameters[i].Type,
             Where,
             "cannot implement function with different parameter type for offset {}",
             i);
+        Assert(
+            function->Parameters[i].FieldType == Parameters[i].FieldType,
+            Where,
+            "cannot implement function with different field type for offset {}",
+            i);
+    }
 }

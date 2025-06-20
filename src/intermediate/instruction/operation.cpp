@@ -20,7 +20,7 @@ mcc::OperationInstruction::OperationInstruction(
     const E_Operator operator_,
     ResourceLocation location,
     const std::vector<ValuePtr> &operands)
-    : Instruction(where, context.GetNumber(), false),
+    : Instruction(where, context.GetNumber(), FieldType_Value),
       Operator(operator_),
       Location(std::move(location)),
       Operands(operands)
@@ -76,12 +76,12 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
         auto player = i == 0 ? "%a" : "%b";
 
         auto operand_value = Operands[i];
-        auto operand       = operand_value->GenerateResult();
+        auto operand = operand_value->GenerateResult();
 
         auto require_operand = operand_value != pre_operand_value && operand != pre_operand;
 
         pre_operand_value = operand_value;
-        pre_operand       = operand;
+        pre_operand = operand;
 
         if (require_operand)
         {
@@ -137,7 +137,7 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
 
     Assert(stack, Where, "operation instruction requires stack");
     commands.Append(
-        "execute store result storage {} {} double 1 run scoreboard players get %a {}",
+        "execute store result storage {} {} long 1 run scoreboard players get %a {}",
         Location,
         GetStackPath(),
         objective);
