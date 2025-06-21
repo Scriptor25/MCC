@@ -68,14 +68,21 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
         parameter_size);
     for (unsigned i = 0; i < argument_size; ++i)
     {
-        auto argument = arguments[i]->Type;
-        auto parameter = function->Parameters[i].Type;
+        const auto &argument = arguments[i];
+        const auto &parameter = function->Parameters[i];
+
         Assert(
-            SameOrSpecial(argument, parameter),
+            SameOrSpecial(argument->Type, parameter.Type),
             Where,
             "cannot assign value of type {} to argument of type {}",
-            argument,
-            parameter);
+            argument->Type,
+            parameter.Type);
+        Assert(
+            argument->FieldType >= parameter.FieldType,
+            Where,
+            "cannot assign value of field type {} to argument of field type {}",
+            argument->FieldType,
+            parameter.FieldType);
     }
 
     return builder.CreateCall(Where, function, arguments, frame.LandingPad);

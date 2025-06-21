@@ -30,11 +30,12 @@ define user_print(age: number, name: string, email: string) {
     !print("@s", `age: ${age}, name: ${name}, email: ${email}`)
 }
 
-define user_test() {
-    const user = user_create(19, "Max Mustermann", "max@mustermann.com", user_print)
-    user_call(user)
-}
-
 define user_set_age(&self: user, age: number) {
     self.age = age
+}
+
+define user_test() {
+    let user = user_create(19, "Max Mustermann", "max@mustermann.com", user_print)
+    user_set_age(user, 18)
+    user_call(user)
 }
