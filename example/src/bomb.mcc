@@ -25,7 +25,7 @@ global bomb_info => {
  */
 define bomb_tick() #minecraft:tick {
     if (bomb_info.enable)
-        if (++bomb_info.counter % 20 == 0)
+        unless (++bomb_info.counter % 20)
             unless (on_ground(bomb_info.target))
                 summon_tnt(bomb_info.target)
 }
