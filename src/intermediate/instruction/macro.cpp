@@ -1,9 +1,10 @@
-#include <utility>
 #include <mcc/command.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
+
+#include <functional>
 
 static void generate_macro_print(const mcc::MacroInstruction &self, mcc::CommandVector &commands)
 {

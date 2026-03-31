@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <mcc/common.hpp>
 #include <mcc/result.hpp>
 #include <mcc/value.hpp>
@@ -75,9 +74,9 @@ namespace mcc
 
     struct ConstantResource final : Constant
     {
-        static ConstantPtr Create(const SourceLocation &where, const TypePtr& type, const ResourceLocation &location);
+        static ConstantPtr Create(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);
 
-        ConstantResource(const SourceLocation &where, const TypePtr& type, ResourceLocation location);
+        ConstantResource(const SourceLocation &where, const TypePtr &type, ResourceLocation location);
 
         [[nodiscard]] Result GenerateResult() const override;
         [[nodiscard]] Result GenerateResultUnwrap() const override;

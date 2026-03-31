@@ -1,9 +1,10 @@
 #pragma once
 
+#include <mcc/common.hpp>
+
 #include <map>
 #include <set>
 #include <vector>
-#include <mcc/common.hpp>
 
 namespace mcc
 {
@@ -33,7 +34,7 @@ namespace mcc
     private:
         std::map<std::string, TypePtr> m_Named;
 
-        TypePtr m_Void, m_Number, m_String, m_AnyArray, m_AnyObject,  m_AnyFunction;
+        TypePtr m_Void, m_Number, m_String, m_AnyArray, m_AnyObject, m_AnyFunction;
         std::map<TypePtr, TypePtr> m_Array;
         std::map<std::map<std::string, TypePtr>, TypePtr> m_Struct;
         std::map<std::vector<TypePtr>, TypePtr> m_Tuple;

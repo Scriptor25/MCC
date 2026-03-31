@@ -5,6 +5,8 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
+#include <ranges>
+
 mcc::ValuePtr mcc::Builder::CreateVariable(
     const SourceLocation &where,
     const TypePtr &type,

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <set>
 #include <mcc/value.hpp>
+
+#include <set>
 
 namespace mcc
 {

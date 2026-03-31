@@ -1,4 +1,3 @@
-#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
 #include <mcc/tree.hpp>

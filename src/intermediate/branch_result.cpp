@@ -1,4 +1,3 @@
-#include <utility>
 #include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::BranchResult::Create(

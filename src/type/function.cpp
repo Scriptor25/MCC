@@ -1,4 +1,3 @@
-#include <utility>
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 

@@ -1,4 +1,3 @@
-#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 
 mcc::Expression::Expression(const SourceLocation &where)

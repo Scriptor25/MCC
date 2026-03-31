@@ -1,6 +1,8 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
+#include <ranges>
+
 mcc::ConstantPtr mcc::ConstantObject::Create(
     const SourceLocation &where,
     const TypePtr &type,

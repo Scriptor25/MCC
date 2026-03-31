@@ -1,6 +1,7 @@
+#include <mcc/error.hpp>
+
 #include <filesystem>
 #include <iostream>
-#include <mcc/error.hpp>
 
 void mcc::Error(const char *message) noexcept(false)
 {

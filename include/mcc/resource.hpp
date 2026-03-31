@@ -2,6 +2,9 @@
 
 #include <mcc/common.hpp>
 
+#include <filesystem>
+#include <sstream>
+
 namespace mcc
 {
     template<bool TAG>

@@ -1,9 +1,8 @@
-#include <algorithm>
-#include <istream>
-#include <utility>
 #include <mcc/error.hpp>
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
+
+#include <algorithm>
 
 mcc::Parser::Parser(TypeContext &context, std::istream &stream, const std::string &filename)
     : Parser(context, stream, SourceLocation(filename, 1, 0))

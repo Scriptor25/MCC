@@ -1,10 +1,11 @@
-#include <utility>
 #include <mcc/block.hpp>
 #include <mcc/command.hpp>
 #include <mcc/error.hpp>
 #include <mcc/function.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
+
+#include <algorithm>
 
 mcc::FunctionPtr mcc::Function::Create(
     const SourceLocation &where,

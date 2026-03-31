@@ -1,4 +1,3 @@
-#include <sstream>
 #include <mcc/expression.hpp>
 #include <mcc/format.hpp>
 #include <mcc/parse.hpp>

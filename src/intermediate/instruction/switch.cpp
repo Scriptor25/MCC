@@ -1,4 +1,3 @@
-#include <utility>
 #include <mcc/block.hpp>
 #include <mcc/command.hpp>
 #include <mcc/constant.hpp>
@@ -6,6 +5,8 @@
 #include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
+
+#include <algorithm>
 
 mcc::InstructionPtr mcc::SwitchInstruction::Create(
     const SourceLocation &where,

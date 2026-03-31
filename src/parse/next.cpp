@@ -1,6 +1,6 @@
-#include <set>
-#include <mcc/error.hpp>
 #include <mcc/parse.hpp>
+
+#include <set>
 
 mcc::Token &mcc::Parser::Next()
 {

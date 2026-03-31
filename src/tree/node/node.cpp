@@ -1,4 +1,3 @@
-#include <utility>
 #include <mcc/format.hpp>
 
 mcc::FormatNode::FormatNode(SourceLocation where)

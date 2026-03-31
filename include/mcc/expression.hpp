@@ -1,9 +1,5 @@
 #pragma once
 
-#include <iosfwd>
-#include <map>
-#include <string>
-#include <vector>
 #include <mcc/common.hpp>
 #include <mcc/statement.hpp>
 

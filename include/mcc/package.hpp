@@ -1,12 +1,9 @@
 #pragma once
 
-#include <filesystem>
-#include <map>
-#include <string>
-#include <vector>
 #include <mcc/common.hpp>
 #include <mcc/resource.hpp>
-#include <nlohmann/json.hpp>
+
+#include <json/json.hxx>
 
 namespace mcc
 {
@@ -31,7 +28,7 @@ namespace mcc
         void Serialize(const std::filesystem::path &path) const;
 
         std::string Name;
-        nlohmann::json Description;
+        json::Node Description;
         unsigned long Version;
     };
 
@@ -46,10 +43,26 @@ namespace mcc
         std::map<std::string, std::map<std::vector<std::string>, TagInfo>> Tags;
     };
 
-    void to_json(nlohmann::json &json, const ResourceLocation &location);
-    void to_json(nlohmann::json &json, const Tag &tag);
-    void to_json(nlohmann::json &json, const TagInfo &info);
+    void to_json(json::Node &node, const ResourceLocation &value);
 
-    void to_json(nlohmann::json &json, const PackageInfo &info);
-    void from_json(const nlohmann::json &json, PackageInfo &info);
+    void to_json(json::Node &node, const Tag &value);
+
+    void to_json(json::Node &node, const TagInfo &value);
+
+    void to_json(json::Node &node, const PackageInfo &value);
+
+    template<json::node N>
+    bool from_json(N &&node, PackageInfo &value)
+    {
+        if (!node.template Is<json::Object>())
+            return false;
+
+        auto ok = true;
+
+        ok &= node["name"] >> value.Name;
+        ok &= node["description"] >> value.Description;
+        ok &= node["version"] >> value.Version;
+
+        return ok;
+    }
 }

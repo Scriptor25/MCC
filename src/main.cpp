@@ -1,8 +1,3 @@
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
 #include <mcc/actions.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/error.hpp>
@@ -10,6 +5,12 @@
 #include <mcc/parse.hpp>
 #include <mcc/statement.hpp>
 #include <mcc/type.hpp>
+
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 static void parse_file(mcc::Package &package, const std::filesystem::path &path)
 {
@@ -103,9 +104,10 @@ int main(const int argc, const char **argv)
         (void) actions.String(1, description);
         (void) actions.String(2, version);
 
-        mcc::PackageInfo info{
-            .Name = name,
-            .Description = description,
+        mcc::PackageInfo info
+        {
+            .Name = std::move(name),
+            .Description = json::Node(std::move(description)),
             .Version = std::stoul(version),
         };
 

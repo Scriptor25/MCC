@@ -1,12 +1,9 @@
-#include <ranges>
-#include <utility>
 #include <mcc/block.hpp>
 #include <mcc/builder.hpp>
-#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/function.hpp>
-#include <mcc/instruction.hpp>
-#include <mcc/value.hpp>
+
+#include <ranges>
 
 mcc::Builder::Builder(TypeContext &context, Package &package)
     : m_Context(context),

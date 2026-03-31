@@ -1,4 +1,3 @@
-#include <utility>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 

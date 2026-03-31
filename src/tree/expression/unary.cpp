@@ -1,4 +1,3 @@
-#include <utility>
 #include <mcc/builder.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
@@ -6,6 +5,8 @@
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
+
+#include <functional>
 
 mcc::UnaryExpression::UnaryExpression(const SourceLocation &where, std::string operator_, ExpressionPtr operand)
     : Expression(where),
