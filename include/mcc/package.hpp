@@ -42,27 +42,29 @@ namespace mcc
         std::map<std::string, std::map<std::vector<std::string>, FunctionInfo>> Functions;
         std::map<std::string, std::map<std::vector<std::string>, TagInfo>> Tags;
     };
-
-    void to_json(json::Node &node, const ResourceLocation &value);
-
-    void to_json(json::Node &node, const Tag &value);
-
-    void to_json(json::Node &node, const TagInfo &value);
-
-    void to_json(json::Node &node, const PackageInfo &value);
-
-    template<json::node N>
-    bool from_json(N &&node, PackageInfo &value)
-    {
-        if (!node.template Is<json::Object>())
-            return false;
-
-        auto ok = true;
-
-        ok &= node["name"] >> value.Name;
-        ok &= node["description"] >> value.Description;
-        ok &= node["version"] >> value.Version;
-
-        return ok;
-    }
 }
+
+template<>
+struct json::serializer<mcc::ResourceLocation>
+{
+    static void to_json(Node &node, const mcc::ResourceLocation &value);
+};
+
+template<>
+struct json::serializer<mcc::Tag>
+{
+    static void to_json(Node &node, const mcc::Tag &value);
+};
+
+template<>
+struct json::serializer<mcc::TagInfo>
+{
+    static void to_json(Node &node, const mcc::TagInfo &value);
+};
+
+template<>
+struct json::serializer<mcc::PackageInfo>
+{
+    static bool from_json(const Node &node, mcc::PackageInfo &value);
+    static void to_json(Node &node, const mcc::PackageInfo &value);
+};

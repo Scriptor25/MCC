@@ -51,8 +51,7 @@ void mcc::Package::Write(const std::filesystem::path &path) const
             std::ofstream stream(file);
             Assert(stream.is_open(), "failed to open file {}", file.string());
 
-            json::Node node;
-            stream << std::setw(2) << (node << tag_);
+            stream << std::setw(2) << json::Node(tag_);
 
             stream.close();
         }
@@ -111,32 +110,46 @@ void mcc::PackageInfo::Serialize(const std::filesystem::path &path) const
     stream << std::setw(2) << json::Node(*this);
 }
 
-void mcc::to_json(json::Node &node, const ResourceLocation &value)
+void json::serializer<mcc::ResourceLocation>::to_json(Node &node, const mcc::ResourceLocation &value)
 {
     node = value.String();
 }
 
-void mcc::to_json(json::Node &node, const Tag &value)
+void json::serializer<mcc::Tag>::to_json(Node &node, const mcc::Tag &value)
 {
-    node = json::Object
+    node = Object
     {
         { "id", value.Location },
         { "required", value.Required },
     };
 }
 
-void mcc::to_json(json::Node &node, const TagInfo &value)
+void json::serializer<mcc::TagInfo>::to_json(Node &node, const mcc::TagInfo &value)
 {
-    node = json::Object
+    node = Object
     {
         { "replace", value.Replace },
         { "values", value.Values },
     };
 }
 
-void mcc::to_json(json::Node &node, const PackageInfo &value)
+bool json::serializer<mcc::PackageInfo>::from_json(const Node &node, mcc::PackageInfo &value)
 {
-    node = json::Object
+    if (!node.Is<Object>())
+        return false;
+
+    auto ok = true;
+
+    ok &= node["name"] >> value.Name;
+    ok &= node["description"] >> value.Description;
+    ok &= node["version"] >> value.Version;
+
+    return ok;
+}
+
+void json::serializer<mcc::PackageInfo>::to_json(Node &node, const mcc::PackageInfo &value)
+{
+    node = Object
     {
         { "name", value.Name },
         { "description", value.Description },
