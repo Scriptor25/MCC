@@ -60,28 +60,16 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     std::ofstream stream(package);
     Assert(stream.is_open(), "failed to open file {}", package.string());
 
-    json::Node node
+    json::Node node = json::Object
     {
-        json::Object
         {
-            std::pair<json::Key, json::Node>
+            "pack",
+            json::Object
             {
-                "pack",
-                json::Object
-                {
-                    std::pair<json::Key, json::Node>
-                    {
-                        "description",
-                        Info.Description,
-                    },
-                    std::pair<json::Key, json::Node>
-                    {
-                        "pack_format",
-                        Info.Version,
-                    },
-                },
+                { "description", Info.Description },
+                { "pack_format", Info.Version },
             },
-        }
+        },
     };
     stream << std::setw(2) << node;
 
