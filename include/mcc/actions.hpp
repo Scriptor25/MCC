@@ -27,10 +27,14 @@ namespace mcc
     public:
         explicit Actions(const std::vector<Action> &actions);
 
-        void operator()(int argc, const char **argv);
+        void operator()(
+                int argc,
+                const char **argv);
 
         [[nodiscard]] unsigned ActionID() const;
-        [[nodiscard]] bool String(unsigned index, std::string &destination) const;
+        [[nodiscard]] bool String(
+                unsigned index,
+                std::string &destination) const;
         [[nodiscard]] bool Flag(unsigned index) const;
 
         void Print() const;
@@ -43,4 +47,4 @@ namespace mcc
         std::map<unsigned, std::string> m_Strings;
         std::set<unsigned> m_Flags;
     };
-}
+} // namespace mcc

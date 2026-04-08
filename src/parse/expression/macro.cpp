@@ -3,7 +3,7 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseMacroExpression()
 {
-    auto where = Expect(TokenType_Other, "!").Where;
-    auto name = Expect(TokenType_Symbol).Value;
+    auto where = Expect(TokenType::Other, "!").Where;
+    auto name  = Expect(TokenType::Symbol).Value;
     return std::make_unique<MacroExpression>(where, name);
 }

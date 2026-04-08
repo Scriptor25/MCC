@@ -6,20 +6,32 @@
 
 #include <algorithm>
 
-mcc::BlockPtr mcc::Block::Create(const SourceLocation &where, TypeContext &context, const FunctionPtr &parent)
+mcc::BlockPtr mcc::Block::Create(
+        const SourceLocation &where,
+        TypeContext &context,
+        const FunctionPtr &parent)
 {
-    auto block = parent->Blocks.emplace_back(std::make_shared<Block>(where, context, parent));
+    auto block  = std::make_shared<Block>(where, context, parent);
     block->Self = block;
+
+    parent->Blocks.push_back(block);
     return block;
 }
 
-mcc::Block::Block(const SourceLocation &where, TypeContext &context, FunctionPtr parent)
-    : Value(where, context.GetVoid(), FieldType_Value),
+mcc::Block::Block(
+        const SourceLocation &where,
+        TypeContext &context,
+        FunctionPtr parent)
+    : Value(where,
+            context.GetVoid(),
+            FieldType_Value),
       Parent(std::move(parent))
 {
 }
 
-void mcc::Block::Generate(CommandVector &commands, const bool stack) const
+void mcc::Block::Generate(
+        CommandVector &commands,
+        const bool stack) const
 {
     for (auto &instruction : Instructions)
         instruction->Generate(commands, stack);
@@ -27,12 +39,8 @@ void mcc::Block::Generate(CommandVector &commands, const bool stack) const
 
 bool mcc::Block::RequireStack() const
 {
-    return std::ranges::any_of(
-        Instructions,
-        [](auto &instruction)
-        {
-            return instruction->RequireStack();
-        });
+    return std::ranges::
+            any_of(Instructions, [](const InstructionPtr &instruction) { return instruction->RequireStack(); });
 }
 
 mcc::InstructionPtr mcc::Block::GetTerminator() const

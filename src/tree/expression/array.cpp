@@ -4,7 +4,10 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::ArrayExpression::ArrayExpression(const SourceLocation &where, std::vector<ExpressionPtr> elements, TypePtr type)
+mcc::ArrayExpression::ArrayExpression(
+        const SourceLocation &where,
+        std::vector<ExpressionPtr> elements,
+        TypePtr type)
     : Expression(where),
       Elements(std::move(elements)),
       Type(std::move(type))
@@ -28,7 +31,9 @@ std::ostream &mcc::ArrayExpression::Print(std::ostream &stream) const
     return stream;
 }
 
-mcc::ValuePtr mcc::ArrayExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::ArrayExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     std::vector<ValuePtr> values;
     std::vector<ConstantPtr> constants;

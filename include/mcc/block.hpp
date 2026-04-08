@@ -8,11 +8,18 @@ namespace mcc
 {
     struct Block final : Value
     {
-        static BlockPtr Create(const SourceLocation &where, TypeContext &context, const FunctionPtr &parent);
+        static BlockPtr Create(
+                const SourceLocation &where,
+                TypeContext &context,
+                const FunctionPtr &parent);
 
-        Block(const SourceLocation &where, TypeContext &context, FunctionPtr parent);
+        Block(const SourceLocation &where,
+              TypeContext &context,
+              FunctionPtr parent);
 
-        void Generate(CommandVector &commands, bool stack) const override;
+        void Generate(
+                CommandVector &commands,
+                bool stack) const override;
         [[nodiscard]] bool RequireStack() const override;
 
         [[nodiscard]] InstructionPtr GetTerminator() const;

@@ -3,7 +3,9 @@
 #include <mcc/expression.hpp>
 #include <mcc/function.hpp>
 
-mcc::ResourceExpression::ResourceExpression(const SourceLocation &where, ResourceLocation location)
+mcc::ResourceExpression::ResourceExpression(
+        const SourceLocation &where,
+        ResourceLocation location)
     : Expression(where),
       Location(std::move(location))
 {
@@ -14,7 +16,9 @@ std::ostream &mcc::ResourceExpression::Print(std::ostream &stream) const
     return stream << Location;
 }
 
-mcc::ValuePtr mcc::ResourceExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::ResourceExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     if (builder.HasGlobal(Location))
         return builder.GetGlobal(Where, Location);

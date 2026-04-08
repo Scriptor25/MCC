@@ -4,7 +4,10 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::GlobalNode::GlobalNode(const SourceLocation &where, ResourceLocation location, TypePtr type)
+mcc::GlobalNode::GlobalNode(
+        const SourceLocation &where,
+        ResourceLocation location,
+        TypePtr type)
     : TreeNode(where),
       Location(std::move(location)),
       Type(std::move(type))
@@ -27,7 +30,9 @@ void mcc::GlobalNode::Generate(Builder &builder) const
     }
 }
 
-void mcc::GlobalNode::GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const
+void mcc::GlobalNode::GenerateInclude(
+        Builder &builder,
+        std::set<std::filesystem::path> &include_chain) const
 {
     if (!builder.HasGlobal(Location))
         builder.CreateGlobal(Where, Location, Type);

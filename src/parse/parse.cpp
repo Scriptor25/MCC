@@ -4,12 +4,23 @@
 
 #include <algorithm>
 
-mcc::Parser::Parser(TypeContext &context, std::istream &stream, const std::string &filename)
-    : Parser(context, stream, SourceLocation(filename, 1, 0))
+mcc::Parser::Parser(
+        TypeContext &context,
+        std::istream &stream,
+        const std::string &filename)
+    : Parser(context,
+             stream,
+             SourceLocation(
+                     filename,
+                     1,
+                     0))
 {
 }
 
-mcc::Parser::Parser(TypeContext &context, std::istream &stream, SourceLocation location)
+mcc::Parser::Parser(
+        TypeContext &context,
+        std::istream &stream,
+        SourceLocation location)
     : m_Context(context),
       m_Stream(stream),
       m_Where(std::move(location))
@@ -46,7 +57,9 @@ void mcc::Parser::Get()
         m_Where.Col++;
 }
 
-bool mcc::Parser::At(const TokenType type, const std::string &value) const
+bool mcc::Parser::At(
+        const TokenType type,
+        const std::string &value) const
 {
     if (m_Token.Type != type)
         return false;
@@ -59,25 +72,17 @@ bool mcc::Parser::At(const TokenType type, const std::string &value) const
 
 bool mcc::Parser::AtAny(const std::vector<TokenType> &types) const
 {
-    return std::ranges::any_of(
-        types,
-        [this](auto &type)
-        {
-            return At(type);
-        });
+    return std::ranges::any_of(types, [this](auto &type) { return At(type); });
 }
 
 bool mcc::Parser::AtEnum(const std::vector<const char *> &values) const
 {
-    return std::ranges::any_of(
-        values,
-        [this](auto &value)
-        {
-            return At(TokenType_Symbol, value);
-        });
+    return std::ranges::any_of(values, [this](auto &value) { return At(TokenType::Symbol, value); });
 }
 
-bool mcc::Parser::SkipIf(const TokenType type, const std::string &value)
+bool mcc::Parser::SkipIf(
+        const TokenType type,
+        const std::string &value)
 {
     if (m_Token.Type != type)
         return false;
@@ -97,7 +102,9 @@ mcc::Token mcc::Parser::Skip()
     return t;
 }
 
-mcc::Token mcc::Parser::Expect(TokenType type, std::string value)
+mcc::Token mcc::Parser::Expect(
+        TokenType type,
+        std::string value)
 {
     Assert(m_Token.Type == type, m_Token.Where, "expected {}, but is {}", type, m_Token.Type);
 
@@ -118,7 +125,7 @@ mcc::Token mcc::Parser::ExpectAny(const std::vector<TokenType> &types)
 mcc::Token mcc::Parser::ExpectEnum(const std::vector<const char *> &values)
 {
     for (auto &value : values)
-        if (At(TokenType_Symbol, value))
+        if (At(TokenType::Symbol, value))
             return Skip();
 
     Error(m_Token.Where, "expected {}, but is '{}'", values, m_Token.Value);

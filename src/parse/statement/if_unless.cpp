@@ -5,20 +5,17 @@
 mcc::StatementPtr mcc::Parser::ParseIfUnlessStatement()
 {
     auto token = ExpectEnum("if", "unless");
-    Expect(TokenType_Other, "(");
+    Expect(TokenType::Other, "(");
     auto condition = ParseExpression();
-    Expect(TokenType_Other, ")");
+    Expect(TokenType::Other, ")");
 
     auto then = ParseStatement();
 
     StatementPtr else_;
-    if (SkipIf(TokenType_Symbol, "else"))
+    if (SkipIf(TokenType::Symbol, "else"))
         else_ = ParseStatement();
 
-    return std::make_unique<IfUnlessStatement>(
-        token.Where,
-        token.Value == "unless",
-        std::move(condition),
-        std::move(then),
-        std::move(else_));
+    return std::make_unique<
+            IfUnlessStatement
+    >(token.Where, token.Value == "unless", std::move(condition), std::move(then), std::move(else_));
 }

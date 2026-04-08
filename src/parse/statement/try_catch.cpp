@@ -3,21 +3,21 @@
 
 mcc::StatementPtr mcc::Parser::ParseTryCatchStatement()
 {
-    auto where = Expect(TokenType_Symbol, "try").Where;
+    auto where = Expect(TokenType::Symbol, "try").Where;
 
     auto try_ = ParseStatement();
 
     StatementPtr catch_;
     std::string variable;
     TypePtr error_type;
-    if (SkipIf(TokenType_Symbol, "catch"))
+    if (SkipIf(TokenType::Symbol, "catch"))
     {
-        if (SkipIf(TokenType_Other, "("))
+        if (SkipIf(TokenType::Other, "("))
         {
-            variable = Expect(TokenType_Symbol).Value;
-            Expect(TokenType_Other, ":");
+            variable = Expect(TokenType::Symbol).Value;
+            Expect(TokenType::Other, ":");
             error_type = ParseType();
-            Expect(TokenType_Other, ")");
+            Expect(TokenType::Other, ")");
         }
 
         catch_ = ParseStatement();

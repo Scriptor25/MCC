@@ -1,7 +1,9 @@
 #include <mcc/builder.hpp>
 #include <mcc/tree.hpp>
 
-mcc::NamespaceNode::NamespaceNode(const SourceLocation &where, std::string namespace_)
+mcc::NamespaceNode::NamespaceNode(
+        const SourceLocation &where,
+        std::string namespace_)
     : TreeNode(where),
       Namespace(std::move(namespace_))
 {
@@ -17,7 +19,9 @@ void mcc::NamespaceNode::Generate(Builder &builder) const
     builder.SetNamespace(Namespace);
 }
 
-void mcc::NamespaceNode::GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const
+void mcc::NamespaceNode::GenerateInclude(
+        Builder &builder,
+        std::set<std::filesystem::path> &include_chain) const
 {
     builder.SetNamespace(Namespace);
 }

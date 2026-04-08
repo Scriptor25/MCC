@@ -8,7 +8,7 @@ AlignConsecutiveAssignments: true
 AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: Consecutive
-AlignConsecutiveShortCaseStatements: 
+AlignConsecutiveShortCaseStatements:
   Enabled: true
   AcrossEmptyLines: true
   AcrossComments: true
@@ -26,11 +26,10 @@ AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLambdasOnASingleLine: Inline
 AlwaysBreakAfterDefinitionReturnType: false
-AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: false
-BinPackParameters: false
+BinPackParameters: AlwaysOnePerLine
 BracedInitializerIndentWidth: 4
-BraceWrapping: 
+BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true
   AfterControlStatement: true
@@ -50,47 +49,49 @@ BraceWrapping:
   SplitEmptyNamespace: true
 BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Leave
+# BreakAfterOpenBracketBracedList: true
 BreakAfterReturnType: Automatic
 BreakArrays: false
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
-BreakConstructorInitializersBeforeComma: false
+# BreakBeforeCloseBracketBracedList: true
+BreakBeforeConceptDeclarations: Always
+BreakBeforeTemplateCloser: true
+BreakConstructorInitializers: BeforeColon
 BreakFunctionDefinitionParameters: false
 BreakInheritanceList: AfterComma
 BreakTemplateDeclarations: Yes
 ColumnLimit: 120
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ContinuationIndentWidth: 8
 Cpp11BracedListStyle: false
 ExperimentalAutoDetectBinPacking: true
 FixNamespaceComments: false
-IncludeCategories: 
-  - Regex: '^<.*'
+IncludeCategories:
+  - Regex: "^<.*"
     Priority: 1
   - Regex: '^".*'
     Priority: 2
-  - Regex: '.*'
+  - Regex: ".*"
     Priority: 3
-IncludeIsMainRegex: '([-_](test|unittest))?$'
+IncludeIsMainRegex: "([-_](test|unittest))?$"
 IndentExternBlock: Indent
 IndentRequiresClause: false
 IndentWidth: 4
 InsertNewlineAtEOF: true
-IntegerLiteralSeparator: 
+IntegerLiteralSeparator:
   Binary: 4
   BinaryMinDigits: 16
   Decimal: 3
   DecimalMinDigits: 10
   Hex: 4
   HexMinDigits: 16
-JavaScriptQuotes: Double
-KeepEmptyLines: 
+KeepEmptyLines:
   AtEndOfFile: false
   AtStartOfBlock: false
   AtStartOfFile: false
 LineEnding: LF
-MacroBlockBegin: ''
-MacroBlockEnd: ''
+MacroBlockBegin: ""
+MacroBlockEnd: ""
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
 PackConstructorInitializers: NextLineOnly
@@ -101,14 +102,15 @@ PenaltyBreakFirstLessLess: 0
 PenaltyBreakScopeResolution: 1000
 PenaltyBreakString: 0
 PenaltyBreakTemplateDeclaration: 0
-PenaltyExcessCharacter: 0
-PenaltyReturnTypeOnItsOwnLine: 0
+PenaltyExcessCharacter: 100000
+PenaltyReturnTypeOnItsOwnLine: 10000
+RequiresClausePosition: OwnLine
+RequiresExpressionIndentation: OuterScope
 SkipMacroDefinitionBody: false
-SortJavaStaticImport: After
 SortUsingDeclarations: Lexicographic
 SpaceAfterCStyleCast: true
 SpaceAfterTemplateKeyword: false
-SpaceBeforeParensOptions: 
+SpaceBeforeParensOptions:
   AfterControlStatements: true
   AfterFunctionDeclarationName: false
   AfterFunctionDefinitionName: false
@@ -125,7 +127,7 @@ SpacesInAngles: false
 SpacesInConditionalStatement: false
 SpacesInCStyleCastParentheses: false
 SpacesInParens: Custom
-SpacesInParensOptions: 
+SpacesInParensOptions:
   ExceptDoubleParentheses: true
   InConditionalStatements: false
   InEmptyParentheses: false

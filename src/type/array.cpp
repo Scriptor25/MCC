@@ -1,7 +1,9 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::ArrayType::ArrayType(TypeContext &context, TypePtr elements)
+mcc::ArrayType::ArrayType(
+        TypeContext &context,
+        TypePtr elements)
     : Type(context),
       Elements(std::move(elements))
 {

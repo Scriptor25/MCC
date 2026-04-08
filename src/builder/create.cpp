@@ -6,10 +6,10 @@
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::Builder::CreateStore(
-    const SourceLocation &where,
-    const ValuePtr &dst,
-    const ValuePtr &src,
-    const bool ignore_mutability) const
+        const SourceLocation &where,
+        const ValuePtr &dst,
+        const ValuePtr &src,
+        const bool ignore_mutability) const
 {
     Assert(!!dst, where, "dst must not be null");
     Assert(!!src, where, "src must not be null");
@@ -19,10 +19,10 @@ mcc::InstructionPtr mcc::Builder::CreateStore(
 }
 
 mcc::InstructionPtr mcc::Builder::CreateComparison(
-    const SourceLocation &where,
-    const E_Comparator comparator,
-    const ValuePtr &left,
-    const ValuePtr &right) const
+        const SourceLocation &where,
+        const E_Comparator comparator,
+        const ValuePtr &left,
+        const ValuePtr &right) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!comparator, where, "comparator must not be null");
@@ -30,14 +30,14 @@ mcc::InstructionPtr mcc::Builder::CreateComparison(
     Assert(!!right, where, "right must not be null");
 
     return Insert(
-        where,
-        ComparisonInstruction::Create(where, m_Context, comparator, m_InsertBlock->Parent->Location, left, right));
+            where,
+            ComparisonInstruction::Create(where, m_Context, comparator, m_InsertBlock->Parent->Location, left, right));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateOperation(
-    const SourceLocation &where,
-    const E_Operator operator_,
-    const std::vector<ValuePtr> &operands) const
+        const SourceLocation &where,
+        const E_Operator operator_,
+        const std::vector<ValuePtr> &operands) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!operands.empty(), where, "operands must not be empty");
@@ -46,14 +46,14 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
         Assert(!!operand, where, "operand must not be null");
 
     return Insert(
-        where,
-        OperationInstruction::Create(where, m_Context, operator_, m_InsertBlock->Parent->Location, operands));
+            where,
+            OperationInstruction::Create(where, m_Context, operator_, m_InsertBlock->Parent->Location, operands));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCommand(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const CommandT &command) const
+        const SourceLocation &where,
+        const TypePtr &type,
+        const CommandT &command) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!type, where, "type must not be null");
@@ -70,22 +70,20 @@ mcc::InstructionPtr mcc::Builder::CreateReturn(const SourceLocation &where) cons
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(
-    const SourceLocation &where,
-    const ValuePtr &value) const
+        const SourceLocation &where,
+        const ValuePtr &value) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!value, where, "value must not be null");
 
-    return Insert(
-        where,
-        ReturnInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, value));
+    return Insert(where, ReturnInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateBranch(
-    const SourceLocation &where,
-    const ValuePtr &condition,
-    const BlockPtr &then_target,
-    const BlockPtr &else_target) const
+        const SourceLocation &where,
+        const ValuePtr &condition,
+        const BlockPtr &then_target,
+        const BlockPtr &else_target) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!condition, where, "condition must not be null");
@@ -99,17 +97,14 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(
     else_target->Predecessors.insert(m_InsertBlock);
 
     return Insert(
-        where,
-        BranchInstruction::Create(
             where,
-            m_Context,
-            m_InsertBlock->Parent->Location,
-            condition,
-            then_target,
-            else_target));
+            BranchInstruction::
+                    Create(where, m_Context, m_InsertBlock->Parent->Location, condition, then_target, else_target));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateDirect(const SourceLocation &where, const BlockPtr &target) const
+mcc::InstructionPtr mcc::Builder::CreateDirect(
+        const SourceLocation &where,
+        const BlockPtr &target) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!target, where, "target must not be null");
@@ -121,10 +116,10 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(const SourceLocation &where, cons
 }
 
 mcc::InstructionPtr mcc::Builder::CreateDirect(
-    const SourceLocation &where,
-    const BlockPtr &target,
-    const ValuePtr &result,
-    const ValuePtr &branch_result) const
+        const SourceLocation &where,
+        const BlockPtr &target,
+        const ValuePtr &result,
+        const ValuePtr &branch_result) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!target, where, "target must not be null");
@@ -135,21 +130,19 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(
     target->Predecessors.insert(m_InsertBlock);
 
     return Insert(
-        where,
-        DirectBranchInstruction::Create(
             where,
-            m_Context,
-            m_InsertBlock->Parent->Location,
-            target,
-            result,
-            branch_result));
+            DirectBranchInstruction::
+                    Create(where, m_Context, m_InsertBlock->Parent->Location, target, result, branch_result));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateSwitch(
-    const SourceLocation &where,
-    const ValuePtr &condition,
-    const BlockPtr &default_target,
-    const std::vector<std::pair<ConstantPtr, BlockPtr>> &case_targets) const
+        const SourceLocation &where,
+        const ValuePtr &condition,
+        const BlockPtr &default_target,
+        const std::vector<std::pair<
+                ConstantPtr,
+                BlockPtr
+        >> &case_targets) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!condition, where, "condition must not be null");
@@ -169,20 +162,15 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
     default_target->Predecessors.insert(m_InsertBlock);
 
     return Insert(
-        where,
-        SwitchInstruction::Create(
             where,
-            m_Context,
-            m_InsertBlock->Parent->Location,
-            condition,
-            default_target,
-            case_targets));
+            SwitchInstruction::
+                    Create(where, m_Context, m_InsertBlock->Parent->Location, condition, default_target, case_targets));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateThrow(
-    const SourceLocation &where,
-    const ValuePtr &value,
-    const BlockPtr &landing_pad) const
+        const SourceLocation &where,
+        const ValuePtr &value,
+        const BlockPtr &landing_pad) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!value, where, "value must not be null");
@@ -194,11 +182,13 @@ mcc::InstructionPtr mcc::Builder::CreateThrow(
     }
 
     return Insert(
-        where,
-        ThrowInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, value, landing_pad));
+            where,
+            ThrowInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, value, landing_pad));
 }
 
-mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where, const TypePtr &type) const
+mcc::ValuePtr mcc::Builder::CreateBranchResult(
+        const SourceLocation &where,
+        const TypePtr &type) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
@@ -206,10 +196,10 @@ mcc::ValuePtr mcc::Builder::CreateBranchResult(const SourceLocation &where, cons
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
-    const SourceLocation &where,
-    const FunctionPtr &callee,
-    const std::vector<ValuePtr> &arguments,
-    const BlockPtr &landing_pad) const
+        const SourceLocation &where,
+        const FunctionPtr &callee,
+        const std::vector<ValuePtr> &arguments,
+        const BlockPtr &landing_pad) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
@@ -224,14 +214,14 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
     }
 
     return Insert(
-        where,
-        CallInstruction::Create(where, m_InsertBlock->Parent->Location, callee, argument_pairs, landing_pad));
+            where,
+            CallInstruction::Create(where, m_InsertBlock->Parent->Location, callee, argument_pairs, landing_pad));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateMacro(
-    const SourceLocation &where,
-    const std::string &name,
-    const std::vector<ValuePtr> &arguments) const
+        const SourceLocation &where,
+        const std::string &name,
+        const std::vector<ValuePtr> &arguments) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
@@ -239,55 +229,55 @@ mcc::InstructionPtr mcc::Builder::CreateMacro(
 }
 
 mcc::InstructionPtr mcc::Builder::CreateAppend(
-    const SourceLocation &where,
-    const ValuePtr &array,
-    const ValuePtr &value,
-    const bool force) const
+        const SourceLocation &where,
+        const ValuePtr &array,
+        const ValuePtr &value,
+        const bool force) const
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
     Assert(force || array->IsMutable(), where, "array must be mutable");
 
     return Insert(
-        where,
-        ArrayInstruction::CreateAppend(where, m_Context, m_InsertBlock->Parent->Location, array, value));
+            where,
+            ArrayInstruction::CreateAppend(where, m_Context, m_InsertBlock->Parent->Location, array, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreatePrepend(
-    const SourceLocation &where,
-    const ValuePtr &array,
-    const ValuePtr &value) const
+        const SourceLocation &where,
+        const ValuePtr &array,
+        const ValuePtr &value) const
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
     Assert(array->IsMutable(), where, "array must be mutable");
 
     return Insert(
-        where,
-        ArrayInstruction::CreatePrepend(where, m_Context, m_InsertBlock->Parent->Location, array, value));
+            where,
+            ArrayInstruction::CreatePrepend(where, m_Context, m_InsertBlock->Parent->Location, array, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(
-    const ValuePtr &array,
-    const SourceLocation &where,
-    const ValuePtr &value,
-    const IndexT index) const
+        const ValuePtr &array,
+        const SourceLocation &where,
+        const ValuePtr &value,
+        const IndexT index) const
 {
     Assert(!!array, where, "array must not be null");
     Assert(!!value, where, "value must not be null");
     Assert(array->IsMutable(), where, "array must be mutable");
 
     return Insert(
-        where,
-        ArrayInstruction::CreateInsert(where, m_Context, m_InsertBlock->Parent->Location, array, value, index));
+            where,
+            ArrayInstruction::CreateInsert(where, m_Context, m_InsertBlock->Parent->Location, array, value, index));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(
-    const SourceLocation &where,
-    const ValuePtr &object,
-    const ValuePtr &value,
-    const std::string &key,
-    const bool force) const
+        const SourceLocation &where,
+        const ValuePtr &object,
+        const ValuePtr &value,
+        const std::string &key,
+        const bool force) const
 {
     Assert(!!object, where, "object must not be null");
     Assert(!!value, where, "value must not be null");
@@ -295,18 +285,22 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
     Assert(force || object->IsMutable(), where, "object must be mutable");
 
     return Insert(
-        where,
-        ObjectInstruction::CreateInsert(where, m_Context, m_InsertBlock->Parent->Location, object, value, key));
+            where,
+            ObjectInstruction::CreateInsert(where, m_Context, m_InsertBlock->Parent->Location, object, value, key));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateNotNull(const SourceLocation &where, const ValuePtr &value) const
+mcc::InstructionPtr mcc::Builder::CreateNotNull(
+        const SourceLocation &where,
+        const ValuePtr &value) const
 {
     Assert(!!value, where, "value must not be null");
 
     return Insert(where, NotNullInstruction::Create(where, m_Context, m_InsertBlock->Parent->Location, value));
 }
 
-mcc::InstructionPtr mcc::Builder::CreateDelete(const SourceLocation &where, const ValuePtr &value) const
+mcc::InstructionPtr mcc::Builder::CreateDelete(
+        const SourceLocation &where,
+        const ValuePtr &value) const
 {
     Assert(!!value, where, "value must not be null");
     Assert(value->IsMutable(), where, "value must be mutable");

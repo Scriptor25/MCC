@@ -3,11 +3,11 @@
 #include <mcc/statement.hpp>
 
 mcc::TryCatchStatement::TryCatchStatement(
-    const SourceLocation &where,
-    StatementPtr try_,
-    StatementPtr catch_,
-    std::string variable,
-    TypePtr error_type)
+        const SourceLocation &where,
+        StatementPtr try_,
+        StatementPtr catch_,
+        std::string variable,
+        TypePtr error_type)
     : Statement(where),
       Try(std::move(try_)),
       Catch(std::move(catch_)),
@@ -29,15 +29,17 @@ std::ostream &mcc::TryCatchStatement::Print(std::ostream &stream) const
     return stream;
 }
 
-void mcc::TryCatchStatement::Generate(Builder &builder, Frame &frame) const
+void mcc::TryCatchStatement::Generate(
+        Builder &builder,
+        Frame &frame) const
 {
-    const auto parent = builder.GetInsertBlock()->Parent;
-    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto parent       = builder.GetInsertBlock()->Parent;
+    const auto tail_target  = Block::Create(Where, builder.GetContext(), parent);
     const auto catch_target = Catch ? Block::Create(Catch->Where, builder.GetContext(), parent) : tail_target;
 
     auto require_tail = !Catch;
 
-    auto target_frame = frame;
+    auto target_frame       = frame;
     target_frame.LandingPad = catch_target;
 
     Try->Generate(builder, target_frame);

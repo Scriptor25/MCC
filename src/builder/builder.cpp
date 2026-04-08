@@ -5,7 +5,9 @@
 
 #include <ranges>
 
-mcc::Builder::Builder(TypeContext &context, Package &package)
+mcc::Builder::Builder(
+        TypeContext &context,
+        Package &package)
     : m_Context(context),
       m_Package(package)
 {
@@ -51,7 +53,9 @@ void mcc::Builder::PopVariables()
     m_Variables.pop_back();
 }
 
-mcc::InstructionPtr mcc::Builder::Insert(const SourceLocation &where, const InstructionPtr &instruction) const
+mcc::InstructionPtr mcc::Builder::Insert(
+        const SourceLocation &where,
+        const InstructionPtr &instruction) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!instruction, where, "instruction must not be null");

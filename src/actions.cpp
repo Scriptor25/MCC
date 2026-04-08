@@ -10,10 +10,12 @@ mcc::Actions::Actions(const std::vector<Action> &actions)
         m_Actions[action.Pattern] = action;
 }
 
-void mcc::Actions::operator()(const int argc, const char **argv)
+void mcc::Actions::operator()(
+        const int argc,
+        const char **argv)
 {
     m_Executable = argv[0];
-    m_Action = argc >= 2 && m_Actions.contains(argv[1]) ? &m_Actions.at(argv[1]) : nullptr;
+    m_Action     = argc >= 2 && m_Actions.contains(argv[1]) ? &m_Actions.at(argv[1]) : nullptr;
     m_Strings.clear();
     m_Flags.clear();
 
@@ -42,7 +44,9 @@ unsigned mcc::Actions::ActionID() const
     return m_Action ? m_Action->ID : ~0;
 }
 
-bool mcc::Actions::String(const unsigned index, std::string &destination) const
+bool mcc::Actions::String(
+        const unsigned index,
+        std::string &destination) const
 {
     if (!m_Strings.contains(index))
         return false;

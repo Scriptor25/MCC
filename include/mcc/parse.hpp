@@ -9,8 +9,12 @@ namespace mcc
     class Parser
     {
     public:
-        Parser(TypeContext &context, std::istream &stream, const std::string &filename);
-        Parser(TypeContext &context, std::istream &stream, SourceLocation location);
+        Parser(TypeContext &context,
+               std::istream &stream,
+               const std::string &filename);
+        Parser(TypeContext &context,
+               std::istream &stream,
+               SourceLocation location);
 
         [[nodiscard]] size_t Count() const;
 
@@ -21,39 +25,45 @@ namespace mcc
         void Get();
         Token &Next();
 
-        [[nodiscard]] bool At(TokenType type, const std::string &value = {}) const;
+        [[nodiscard]] bool At(
+                TokenType type,
+                const std::string &value = {}) const;
         [[nodiscard]] bool AtAny(const std::vector<TokenType> &types) const;
         [[nodiscard]] bool AtEnum(const std::vector<const char *> &values) const;
 
         template<typename... Args>
-        [[nodiscard]] bool AtEnum(Args... args) const
+        [[nodiscard]] bool AtEnum(Args &&...args) const
         {
-            return AtEnum({ args... });
+            return AtEnum({ std::forward<Args>(args)... });
         }
 
         template<typename... Args>
-        [[nodiscard]] bool AtAny(Args... args) const
+        [[nodiscard]] bool AtAny(Args &&...args) const
         {
-            return AtAny({ args... });
+            return AtAny({ std::forward<Args>(args)... });
         }
 
-        bool SkipIf(TokenType type, const std::string &value = {});
+        bool SkipIf(
+                TokenType type,
+                const std::string &value = {});
 
         Token Skip();
-        Token Expect(TokenType type, std::string value = {});
+        Token Expect(
+                TokenType type,
+                std::string value = {});
         Token ExpectAny(const std::vector<TokenType> &types);
         Token ExpectEnum(const std::vector<const char *> &values);
 
         template<typename... Args>
-        Token ExpectEnum(Args... args)
+        Token ExpectEnum(Args &&...args)
         {
-            return ExpectEnum({ args... });
+            return ExpectEnum({ std::forward<Args>(args)... });
         }
 
         template<typename... Args>
-        Token ExpectAny(Args... args)
+        Token ExpectAny(Args &&...args)
         {
-            return ExpectAny({ args... });
+            return ExpectAny({ std::forward<Args>(args)... });
         }
 
         ResourceLocation ParseResourceLocation(bool simple_path = false);
@@ -86,7 +96,9 @@ namespace mcc
 
         ExpressionPtr ParseExpression();
         ExpressionPtr ParseArrayExpression();
-        ExpressionPtr ParseBinaryExpression(ExpressionPtr left, unsigned min_pre);
+        ExpressionPtr ParseBinaryExpression(
+                ExpressionPtr left,
+                unsigned min_pre);
         ExpressionPtr ParseCommandExpression();
         ExpressionPtr ParseRefExpression();
         ExpressionPtr ParseFormatExpression();

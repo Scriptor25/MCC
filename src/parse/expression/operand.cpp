@@ -9,34 +9,34 @@ mcc::ExpressionPtr mcc::Parser::ParseOperandExpression()
     {
         auto where = m_Token.Where;
 
-        if (SkipIf(TokenType_Other, "("))
+        if (SkipIf(TokenType::Other, "("))
         {
             std::vector<ExpressionPtr> arguments;
-            while (!At(TokenType_Other, ")") && !At(TokenType_EOF))
+            while (!At(TokenType::Other, ")") && !At(TokenType::EoF))
             {
                 arguments.emplace_back(ParseExpression());
 
-                if (!At(TokenType_Other, ")"))
-                    Expect(TokenType_Other, ",");
+                if (!At(TokenType::Other, ")"))
+                    Expect(TokenType::Other, ",");
             }
-            Expect(TokenType_Other, ")");
+            Expect(TokenType::Other, ")");
 
             operand = std::make_unique<CallExpression>(where, std::move(operand), std::move(arguments));
             continue;
         }
 
-        if (SkipIf(TokenType_Other, "["))
+        if (SkipIf(TokenType::Other, "["))
         {
             auto index = ParseExpression();
-            Expect(TokenType_Other, "]");
+            Expect(TokenType::Other, "]");
 
             operand = std::make_unique<SubscriptExpression>(where, std::move(operand), std::move(index));
             continue;
         }
 
-        if (SkipIf(TokenType_Other, "."))
+        if (SkipIf(TokenType::Other, "."))
         {
-            auto member = Expect(TokenType_Symbol).Value;
+            auto member = Expect(TokenType::Symbol).Value;
 
             operand = std::make_unique<MemberExpression>(where, std::move(operand), member);
             continue;

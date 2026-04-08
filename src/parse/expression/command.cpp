@@ -4,11 +4,11 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseCommandExpression()
 {
-    auto where = Expect(TokenType_Other, "?").Where;
+    auto where = Expect(TokenType::Other, "?").Where;
     TypePtr type;
-    if (SkipIf(TokenType_Other, ":"))
+    if (SkipIf(TokenType::Other, ":"))
         type = ParseType();
-    auto command = Expect(TokenType_FormatString).Value;
+    auto command = Expect(TokenType::FormatString).Value;
 
     return std::make_unique<CommandExpression>(where, type, command);
 }

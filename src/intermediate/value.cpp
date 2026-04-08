@@ -1,14 +1,22 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
-mcc::Value::Value(SourceLocation where, TypePtr type, const E_FieldType field_type)
+static uintptr_t global_stack = 0;
+
+mcc::Value::Value(
+        SourceLocation where,
+        TypePtr type,
+        const E_FieldType field_type)
     : Where(std::move(where)),
       Type(std::move(type)),
-      FieldType(field_type)
+      FieldType(field_type),
+      StackId(global_stack++)
 {
 }
 
-void mcc::Value::Generate(CommandVector &commands, bool stack) const
+void mcc::Value::Generate(
+        CommandVector &commands,
+        bool stack) const
 {
     Error(Where, "mcc::Value::Generate");
 }

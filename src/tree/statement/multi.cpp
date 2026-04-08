@@ -1,7 +1,9 @@
 #include <mcc/builder.hpp>
 #include <mcc/statement.hpp>
 
-mcc::MultiStatement::MultiStatement(const SourceLocation &where, std::vector<StatementPtr> statements)
+mcc::MultiStatement::MultiStatement(
+        const SourceLocation &where,
+        std::vector<StatementPtr> statements)
     : Statement(where),
       Statements(std::move(statements))
 {
@@ -19,7 +21,9 @@ std::ostream &mcc::MultiStatement::Print(std::ostream &stream) const
     return stream << indentation << '}';
 }
 
-void mcc::MultiStatement::Generate(Builder &builder, Frame &frame) const
+void mcc::MultiStatement::Generate(
+        Builder &builder,
+        Frame &frame) const
 {
     builder.PushVariables();
 

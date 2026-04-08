@@ -10,13 +10,13 @@
 #include <mcc/value.hpp>
 
 mcc::DefineNode::DefineNode(
-    const SourceLocation &where,
-    ResourceLocation location,
-    ParameterList parameters,
-    TypePtr result_type,
-    const bool throws,
-    const std::vector<ResourceTag> &tags,
-    StatementPtr body)
+        const SourceLocation &where,
+        ResourceLocation location,
+        ParameterList parameters,
+        TypePtr result_type,
+        const bool throws,
+        const std::vector<ResourceTag> &tags,
+        StatementPtr body)
     : TreeNode(where),
       Location(std::move(location)),
       Parameters(std::move(parameters)),
@@ -99,20 +99,20 @@ void mcc::DefineNode::Generate(Builder &builder) const
             value = ArgumentValue::Create(Where, type_, name_);
             break;
         case FieldType_MutableReference:
-            value = GenericStorageReference::Create(
-                Where,
-                type_,
-                ArgumentValue::Create(Where, nullptr, name_ + "_target"),
-                ArgumentValue::Create(Where, nullptr, name_ + "_path"),
-                true);
+            value = GenericStorageReference::
+                    Create(Where,
+                           type_,
+                           ArgumentValue::Create(Where, nullptr, name_ + "_target"),
+                           ArgumentValue::Create(Where, nullptr, name_ + "_path"),
+                           true);
             break;
         case FieldType_ImmutableReference:
-            value = GenericStorageReference::Create(
-                Where,
-                type_,
-                ArgumentValue::Create(Where, nullptr, name_ + "_target"),
-                ArgumentValue::Create(Where, nullptr, name_ + "_path"),
-                false);
+            value = GenericStorageReference::
+                    Create(Where,
+                           type_,
+                           ArgumentValue::Create(Where, nullptr, name_ + "_target"),
+                           ArgumentValue::Create(Where, nullptr, name_ + "_path"),
+                           false);
             break;
         }
         builder.InsertVariable(Where, name_, value);
@@ -130,12 +130,11 @@ void mcc::DefineNode::Generate(Builder &builder) const
             if (const auto instruction = std::dynamic_pointer_cast<ReturnInstruction>(terminator))
             {
                 auto type = instruction->Value ? instruction->Value->Type : builder.GetContext().GetVoid();
-                Assert(
-                    SameOrSpecial(type, ResultType),
-                    Where,
-                    "cannot return value of type {} for result type {}",
-                    type,
-                    ResultType);
+                Assert(SameOrSpecial(type, ResultType),
+                       Where,
+                       "cannot return value of type {} for result type {}",
+                       type,
+                       ResultType);
             }
         }
         else if (ResultType->IsVoid())
@@ -149,7 +148,9 @@ void mcc::DefineNode::Generate(Builder &builder) const
     builder.SetInsertBlock(nullptr);
 }
 
-void mcc::DefineNode::GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const
+void mcc::DefineNode::GenerateInclude(
+        Builder &builder,
+        std::set<std::filesystem::path> &include_chain) const
 {
     if (!builder.HasFunction(Location))
     {
@@ -165,21 +166,18 @@ void mcc::DefineNode::Check(const FunctionPtr &function) const
 {
     Assert(function->ResultType == ResultType, Where, "cannot implement function with different result type");
     Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
-    Assert(
-        function->Parameters.size() == Parameters.size(),
-        Where,
-        "cannot implement function with different parameter count");
+    Assert(function->Parameters.size() == Parameters.size(),
+           Where,
+           "cannot implement function with different parameter count");
     for (unsigned i = 0; i < Parameters.size(); ++i)
     {
-        Assert(
-            function->Parameters[i].Type == Parameters[i].Type,
-            Where,
-            "cannot implement function with different parameter type for offset {}",
-            i);
-        Assert(
-            function->Parameters[i].FieldType == Parameters[i].FieldType,
-            Where,
-            "cannot implement function with different field type for offset {}",
-            i);
+        Assert(function->Parameters[i].Type == Parameters[i].Type,
+               Where,
+               "cannot implement function with different parameter type for offset {}",
+               i);
+        Assert(function->Parameters[i].FieldType == Parameters[i].FieldType,
+               Where,
+               "cannot implement function with different field type for offset {}",
+               i);
     }
 }

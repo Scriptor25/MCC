@@ -4,37 +4,40 @@
 #include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::GenericStorageReference::Create(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const ValuePtr &location,
-    const ValuePtr &path,
-    bool is_mutable)
+        const SourceLocation &where,
+        const TypePtr &type,
+        const ValuePtr &location,
+        const ValuePtr &path,
+        bool is_mutable)
 {
     return std::make_shared<GenericStorageReference>(where, type, location, path, is_mutable);
 }
 
 mcc::ValuePtr mcc::GenericStorageReference::Create(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const ResourceLocation &location,
-    const std::string &path,
-    const bool is_mutable)
+        const SourceLocation &where,
+        const TypePtr &type,
+        const ResourceLocation &location,
+        const std::string &path,
+        const bool is_mutable)
 {
-    return std::make_shared<GenericStorageReference>(
-        where,
-        type,
-        ConstantResource::Create(where, type->Context.GetVoid(), location),
-        ConstantString::Create(where, type->Context, path),
-        is_mutable);
+    return std::make_shared<
+            GenericStorageReference
+    >(where,
+      type,
+      ConstantResource::Create(where, type->Context.GetVoid(), location),
+      ConstantString::Create(where, type->Context, path),
+      is_mutable);
 }
 
 mcc::GenericStorageReference::GenericStorageReference(
-    const SourceLocation &where,
-    const TypePtr &type,
-    ValuePtr location,
-    ValuePtr path,
-    const bool is_mutable)
-    : Value(where, type, is_mutable ? FieldType_MutableReference : FieldType_ImmutableReference),
+        const SourceLocation &where,
+        const TypePtr &type,
+        ValuePtr location,
+        ValuePtr path,
+        const bool is_mutable)
+    : Value(where,
+            type,
+            is_mutable ? FieldType_MutableReference : FieldType_ImmutableReference),
       Location(std::move(location)),
       Path(std::move(path))
 {
@@ -56,7 +59,7 @@ bool mcc::GenericStorageReference::RequireStack() const
 mcc::Result mcc::GenericStorageReference::GenerateResult() const
 {
     auto location = Location->GenerateResultUnwrap();
-    auto path = Path->GenerateResultUnwrap();
+    auto path     = Path->GenerateResultUnwrap();
 
     auto with_argument = location.WithArgument || path.WithArgument;
     std::string location_value, path_value;
@@ -68,7 +71,7 @@ mcc::Result mcc::GenericStorageReference::GenerateResult() const
         break;
 
     case ResultType_Argument:
-        with_argument = true;
+        with_argument  = true;
         location_value = location.Name;
         break;
 
@@ -84,7 +87,7 @@ mcc::Result mcc::GenericStorageReference::GenerateResult() const
 
     case ResultType_Argument:
         with_argument = true;
-        path_value = path.Name;
+        path_value    = path.Name;
         break;
 
     default:
@@ -92,10 +95,10 @@ mcc::Result mcc::GenericStorageReference::GenerateResult() const
     }
 
     return {
-        .Type = ResultType_Reference,
-        .WithArgument = with_argument,
+        .Type          = ResultType_Reference,
+        .WithArgument  = with_argument,
         .ReferenceType = ReferenceType_Storage,
-        .Target = location_value,
-        .Path = path_value,
+        .Target        = location_value,
+        .Path          = path_value,
     };
 }

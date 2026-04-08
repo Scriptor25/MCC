@@ -3,15 +3,15 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
 {
-    auto where = Expect(TokenType_Symbol, "ref").Where;
+    auto where = Expect(TokenType::Symbol, "ref").Where;
 
-    Expect(TokenType_Operator, "<");
+    Expect(TokenType::Operator, "<");
     auto type = ParseType();
-    Expect(TokenType_Operator, ">");
+    Expect(TokenType::Operator, ">");
 
-    Expect(TokenType_Other, "(");
+    Expect(TokenType::Other, "(");
     auto target_type = *ToReferenceType(ExpectEnum("block", "entity", "storage").Value);
-    Expect(TokenType_Other, ",");
+    Expect(TokenType::Other, ",");
 
     ExpressionPtr target_position_x, target_position_y, target_position_z, target_name, target_location;
 
@@ -19,9 +19,9 @@ mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
     {
     case ReferenceType_Block:
         target_position_x = ParseExpression();
-        Expect(TokenType_Other, ",");
+        Expect(TokenType::Other, ",");
         target_position_y = ParseExpression();
-        Expect(TokenType_Other, ",");
+        Expect(TokenType::Other, ",");
         target_position_z = ParseExpression();
         break;
     case ReferenceType_Entity:
@@ -32,18 +32,19 @@ mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
         break;
     }
 
-    Expect(TokenType_Other, ",");
+    Expect(TokenType::Other, ",");
     auto path = ParseExpression();
-    Expect(TokenType_Other, ")");
+    Expect(TokenType::Other, ")");
 
-    return std::make_unique<RefExpression>(
-        where,
-        type,
-        target_type,
-        std::move(target_position_x),
-        std::move(target_position_y),
-        std::move(target_position_z),
-        std::move(target_name),
-        std::move(target_location),
-        std::move(path));
+    return std::make_unique<
+            RefExpression
+    >(where,
+      type,
+      target_type,
+      std::move(target_position_x),
+      std::move(target_position_y),
+      std::move(target_position_z),
+      std::move(target_name),
+      std::move(target_location),
+      std::move(path));
 }

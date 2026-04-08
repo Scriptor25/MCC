@@ -17,13 +17,15 @@ namespace mcc
         {
         }
 
-        Resource(std::string namespace_, const std::vector<std::string> &path)
+        Resource(
+                std::string namespace_,
+                const std::vector<std::string> &path)
             : Namespace(std::move(namespace_)),
               Path(path)
         {
         }
 
-        Resource(const Resource &other) = default;
+        Resource(const Resource &other)            = default;
         Resource &operator=(const Resource &other) = default;
 
         Resource(Resource &&other) noexcept
@@ -34,8 +36,8 @@ namespace mcc
 
         Resource &operator=(Resource &&other) noexcept
         {
-            Namespace = std::move(other.Namespace);
-            Path = std::move(other.Path);
+            std::swap(Namespace, other.Namespace);
+            std::swap(Path, other.Path);
             return *this;
         }
 
@@ -53,26 +55,26 @@ namespace mcc
 
         Resource &operator=(Resource<!TAG> &&other) noexcept
         {
-            Namespace = std::move(other.Namespace);
-            Path = std::move(other.Path);
+            std::swap(Namespace, other.Namespace);
+            std::swap(Path, other.Path);
             return *this;
         }
 
         std::ostream &Print(std::ostream &stream) const
         {
             stream << (TAG ? "#" : "") << Namespace << ':';
-            for (unsigned i = 0; i < Path.size(); ++i)
+            for (auto it = Path.begin(); it != Path.end(); ++it)
             {
-                if (i)
+                if (it != Path.begin())
                     stream << '/';
-                stream << Path[i];
+                stream << *it;
             }
             return stream;
         }
 
         [[nodiscard]] std::string String() const
         {
-            std::stringstream stream;
+            std::ostringstream stream;
             Print(stream);
             return stream.str();
         }
@@ -85,7 +87,7 @@ namespace mcc
         [[nodiscard]] Resource Child(const std::string &path_segment) const
         {
             auto path = Path;
-            path.emplace_back(path_segment);
+            path.push_back(path_segment);
             return { Namespace, path };
         }
 
@@ -94,18 +96,24 @@ namespace mcc
     };
 
     using ResourceLocation = Resource<false>;
-    using ResourceTag = Resource<true>;
+    using ResourceTag      = Resource<true>;
 
     template<bool TAG>
-    std::ostream &operator<<(std::ostream &stream, const Resource<TAG> &resource)
+    std::ostream &operator<<(
+            std::ostream &stream,
+            const Resource<TAG> &resource)
     {
         return resource.Print(stream);
     }
 
-    std::ostream &operator<<(std::ostream &stream, const TypePtr &type);
+    std::ostream &operator<<(
+            std::ostream &stream,
+            const TypePtr &type);
 
     template<typename T>
-    std::filesystem::path operator/(std::filesystem::path first, const std::vector<T> &second)
+    std::filesystem::path operator/(
+            std::filesystem::path first,
+            const std::vector<T> &second)
     {
         for (const auto &segment : second)
             first /= segment;
@@ -116,10 +124,12 @@ namespace mcc
 namespace std
 {
     template<>
-    struct formatter<mcc::ResourceLocation> final : formatter<string>
+    struct formatter<mcc::ResourceLocation> : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::ResourceLocation &location, FormatContext &ctx) const
+        auto format(
+                const mcc::ResourceLocation &location,
+                FormatContext &ctx) const
         {
             return formatter<string>::format(location.String(), ctx);
         }

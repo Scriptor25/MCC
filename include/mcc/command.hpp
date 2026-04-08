@@ -14,14 +14,17 @@ namespace mcc
 
         CommandVector &Append(CommandT command)
         {
-            m_Commands.emplace_back(std::move(command));
+            m_Commands.push_back(std::move(command));
             return *this;
         }
 
         template<typename... Args>
-        CommandVector &Append(std::string_view format, Args &&... args)
+        CommandVector &Append(
+                std::format_string<Args...> format,
+                Args &&...args)
         {
-            return Append(std::vformat(std::move(format), std::make_format_args(args...)));
+            m_Commands.push_back(std::format(std::move(format), std::forward<Args>(args)...));
+            return *this;
         }
 
     private:

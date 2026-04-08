@@ -4,7 +4,10 @@
 #include <mcc/function.hpp>
 #include <mcc/value.hpp>
 
-mcc::ValuePtr mcc::Builder::StoreResult(const SourceLocation &where, const TypePtr &type, const std::string &name)
+mcc::ValuePtr mcc::Builder::StoreResult(
+        const SourceLocation &where,
+        const TypePtr &type,
+        const std::string &name)
 {
     Assert(!!type, where, "type must not be null");
     Assert(!name.empty(), where, "name must not be empty");

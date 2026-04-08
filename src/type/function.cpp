@@ -2,10 +2,10 @@
 #include <mcc/type.hpp>
 
 mcc::FunctionType::FunctionType(
-    TypeContext &context,
-    const std::vector<TypePtr> &parameters,
-    TypePtr result,
-    const bool throws)
+        TypeContext &context,
+        const std::vector<TypePtr> &parameters,
+        TypePtr result,
+        const bool throws)
     : Type(context),
       Parameters(parameters),
       Result(std::move(result)),

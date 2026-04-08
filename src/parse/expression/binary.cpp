@@ -1,10 +1,12 @@
 #include <mcc/expression.hpp>
 #include <mcc/parse.hpp>
 
-mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const unsigned min_pre)
+mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(
+        ExpressionPtr left,
+        const unsigned min_pre)
 {
     static const std::map<std::string, unsigned> pres{
-        { "=", 0 },
+        {  "=", 0 },
         { "+=", 0 },
         { "-=", 0 },
         { "*=", 0 },
@@ -13,13 +15,13 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
         { "==", 1 },
         { "<=", 1 },
         { ">=", 1 },
-        { "<", 1 },
-        { ">", 1 },
-        { "+", 2 },
-        { "-", 2 },
-        { "*", 3 },
-        { "/", 3 },
-        { "%", 3 },
+        {  "<", 1 },
+        {  ">", 1 },
+        {  "+", 2 },
+        {  "-", 2 },
+        {  "*", 3 },
+        {  "/", 3 },
+        {  "%", 3 },
     };
 
     auto has_pre = [this]
@@ -32,12 +34,12 @@ mcc::ExpressionPtr mcc::Parser::ParseBinaryExpression(ExpressionPtr left, const 
         return pres.at(m_Token.Value);
     };
 
-    while (At(TokenType_Operator) && has_pre() && get_pre() >= min_pre)
+    while (At(TokenType::Operator) && has_pre() && get_pre() >= min_pre)
     {
         const auto pre = get_pre();
         auto operator_ = Skip();
-        auto right = ParseOperandExpression();
-        while (At(TokenType_Operator) && has_pre() && (get_pre() > pre || (!get_pre() && !pre)))
+        auto right     = ParseOperandExpression();
+        while (At(TokenType::Operator) && has_pre() && (get_pre() > pre || (!get_pre() && !pre)))
             right = ParseBinaryExpression(std::move(right), pre + (get_pre() > pre ? 1 : 0));
         left = std::make_unique<BinaryExpression>(operator_.Where, operator_.Value, std::move(left), std::move(right));
     }

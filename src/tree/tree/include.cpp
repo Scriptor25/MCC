@@ -6,7 +6,9 @@
 
 #include <fstream>
 
-mcc::IncludeNode::IncludeNode(const SourceLocation &where, std::filesystem::path filepath)
+mcc::IncludeNode::IncludeNode(
+        const SourceLocation &where,
+        std::filesystem::path filepath)
     : TreeNode(where),
       Filepath(std::move(filepath))
 {
@@ -32,7 +34,9 @@ void mcc::IncludeNode::Generate(Builder &builder) const
             statement->GenerateInclude(builder, include_chain);
 }
 
-void mcc::IncludeNode::GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const
+void mcc::IncludeNode::GenerateInclude(
+        Builder &builder,
+        std::set<std::filesystem::path> &include_chain) const
 {
     if (include_chain.contains(canonical(Filepath)))
     {

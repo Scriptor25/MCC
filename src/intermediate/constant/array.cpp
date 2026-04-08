@@ -2,19 +2,19 @@
 #include <mcc/type.hpp>
 
 mcc::ConstantPtr mcc::ConstantArray::Create(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const std::vector<ConstantPtr> &values,
-    const bool stringify)
+        const SourceLocation &where,
+        const TypePtr &type,
+        const std::vector<ConstantPtr> &values,
+        const bool stringify)
 {
     return std::make_shared<ConstantArray>(where, type, values, stringify);
 }
 
 mcc::ConstantPtr mcc::ConstantArray::Create(
-    const SourceLocation &where,
-    TypeContext &context,
-    const std::vector<ConstantPtr> &values,
-    const bool stringify)
+        const SourceLocation &where,
+        TypeContext &context,
+        const std::vector<ConstantPtr> &values,
+        const bool stringify)
 {
     std::set<TypePtr> elements;
     for (auto &value : values)
@@ -26,11 +26,13 @@ mcc::ConstantPtr mcc::ConstantArray::Create(
 }
 
 mcc::ConstantArray::ConstantArray(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const std::vector<ConstantPtr> &values,
-    const bool stringify)
-    : Constant(where, type),
+        const SourceLocation &where,
+        const TypePtr &type,
+        const std::vector<ConstantPtr> &values,
+        const bool stringify)
+    : Constant(
+              where,
+              type),
       Values(values),
       Stringify(stringify)
 {
@@ -63,8 +65,8 @@ mcc::Result mcc::ConstantArray::GenerateResult() const
     result += ']';
 
     return {
-        .Type = ResultType_Value,
-        .Value = std::move(result),
+        .Type    = ResultType_Value,
+        .Value   = std::move(result),
         .NotNull = true,
     };
 }

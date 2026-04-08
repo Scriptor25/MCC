@@ -19,10 +19,7 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     for (auto &[namespace_, functions_] : Functions)
         for (auto &[path_, function_] : functions_)
         {
-            const auto file = data
-                              / namespace_
-                              / "function"
-                              / std::vector(path_.begin(), path_.end() - 1)
+            const auto file = data / namespace_ / "function" / std::vector(path_.begin(), path_.end() - 1)
                               / (path_.back() + ".mcfunction");
             const auto directory = file.parent_path();
             create_directories(directory);
@@ -39,11 +36,7 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     for (auto &[namespace_, tags_] : Tags)
         for (auto &[path_, tag_] : tags_)
         {
-            const auto file = data
-                              / namespace_
-                              / "tags"
-                              / "function"
-                              / std::vector(path_.begin(), path_.end() - 1)
+            const auto file = data / namespace_ / "tags" / "function" / std::vector(path_.begin(), path_.end() - 1)
                               / (path_.back() + ".json");
             const auto directory = file.parent_path();
             create_directories(directory);
@@ -60,16 +53,12 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     std::ofstream stream(package);
     Assert(stream.is_open(), "failed to open file {}", package.string());
 
-    json::Node node = json::Object
-    {
+    json::Node node = json::Object{
         {
-            "pack",
-            json::Object
-            {
+         "pack", json::Object{
                 { "description", Info.Description },
                 { "pack_format", Info.Version },
-            },
-        },
+            }, },
     };
     stream << std::setw(2) << node;
 
@@ -98,30 +87,36 @@ void mcc::PackageInfo::Serialize(const std::filesystem::path &path) const
     stream << std::setw(2) << json::Node(*this);
 }
 
-void json::serializer<mcc::ResourceLocation>::to_json(Node &node, const mcc::ResourceLocation &value)
+void json::serializer<mcc::ResourceLocation>::to_json(
+        Node &node,
+        const mcc::ResourceLocation &value)
 {
     node = value.String();
 }
 
-void json::serializer<mcc::Tag>::to_json(Node &node, const mcc::Tag &value)
+void json::serializer<mcc::Tag>::to_json(
+        Node &node,
+        const mcc::Tag &value)
 {
-    node = Object
-    {
-        { "id", value.Location },
+    node = Object{
+        {       "id", value.Location },
         { "required", value.Required },
     };
 }
 
-void json::serializer<mcc::TagInfo>::to_json(Node &node, const mcc::TagInfo &value)
+void json::serializer<mcc::TagInfo>::to_json(
+        Node &node,
+        const mcc::TagInfo &value)
 {
-    node = Object
-    {
+    node = Object{
         { "replace", value.Replace },
-        { "values", value.Values },
+        {  "values",  value.Values },
     };
 }
 
-bool json::serializer<mcc::PackageInfo>::from_json(const Node &node, mcc::PackageInfo &value)
+bool json::serializer<mcc::PackageInfo>::from_json(
+        const Node &node,
+        mcc::PackageInfo &value)
 {
     if (!node.Is<Object>())
         return false;
@@ -135,12 +130,13 @@ bool json::serializer<mcc::PackageInfo>::from_json(const Node &node, mcc::Packag
     return ok;
 }
 
-void json::serializer<mcc::PackageInfo>::to_json(Node &node, const mcc::PackageInfo &value)
+void json::serializer<mcc::PackageInfo>::to_json(
+        Node &node,
+        const mcc::PackageInfo &value)
 {
-    node = Object
-    {
-        { "name", value.Name },
+    node = Object{
+        {        "name",        value.Name },
         { "description", value.Description },
-        { "version", value.Version },
+        {     "version",     value.Version },
     };
 }

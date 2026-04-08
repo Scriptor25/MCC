@@ -2,24 +2,26 @@
 #include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::GenericBlockReference::Create(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const ValuePtr &position_x,
-    const ValuePtr &position_y,
-    const ValuePtr &position_z,
-    const ValuePtr &path)
+        const SourceLocation &where,
+        const TypePtr &type,
+        const ValuePtr &position_x,
+        const ValuePtr &position_y,
+        const ValuePtr &position_z,
+        const ValuePtr &path)
 {
     return std::make_shared<GenericBlockReference>(where, type, position_x, position_y, position_z, path);
 }
 
 mcc::GenericBlockReference::GenericBlockReference(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const ValuePtr &position_x,
-    const ValuePtr &position_y,
-    const ValuePtr &position_z,
-    const ValuePtr &path)
-    : Value(where, type, FieldType_ImmutableReference),
+        const SourceLocation &where,
+        const TypePtr &type,
+        const ValuePtr &position_x,
+        const ValuePtr &position_y,
+        const ValuePtr &position_z,
+        const ValuePtr &path)
+    : Value(where,
+            type,
+            FieldType_ImmutableReference),
       PositionX(position_x),
       PositionY(position_y),
       PositionZ(position_z),
@@ -44,9 +46,9 @@ bool mcc::GenericBlockReference::RequireStack() const
 
 mcc::Result mcc::GenericBlockReference::GenerateResult() const
 {
-    auto x = PositionX->GenerateResultUnwrap();
-    auto y = PositionY->GenerateResultUnwrap();
-    auto z = PositionZ->GenerateResultUnwrap();
+    auto x    = PositionX->GenerateResultUnwrap();
+    auto y    = PositionY->GenerateResultUnwrap();
+    auto z    = PositionZ->GenerateResultUnwrap();
     auto path = Path->GenerateResultUnwrap();
 
     auto with_argument = x.WithArgument || y.WithArgument || z.WithArgument || path.WithArgument;
@@ -60,7 +62,7 @@ mcc::Result mcc::GenericBlockReference::GenerateResult() const
 
     case ResultType_Argument:
         with_argument = true;
-        x_value = x.Name;
+        x_value       = x.Name;
         break;
 
     default:
@@ -75,7 +77,7 @@ mcc::Result mcc::GenericBlockReference::GenerateResult() const
 
     case ResultType_Argument:
         with_argument = true;
-        y_value = y.Name;
+        y_value       = y.Name;
         break;
 
     default:
@@ -90,7 +92,7 @@ mcc::Result mcc::GenericBlockReference::GenerateResult() const
 
     case ResultType_Argument:
         with_argument = true;
-        z_value = z.Name;
+        z_value       = z.Name;
         break;
 
     default:
@@ -105,7 +107,7 @@ mcc::Result mcc::GenericBlockReference::GenerateResult() const
 
     case ResultType_Argument:
         with_argument = true;
-        path_value = path.Name;
+        path_value    = path.Name;
         break;
 
     default:
@@ -113,10 +115,10 @@ mcc::Result mcc::GenericBlockReference::GenerateResult() const
     }
 
     return {
-        .Type = ResultType_Reference,
-        .WithArgument = with_argument,
+        .Type          = ResultType_Reference,
+        .WithArgument  = with_argument,
         .ReferenceType = ReferenceType_Block,
-        .Target = std::format("{} {} {}", x_value, y_value, z_value),
-        .Path = std::move(path_value),
+        .Target        = std::format("{} {} {}", x_value, y_value, z_value),
+        .Path          = std::move(path_value),
     };
 }

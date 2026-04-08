@@ -5,7 +5,9 @@ mcc::Expression::Expression(const SourceLocation &where)
 {
 }
 
-void mcc::Expression::Generate(Builder &builder, Frame &frame) const
+void mcc::Expression::Generate(
+        Builder &builder,
+        Frame &frame) const
 {
     (void) GenerateValue(builder, frame);
 }

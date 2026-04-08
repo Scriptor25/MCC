@@ -4,20 +4,23 @@
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ReturnInstruction::Create(
-    const SourceLocation &where,
-    TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &value)
+        const SourceLocation &where,
+        TypeContext &context,
+        const ResourceLocation &location,
+        const ValuePtr &value)
 {
     return std::make_shared<ReturnInstruction>(where, context, location, value);
 }
 
 mcc::ReturnInstruction::ReturnInstruction(
-    const SourceLocation &where,
-    TypeContext &context,
-    ResourceLocation location,
-    ValuePtr value)
-    : Instruction(where, context.GetVoid(), FieldType_Value),
+        const SourceLocation &where,
+        TypeContext &context,
+        ResourceLocation location,
+        ValuePtr value)
+    : Instruction(
+              where,
+              context.GetVoid(),
+              FieldType_Value),
       Location(std::move(location)),
       Value(std::move(value))
 {
@@ -31,7 +34,9 @@ mcc::ReturnInstruction::~ReturnInstruction()
         Value->Drop();
 }
 
-void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack) const
+void mcc::ReturnInstruction::Generate(
+        CommandVector &commands,
+        const bool stack) const
 {
     if (Value)
     {
@@ -48,13 +53,13 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
             break;
 
         case ResultType_Reference:
-            commands.Append(
-                "{}data modify storage {} result set from {} {} {}",
-                prefix,
-                Location,
-                value.ReferenceType,
-                value.Target,
-                value.Path);
+            commands
+                    .Append("{}data modify storage {} result set from {} {} {}",
+                            prefix,
+                            Location,
+                            value.ReferenceType,
+                            value.Target,
+                            value.Path);
             break;
 
         case ResultType_Argument:
@@ -62,13 +67,12 @@ void mcc::ReturnInstruction::Generate(CommandVector &commands, const bool stack)
             break;
 
         default:
-            Error(
-                Where,
-                "value must be {}, {} or {}, but is {}",
-                ResultType_Value,
-                ResultType_Reference,
-                ResultType_Argument,
-                value.Type);
+            Error(Where,
+                  "value must be {}, {} or {}, but is {}",
+                  ResultType_Value,
+                  ResultType_Reference,
+                  ResultType_Argument,
+                  value.Type);
         }
     }
     else

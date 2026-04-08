@@ -4,7 +4,12 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::ObjectExpression::ObjectExpression(const SourceLocation &where, std::map<std::string, ExpressionPtr> elements)
+mcc::ObjectExpression::ObjectExpression(
+        const SourceLocation &where,
+        std::map<
+                std::string,
+                ExpressionPtr
+        > elements)
     : Expression(where),
       Elements(std::move(elements))
 {
@@ -25,7 +30,9 @@ std::ostream &mcc::ObjectExpression::Print(std::ostream &stream) const
     return stream << " }";
 }
 
-mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::ObjectExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     std::map<std::string, ValuePtr> values;
     std::map<std::string, ConstantPtr> constants;
@@ -34,8 +41,8 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(Builder &builder, const Frame
     for (auto &[key_, value_] : Elements)
     {
         const auto value = value_->GenerateValue(builder, frame);
-        values[key_] = value;
-        elements[key_] = value->Type;
+        values[key_]     = value;
+        elements[key_]   = value->Type;
         if (const auto constant = std::dynamic_pointer_cast<Constant>(value))
             constants[key_] = constant;
     }

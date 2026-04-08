@@ -5,10 +5,10 @@ mcc::StatementPtr mcc::Parser::ParseMultiStatement()
 {
     std::vector<StatementPtr> statements;
 
-    auto where = Expect(TokenType_Other, "{").Where;
-    while (!At(TokenType_Other, "}") && !At(TokenType_EOF))
+    auto where = Expect(TokenType::Other, "{").Where;
+    while (!At(TokenType::Other, "}") && !At(TokenType::EoF))
         statements.emplace_back(ParseStatement());
-    Expect(TokenType_Other, "}");
+    Expect(TokenType::Other, "}");
 
     return std::make_unique<MultiStatement>(where, std::move(statements));
 }

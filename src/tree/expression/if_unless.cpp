@@ -7,11 +7,11 @@
 #include <mcc/value.hpp>
 
 mcc::IfUnlessExpression::IfUnlessExpression(
-    const SourceLocation &where,
-    const bool unless,
-    ExpressionPtr condition,
-    ExpressionPtr then,
-    ExpressionPtr else_)
+        const SourceLocation &where,
+        const bool unless,
+        ExpressionPtr condition,
+        ExpressionPtr then,
+        ExpressionPtr else_)
     : Expression(where),
       Unless(unless),
       Condition(std::move(condition)),
@@ -25,7 +25,9 @@ std::ostream &mcc::IfUnlessExpression::Print(std::ostream &stream) const
     return Else->Print(Then->Print(Condition->Print(stream << (Unless ? "unless" : "if") << " (") << ") ") << " else ");
 }
 
-mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     auto condition = Condition->GenerateValue(builder, frame);
     if (!condition->Type->IsNumber())
@@ -38,27 +40,24 @@ mcc::ValuePtr mcc::IfUnlessExpression::GenerateValue(Builder &builder, const Fra
         return Else->GenerateValue(builder, frame);
     }
 
-    const auto parent = builder.GetInsertBlock()->Parent;
-    auto then_target = Block::Create(Then->Where, builder.GetContext(), parent);
-    auto else_target = Block::Create(Else->Where, builder.GetContext(), parent);
+    const auto parent      = builder.GetInsertBlock()->Parent;
+    auto then_target       = Block::Create(Then->Where, builder.GetContext(), parent);
+    auto else_target       = Block::Create(Else->Where, builder.GetContext(), parent);
     const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
 
-    (void) builder.CreateBranch(
-        Where,
-        condition,
-        Unless ? else_target : then_target,
-        Unless ? then_target : else_target);
+    (void) builder
+            .CreateBranch(Where, condition, Unless ? else_target : then_target, Unless ? then_target : else_target);
 
     builder.SetInsertBlock(then_target);
     const auto then_value = Then->GenerateValue(builder, frame);
-    then_target = builder.GetInsertBlock();
+    then_target           = builder.GetInsertBlock();
 
     builder.SetInsertBlock(else_target);
     const auto else_value = Else->GenerateValue(builder, frame);
-    else_target = builder.GetInsertBlock();
+    else_target           = builder.GetInsertBlock();
 
     builder.SetInsertBlock(tail_target);
-    const auto type = builder.GetContext().GetUnionOrSingle({ then_value->Type, else_value->Type });
+    const auto type    = builder.GetContext().GetUnionOrSingle({ then_value->Type, else_value->Type });
     auto branch_result = builder.CreateBranchResult(Where, type);
 
     builder.SetInsertBlock(then_target);

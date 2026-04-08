@@ -7,9 +7,9 @@
 #include <mcc/value.hpp>
 
 mcc::VectorExpression::VectorExpression(
-    const SourceLocation &where,
-    std::string operator_,
-    std::vector<ExpressionPtr> operands)
+        const SourceLocation &where,
+        std::string operator_,
+        std::vector<ExpressionPtr> operands)
     : Expression(where),
       Operator(std::move(operator_)),
       Operands(std::move(operands))
@@ -30,7 +30,9 @@ std::ostream &mcc::VectorExpression::Print(std::ostream &stream) const
     return stream;
 }
 
-mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::VectorExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     std::vector<ValuePtr> operand_values;
     std::vector<std::shared_ptr<ConstantNumber>> operand_constants;
@@ -38,11 +40,10 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(Builder &builder, const Frame
     for (auto &operand : Operands)
     {
         auto operand_value = operand->GenerateValue(builder, frame);
-        Assert(
-            operand_value->Type->IsNumber(),
-            operand->Where,
-            "operand must be of type number, but is {}",
-            operand_value->Type);
+        Assert(operand_value->Type->IsNumber(),
+               operand->Where,
+               "operand must be of type number, but is {}",
+               operand_value->Type);
         operand_values.emplace_back(operand_value);
         if (auto constant = std::dynamic_pointer_cast<ConstantNumber>(operand_value))
             operand_constants.emplace_back(constant);

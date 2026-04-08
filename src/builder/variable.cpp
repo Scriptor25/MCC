@@ -8,11 +8,11 @@
 #include <ranges>
 
 mcc::ValuePtr mcc::Builder::CreateVariable(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const std::string &name,
-    const bool is_mutable,
-    ValuePtr initializer)
+        const SourceLocation &where,
+        const TypePtr &type,
+        const std::string &name,
+        const bool is_mutable,
+        ValuePtr initializer)
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!m_Variables.empty(), where, "variables must not be empty");
@@ -31,7 +31,10 @@ mcc::ValuePtr mcc::Builder::CreateVariable(
     return variable;
 }
 
-mcc::ValuePtr mcc::Builder::InsertVariable(const SourceLocation &where, const std::string &name, const ValuePtr &value)
+mcc::ValuePtr mcc::Builder::InsertVariable(
+        const SourceLocation &where,
+        const std::string &name,
+        const ValuePtr &value)
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!m_Variables.empty(), where, "variables must not be empty");
@@ -39,7 +42,7 @@ mcc::ValuePtr mcc::Builder::InsertVariable(const SourceLocation &where, const st
     Assert(!!value, where, "value must not be null");
 
     auto &variables = m_Variables.back();
-    auto &variable = variables[name];
+    auto &variable  = variables[name];
     Assert(!variable, where, "already defined variable {}", name);
 
     return variable = value;
@@ -56,7 +59,9 @@ bool mcc::Builder::HasVariable(const std::string &name) const
     return HasGlobal(location) || HasFunction(location);
 }
 
-mcc::ValuePtr mcc::Builder::GetVariable(const SourceLocation &where, const std::string &name) const
+mcc::ValuePtr mcc::Builder::GetVariable(
+        const SourceLocation &where,
+        const std::string &name) const
 {
     Assert(!m_Variables.empty(), where, "variables must not be empty");
 

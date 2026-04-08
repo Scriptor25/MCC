@@ -5,7 +5,10 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::MemberExpression::MemberExpression(const SourceLocation &where, ExpressionPtr object, std::string member)
+mcc::MemberExpression::MemberExpression(
+        const SourceLocation &where,
+        ExpressionPtr object,
+        std::string member)
     : Expression(where),
       Object(std::move(object)),
       Member(std::move(member))
@@ -17,7 +20,9 @@ std::ostream &mcc::MemberExpression::Print(std::ostream &stream) const
     return Object->Print(stream) << '.' << Member;
 }
 
-mcc::ValuePtr mcc::MemberExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::MemberExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     auto object = Object->GenerateValue(builder, frame);
     Assert(object->Type->IsObject(), Object->Where, "object must be of type object, but is {}", object->Type);

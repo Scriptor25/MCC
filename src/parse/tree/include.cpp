@@ -3,8 +3,8 @@
 
 mcc::TreeNodePtr mcc::Parser::ParseIncludeNode()
 {
-    const auto where = Expect(TokenType_Symbol, "include").Where;
-    const auto filename = Expect(TokenType_String).Value;
+    const auto where    = Expect(TokenType::Symbol, "include").Where;
+    const auto filename = Expect(TokenType::String).Value;
 
     std::filesystem::path filepath(filename);
     if (filepath.is_relative())

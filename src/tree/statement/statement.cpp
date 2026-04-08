@@ -12,7 +12,9 @@ void mcc::Statement::Generate(Builder &builder) const
     Generate(builder, target_frame);
 }
 
-void mcc::Statement::GenerateInclude(Builder &builder, std::set<std::filesystem::path> &include_chain) const
+void mcc::Statement::GenerateInclude(
+        Builder &builder,
+        std::set<std::filesystem::path> &include_chain) const
 {
     Error(Where, "mcc::Statement::GenerateInclude");
 }

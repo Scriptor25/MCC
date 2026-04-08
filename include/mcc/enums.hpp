@@ -68,25 +68,23 @@ namespace mcc
         FieldType_MutableReference,
     };
 
-    inline std::optional<E_Declarator> ToDeclarator(const std::string_view &string_)
+    inline std::optional<E_Declarator> ToDeclarator(const std::string_view &str)
     {
-        static const std::map<std::string_view, E_Declarator> map
-        {
-            { "let", Declarator_Let },
-            { "const", Declarator_Const },
+        static const std::map<std::string_view, E_Declarator> map{
+            {       "let",       Declarator_Let },
+            {     "const",     Declarator_Const },
             { "constexpr", Declarator_ConstExpr },
         };
 
-        if (!map.contains(string_))
-            return std::nullopt;
+        if (auto it = map.find(str); it != map.end())
+            return it->second;
 
-        return map.at(string_);
+        return std::nullopt;
     }
 
-    inline std::optional<E_Operator> ToOperator(const std::string_view &string_)
+    inline std::optional<E_Operator> ToOperator(const std::string_view &str)
     {
-        static const std::map<std::string_view, E_Operator> map
-        {
+        static const std::map<std::string_view, E_Operator> map{
             { "+", Operator_Add },
             { "-", Operator_Sub },
             { "*", Operator_Mul },
@@ -94,58 +92,54 @@ namespace mcc
             { "%", Operator_Rem },
         };
 
-        if (!map.contains(string_))
-            return std::nullopt;
+        if (auto it = map.find(str); it != map.end())
+            return it->second;
 
-        return map.at(string_);
+        return std::nullopt;
     }
 
-    inline std::optional<E_ReferenceType> ToReferenceType(const std::string_view &string_)
+    inline std::optional<E_ReferenceType> ToReferenceType(const std::string_view &str)
     {
-        static const std::map<std::string_view, E_ReferenceType> map
-        {
-            { "block", ReferenceType_Block },
-            { "entity", ReferenceType_Entity },
+        static const std::map<std::string_view, E_ReferenceType> map{
+            {   "block",   ReferenceType_Block },
+            {  "entity",  ReferenceType_Entity },
             { "storage", ReferenceType_Storage },
         };
 
-        if (!map.contains(string_))
-            return std::nullopt;
+        if (auto it = map.find(str); it != map.end())
+            return it->second;
 
-        return map.at(string_);
+        return std::nullopt;
     }
 
-    inline const char *ToString(const E_Comparator enum_)
+    inline const char *ToString(const E_Comparator val)
     {
-        static const std::map<E_Comparator, const char *> map
-        {
+        static const std::map<E_Comparator, const char *> map{
             { Comparator_None, "none" },
-            { Comparator_LT, "lt" },
-            { Comparator_GT, "gt" },
-            { Comparator_LE, "le" },
-            { Comparator_GE, "ge" },
-            { Comparator_EQ, "eq" },
+            {   Comparator_LT,   "lt" },
+            {   Comparator_GT,   "gt" },
+            {   Comparator_LE,   "le" },
+            {   Comparator_GE,   "ge" },
+            {   Comparator_EQ,   "eq" },
         };
 
-        return map.at(enum_);
+        return map.at(val);
     }
 
-    inline const char *ToString(const E_Declarator enum_)
+    inline const char *ToString(const E_Declarator val)
     {
-        static const std::map<E_Declarator, const char *> map
-        {
-            { Declarator_Let, "let" },
-            { Declarator_Const, "const" },
+        static const std::map<E_Declarator, const char *> map{
+            {       Declarator_Let,       "let" },
+            {     Declarator_Const,     "const" },
             { Declarator_ConstExpr, "constexpr" },
         };
 
-        return map.at(enum_);
+        return map.at(val);
     }
 
-    inline const char *ToString(const E_Operator enum_)
+    inline const char *ToString(const E_Operator val)
     {
-        static const std::map<E_Operator, const char *> map
-        {
+        static const std::map<E_Operator, const char *> map{
             { Operator_Add, "+" },
             { Operator_Sub, "-" },
             { Operator_Mul, "*" },
@@ -153,105 +147,114 @@ namespace mcc
             { Operator_Rem, "%" },
         };
 
-        return map.at(enum_);
+        return map.at(val);
     }
 
-    inline const char *ToString(const E_ReferenceType enum_)
+    inline const char *ToString(const E_ReferenceType val)
     {
-        static const std::map<E_ReferenceType, const char *> map
-        {
-            { ReferenceType_Block, "block" },
-            { ReferenceType_Entity, "entity" },
+        static const std::map<E_ReferenceType, const char *> map{
+            {   ReferenceType_Block,   "block" },
+            {  ReferenceType_Entity,  "entity" },
             { ReferenceType_Storage, "storage" },
         };
 
-        return map.at(enum_);
+        return map.at(val);
     }
 
-    inline const char *ToString(const E_ResultType enum_)
+    inline const char *ToString(const E_ResultType val)
     {
-        static const std::map<E_ResultType, const char *> map
-        {
-            { ResultType_Value, "value" },
+        static const std::map<E_ResultType, const char *> map{
+            {     ResultType_Value,     "value" },
             { ResultType_Reference, "reference" },
-            { ResultType_Argument, "argument" },
+            {  ResultType_Argument,  "argument" },
         };
 
-        return map.at(enum_);
+        return map.at(val);
     }
 
-    inline const char *ToString(const E_FieldType enum_)
+    inline const char *ToString(const E_FieldType val)
     {
-        static const std::map<E_FieldType, const char *> map
-        {
-            { FieldType_Value, "value" },
+        static const std::map<E_FieldType, const char *> map{
+            {              FieldType_Value,               "value" },
             { FieldType_ImmutableReference, "immutable_reference" },
-            { FieldType_MutableReference, "mutable_reference" },
+            {   FieldType_MutableReference,   "mutable_reference" },
         };
 
-        return map.at(enum_);
+        return map.at(val);
     }
 }
 
 namespace std
 {
     template<>
-    struct formatter<mcc::E_Comparator> final : formatter<string>
+    struct formatter<mcc::E_Comparator> : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::E_Comparator &comparator_, FormatContext &ctx) const
+        auto format(
+                const mcc::E_Comparator &val,
+                FormatContext &ctx) const
         {
-            return formatter<string>::format(mcc::ToString(comparator_), ctx);
+            return formatter<string>::format(mcc::ToString(val), ctx);
         }
     };
 
     template<>
-    struct formatter<mcc::E_Declarator> final : formatter<string>
+    struct formatter<mcc::E_Declarator> : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::E_Declarator &declarator, FormatContext &ctx) const
+        auto format(
+                const mcc::E_Declarator &val,
+                FormatContext &ctx) const
         {
-            return formatter<string>::format(mcc::ToString(declarator), ctx);
+            return formatter<string>::format(mcc::ToString(val), ctx);
         }
     };
 
     template<>
-    struct formatter<mcc::E_Operator> final : formatter<string>
+    struct formatter<mcc::E_Operator> : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::E_Operator &operator_, FormatContext &ctx) const
+        auto format(
+                const mcc::E_Operator &val,
+                FormatContext &ctx) const
         {
-            return formatter<string>::format(mcc::ToString(operator_), ctx);
+            return formatter<string>::format(mcc::ToString(val), ctx);
         }
     };
 
     template<>
-    struct formatter<mcc::E_ReferenceType> final : formatter<string>
+    struct formatter<mcc::E_ReferenceType> : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::E_ReferenceType &type, FormatContext &ctx) const
+        auto format(
+                const mcc::E_ReferenceType &val,
+                FormatContext &ctx) const
         {
-            return formatter<string>::format(mcc::ToString(type), ctx);
+            return formatter<string>::format(mcc::ToString(val), ctx);
         }
     };
 
     template<>
-    struct formatter<mcc::E_ResultType> final : formatter<string>
+    struct formatter<mcc::E_ResultType> : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::E_ResultType &type, FormatContext &ctx) const
+        auto format(
+                const mcc::E_ResultType &val,
+                FormatContext &ctx) const
         {
-            return formatter<string>::format(mcc::ToString(type), ctx);
+            return formatter<string>::format(mcc::ToString(val), ctx);
         }
     };
 
     template<>
-    struct formatter<mcc::E_FieldType> final : formatter<string>
+    struct formatter<mcc::E_FieldType> : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::E_FieldType &type, FormatContext &ctx) const
+        auto format(
+                const mcc::E_FieldType &val,
+                FormatContext &ctx) const
         {
-            return formatter<string>::format(mcc::ToString(type), ctx);
+            return formatter<string>::format(mcc::ToString(val), ctx);
         }
     };
 }

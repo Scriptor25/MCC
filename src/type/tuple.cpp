@@ -1,7 +1,9 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::TupleType::TupleType(TypeContext &context, const std::vector<TypePtr> &elements)
+mcc::TupleType::TupleType(
+        TypeContext &context,
+        const std::vector<TypePtr> &elements)
     : Type(context),
       Elements(elements)
 {

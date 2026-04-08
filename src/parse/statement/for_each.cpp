@@ -4,13 +4,13 @@
 
 mcc::StatementPtr mcc::Parser::ParseForEachStatement()
 {
-    auto where = Expect(TokenType_Symbol, "foreach").Where;
-    Expect(TokenType_Other, "(");
-    auto constant = SkipIf(TokenType_Symbol, "const") || (Expect(TokenType_Symbol, "let"), false);
-    auto name = Expect(TokenType_Symbol).Value;
-    Expect(TokenType_Other, ":");
+    auto where = Expect(TokenType::Symbol, "foreach").Where;
+    Expect(TokenType::Other, "(");
+    auto constant = SkipIf(TokenType::Symbol, "const") || (Expect(TokenType::Symbol, "let"), false);
+    auto name     = Expect(TokenType::Symbol).Value;
+    Expect(TokenType::Other, ":");
     auto iterable = ParseExpression();
-    Expect(TokenType_Other, ")");
+    Expect(TokenType::Other, ")");
     auto do_ = ParseStatement();
     return std::make_unique<ForEachStatement>(where, constant, name, std::move(iterable), std::move(do_));
 }

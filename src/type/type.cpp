@@ -1,7 +1,9 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-bool mcc::SameOrSpecial(const TypePtr &a, const TypePtr &b)
+bool mcc::SameOrSpecial(
+        const TypePtr &a,
+        const TypePtr &b)
 {
     if (!a || !b)
         return false;
@@ -62,7 +64,9 @@ bool mcc::Type::IsFunction() const
     return false;
 }
 
-std::ostream &mcc::operator<<(std::ostream &stream, const TypePtr &type)
+std::ostream &mcc::operator<<(
+        std::ostream &stream,
+        const TypePtr &type)
 {
     return type->Print(stream);
 }

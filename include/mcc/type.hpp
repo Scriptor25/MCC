@@ -8,7 +8,9 @@
 
 namespace mcc
 {
-    bool SameOrSpecial(const TypePtr &a, const TypePtr &b);
+    bool SameOrSpecial(
+            const TypePtr &a,
+            const TypePtr &b);
 
     class TypeContext
     {
@@ -17,10 +19,17 @@ namespace mcc
         TypePtr GetNumber();
         TypePtr GetString();
         TypePtr GetArray(const TypePtr &elements);
-        TypePtr GetObject(const std::map<std::string, TypePtr> &elements);
+        TypePtr GetObject(
+                const std::map<
+                        std::string,
+                        TypePtr
+                > &elements);
         TypePtr GetTuple(const std::vector<TypePtr> &elements);
         TypePtr GetUnion(const std::set<TypePtr> &elements);
-        TypePtr GetFunction(const std::vector<TypePtr> &parameters, const TypePtr &result, bool throws);
+        TypePtr GetFunction(
+                const std::vector<TypePtr> &parameters,
+                const TypePtr &result,
+                bool throws);
 
         TypePtr GetAnyArray();
         TypePtr GetAnyObject();
@@ -28,7 +37,9 @@ namespace mcc
 
         TypePtr GetUnionOrSingle(const std::set<TypePtr> &elements);
 
-        TypePtr SetNamed(const std::string &name, const TypePtr &type);
+        TypePtr SetNamed(
+                const std::string &name,
+                const TypePtr &type);
         [[nodiscard]] TypePtr GetNamed(const std::string &name) const;
 
     private:
@@ -47,11 +58,11 @@ namespace mcc
         explicit Type(TypeContext &context);
         virtual ~Type() = default;
 
-        [[nodiscard]] virtual std::string String() const = 0;
+        [[nodiscard]] virtual std::string String() const        = 0;
         virtual std::ostream &Print(std::ostream &stream) const = 0;
 
         [[nodiscard]] virtual ConstantPtr GetNull(const SourceLocation &where) const = 0;
-        [[nodiscard]] virtual bool HasSpecial(const TypePtr &other) const = 0;
+        [[nodiscard]] virtual bool HasSpecial(const TypePtr &other) const            = 0;
 
         [[nodiscard]] virtual bool IsAny() const;
         [[nodiscard]] virtual bool IsVoid() const;
@@ -109,7 +120,9 @@ namespace mcc
     /** A[] */
     struct ArrayType final : Type
     {
-        ArrayType(TypeContext &context, TypePtr elements);
+        ArrayType(
+                TypeContext &context,
+                TypePtr elements);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
@@ -125,7 +138,12 @@ namespace mcc
     /** { a: A, ..., b: B } */
     struct ObjectType final : Type
     {
-        ObjectType(TypeContext &context, const std::map<std::string, TypePtr> &elements);
+        ObjectType(
+                TypeContext &context,
+                const std::map<
+                        std::string,
+                        TypePtr
+                > &elements);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
@@ -141,7 +159,9 @@ namespace mcc
     /** [ A, ..., B ] */
     struct TupleType final : Type
     {
-        TupleType(TypeContext &context, const std::vector<TypePtr> &elements);
+        TupleType(
+                TypeContext &context,
+                const std::vector<TypePtr> &elements);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
@@ -157,7 +177,9 @@ namespace mcc
     /** A | ... | B */
     struct UnionType final : Type
     {
-        UnionType(TypeContext &context, const std::set<TypePtr> &elements);
+        UnionType(
+                TypeContext &context,
+                const std::set<TypePtr> &elements);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
@@ -173,7 +195,11 @@ namespace mcc
     /** $(A, ..., B) => C, $!(A, ..., B) => C */
     struct FunctionType final : Type
     {
-        FunctionType(TypeContext &context, const std::vector<TypePtr> &parameters, TypePtr result, bool throws);
+        FunctionType(
+                TypeContext &context,
+                const std::vector<TypePtr> &parameters,
+                TypePtr result,
+                bool throws);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
@@ -232,10 +258,12 @@ namespace mcc
 }
 
 template<>
-struct std::formatter<mcc::TypePtr> final : std::formatter<std::string>
+struct std::formatter<mcc::TypePtr> : std::formatter<std::string>
 {
     template<typename FormatContext>
-    auto format(const mcc::TypePtr &type, FormatContext &ctx) const
+    auto format(
+            const mcc::TypePtr &type,
+            FormatContext &ctx) const
     {
         return std::formatter<std::string>::format(type->String(), ctx);
     }

@@ -7,12 +7,12 @@
 #include <mcc/value.hpp>
 
 mcc::VariableStatement::VariableStatement(
-    const SourceLocation &where,
-    const E_Declarator declarator,
-    const bool is_reference,
-    std::vector<std::string> names,
-    TypePtr type,
-    ExpressionPtr value)
+        const SourceLocation &where,
+        const E_Declarator declarator,
+        const bool is_reference,
+        std::vector<std::string> names,
+        TypePtr type,
+        ExpressionPtr value)
     : Statement(where),
       Declarator(declarator),
       IsReference(is_reference),
@@ -38,22 +38,23 @@ std::ostream &mcc::VariableStatement::Print(std::ostream &stream) const
     return stream;
 }
 
-void mcc::VariableStatement::Generate(Builder &builder, Frame &frame) const
+void mcc::VariableStatement::Generate(
+        Builder &builder,
+        Frame &frame) const
 {
     ValuePtr value;
     if (Value)
     {
         value = Value->GenerateValue(builder, frame);
-        Assert(
-            !Type || SameOrSpecial(value->Type, Type),
-            Where,
-            "cannot assign value of type {} to variable of type {}",
-            value->Type,
-            Type);
+        Assert(!Type || SameOrSpecial(value->Type, Type),
+               Where,
+               "cannot assign value of type {} to variable of type {}",
+               value->Type,
+               Type);
     }
 
     const auto constant = std::dynamic_pointer_cast<Constant>(value);
-    const auto type = Type ? Type : value->Type;
+    const auto type     = Type ? Type : value->Type;
 
     for (auto &name : Names)
         if (IsReference)

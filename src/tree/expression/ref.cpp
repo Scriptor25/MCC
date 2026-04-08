@@ -3,15 +3,15 @@
 #include <mcc/value.hpp>
 
 mcc::RefExpression::RefExpression(
-    const SourceLocation &where,
-    TypePtr type,
-    const E_ReferenceType target_type,
-    ExpressionPtr target_position_x,
-    ExpressionPtr target_position_y,
-    ExpressionPtr target_position_z,
-    ExpressionPtr target_name,
-    ExpressionPtr target_location,
-    ExpressionPtr path)
+        const SourceLocation &where,
+        TypePtr type,
+        const E_ReferenceType target_type,
+        ExpressionPtr target_position_x,
+        ExpressionPtr target_position_y,
+        ExpressionPtr target_position_z,
+        ExpressionPtr target_name,
+        ExpressionPtr target_location,
+        ExpressionPtr path)
     : Expression(where),
       Type(std::move(type)),
       TargetType(target_type),
@@ -42,7 +42,9 @@ std::ostream &mcc::RefExpression::Print(std::ostream &stream) const
     return Path->Print(stream << ", \"") << "\")";
 }
 
-mcc::ValuePtr mcc::RefExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::RefExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     auto path = Path->GenerateValue(builder, frame);
 
@@ -54,13 +56,8 @@ mcc::ValuePtr mcc::RefExpression::GenerateValue(Builder &builder, const Frame &f
         const auto target_position_x = TargetPositionX->GenerateValue(builder, frame);
         const auto target_position_y = TargetPositionY->GenerateValue(builder, frame);
         const auto target_position_z = TargetPositionZ->GenerateValue(builder, frame);
-        return GenericBlockReference::Create(
-            Where,
-            Type,
-            target_position_x,
-            target_position_y,
-            target_position_z,
-            path);
+        return GenericBlockReference::
+                Create(Where, Type, target_position_x, target_position_y, target_position_z, path);
     }
 
     // ... entity <target name> <path>

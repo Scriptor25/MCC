@@ -3,14 +3,17 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::ValuePtr mcc::ElementReference::Create(const SourceLocation &where, const ValuePtr &base, const ValuePtr &index)
+mcc::ValuePtr mcc::ElementReference::Create(
+        const SourceLocation &where,
+        const ValuePtr &base,
+        const ValuePtr &index)
 {
     Assert(!!base, where, "base must not be null");
     Assert(!!index, where, "index must not be null");
 
     const auto base_type = base->Type;
-    const auto is_array = base_type->IsArray();
-    const auto is_tuple = base_type->IsTuple();
+    const auto is_array  = base_type->IsArray();
+    const auto is_tuple  = base_type->IsTuple();
 
     TypePtr type;
     if (is_array)
@@ -28,11 +31,13 @@ mcc::ValuePtr mcc::ElementReference::Create(const SourceLocation &where, const V
 }
 
 mcc::ElementReference::ElementReference(
-    const SourceLocation &where,
-    const TypePtr &type,
-    const ValuePtr &base,
-    const ValuePtr &index)
-    : Value(where, type, base->FieldType),
+        const SourceLocation &where,
+        const TypePtr &type,
+        const ValuePtr &base,
+        const ValuePtr &index)
+    : Value(where,
+            type,
+            base->FieldType),
       Base(base),
       Index(index)
 {
@@ -53,7 +58,7 @@ bool mcc::ElementReference::RequireStack() const
 
 mcc::Result mcc::ElementReference::GenerateResult() const
 {
-    auto base = Base->GenerateResult();
+    auto base  = Base->GenerateResult();
     auto index = Index->GenerateResult();
 
     Assert(base.Type == ResultType_Reference, Where, "base must be {}, but is {}", ResultType_Reference, base.Type);
@@ -62,20 +67,20 @@ mcc::Result mcc::ElementReference::GenerateResult() const
     {
     case ResultType_Value:
         return {
-            .Type = ResultType_Reference,
-            .WithArgument = base.WithArgument || index.WithArgument,
+            .Type          = ResultType_Reference,
+            .WithArgument  = base.WithArgument || index.WithArgument,
             .ReferenceType = base.ReferenceType,
-            .Target = base.Target,
-            .Path = std::format("{}[{}]", base.Path, index.Value),
+            .Target        = base.Target,
+            .Path          = std::format("{}[{}]", base.Path, index.Value),
         };
 
     case ResultType_Argument:
         return {
-            .Type = ResultType_Reference,
-            .WithArgument = true,
+            .Type          = ResultType_Reference,
+            .WithArgument  = true,
             .ReferenceType = base.ReferenceType,
-            .Target = base.Target,
-            .Path = std::format("{}[{}]", base.Path, index.Name),
+            .Target        = base.Target,
+            .Path          = std::format("{}[{}]", base.Path, index.Name),
         };
 
     default:

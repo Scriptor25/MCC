@@ -10,8 +10,8 @@
 namespace mcc
 {
     using IntegerT = long long;
-    using FloatT = long double;
-    using IndexT = unsigned long long;
+    using FloatT   = long double;
+    using IndexT   = unsigned long long;
     using CommandT = std::string;
 
     class TypeContext;
@@ -19,18 +19,31 @@ namespace mcc
     class Builder;
     class CommandVector;
 
-    using TreeNodePtr = std::unique_ptr<struct TreeNode>;
-    using StatementPtr = std::unique_ptr<struct Statement>;
-    using ExpressionPtr = std::unique_ptr<struct Expression>;
-    using FormatNodePtr = std::unique_ptr<struct FormatNode>;
+    struct TreeNode;
+    struct Statement;
+    struct Expression;
+    struct FormatNode;
 
-    using ValuePtr = std::shared_ptr<struct Value>;
-    using ConstantPtr = std::shared_ptr<struct Constant>;
-    using InstructionPtr = std::shared_ptr<struct Instruction>;
-    using BlockPtr = std::shared_ptr<struct Block>;
-    using FunctionPtr = std::shared_ptr<struct Function>;
+    using TreeNodePtr   = std::unique_ptr<TreeNode>;
+    using StatementPtr  = std::unique_ptr<Statement>;
+    using ExpressionPtr = std::unique_ptr<Expression>;
+    using FormatNodePtr = std::unique_ptr<FormatNode>;
 
-    using TypePtr = std::shared_ptr<struct Type>;
+    struct Value;
+    struct Constant;
+    struct Instruction;
+    struct Block;
+    struct Function;
+
+    using ValuePtr       = std::shared_ptr<Value>;
+    using ConstantPtr    = std::shared_ptr<Constant>;
+    using InstructionPtr = std::shared_ptr<Instruction>;
+    using BlockPtr       = std::shared_ptr<Block>;
+    using FunctionPtr    = std::shared_ptr<Function>;
+
+    struct Type;
+
+    using TypePtr = std::shared_ptr<Type>;
 
     struct Parameter
     {
@@ -64,7 +77,9 @@ template<typename T>
 struct std::formatter<std::vector<T>> final : std::formatter<std::string>
 {
     template<typename FormatContext>
-    auto format(const std::vector<T> &elements, FormatContext &ctx) const
+    auto format(
+            const std::vector<T> &elements,
+            FormatContext &ctx) const
     {
         std::string s = "[ ";
 

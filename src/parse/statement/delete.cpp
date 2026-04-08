@@ -4,7 +4,7 @@
 
 mcc::StatementPtr mcc::Parser::ParseDeleteStatement()
 {
-    auto where = Expect(TokenType_Symbol, "delete").Where;
+    auto where = Expect(TokenType::Symbol, "delete").Where;
     auto value = ParseExpression();
     return std::make_unique<DeleteStatement>(where, std::move(value));
 }

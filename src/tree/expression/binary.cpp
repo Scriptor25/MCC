@@ -6,10 +6,10 @@
 #include <mcc/type.hpp>
 
 mcc::BinaryExpression::BinaryExpression(
-    const SourceLocation &where,
-    std::string operator_,
-    ExpressionPtr left,
-    ExpressionPtr right)
+        const SourceLocation &where,
+        std::string operator_,
+        ExpressionPtr left,
+        ExpressionPtr right)
     : Expression(where),
       Operator(std::move(operator_)),
       Left(std::move(left)),
@@ -19,13 +19,8 @@ mcc::BinaryExpression::BinaryExpression(
 
 mcc::ExpressionPtr mcc::BinaryExpression::Merge()
 {
-    static const std::set<std::string_view> mergeable
-    {
-        "+",
-        "-",
-        "*",
-        "/",
-        "%",
+    static const std::set<std::string_view> mergeable{
+        "+", "-", "*", "/", "%",
     };
 
     if (!mergeable.contains(Operator))
@@ -54,7 +49,7 @@ mcc::ExpressionPtr mcc::BinaryExpression::Merge()
 
     if (!merged)
     {
-        Left = std::move(operands.front());
+        Left  = std::move(operands.front());
         Right = std::move(operands.back());
         return nullptr;
     }
@@ -67,67 +62,39 @@ std::ostream &mcc::BinaryExpression::Print(std::ostream &stream) const
     return Right->Print(Left->Print(stream) << ' ' << Operator << ' ');
 }
 
-mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::BinaryExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
-    auto left = Left->GenerateValue(builder, frame);
+    auto left  = Left->GenerateValue(builder, frame);
     auto right = Right->GenerateValue(builder, frame);
 
-    const auto constant_left = std::dynamic_pointer_cast<ConstantNumber>(left);
+    const auto constant_left  = std::dynamic_pointer_cast<ConstantNumber>(left);
     const auto constant_right = std::dynamic_pointer_cast<ConstantNumber>(right);
 
     if (constant_left && constant_right)
     {
         if (Operator == "<")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value < constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value < constant_right->Value);
         if (Operator == ">")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value > constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value > constant_right->Value);
         if (Operator == "<=")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value <= constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value <= constant_right->Value);
         if (Operator == ">=")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value >= constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value >= constant_right->Value);
         if (Operator == "==")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value == constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value == constant_right->Value);
 
         if (Operator == "+")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value + constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value + constant_right->Value);
         if (Operator == "-")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value - constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value - constant_right->Value);
         if (Operator == "*")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value * constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value * constant_right->Value);
         if (Operator == "/")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value / constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value / constant_right->Value);
         if (Operator == "%")
-            return ConstantNumber::Create(
-                Where,
-                builder.GetContext(),
-                constant_left->Value % constant_right->Value);
+            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value % constant_right->Value);
     }
 
     if (Operator == "=")
@@ -151,7 +118,7 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(Builder &builder, const Frame
     if (comparator)
         return builder.CreateComparison(Where, comparator, left, right);
 
-    const auto store = Operator.back() == '=';
+    const auto store     = Operator.back() == '=';
     auto operator_string = Operator;
     if (store)
         operator_string.pop_back();

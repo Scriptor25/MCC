@@ -3,6 +3,6 @@
 
 mcc::StatementPtr mcc::Parser::ParseContinueStatement()
 {
-    auto where = Expect(TokenType_Symbol, "continue").Where;
+    auto where = Expect(TokenType::Symbol, "continue").Where;
     return std::make_unique<ContinueStatement>(where);
 }

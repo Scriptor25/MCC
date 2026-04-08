@@ -4,20 +4,23 @@
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::NotNullInstruction::Create(
-    const SourceLocation &where,
-    TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &value)
+        const SourceLocation &where,
+        TypeContext &context,
+        const ResourceLocation &location,
+        const ValuePtr &value)
 {
     return std::make_shared<NotNullInstruction>(where, context, location, value);
 }
 
 mcc::NotNullInstruction::NotNullInstruction(
-    const SourceLocation &where,
-    TypeContext &context,
-    ResourceLocation location,
-    ValuePtr value)
-    : Instruction(where, context.GetNumber(), FieldType_ImmutableReference),
+        const SourceLocation &where,
+        TypeContext &context,
+        ResourceLocation location,
+        ValuePtr value)
+    : Instruction(
+              where,
+              context.GetNumber(),
+              FieldType_ImmutableReference),
       Location(std::move(location)),
       Value(std::move(value))
 {
@@ -29,7 +32,9 @@ mcc::NotNullInstruction::~NotNullInstruction()
     Value->Drop();
 }
 
-void mcc::NotNullInstruction::Generate(CommandVector &commands, bool stack) const
+void mcc::NotNullInstruction::Generate(
+        CommandVector &commands,
+        bool stack) const
 {
     auto value = Value->GenerateResult();
     Assert(value.Type == ResultType_Reference, Where, "value must be {}, but is {}", ResultType_Reference, value.Type);
@@ -41,14 +46,14 @@ void mcc::NotNullInstruction::Generate(CommandVector &commands, bool stack) cons
         prefix = "$";
 
     commands.Append("data modify storage {} {} set value 0", Location, stack_path);
-    commands.Append(
-        "{}execute if data {} {} {} run data modify storage {} {} set value 1",
-        prefix,
-        value.ReferenceType,
-        value.Target,
-        value.Path,
-        Location,
-        stack_path);
+    commands
+            .Append("{}execute if data {} {} {} run data modify storage {} {} set value 1",
+                    prefix,
+                    value.ReferenceType,
+                    value.Target,
+                    value.Path,
+                    Location,
+                    stack_path);
 }
 
 bool mcc::NotNullInstruction::RequireStack() const
@@ -59,9 +64,9 @@ bool mcc::NotNullInstruction::RequireStack() const
 mcc::Result mcc::NotNullInstruction::GenerateResult() const
 {
     return {
-        .Type = ResultType_Reference,
+        .Type          = ResultType_Reference,
         .ReferenceType = ReferenceType_Storage,
-        .Target = Location.String(),
-        .Path = GetStackPath(),
+        .Target        = Location.String(),
+        .Path          = GetStackPath(),
     };
 }

@@ -5,7 +5,9 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::FormatExpression::FormatExpression(const SourceLocation &where, std::vector<FormatNodePtr> nodes)
+mcc::FormatExpression::FormatExpression(
+        const SourceLocation &where,
+        std::vector<FormatNodePtr> nodes)
     : Expression(where),
       Nodes(std::move(nodes))
 {
@@ -19,7 +21,9 @@ std::ostream &mcc::FormatExpression::Print(std::ostream &stream) const
     return stream << '`';
 }
 
-mcc::ValuePtr mcc::FormatExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::FormatExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     std::vector<ValuePtr> values;
     std::vector<ConstantPtr> constants;

@@ -12,7 +12,9 @@
 #include <string>
 #include <vector>
 
-static void parse_file(mcc::Package &package, const std::filesystem::path &path)
+static void parse_file(
+        mcc::Package &package,
+        const std::filesystem::path &path)
 {
     std::ifstream stream(path);
     mcc::Assert(stream.is_open(), "failed to open file {}", path.string());
@@ -28,7 +30,9 @@ static void parse_file(mcc::Package &package, const std::filesystem::path &path)
     builder.Generate();
 }
 
-static void parse_directory(mcc::Package &package, const std::filesystem::path &path)
+static void parse_directory(
+        mcc::Package &package,
+        const std::filesystem::path &path)
 {
     for (auto &entry : std::filesystem::directory_iterator(path))
     {
@@ -45,70 +49,56 @@ static void parse_directory(mcc::Package &package, const std::filesystem::path &
     }
 }
 
-int main(const int argc, const char **argv)
+int main(
+        const int argc,
+        const char **argv)
 {
     // https://minecraft.fandom.com/wiki/Argument_types
     // https://minecraft.fandom.com/wiki/Commands
     // https://minecraft.fandom.com/wiki/Data_pack
 
     mcc::Actions actions(
-        {
-            { 0, "help", "display help text and program description" },
-            // mcc init [-name <package name>] [-version <package version>] [-description <package description>]
-            //  -> initialize a new package with a given name, version and description
             {
-                1,
-                "init",
-                "initialize a new package",
-                {
-                    { false, "-name", "package name (default: 'example')" },
+                { 0, "help", "display help text and program description" },
+                // mcc init [-name <package name>] [-version <package version>] [-description <package description>]
+                //  -> initialize a new package with a given name, version and description
+                { 1,
+                 "init", "initialize a new package",
+                 { { false, "-name", "package name (default: 'example')" },
                     { false, "-description", "package description (default: 'the example package')" },
-                    { false, "-version", "package version (default: '71')" }
-                }
-            },
-            // mcc compile [-pkg <package file>] [-target <target directory>]
-            //  -> compile a package to a target directory
-            {
-                2,
-                "compile",
-                "compile a package into the target directory",
-                {
-                    { false, "-pkg", "package file (default: 'info.json')" },
-                    { false, "-target", "target directory (default: 'target')" }
-                }
-            },
-            // mcc package [-pkg <package file>] [-target <target directory>] [-destination <destination file name>]
-            //  -> package a package into a zip destination file
-            {
-                3,
-                "package",
-                "compress a package into a zip file, into the target directory",
-                {
-                    { false, "-pkg", "package file (default: 'info.json')" },
+                    { false, "-version", "package version (default: '71')" } } },
+                // mcc compile [-pkg <package file>] [-target <target directory>]
+                //  -> compile a package to a target directory
+                { 2,
+                 "compile", "compile a package into the target directory",
+                 { { false, "-pkg", "package file (default: 'info.json')" },
+                    { false, "-target", "target directory (default: 'target')" } } },
+                // mcc package [-pkg <package file>] [-target <target directory>] [-destination <destination file name>]
+                //  -> package a package into a zip destination file
+                { 3,
+                 "package", "compress a package into a zip file, into the target directory",
+                 { { false, "-pkg", "package file (default: 'info.json')" },
                     { false, "-target", "taget directory (default: 'target')" },
-                    { false, "-destination", "destination file name (default: '<package name>.zip')" }
-                }
-            }
-        });
+                    { false, "-destination", "destination file name (default: '<package name>.zip')" } } }
+    });
     actions(argc, argv);
 
     switch (actions.ActionID())
     {
     case 1: // init
     {
-        std::string name = "package";
+        std::string name        = "package";
         std::string description = "the package description";
-        std::string version = "71";
+        std::string version     = "71";
 
         (void) actions.String(0, name);
         (void) actions.String(1, description);
         (void) actions.String(2, version);
 
-        mcc::PackageInfo info
-        {
-            .Name = std::move(name),
+        mcc::PackageInfo info{
+            .Name        = std::move(name),
             .Description = json::Node(std::move(description)),
-            .Version = std::stoul(version),
+            .Version     = std::stoul(version),
         };
 
         info.Serialize(std::filesystem::path(name) / "info.json");
@@ -120,7 +110,7 @@ int main(const int argc, const char **argv)
 
     case 2: // compile
     {
-        std::string pkg = "info.json";
+        std::string pkg    = "info.json";
         std::string target = "target";
 
         (void) actions.String(0, pkg);

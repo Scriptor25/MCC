@@ -1,7 +1,9 @@
 #include <mcc/error.hpp>
 #include <mcc/type.hpp>
 
-mcc::UnionType::UnionType(TypeContext &context, const std::set<TypePtr> &elements)
+mcc::UnionType::UnionType(
+        TypeContext &context,
+        const std::set<TypePtr> &elements)
     : Type(context),
       Elements(elements)
 {

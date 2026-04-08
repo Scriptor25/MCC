@@ -6,22 +6,25 @@
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ThrowInstruction::Create(
-    const SourceLocation &where,
-    TypeContext &context,
-    const ResourceLocation &location,
-    const ValuePtr &value,
-    const BlockPtr &landing_pad)
+        const SourceLocation &where,
+        TypeContext &context,
+        const ResourceLocation &location,
+        const ValuePtr &value,
+        const BlockPtr &landing_pad)
 {
     return std::make_shared<ThrowInstruction>(where, context, location, value, landing_pad);
 }
 
 mcc::ThrowInstruction::ThrowInstruction(
-    const SourceLocation &where,
-    TypeContext &context,
-    ResourceLocation location,
-    ValuePtr value,
-    BlockPtr landing_pad)
-    : Instruction(where, context.GetVoid(), FieldType_Value),
+        const SourceLocation &where,
+        TypeContext &context,
+        ResourceLocation location,
+        ValuePtr value,
+        BlockPtr landing_pad)
+    : Instruction(
+              where,
+              context.GetVoid(),
+              FieldType_Value),
       Location(std::move(location)),
       Value(std::move(value)),
       LandingPad(std::move(landing_pad))
@@ -38,7 +41,9 @@ mcc::ThrowInstruction::~ThrowInstruction()
         LandingPad->Drop();
 }
 
-void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) const
+void mcc::ThrowInstruction::Generate(
+        CommandVector &commands,
+        const bool stack) const
 {
     auto value = Value->GenerateResult();
 
@@ -53,13 +58,13 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
         break;
 
     case ResultType_Reference:
-        commands.Append(
-            "{}data modify storage {} result set from {} {} {}",
-            value_prefix,
-            Location,
-            value.ReferenceType,
-            value.Target,
-            value.Path);
+        commands
+                .Append("{}data modify storage {} result set from {} {} {}",
+                        value_prefix,
+                        Location,
+                        value.ReferenceType,
+                        value.Target,
+                        value.Path);
         break;
 
     case ResultType_Argument:
@@ -67,13 +72,12 @@ void mcc::ThrowInstruction::Generate(CommandVector &commands, const bool stack) 
         break;
 
     default:
-        Error(
-            Where,
-            "value must be {}, {} or {}, but is {}",
-            ResultType_Value,
-            ResultType_Reference,
-            ResultType_Argument,
-            value.Type);
+        Error(Where,
+              "value must be {}, {} or {}, but is {}",
+              ResultType_Value,
+              ResultType_Reference,
+              ResultType_Argument,
+              value.Type);
     }
 
     if (LandingPad)

@@ -4,22 +4,25 @@
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::OperationInstruction::Create(
-    const SourceLocation &where,
-    TypeContext &context,
-    const E_Operator operator_,
-    const ResourceLocation &location,
-    const std::vector<ValuePtr> &operands)
+        const SourceLocation &where,
+        TypeContext &context,
+        const E_Operator operator_,
+        const ResourceLocation &location,
+        const std::vector<ValuePtr> &operands)
 {
     return std::make_shared<OperationInstruction>(where, context, operator_, location, operands);
 }
 
 mcc::OperationInstruction::OperationInstruction(
-    const SourceLocation &where,
-    TypeContext &context,
-    const E_Operator operator_,
-    ResourceLocation location,
-    const std::vector<ValuePtr> &operands)
-    : Instruction(where, context.GetNumber(), FieldType_Value),
+        const SourceLocation &where,
+        TypeContext &context,
+        const E_Operator operator_,
+        ResourceLocation location,
+        const std::vector<ValuePtr> &operands)
+    : Instruction(
+              where,
+              context.GetNumber(),
+              FieldType_Value),
       Operator(operator_),
       Location(std::move(location)),
       Operands(operands)
@@ -34,7 +37,9 @@ mcc::OperationInstruction::~OperationInstruction()
         operand->Drop();
 }
 
-void mcc::OperationInstruction::Generate(CommandVector &commands, const bool stack) const
+void mcc::OperationInstruction::Generate(
+        CommandVector &commands,
+        const bool stack) const
 {
     auto objective = GetTemp();
 
@@ -75,12 +80,12 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
         auto player = i == 0 ? "%a" : "%b";
 
         auto operand_value = Operands[i];
-        auto operand = operand_value->GenerateResult();
+        auto operand       = operand_value->GenerateResult();
 
         auto require_operand = operand_value != pre_operand_value && operand != pre_operand;
 
         pre_operand_value = operand_value;
-        pre_operand = operand;
+        pre_operand       = operand;
 
         if (require_operand)
         {
@@ -95,14 +100,14 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
                 break;
 
             case ResultType_Reference:
-                commands.Append(
-                    "{}execute store result score {} {} run data get {} {} {}",
-                    prefix,
-                    player,
-                    objective,
-                    operand.ReferenceType,
-                    operand.Target,
-                    operand.Path);
+                commands
+                        .Append("{}execute store result score {} {} run data get {} {} {}",
+                                prefix,
+                                player,
+                                objective,
+                                operand.ReferenceType,
+                                operand.Target,
+                                operand.Path);
                 break;
 
             case ResultType_Argument:
@@ -110,36 +115,33 @@ void mcc::OperationInstruction::Generate(CommandVector &commands, const bool sta
                 break;
 
             default:
-                Error(
-                    Where,
-                    "operand must be {}, {} or {}, but is {}",
-                    ResultType_Value,
-                    ResultType_Reference,
-                    ResultType_Argument,
-                    operand.Type);
+                Error(Where,
+                      "operand must be {}, {} or {}, but is {}",
+                      ResultType_Value,
+                      ResultType_Reference,
+                      ResultType_Argument,
+                      operand.Type);
             }
         }
 
         if (i)
         {
-            commands.Append(
-                "scoreboard players operation %a {0} {1} {2} {0}",
-                objective,
-                operator_,
-                require_operand
-                    ? "%b"
-                    : i > 1
-                    ? "%b"
-                    : "%a");
+            commands
+                    .Append("scoreboard players operation %a {0} {1} {2} {0}",
+                            objective,
+                            operator_,
+                            require_operand ? "%b"
+                            : i > 1         ? "%b"
+                                            : "%a");
         }
     }
 
     Assert(stack, Where, "operation instruction requires stack");
-    commands.Append(
-        "execute store result storage {} {} long 1 run scoreboard players get %a {}",
-        Location,
-        GetStackPath(),
-        objective);
+    commands
+            .Append("execute store result storage {} {} long 1 run scoreboard players get %a {}",
+                    Location,
+                    GetStackPath(),
+                    objective);
 
     commands.Append(RemoveScore());
 }
@@ -152,9 +154,9 @@ bool mcc::OperationInstruction::RequireStack() const
 mcc::Result mcc::OperationInstruction::GenerateResult() const
 {
     return {
-        .Type = ResultType_Reference,
+        .Type          = ResultType_Reference,
         .ReferenceType = ReferenceType_Storage,
-        .Target = Location.String(),
-        .Path = GetStackPath(),
+        .Target        = Location.String(),
+        .Path          = GetStackPath(),
     };
 }

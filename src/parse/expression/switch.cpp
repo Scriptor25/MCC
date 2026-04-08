@@ -4,32 +4,32 @@
 
 mcc::ExpressionPtr mcc::Parser::ParseSwitchExpression()
 {
-    auto where = Expect(TokenType_Symbol, "switch").Where;
-    Expect(TokenType_Other, "(");
+    auto where = Expect(TokenType::Symbol, "switch").Where;
+    Expect(TokenType::Other, "(");
     auto condition = ParseExpression();
-    Expect(TokenType_Other, ")");
-    Expect(TokenType_Other, "{");
+    Expect(TokenType::Other, ")");
+    Expect(TokenType::Other, "{");
     ExpressionPtr default_;
     std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases;
-    while (!At(TokenType_Other, "}") && !At(TokenType_EOF))
+    while (!At(TokenType::Other, "}") && !At(TokenType::EoF))
     {
-        if (SkipIf(TokenType_Symbol, "default"))
+        if (SkipIf(TokenType::Symbol, "default"))
         {
-            Expect(TokenType_Operator, "->");
+            Expect(TokenType::Operator, "->");
             default_ = ParseExpression();
             continue;
         }
 
-        Expect(TokenType_Symbol, "case");
+        Expect(TokenType::Symbol, "case");
         std::vector<ExpressionPtr> conditions;
         do
             conditions.emplace_back(ParseExpression());
-        while (SkipIf(TokenType_Other, ","));
-        Expect(TokenType_Operator, "->");
+        while (SkipIf(TokenType::Other, ","));
+        Expect(TokenType::Operator, "->");
         auto value = ParseExpression();
         cases.emplace_back(std::move(conditions), std::move(value));
     }
-    Expect(TokenType_Other, "}");
+    Expect(TokenType::Other, "}");
 
     Assert(!!default_, where, "switch expression must specify exactly one default case");
 

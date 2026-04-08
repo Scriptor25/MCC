@@ -3,6 +3,6 @@
 
 mcc::StatementPtr mcc::Parser::ParseBreakStatement()
 {
-    auto where = Expect(TokenType_Symbol, "break").Where;
+    auto where = Expect(TokenType::Symbol, "break").Where;
     return std::make_unique<BreakStatement>(where);
 }

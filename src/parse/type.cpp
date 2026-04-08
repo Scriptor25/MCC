@@ -11,7 +11,7 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
 {
     const auto where = m_Token.Where;
 
-    if (At(TokenType_Symbol))
+    if (At(TokenType::Symbol))
     {
         auto name = Skip().Value;
 
@@ -34,66 +34,66 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
         Error(where, "undefined type {}", name);
     }
 
-    if (SkipIf(TokenType_Other, "{"))
+    if (SkipIf(TokenType::Other, "{"))
     {
         std::map<std::string, TypePtr> elements;
 
-        while (!At(TokenType_Other, "}") && !At(TokenType_EOF))
+        while (!At(TokenType::Other, "}") && !At(TokenType::EoF))
         {
-            auto name = Expect(TokenType_Symbol).Value;
-            Expect(TokenType_Other, ":");
+            auto name = Expect(TokenType::Symbol).Value;
+            Expect(TokenType::Other, ":");
             elements[name] = ParseType();
 
-            if (!At(TokenType_Other, "}"))
-                Expect(TokenType_Other, ",");
+            if (!At(TokenType::Other, "}"))
+                Expect(TokenType::Other, ",");
         }
-        Expect(TokenType_Other, "}");
+        Expect(TokenType::Other, "}");
 
         return m_Context.GetObject(elements);
     }
 
-    if (SkipIf(TokenType_Other, "["))
+    if (SkipIf(TokenType::Other, "["))
     {
         std::vector<TypePtr> elements;
 
-        while (!At(TokenType_Other, "]") && !At(TokenType_EOF))
+        while (!At(TokenType::Other, "]") && !At(TokenType::EoF))
         {
             elements.emplace_back(ParseType());
 
-            if (!At(TokenType_Other, "]"))
-                Expect(TokenType_Other, ",");
+            if (!At(TokenType::Other, "]"))
+                Expect(TokenType::Other, ",");
         }
-        Expect(TokenType_Other, "]");
+        Expect(TokenType::Other, "]");
 
         return m_Context.GetTuple(elements);
     }
 
-    if (SkipIf(TokenType_Other, "$"))
+    if (SkipIf(TokenType::Other, "$"))
     {
         std::vector<TypePtr> parameters;
 
-        const auto throws = SkipIf(TokenType_Other, "!");
+        const auto throws = SkipIf(TokenType::Other, "!");
 
-        Expect(TokenType_Other, "(");
-        while (!At(TokenType_Other, ")") && !At(TokenType_EOF))
+        Expect(TokenType::Other, "(");
+        while (!At(TokenType::Other, ")") && !At(TokenType::EoF))
         {
             parameters.emplace_back(ParseType());
 
-            if (!At(TokenType_Other, ")"))
-                Expect(TokenType_Other, ",");
+            if (!At(TokenType::Other, ")"))
+                Expect(TokenType::Other, ",");
         }
-        Expect(TokenType_Other, ")");
-        Expect(TokenType_Operator, "=>");
+        Expect(TokenType::Other, ")");
+        Expect(TokenType::Operator, "=>");
 
         const auto result = ParseType();
 
         return m_Context.GetFunction(parameters, result, throws);
     }
 
-    if (SkipIf(TokenType_Other, "("))
+    if (SkipIf(TokenType::Other, "("))
     {
         auto type = ParseType();
-        Expect(TokenType_Other, ")");
+        Expect(TokenType::Other, ")");
         return type;
     }
 
@@ -104,9 +104,9 @@ mcc::TypePtr mcc::Parser::ParseArrayType()
 {
     auto base = ParseBaseType();
 
-    while (SkipIf(TokenType_Other, "["))
+    while (SkipIf(TokenType::Other, "["))
     {
-        Expect(TokenType_Other, "]");
+        Expect(TokenType::Other, "]");
         base = m_Context.GetArray(base);
     }
 
@@ -117,14 +117,14 @@ mcc::TypePtr mcc::Parser::ParseUnionType()
 {
     auto type = ParseArrayType();
 
-    if (SkipIf(TokenType_Other, "|"))
+    if (SkipIf(TokenType::Other, "|"))
     {
         std::set<TypePtr> elements;
         elements.insert(type);
 
         do
             elements.insert(ParseArrayType());
-        while (SkipIf(TokenType_Other, "|"));
+        while (SkipIf(TokenType::Other, "|"));
 
         type = m_Context.GetUnion(elements);
     }

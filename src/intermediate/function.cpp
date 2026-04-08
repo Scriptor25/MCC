@@ -8,12 +8,12 @@
 #include <algorithm>
 
 mcc::FunctionPtr mcc::Function::Create(
-    const SourceLocation &where,
-    TypeContext &context,
-    const ResourceLocation &location,
-    const ParameterList &parameters,
-    const TypePtr &result_type,
-    const bool throws)
+        const SourceLocation &where,
+        TypeContext &context,
+        const ResourceLocation &location,
+        const ParameterList &parameters,
+        const TypePtr &result_type,
+        const bool throws)
 {
     std::vector<TypePtr> parameter_types;
     for (const auto &[_0, type_, _1] : parameters)
@@ -24,13 +24,15 @@ mcc::FunctionPtr mcc::Function::Create(
 }
 
 mcc::Function::Function(
-    const SourceLocation &where,
-    const TypePtr &type,
-    ResourceLocation location,
-    ParameterList parameters,
-    TypePtr result_type,
-    const bool throws)
-    : Value(where, type, FieldType_Value),
+        const SourceLocation &where,
+        const TypePtr &type,
+        ResourceLocation location,
+        ParameterList parameters,
+        TypePtr result_type,
+        const bool throws)
+    : Value(where,
+            type,
+            FieldType_Value),
       Location(std::move(location)),
       Parameters(std::move(parameters)),
       ResultType(std::move(result_type)),
@@ -38,7 +40,9 @@ mcc::Function::Function(
 {
 }
 
-void mcc::Function::Generate(CommandVector &commands, const bool stack) const
+void mcc::Function::Generate(
+        CommandVector &commands,
+        const bool stack) const
 {
     Error(Where, "mcc::Function::Generate");
 }
@@ -48,19 +52,14 @@ bool mcc::Function::RequireStack() const
     if (StackIndex)
         return true;
 
-    return std::ranges::any_of(
-        Blocks,
-        [](const auto &block)
-        {
-            return block->RequireStack();
-        });
+    return std::ranges::any_of(Blocks, [](const auto &block) { return block->RequireStack(); });
 }
 
 mcc::Result mcc::Function::GenerateResult() const
 {
     return {
-        .Type = ResultType_Value,
-        .Value = '"' + Location.String() + '"',
+        .Type    = ResultType_Value,
+        .Value   = '"' + Location.String() + '"',
         .NotNull = true,
     };
 }
@@ -68,8 +67,8 @@ mcc::Result mcc::Function::GenerateResult() const
 mcc::Result mcc::Function::GenerateResultUnwrap() const
 {
     return {
-        .Type = ResultType_Value,
-        .Value = Location.String(),
+        .Type    = ResultType_Value,
+        .Value   = Location.String(),
         .NotNull = true,
     };
 }
@@ -173,7 +172,9 @@ void mcc::Function::GenerateFunction(Package &package) const
     }
 }
 
-void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments) const
+void mcc::Function::ForwardArguments(
+        std::string &prefix,
+        std::string &arguments) const
 {
     if (Parameters.empty())
         return;
@@ -187,9 +188,8 @@ void mcc::Function::ForwardArguments(std::string &prefix, std::string &arguments
         if (Parameters[i].Type->IsString())
             arguments += std::format("\"{0}\":\"$({0})\"", Parameters[i].Name);
         else if (Parameters[i].FieldType != FieldType_Value)
-            arguments += std::format(
-                "\"{0}_target\":\"$({0}_target)\",\"{0}_path\":\"$({0}_path)\"",
-                Parameters[i].Name);
+            arguments += std::
+                    format("\"{0}_target\":\"$({0}_target)\",\"{0}_path\":\"$({0}_path)\"", Parameters[i].Name);
         else
             arguments += std::format("\"{0}\":$({0})", Parameters[i].Name);
     }

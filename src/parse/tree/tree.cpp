@@ -4,18 +4,18 @@
 
 mcc::TreeNodePtr mcc::Parser::ParseTreeNode()
 {
-    if (m_Token.Type == TokenType_EOF)
+    if (m_Token.Type == TokenType::EoF)
         return {};
 
-    if (At(TokenType_Symbol, "define"))
+    if (At(TokenType::Symbol, "define"))
         return ParseDefineNode();
-    if (At(TokenType_Symbol, "global"))
+    if (At(TokenType::Symbol, "global"))
         return ParseGlobalNode();
-    if (At(TokenType_Symbol, "include"))
+    if (At(TokenType::Symbol, "include"))
         return ParseIncludeNode();
-    if (At(TokenType_Symbol, "namespace"))
+    if (At(TokenType::Symbol, "namespace"))
         return ParseNamespaceNode();
-    if (At(TokenType_Symbol, "type"))
+    if (At(TokenType::Symbol, "type"))
         return ParseTypeNode();
 
     Error(m_Token.Where, "cannot parse {} '{}'", m_Token.Type, m_Token.Value);

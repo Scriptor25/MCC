@@ -8,9 +8,9 @@
 #include <mcc/value.hpp>
 
 mcc::CallExpression::CallExpression(
-    const SourceLocation &where,
-    ExpressionPtr callee,
-    std::vector<ExpressionPtr> arguments)
+        const SourceLocation &where,
+        ExpressionPtr callee,
+        std::vector<ExpressionPtr> arguments)
     : Expression(where),
       Callee(std::move(callee)),
       Arguments(std::move(arguments))
@@ -32,7 +32,9 @@ std::ostream &mcc::CallExpression::Print(std::ostream &stream) const
     return stream << ')';
 }
 
-mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::CallExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     std::vector<ValuePtr> arguments;
     for (auto &argument : Arguments)
@@ -58,31 +60,28 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(Builder &builder, const Frame &
     Assert(builder.HasFunction(callee), Where, "undefined function {}", callee);
     const auto function = builder.GetFunction(Where, callee);
 
-    auto argument_size = arguments.size();
+    auto argument_size  = arguments.size();
     auto parameter_size = function->Parameters.size();
-    Assert(
-        argument_size == parameter_size,
-        Where,
-        "invalid number of arguments, got {}, require {}",
-        argument_size,
-        parameter_size);
+    Assert(argument_size == parameter_size,
+           Where,
+           "invalid number of arguments, got {}, require {}",
+           argument_size,
+           parameter_size);
     for (unsigned i = 0; i < argument_size; ++i)
     {
-        const auto &argument = arguments[i];
+        const auto &argument  = arguments[i];
         const auto &parameter = function->Parameters[i];
 
-        Assert(
-            SameOrSpecial(argument->Type, parameter.Type),
-            Where,
-            "cannot assign value of type {} to argument of type {}",
-            argument->Type,
-            parameter.Type);
-        Assert(
-            argument->FieldType >= parameter.FieldType,
-            Where,
-            "cannot assign value of field type {} to argument of field type {}",
-            argument->FieldType,
-            parameter.FieldType);
+        Assert(SameOrSpecial(argument->Type, parameter.Type),
+               Where,
+               "cannot assign value of type {} to argument of type {}",
+               argument->Type,
+               parameter.Type);
+        Assert(argument->FieldType >= parameter.FieldType,
+               Where,
+               "cannot assign value of field type {} to argument of field type {}",
+               argument->FieldType,
+               parameter.FieldType);
     }
 
     return builder.CreateCall(Where, function, arguments, frame.LandingPad);

@@ -7,10 +7,13 @@
 #include <mcc/value.hpp>
 
 mcc::SwitchExpression::SwitchExpression(
-    const SourceLocation &where,
-    ExpressionPtr condition,
-    ExpressionPtr default_,
-    std::vector<std::pair<std::vector<ExpressionPtr>, ExpressionPtr>> cases)
+        const SourceLocation &where,
+        ExpressionPtr condition,
+        ExpressionPtr default_,
+        std::vector<std::pair<
+                std::vector<ExpressionPtr>,
+                ExpressionPtr
+        >> cases)
     : Expression(where),
       Condition(std::move(condition)),
       Default(std::move(default_)),
@@ -43,14 +46,15 @@ std::ostream &mcc::SwitchExpression::Print(std::ostream &stream) const
     return stream << '}';
 }
 
-mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame &frame) const
+mcc::ValuePtr mcc::SwitchExpression::GenerateValue(
+        Builder &builder,
+        const Frame &frame) const
 {
     const auto condition = Condition->GenerateValue(builder, frame);
-    Assert(
-        condition->Type->IsNumber(),
-        Condition->Where,
-        "condition must be of type number, but is {}",
-        condition->Type);
+    Assert(condition->Type->IsNumber(),
+           Condition->Where,
+           "condition must be of type number, but is {}",
+           condition->Type);
 
     if (const auto constant_condition = std::dynamic_pointer_cast<ConstantNumber>(condition))
     {
@@ -58,11 +62,10 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
             for (auto &case_condition : case_conditions_)
             {
                 auto case_condition_value = case_condition->GenerateValue(builder, frame);
-                Assert(
-                    case_condition_value->Type->IsNumber(),
-                    case_condition->Where,
-                    "case condition must be of type number, but is {}",
-                    case_condition_value->Type);
+                Assert(case_condition_value->Type->IsNumber(),
+                       case_condition->Where,
+                       "case condition must be of type number, but is {}",
+                       case_condition_value->Type);
 
                 auto constant_case_condition = std::dynamic_pointer_cast<ConstantNumber>(case_condition_value);
                 Assert(!!constant_case_condition, case_condition->Where, "case condition must be a constant number");
@@ -75,8 +78,8 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
 
     const auto pre_target = builder.GetInsertBlock();
 
-    const auto parent = pre_target->Parent;
-    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto parent         = pre_target->Parent;
+    const auto tail_target    = Block::Create(Where, builder.GetContext(), parent);
     const auto default_target = Block::Create(Default->Where, builder.GetContext(), parent);
 
     std::set<TypePtr> elements;
@@ -95,11 +98,10 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
         for (auto &case_condition : case_conditions_)
         {
             auto case_condition_value = case_condition->GenerateValue(builder, frame);
-            Assert(
-                case_condition_value->Type->IsNumber(),
-                case_condition->Where,
-                "case condition must be of type number, but is {}",
-                case_condition_value->Type);
+            Assert(case_condition_value->Type->IsNumber(),
+                   case_condition->Where,
+                   "case condition must be of type number, but is {}",
+                   case_condition_value->Type);
 
             auto constant_case_condition = std::dynamic_pointer_cast<ConstantNumber>(case_condition_value);
             Assert(!!constant_case_condition, case_condition->Where, "case condition must be a constant number");
@@ -117,7 +119,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(Builder &builder, const Frame
     (void) builder.CreateSwitch(Where, condition, default_target, case_targets);
 
     builder.SetInsertBlock(tail_target);
-    const auto type = builder.GetContext().GetUnionOrSingle(elements);
+    const auto type          = builder.GetContext().GetUnionOrSingle(elements);
     const auto branch_result = builder.CreateBranchResult(Where, type);
 
     for (auto &[target_, value_] : case_values)

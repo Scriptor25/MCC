@@ -4,16 +4,16 @@
 
 namespace mcc
 {
-    enum TokenType
+    enum class TokenType
     {
-        TokenType_EOF,
-        TokenType_Symbol,
-        TokenType_Operator,
-        TokenType_Number,
-        TokenType_String,
-        TokenType_FormatString,
-        TokenType_Other,
-        TokenType_Undefined,
+        EoF,
+        Symbol,
+        Operator,
+        Number,
+        String,
+        FormatString,
+        Other,
+        Undefined,
     };
 
     struct Token
@@ -29,23 +29,28 @@ namespace mcc
 namespace std
 {
     template<>
-    struct formatter<mcc::TokenType> final : formatter<string>
+    struct formatter<mcc::TokenType> : formatter<string>
     {
         template<typename FormatContext>
-        auto format(const mcc::TokenType &type, FormatContext &ctx) const
+        auto format(
+                const mcc::TokenType &val,
+                FormatContext &ctx) const
         {
-            static const std::map<mcc::TokenType, std::string> types{
-                { mcc::TokenType_EOF, "eof" },
-                { mcc::TokenType_Symbol, "symbol" },
-                { mcc::TokenType_Operator, "operator" },
-                { mcc::TokenType_Number, "number" },
-                { mcc::TokenType_String, "string" },
-                { mcc::TokenType_FormatString, "format string" },
-                { mcc::TokenType_Other, "other" },
-                { mcc::TokenType_Undefined, "undefined" },
+            static const std::map<mcc::TokenType, std::string> map{
+                {          mcc::TokenType::EoF,           "eof" },
+                {       mcc::TokenType::Symbol,        "symbol" },
+                {     mcc::TokenType::Operator,      "operator" },
+                {       mcc::TokenType::Number,        "number" },
+                {       mcc::TokenType::String,        "string" },
+                { mcc::TokenType::FormatString, "format string" },
+                {        mcc::TokenType::Other,         "other" },
+                {    mcc::TokenType::Undefined,     "undefined" },
             };
 
-            return formatter<string>::format(types.contains(type) ? types.at(type) : "<undefined>", ctx);
+            if (auto it = map.find(val); it != map.end())
+                return formatter<string>::format(it->second, ctx);
+
+            return formatter<string>::format("<undefined>", ctx);
         }
     };
 }

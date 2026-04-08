@@ -47,24 +47,34 @@ namespace mcc
 template<>
 struct json::serializer<mcc::ResourceLocation>
 {
-    static void to_json(Node &node, const mcc::ResourceLocation &value);
+    static void to_json(
+            Node &node,
+            const mcc::ResourceLocation &value);
 };
 
 template<>
 struct json::serializer<mcc::Tag>
 {
-    static void to_json(Node &node, const mcc::Tag &value);
+    static void to_json(
+            Node &node,
+            const mcc::Tag &value);
 };
 
 template<>
 struct json::serializer<mcc::TagInfo>
 {
-    static void to_json(Node &node, const mcc::TagInfo &value);
+    static void to_json(
+            Node &node,
+            const mcc::TagInfo &value);
 };
 
 template<>
 struct json::serializer<mcc::PackageInfo>
 {
-    static bool from_json(const Node &node, mcc::PackageInfo &value);
-    static void to_json(Node &node, const mcc::PackageInfo &value);
+    static bool from_json(
+            const Node &node,
+            mcc::PackageInfo &value);
+    static void to_json(
+            Node &node,
+            const mcc::PackageInfo &value);
 };

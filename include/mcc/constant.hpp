@@ -8,7 +8,9 @@ namespace mcc
 {
     struct Constant : Value
     {
-        Constant(const SourceLocation &where, const TypePtr &type);
+        Constant(
+                const SourceLocation &where,
+                const TypePtr &type);
 
         [[nodiscard]] bool RequireStack() const override;
     };
@@ -16,21 +18,21 @@ namespace mcc
     struct ConstantArray final : Constant
     {
         static ConstantPtr Create(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
+                const SourceLocation &where,
+                const TypePtr &type,
+                const std::vector<ConstantPtr> &values,
+                bool stringify);
         static ConstantPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
+                const SourceLocation &where,
+                TypeContext &context,
+                const std::vector<ConstantPtr> &values,
+                bool stringify);
 
         ConstantArray(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const std::vector<ConstantPtr> &values,
-            bool stringify);
+                const SourceLocation &where,
+                const TypePtr &type,
+                const std::vector<ConstantPtr> &values,
+                bool stringify);
         ~ConstantArray() override;
 
         [[nodiscard]] Result GenerateResult() const override;
@@ -41,9 +43,15 @@ namespace mcc
 
     struct ConstantNumber final : Constant
     {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, IntegerT value);
+        static ConstantPtr Create(
+                const SourceLocation &where,
+                TypeContext &context,
+                IntegerT value);
 
-        ConstantNumber(const SourceLocation &where, TypeContext &context, IntegerT value);
+        ConstantNumber(
+                const SourceLocation &where,
+                TypeContext &context,
+                IntegerT value);
 
         [[nodiscard]] Result GenerateResult() const override;
 
@@ -53,18 +61,27 @@ namespace mcc
     struct ConstantObject final : Constant
     {
         static ConstantPtr Create(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const std::map<std::string, ConstantPtr> &values);
+                const SourceLocation &where,
+                const TypePtr &type,
+                const std::map<
+                        std::string,
+                        ConstantPtr
+                > &values);
         static ConstantPtr Create(
-            const SourceLocation &where,
-            TypeContext &context,
-            const std::map<std::string, ConstantPtr> &values);
+                const SourceLocation &where,
+                TypeContext &context,
+                const std::map<
+                        std::string,
+                        ConstantPtr
+                > &values);
 
         ConstantObject(
-            const SourceLocation &where,
-            const TypePtr &type,
-            const std::map<std::string, ConstantPtr> &values);
+                const SourceLocation &where,
+                const TypePtr &type,
+                const std::map<
+                        std::string,
+                        ConstantPtr
+                > &values);
         ~ConstantObject() override;
 
         [[nodiscard]] Result GenerateResult() const override;
@@ -74,9 +91,15 @@ namespace mcc
 
     struct ConstantResource final : Constant
     {
-        static ConstantPtr Create(const SourceLocation &where, const TypePtr &type, const ResourceLocation &location);
+        static ConstantPtr Create(
+                const SourceLocation &where,
+                const TypePtr &type,
+                const ResourceLocation &location);
 
-        ConstantResource(const SourceLocation &where, const TypePtr &type, ResourceLocation location);
+        ConstantResource(
+                const SourceLocation &where,
+                const TypePtr &type,
+                ResourceLocation location);
 
         [[nodiscard]] Result GenerateResult() const override;
         [[nodiscard]] Result GenerateResultUnwrap() const override;
@@ -86,9 +109,15 @@ namespace mcc
 
     struct ConstantString final : Constant
     {
-        static ConstantPtr Create(const SourceLocation &where, TypeContext &context, const std::string &value);
+        static ConstantPtr Create(
+                const SourceLocation &where,
+                TypeContext &context,
+                const std::string &value);
 
-        ConstantString(const SourceLocation &where, TypeContext &context, std::string value);
+        ConstantString(
+                const SourceLocation &where,
+                TypeContext &context,
+                std::string value);
 
         [[nodiscard]] Result GenerateResult() const override;
         [[nodiscard]] Result GenerateResultUnwrap() const override;

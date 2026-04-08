@@ -7,37 +7,37 @@ mcc::ExpressionPtr mcc::Parser::ParsePrimaryExpression()
 {
     if (AtEnum("if", "unless"))
         return ParseIfUnlessExpression();
-    if (At(TokenType_Symbol, "switch"))
+    if (At(TokenType::Symbol, "switch"))
         return ParseSwitchExpression();
-    if (At(TokenType_Symbol, "ref"))
+    if (At(TokenType::Symbol, "ref"))
         return ParseRefExpression();
-    if (At(TokenType_Number))
+    if (At(TokenType::Number))
         return ParseNumberExpression();
-    if (At(TokenType_String))
+    if (At(TokenType::String))
         return ParseStringExpression();
-    if (At(TokenType_FormatString))
+    if (At(TokenType::FormatString))
         return ParseFormatExpression();
-    if (At(TokenType_Symbol))
+    if (At(TokenType::Symbol))
         return ParseSymbolExpression();
-    if (At(TokenType_Other, "?"))
+    if (At(TokenType::Other, "?"))
         return ParseCommandExpression();
-    if (At(TokenType_Other, "!"))
+    if (At(TokenType::Other, "!"))
         return ParseMacroExpression();
-    if (At(TokenType_Other, "["))
+    if (At(TokenType::Other, "["))
         return ParseArrayExpression();
-    if (At(TokenType_Other, "{"))
+    if (At(TokenType::Other, "{"))
         return ParseObjectExpression();
 
-    if (SkipIf(TokenType_Other, "("))
+    if (SkipIf(TokenType::Other, "("))
     {
         auto expression = ParseExpression();
-        Expect(TokenType_Other, ")");
+        Expect(TokenType::Other, ")");
         return expression;
     }
 
-    if (At(TokenType_Operator))
+    if (At(TokenType::Operator))
     {
-        auto token = Skip();
+        auto token   = Skip();
         auto operand = ParseOperandExpression();
         return std::make_unique<UnaryExpression>(token.Where, token.Value, std::move(operand));
     }
