@@ -195,7 +195,13 @@ mcc::InstructionPtr mcc::MacroInstruction::Create(
         const std::string &name,
         const std::vector<ValuePtr> &arguments)
 {
-    return std::make_shared<MacroInstruction>(where, context, location, name, arguments);
+    auto self = std::make_shared<MacroInstruction>(where, context, location, name, arguments);
+
+    self->Self = self;
+    for (const auto &argument : self->Arguments)
+        argument->Use(self);
+
+    return self;
 }
 
 mcc::MacroInstruction::MacroInstruction(
@@ -212,14 +218,12 @@ mcc::MacroInstruction::MacroInstruction(
       Name(std::move(name)),
       Arguments(arguments)
 {
-    for (const auto &argument : Arguments)
-        argument->Use();
 }
 
 mcc::MacroInstruction::~MacroInstruction()
 {
     for (const auto &argument : Arguments)
-        argument->Drop();
+        argument->Drop(Self);
 }
 
 void mcc::MacroInstruction::Generate(

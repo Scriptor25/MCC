@@ -9,7 +9,14 @@ mcc::ValuePtr mcc::GenericBlockReference::Create(
         const ValuePtr &position_z,
         const ValuePtr &path)
 {
-    return std::make_shared<GenericBlockReference>(where, type, position_x, position_y, position_z, path);
+    auto self = std::make_shared<GenericBlockReference>(where, type, position_x, position_y, position_z, path);
+
+    self->Self = self;
+    self->PositionX->Use(self);
+    self->PositionY->Use(self);
+    self->PositionZ->Use(self);
+
+    return self;
 }
 
 mcc::GenericBlockReference::GenericBlockReference(
@@ -27,16 +34,13 @@ mcc::GenericBlockReference::GenericBlockReference(
       PositionZ(position_z),
       Path(path)
 {
-    PositionX->Use();
-    PositionY->Use();
-    PositionZ->Use();
 }
 
 mcc::GenericBlockReference::~GenericBlockReference()
 {
-    PositionX->Drop();
-    PositionY->Drop();
-    PositionZ->Drop();
+    PositionX->Drop(Self);
+    PositionY->Drop(Self);
+    PositionZ->Drop(Self);
 }
 
 bool mcc::GenericBlockReference::RequireStack() const

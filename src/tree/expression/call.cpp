@@ -38,7 +38,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(
 {
     std::vector<ValuePtr> arguments;
     for (auto &argument : Arguments)
-        arguments.emplace_back(argument->GenerateValue(builder, frame));
+        arguments.push_back(argument->GenerateValue(builder, frame));
 
     if (const auto macro = dynamic_cast<MacroExpression *>(Callee.get()))
         return builder.CreateMacro(Where, macro->Name, arguments);

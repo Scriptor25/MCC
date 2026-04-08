@@ -58,7 +58,7 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
 
         while (!At(TokenType::Other, "]") && !At(TokenType::EoF))
         {
-            elements.emplace_back(ParseType());
+            elements.push_back(ParseType());
 
             if (!At(TokenType::Other, "]"))
                 Expect(TokenType::Other, ",");
@@ -77,7 +77,7 @@ mcc::TypePtr mcc::Parser::ParseBaseType()
         Expect(TokenType::Other, "(");
         while (!At(TokenType::Other, ")") && !At(TokenType::EoF))
         {
-            parameters.emplace_back(ParseType());
+            parameters.push_back(ParseType());
 
             if (!At(TokenType::Other, ")"))
                 Expect(TokenType::Other, ",");

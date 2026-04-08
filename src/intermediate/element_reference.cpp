@@ -3,7 +3,7 @@
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
-mcc::ValuePtr mcc::ElementReference::Create(
+mcc::ElementReference::SPtr mcc::ElementReference::Create(
         const SourceLocation &where,
         const ValuePtr &base,
         const ValuePtr &index)
@@ -27,7 +27,13 @@ mcc::ValuePtr mcc::ElementReference::Create(
     else
         Error(where, "base must be of type array or tuple");
 
-    return std::make_shared<ElementReference>(where, type, base, index);
+    auto self = std::make_shared<ElementReference>(where, type, base, index);
+
+    self->Self = self;
+    self->Base->Use(self);
+    self->Index->Use(self);
+
+    return self;
 }
 
 mcc::ElementReference::ElementReference(
@@ -41,14 +47,12 @@ mcc::ElementReference::ElementReference(
       Base(base),
       Index(index)
 {
-    Base->Use();
-    Index->Use();
 }
 
 mcc::ElementReference::~ElementReference()
 {
-    Base->Drop();
-    Index->Drop();
+    Base->Drop(Self);
+    Index->Drop(Self);
 }
 
 bool mcc::ElementReference::RequireStack() const

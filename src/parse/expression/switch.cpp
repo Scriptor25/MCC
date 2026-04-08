@@ -23,7 +23,7 @@ mcc::ExpressionPtr mcc::Parser::ParseSwitchExpression()
         Expect(TokenType::Symbol, "case");
         std::vector<ExpressionPtr> conditions;
         do
-            conditions.emplace_back(ParseExpression());
+            conditions.push_back(ParseExpression());
         while (SkipIf(TokenType::Other, ","));
         Expect(TokenType::Operator, "->");
         auto value = ParseExpression();

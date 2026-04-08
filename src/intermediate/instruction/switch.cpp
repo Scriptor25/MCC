@@ -14,12 +14,20 @@ mcc::InstructionPtr mcc::SwitchInstruction::Create(
         const ResourceLocation &location,
         const ValuePtr &condition,
         const BlockPtr &default_target,
-        const std::vector<std::pair<
-                ConstantPtr,
-                BlockPtr
-        >> &case_targets)
+        const CaseTargetMap &case_targets)
 {
-    return std::make_shared<SwitchInstruction>(where, context, location, condition, default_target, case_targets);
+    auto self = std::make_shared<SwitchInstruction>(where, context, location, condition, default_target, case_targets);
+
+    self->Self = self;
+    self->Condition->Use(self);
+    self->DefaultTarget->Use(self);
+    for (auto &[case_, target_] : self->CaseTargets)
+    {
+        case_->Use(self);
+        target_->Use(self);
+    }
+
+    return self;
 }
 
 mcc::SwitchInstruction::SwitchInstruction(
@@ -28,10 +36,7 @@ mcc::SwitchInstruction::SwitchInstruction(
         ResourceLocation location,
         ValuePtr condition,
         BlockPtr default_target,
-        const std::vector<std::pair<
-                ConstantPtr,
-                BlockPtr
-        >> &case_targets)
+        const CaseTargetMap &case_targets)
     : Instruction(
               where,
               context.GetVoid(),
@@ -41,23 +46,16 @@ mcc::SwitchInstruction::SwitchInstruction(
       DefaultTarget(std::move(default_target)),
       CaseTargets(case_targets)
 {
-    Condition->Use();
-    DefaultTarget->Use();
-    for (auto &[case_, target_] : CaseTargets)
-    {
-        case_->Use();
-        target_->Use();
-    }
 }
 
 mcc::SwitchInstruction::~SwitchInstruction()
 {
-    Condition->Drop();
-    DefaultTarget->Drop();
+    Condition->Drop(Self);
+    DefaultTarget->Drop(Self);
     for (auto &[case_, target_] : CaseTargets)
     {
-        case_->Drop();
-        target_->Drop();
+        case_->Drop(Self);
+        target_->Drop(Self);
     }
 }
 
@@ -66,54 +64,45 @@ void mcc::SwitchInstruction::Generate(
         bool stack) const
 {
     std::string prefix, arguments;
-    (DefaultTarget ? DefaultTarget : CaseTargets.front().second)->Parent->ForwardArguments(prefix, arguments);
+    DefaultTarget->Parent->ForwardArguments(prefix, arguments);
 
     auto stack_path = GetStackPath();
     auto tmp_name   = GetTemp();
-
-    auto take_default = true;
 
     auto condition = Condition->GenerateResult();
 
     std::string condition_prefix;
     if (condition.WithArgument)
-    {
         condition_prefix = "$";
+
+    std::map<std::string, BlockPtr> case_targets;
+    for (auto &[case_, target_] : CaseTargets)
+    {
+        auto case_value = case_->GenerateResult();
+        Assert(case_value.Type == ResultType_Value,
+               case_->Where,
+               "case value must be {}, but is {}",
+               ResultType_Value,
+               case_value.Type);
+        case_targets[case_value.Value] = target_;
     }
 
     switch (condition.Type)
     {
     case ResultType_Value:
-        for (auto &[case_, target_] : CaseTargets)
-        {
-            auto case_value = case_->GenerateResult();
-            Assert(case_value.Type == ResultType_Value,
-                   case_->Where,
-                   "case value must be {}, but is {}",
-                   ResultType_Value,
-                   case_value.Type);
-
-            if (case_value.Value != condition.Value)
-                continue;
-
-            commands.Append("{}return run function {}{}", prefix, target_->GetLocation(), arguments);
-            take_default = false;
-            break;
-        }
-        if (take_default)
-            commands.Append("{}return run function {}{}", prefix, DefaultTarget->GetLocation(), arguments);
+    {
+        BlockPtr block;
+        if (auto it = case_targets.find(condition.Value); it != case_targets.end())
+            block = it->second;
+        else
+            block = DefaultTarget;
+        commands.Append("{}return run function {}{}", prefix, block->GetLocation(), arguments);
         break;
+    }
 
     case ResultType_Reference:
-        for (auto &[case_, target_] : CaseTargets)
+        for (auto &[case_, target_] : case_targets)
         {
-            auto case_value = case_->GenerateResult();
-            Assert(case_value.Type == ResultType_Value,
-                   case_->Where,
-                   "case value must be {}, but is {}",
-                   ResultType_Value,
-                   case_value.Type);
-
             commands.Append(CreateScore());
             commands
                     .Append("{}execute store result score %c {} run data get {} {} {}",
@@ -126,7 +115,7 @@ void mcc::SwitchInstruction::Generate(
             commands
                     .Append("execute if score %c {} matches {} run data modify storage {} {} set value 1",
                             tmp_name,
-                            case_value.Value,
+                            case_,
                             Location,
                             stack_path);
             commands.Append(RemoveScore());
@@ -143,17 +132,15 @@ void mcc::SwitchInstruction::Generate(
         break;
 
     case ResultType_Argument:
-        for (auto &[case_, target_] : CaseTargets)
+        for (auto &[case_, target_] : case_targets)
         {
-            auto case_value = case_->GenerateResult();
-
             commands.Append(CreateScore());
             commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);
             commands.Append("data remove storage {} {}", Location, stack_path);
             commands
                     .Append("execute if score %c {} matches {} run data modify storage {} {} set value 1",
                             tmp_name,
-                            case_value.Value,
+                            case_,
                             Location,
                             stack_path);
             commands.Append(RemoveScore());
@@ -182,7 +169,9 @@ void mcc::SwitchInstruction::Generate(
 bool mcc::SwitchInstruction::RequireStack() const
 {
     return Condition->RequireStack() || DefaultTarget->RequireStack()
-           || std::ranges::any_of(CaseTargets, [](auto &case_target) { return case_target.second->RequireStack(); });
+           || std::ranges::
+                   any_of(CaseTargets,
+                          [](const CaseTarget &case_target) { return case_target.second->RequireStack(); });
 }
 
 bool mcc::SwitchInstruction::IsTerminator() const

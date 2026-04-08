@@ -1,5 +1,6 @@
 #include <mcc/block.hpp>
 #include <mcc/builder.hpp>
+#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
@@ -139,24 +140,24 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
         const SourceLocation &where,
         const ValuePtr &condition,
         const BlockPtr &default_target,
-        const std::vector<std::pair<
-                ConstantPtr,
-                BlockPtr
-        >> &case_targets) const
+        const CaseTargetMap &case_targets) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
+
     Assert(!!condition, where, "condition must not be null");
     Assert(condition->Type->IsNumber(), where, "condition must be number");
-    Assert(!!default_target, where, "default target must not be null");
 
     for (auto &[condition_, target_] : case_targets)
     {
         Assert(!!condition_, where, "case condition must not be null");
+        Assert(condition_->Type->IsNumber(), where, "case condition must be number");
         Assert(!!target_, where, "case target must not be null");
 
         m_InsertBlock->Successors.insert(target_);
         target_->Predecessors.insert(m_InsertBlock);
     }
+
+    Assert(!!default_target, where, "default target must not be null");
 
     m_InsertBlock->Successors.insert(default_target);
     default_target->Predecessors.insert(m_InsertBlock);

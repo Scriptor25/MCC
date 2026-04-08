@@ -7,7 +7,13 @@ mcc::InstructionPtr mcc::StoreInstruction::Create(
         const ValuePtr &dst,
         const ValuePtr &src)
 {
-    return std::make_shared<StoreInstruction>(where, dst, src);
+    auto self = std::make_shared<StoreInstruction>(where, dst, src);
+
+    self->Self = self;
+    self->Dst->Use(self);
+    self->Src->Use(self);
+
+    return self;
 }
 
 mcc::StoreInstruction::StoreInstruction(
@@ -21,14 +27,12 @@ mcc::StoreInstruction::StoreInstruction(
       Dst(dst),
       Src(std::move(src))
 {
-    Dst->Use();
-    Src->Use();
 }
 
 mcc::StoreInstruction::~StoreInstruction()
 {
-    Dst->Drop();
-    Src->Drop();
+    Dst->Drop(Self);
+    Src->Drop(Self);
 }
 
 void mcc::StoreInstruction::Generate(

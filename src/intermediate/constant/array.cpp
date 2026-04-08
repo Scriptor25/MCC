@@ -7,7 +7,13 @@ mcc::ConstantPtr mcc::ConstantArray::Create(
         const std::vector<ConstantPtr> &values,
         const bool stringify)
 {
-    return std::make_shared<ConstantArray>(where, type, values, stringify);
+    auto self = std::make_shared<ConstantArray>(where, type, values, stringify);
+
+    self->Self = self;
+    for (const auto &value : self->Values)
+        value->Use(self);
+
+    return self;
 }
 
 mcc::ConstantPtr mcc::ConstantArray::Create(
@@ -22,7 +28,7 @@ mcc::ConstantPtr mcc::ConstantArray::Create(
 
     auto type = context.GetArray(context.GetUnionOrSingle(elements));
 
-    return std::make_shared<ConstantArray>(where, type, values, stringify);
+    return Create(where, type, values, stringify);
 }
 
 mcc::ConstantArray::ConstantArray(
@@ -36,14 +42,12 @@ mcc::ConstantArray::ConstantArray(
       Values(values),
       Stringify(stringify)
 {
-    for (const auto &value : Values)
-        value->Use();
 }
 
 mcc::ConstantArray::~ConstantArray()
 {
     for (const auto &value : Values)
-        value->Drop();
+        value->Drop(Self);
 }
 
 mcc::Result mcc::ConstantArray::GenerateResult() const

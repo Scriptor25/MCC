@@ -5,7 +5,9 @@ mcc::ValuePtr mcc::FunctionResult::Create(
         const TypePtr &type,
         const ResourceLocation &location)
 {
-    return std::make_shared<FunctionResult>(where, type, location);
+    auto self  = std::make_shared<FunctionResult>(where, type, location);
+    self->Self = self;
+    return self;
 }
 
 mcc::FunctionResult::FunctionResult(

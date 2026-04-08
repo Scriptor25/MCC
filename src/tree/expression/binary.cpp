@@ -32,20 +32,20 @@ mcc::ExpressionPtr mcc::BinaryExpression::Merge()
     if (const auto left = dynamic_cast<BinaryExpression *>(Left.get()); left && left->Operator == Operator)
     {
         merged = true;
-        operands.emplace_back(std::move(left->Left));
-        operands.emplace_back(std::move(left->Right));
+        operands.push_back(std::move(left->Left));
+        operands.push_back(std::move(left->Right));
     }
     else
-        operands.emplace_back(std::move(Left));
+        operands.push_back(std::move(Left));
 
     if (const auto right = dynamic_cast<BinaryExpression *>(Right.get()); right && right->Operator == Operator)
     {
         merged = true;
-        operands.emplace_back(std::move(right->Left));
-        operands.emplace_back(std::move(right->Right));
+        operands.push_back(std::move(right->Left));
+        operands.push_back(std::move(right->Right));
     }
     else
-        operands.emplace_back(std::move(Right));
+        operands.push_back(std::move(Right));
 
     if (!merged)
     {

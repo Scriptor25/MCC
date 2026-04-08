@@ -6,7 +6,9 @@ mcc::ConstantPtr mcc::ConstantNumber::Create(
         TypeContext &context,
         const IntegerT value)
 {
-    return std::make_shared<ConstantNumber>(where, context, value);
+    auto self  = std::make_shared<ConstantNumber>(where, context, value);
+    self->Self = self;
+    return self;
 }
 
 mcc::ConstantNumber::ConstantNumber(

@@ -23,7 +23,7 @@ mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
     for (size_t pos; (pos = format.find("${")) != std::string::npos;)
     {
         if (pos != 0)
-            nodes.emplace_back(std::make_unique<StringNode>(get_where(), format.substr(0, pos)));
+            nodes.push_back(std::make_unique<StringNode>(get_where(), format.substr(0, pos)));
 
         format = format.substr(pos + 2);
 
@@ -38,7 +38,7 @@ mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
 
         auto expression = parser.ParseExpression();
 
-        nodes.emplace_back(std::make_unique<ExpressionNode>(node_where, std::move(expression)));
+        nodes.push_back(std::make_unique<ExpressionNode>(node_where, std::move(expression)));
 
         auto count = parser.Count();
         format     = format.substr(count);
@@ -46,7 +46,7 @@ mcc::ExpressionPtr mcc::Parser::ParseFormatExpression()
     }
 
     if (!format.empty())
-        nodes.emplace_back(std::make_unique<StringNode>(get_where(), format));
+        nodes.push_back(std::make_unique<StringNode>(get_where(), format));
 
     return std::make_unique<FormatExpression>(where, std::move(nodes));
 }

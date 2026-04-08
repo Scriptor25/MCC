@@ -49,7 +49,7 @@ mcc::ConstantPtr mcc::TupleType::GetNull(const SourceLocation &where) const
 {
     std::vector<ConstantPtr> values;
     for (auto &element : Elements)
-        values.emplace_back(element->GetNull(where));
+        values.push_back(element->GetNull(where));
 
     return ConstantArray::Create(where, Self.lock(), values, false);
 }

@@ -6,7 +6,9 @@ mcc::ValuePtr mcc::ArgumentValue::Create(
         const TypePtr &type,
         const std::string &name)
 {
-    return std::make_shared<ArgumentValue>(where, type, name);
+    auto self  = std::make_shared<ArgumentValue>(where, type, name);
+    self->Self = self;
+    return self;
 }
 
 mcc::ArgumentValue::ArgumentValue(

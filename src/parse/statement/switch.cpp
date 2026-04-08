@@ -27,7 +27,7 @@ mcc::StatementPtr mcc::Parser::ParseSwitchStatement()
         Expect(TokenType::Symbol, "case");
         std::vector<ExpressionPtr> conditions;
         do
-            conditions.emplace_back(ParseExpression());
+            conditions.push_back(ParseExpression());
         while (SkipIf(TokenType::Other, ","));
         StatementPtr value;
         if (SkipIf(TokenType::Operator, "->"))

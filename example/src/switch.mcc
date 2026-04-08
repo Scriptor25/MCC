@@ -1,0 +1,27 @@
+namespace example
+
+define test_switch(c0: number) {
+    constexpr c1 = 128
+    const c2 = 128
+
+    switch (c0) {
+        case 0 -> !print("@s", "zero")
+        case 128 -> !print("@s", "half")
+        case 256 -> !print("@s", "full")
+        default -> !print("@s", "none")
+    }
+    
+    switch (c1) {
+        case 0 -> !print("@s", "zero")
+        case 128 -> !print("@s", "half")
+        case 256 -> !print("@s", "full")
+        default -> !print("@s", "none")
+    }
+    
+    switch (c2) {
+        case 0 -> !print("@s", "zero")
+        case 128 -> !print("@s", "half")
+        case 256 -> !print("@s", "full")
+        default -> !print("@s", "none")
+    }
+}

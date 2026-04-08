@@ -44,9 +44,9 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(
                operand->Where,
                "operand must be of type number, but is {}",
                operand_value->Type);
-        operand_values.emplace_back(operand_value);
+        operand_values.push_back(operand_value);
         if (auto constant = std::dynamic_pointer_cast<ConstantNumber>(operand_value))
-            operand_constants.emplace_back(constant);
+            operand_constants.push_back(constant);
     }
 
     const auto operator_ = ToOperator(Operator);

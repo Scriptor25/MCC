@@ -6,7 +6,9 @@ mcc::ConstantPtr mcc::ConstantResource::Create(
         const TypePtr &type,
         const ResourceLocation &location)
 {
-    return std::make_shared<ConstantResource>(where, type, location);
+    auto self  = std::make_shared<ConstantResource>(where, type, location);
+    self->Self = self;
+    return self;
 }
 
 mcc::ConstantResource::ConstantResource(

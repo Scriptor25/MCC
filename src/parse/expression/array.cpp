@@ -9,7 +9,7 @@ mcc::ExpressionPtr mcc::Parser::ParseArrayExpression()
 
     while (!At(TokenType::Other, "]") && !At(TokenType::EoF))
     {
-        elements.emplace_back(ParseExpression());
+        elements.push_back(ParseExpression());
         if (!At(TokenType::Other, "]"))
             Expect(TokenType::Other, ",");
     }

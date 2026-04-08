@@ -17,10 +17,12 @@ mcc::FunctionPtr mcc::Function::Create(
 {
     std::vector<TypePtr> parameter_types;
     for (const auto &[_0, type_, _1] : parameters)
-        parameter_types.emplace_back(type_);
+        parameter_types.push_back(type_);
 
-    auto type = context.GetFunction(parameter_types, result_type, throws);
-    return std::make_shared<Function>(where, type, location, parameters, result_type, throws);
+    auto type  = context.GetFunction(parameter_types, result_type, throws);
+    auto self  = std::make_shared<Function>(where, type, location, parameters, result_type, throws);
+    self->Self = self;
+    return self;
 }
 
 mcc::Function::Function(
@@ -89,20 +91,20 @@ bool mcc::Function::RemoveUnreferencedBlocks()
 bool mcc::Function::MergeConsecutiveBlocks()
 {
     std::set<BlockPtr> blocks;
-    for (const auto &block : Blocks)
+    for (auto &block : Blocks)
     {
         if (blocks.contains(block))
             continue;
 
         if (block->Successors.size() == 1)
-            if (auto successor = *block->Successors.begin(); successor->Predecessors.size() == 1)
+            if (auto &successor = *block->Successors.begin(); successor->Predecessors.size() == 1)
             {
                 Assert(!block->Instructions.empty(), "instructions must not be empty");
 
                 block->Instructions.pop_back();
 
                 for (auto &instruction : successor->Instructions)
-                    block->Instructions.emplace_back(instruction);
+                    block->Instructions.push_back(std::move(instruction));
                 successor->Instructions.clear();
 
                 block->Successors.erase(successor);
@@ -146,7 +148,7 @@ void mcc::Function::GenerateFunction(Package &package) const
     {
         auto [namespace_, path_] = Location;
         if (i)
-            path_.emplace_back(std::to_string(i));
+            path_.push_back(std::to_string(i));
 
         CommandVector commands(package.Functions[namespace_][path_]);
 
@@ -181,43 +183,48 @@ void mcc::Function::ForwardArguments(
 
     prefix = "$";
     arguments += " {";
-    for (unsigned i = 0; i < Parameters.size(); ++i)
+    for (auto i = Parameters.begin(); i != Parameters.end(); ++i)
     {
-        if (i)
+        if (i != Parameters.begin())
             arguments += ',';
-        if (Parameters[i].Type->IsString())
-            arguments += std::format("\"{0}\":\"$({0})\"", Parameters[i].Name);
-        else if (Parameters[i].FieldType != FieldType_Value)
-            arguments += std::
-                    format("\"{0}_target\":\"$({0}_target)\",\"{0}_path\":\"$({0}_path)\"", Parameters[i].Name);
+        if (i->Type->IsString())
+            arguments += std::format("\"{0}\":\"$({0})\"", i->Name);
+        else if (i->FieldType != FieldType_Value)
+            arguments += std::format("\"{0}_target\":\"$({0}_target)\",\"{0}_path\":\"$({0}_path)\"", i->Name);
         else
-            arguments += std::format("\"{0}\":$({0})", Parameters[i].Name);
+            arguments += std::format("\"{0}\":$({0})", i->Name);
     }
     arguments += '}';
 }
 
 mcc::ResourceLocation mcc::Function::GetLocation(const BlockPtr &target_block) const
 {
+    Assert(!!target_block, "target block must not be null");
+
     for (unsigned i = 0; i < Blocks.size(); ++i)
         if (Blocks[i] == target_block)
             return Location.Child(std::to_string(i));
 
-    Error(Where, "cannot get location for non-child block");
+    Error(target_block->Where, "target block is not owned by the function");
 }
 
 mcc::BlockPtr mcc::Function::Erase(const BlockPtr &target_block)
 {
+    Assert(!!target_block, "target block must not be null");
+    Assert(target_block->Predecessors.empty(), target_block->Where, "target block must not have any predecessors");
+
     for (auto i = Blocks.begin(); i != Blocks.end(); ++i)
         if (*i == target_block)
         {
-            Assert(target_block->Predecessors.empty(), target_block->Where, "cannot erase referenced block");
             Blocks.erase(i);
+
             for (auto &successor : target_block->Successors)
                 successor->Predecessors.erase(target_block);
             target_block->Successors.clear();
+
             target_block->Parent = nullptr;
             return target_block;
         }
 
-    return nullptr;
+    Error(target_block->Where, "target block is not owned by the function");
 }

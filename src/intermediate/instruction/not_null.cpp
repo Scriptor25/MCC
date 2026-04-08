@@ -9,7 +9,12 @@ mcc::InstructionPtr mcc::NotNullInstruction::Create(
         const ResourceLocation &location,
         const ValuePtr &value)
 {
-    return std::make_shared<NotNullInstruction>(where, context, location, value);
+    auto self = std::make_shared<NotNullInstruction>(where, context, location, value);
+
+    self->Self = self;
+    self->Value->Use(self);
+
+    return self;
 }
 
 mcc::NotNullInstruction::NotNullInstruction(
@@ -24,12 +29,11 @@ mcc::NotNullInstruction::NotNullInstruction(
       Location(std::move(location)),
       Value(std::move(value))
 {
-    Value->Use();
 }
 
 mcc::NotNullInstruction::~NotNullInstruction()
 {
-    Value->Drop();
+    Value->Drop(Self);
 }
 
 void mcc::NotNullInstruction::Generate(
@@ -58,7 +62,7 @@ void mcc::NotNullInstruction::Generate(
 
 bool mcc::NotNullInstruction::RequireStack() const
 {
-    return UseCount || Value->RequireStack();
+    return !Uses.empty() || Value->RequireStack();
 }
 
 mcc::Result mcc::NotNullInstruction::GenerateResult() const

@@ -5,7 +5,7 @@
 
 namespace mcc
 {
-    struct Instruction : Value
+    struct Instruction : Value<Instruction>
     {
         Instruction(
                 const SourceLocation &where,
@@ -38,6 +38,15 @@ namespace mcc
         static InstructionPtr CreateInsert(
                 const SourceLocation &where,
                 TypeContext &context,
+                const ResourceLocation &location,
+                const ValuePtr &array,
+                const ValuePtr &value,
+                IndexT index);
+
+        static SPtr Create(
+                const SourceLocation &where,
+                TypeContext &context,
+                E_ArrayOperation array_operation,
                 const ResourceLocation &location,
                 const ValuePtr &array,
                 const ValuePtr &value,
@@ -419,10 +428,7 @@ namespace mcc
                 const ResourceLocation &location,
                 const ValuePtr &condition,
                 const BlockPtr &default_target,
-                const std::vector<std::pair<
-                        ConstantPtr,
-                        BlockPtr
-                >> &case_targets);
+                const CaseTargetMap &case_targets);
 
         SwitchInstruction(
                 const SourceLocation &where,
@@ -430,10 +436,7 @@ namespace mcc
                 ResourceLocation location,
                 ValuePtr condition,
                 BlockPtr default_target,
-                const std::vector<std::pair<
-                        ConstantPtr,
-                        BlockPtr
-                >> &case_targets);
+                const CaseTargetMap &case_targets);
         ~SwitchInstruction() override;
 
         void Generate(
@@ -447,7 +450,7 @@ namespace mcc
         ResourceLocation Location;
         ValuePtr Condition;
         BlockPtr DefaultTarget;
-        std::vector<std::pair<ConstantPtr, BlockPtr>> CaseTargets;
+        CaseTargetMap CaseTargets;
     };
 
     struct ThrowInstruction final : Instruction

@@ -1,9 +1,22 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
 
+auto mcc::operator<=>(
+        const WeakValuePtr &lhs,
+        const WeakValuePtr &rhs)
+{
+    if (lhs.expired() && rhs.expired())
+        return std::strong_ordering::equivalent;
+    if (lhs.expired())
+        return std::strong_ordering::less;
+    if (rhs.expired())
+        return std::strong_ordering::greater;
+    return lhs.lock() <=> rhs.lock();
+}
+
 static uintptr_t global_stack = 0;
 
-mcc::Value::Value(
+mcc::ValueBase::ValueBase(
         SourceLocation where,
         TypePtr type,
         const E_FieldType field_type)
@@ -14,39 +27,39 @@ mcc::Value::Value(
 {
 }
 
-void mcc::Value::Generate(
+void mcc::ValueBase::Generate(
         CommandVector &commands,
         bool stack) const
 {
-    Error(Where, "mcc::Value::Generate");
+    Error(Where, "mcc::ValueBase::Generate");
 }
 
-bool mcc::Value::RequireStack() const
+bool mcc::ValueBase::RequireStack() const
 {
-    Error(Where, "mcc::Value::RequireStack");
+    Error(Where, "mcc::ValueBase::RequireStack");
 }
 
-mcc::Result mcc::Value::GenerateResult() const
+mcc::Result mcc::ValueBase::GenerateResult() const
 {
-    Error(Where, "mcc::Value::GenerateResult");
+    Error(Where, "mcc::ValueBase::GenerateResult");
 }
 
-mcc::Result mcc::Value::GenerateResultUnwrap() const
+mcc::Result mcc::ValueBase::GenerateResultUnwrap() const
 {
     return GenerateResult();
 }
 
-void mcc::Value::Use()
+void mcc::ValueBase::Use(WeakValuePtr user)
 {
-    UseCount++;
+    Uses.insert(user);
 }
 
-void mcc::Value::Drop()
+void mcc::ValueBase::Drop(WeakValuePtr user)
 {
-    UseCount--;
+    Uses.erase(user);
 }
 
-bool mcc::Value::IsMutable() const
+bool mcc::ValueBase::IsMutable() const
 {
     return FieldType == FieldType_MutableReference;
 }

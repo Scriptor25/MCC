@@ -6,7 +6,12 @@ mcc::ValuePtr mcc::StringifyValue::Create(
         const SourceLocation &where,
         const ValuePtr &target)
 {
-    return std::make_shared<StringifyValue>(where, target);
+    auto self = std::make_shared<StringifyValue>(where, target);
+
+    self->Self = self;
+    self->Target->Use(self);
+
+    return self;
 }
 
 mcc::StringifyValue::StringifyValue(
@@ -17,12 +22,11 @@ mcc::StringifyValue::StringifyValue(
             FieldType_Value),
       Target(target)
 {
-    Target->Use();
 }
 
 mcc::StringifyValue::~StringifyValue()
 {
-    Target->Drop();
+    Target->Drop(Self);
 }
 
 bool mcc::StringifyValue::RequireStack() const

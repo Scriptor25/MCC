@@ -8,7 +8,7 @@ mcc::ResourceLocation mcc::Parser::ParseResourceLocation(const bool simple_path)
     const auto use_default = !SkipIf(TokenType::Other, ":");
 
     do
-        path.emplace_back(Expect(TokenType::Symbol).Value);
+        path.push_back(Expect(TokenType::Symbol).Value);
     while (!simple_path && SkipIf(TokenType::Operator, "/"));
 
     if (use_default && SkipIf(TokenType::Other, ":"))
@@ -17,7 +17,7 @@ mcc::ResourceLocation mcc::Parser::ParseResourceLocation(const bool simple_path)
 
         path.clear();
         do
-            path.emplace_back(Expect(TokenType::Symbol).Value);
+            path.push_back(Expect(TokenType::Symbol).Value);
         while (!simple_path && SkipIf(TokenType::Operator, "/"));
     }
 

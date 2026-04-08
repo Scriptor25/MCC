@@ -6,7 +6,7 @@
 
 namespace mcc
 {
-    struct Constant : Value
+    struct Constant : Value<Constant>
     {
         Constant(
                 const SourceLocation &where,

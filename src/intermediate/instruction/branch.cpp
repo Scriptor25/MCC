@@ -13,7 +13,14 @@ mcc::InstructionPtr mcc::BranchInstruction::Create(
         const BlockPtr &then_target,
         const BlockPtr &else_target)
 {
-    return std::make_shared<BranchInstruction>(where, context, location, condition, then_target, else_target);
+    auto self = std::make_shared<BranchInstruction>(where, context, location, condition, then_target, else_target);
+
+    self->Self = self;
+    self->Condition->Use(self);
+    self->ThenTarget->Use(self);
+    self->ElseTarget->Use(self);
+
+    return self;
 }
 
 mcc::BranchInstruction::BranchInstruction(
@@ -32,16 +39,13 @@ mcc::BranchInstruction::BranchInstruction(
       ThenTarget(std::move(then_target)),
       ElseTarget(std::move(else_target))
 {
-    Condition->Use();
-    ThenTarget->Use();
-    ElseTarget->Use();
 }
 
 mcc::BranchInstruction::~BranchInstruction()
 {
-    Condition->Drop();
-    ThenTarget->Drop();
-    ElseTarget->Drop();
+    Condition->Drop(Self);
+    ThenTarget->Drop(Self);
+    ElseTarget->Drop(Self);
 }
 
 void mcc::BranchInstruction::Generate(

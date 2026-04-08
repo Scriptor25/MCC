@@ -5,17 +5,17 @@
 #include <mcc/value.hpp>
 
 #include <algorithm>
+#include "mcc/error.hpp"
 
 mcc::BlockPtr mcc::Block::Create(
         const SourceLocation &where,
         TypeContext &context,
         const FunctionPtr &parent)
 {
-    auto block  = std::make_shared<Block>(where, context, parent);
-    block->Self = block;
-
-    parent->Blocks.push_back(block);
-    return block;
+    auto self  = std::make_shared<Block>(where, context, parent);
+    self->Self = self;
+    parent->Blocks.push_back(self);
+    return self;
 }
 
 mcc::Block::Block(
@@ -53,10 +53,12 @@ mcc::InstructionPtr mcc::Block::GetTerminator() const
 
 mcc::ResourceLocation mcc::Block::GetLocation() const
 {
+    Assert(!!Parent, Where, "parent must not be null");
     return Parent->GetLocation(Self.lock());
 }
 
 void mcc::Block::Erase() const
 {
+    Assert(!!Parent, Where, "parent must not be null");
     Parent->Erase(Self.lock());
 }

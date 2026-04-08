@@ -133,7 +133,7 @@ void mcc::SwitchStatement::Generate(
         }
     }
 
-    std::vector<std::pair<ConstantPtr, BlockPtr>> case_targets;
+    CaseTargetMap case_targets;
 
     for (auto &[case_conditions_, case_] : Cases)
     {
@@ -150,7 +150,7 @@ void mcc::SwitchStatement::Generate(
             auto constant_case_condition = std::dynamic_pointer_cast<ConstantNumber>(case_condition_value);
             Assert(!!constant_case_condition, case_condition->Where, "case condition must be a constant number");
 
-            case_targets.emplace_back(constant_case_condition, case_target);
+            case_targets[constant_case_condition] = case_target;
         }
 
         builder.SetInsertBlock(case_target);

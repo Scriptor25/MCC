@@ -29,13 +29,17 @@ namespace mcc
     using ExpressionPtr = std::unique_ptr<Expression>;
     using FormatNodePtr = std::unique_ptr<FormatNode>;
 
-    struct Value;
+    struct ValueBase;
     struct Constant;
     struct Instruction;
     struct Block;
     struct Function;
 
-    using ValuePtr       = std::shared_ptr<Value>;
+    template<typename T = ValueBase>
+    struct Value;
+
+    using ValuePtr       = std::shared_ptr<ValueBase>;
+    using WeakValuePtr   = std::weak_ptr<ValueBase>;
     using ConstantPtr    = std::shared_ptr<Constant>;
     using InstructionPtr = std::shared_ptr<Instruction>;
     using BlockPtr       = std::shared_ptr<Block>;
@@ -71,6 +75,9 @@ namespace mcc
         unsigned Row = 0;
         unsigned Col = 0;
     };
+
+    using CaseTarget    = std::pair<ConstantPtr, BlockPtr>;
+    using CaseTargetMap = std::map<ConstantPtr, BlockPtr>;
 }
 
 template<typename T>

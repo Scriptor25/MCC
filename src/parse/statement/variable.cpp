@@ -12,7 +12,7 @@ mcc::StatementPtr mcc::Parser::ParseVariableStatement()
 
     std::vector<std::string> names;
     do
-        names.emplace_back(Expect(TokenType::Symbol).Value);
+        names.push_back(Expect(TokenType::Symbol).Value);
     while (SkipIf(TokenType::Other, ","));
 
     TypePtr type;

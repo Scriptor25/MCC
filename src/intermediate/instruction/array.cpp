@@ -10,7 +10,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
         const ValuePtr &array,
         const ValuePtr &value)
 {
-    return std::make_shared<ArrayInstruction>(where, context, ArrayOperation_Append, location, array, value, ~0);
+    return Create(where, context, ArrayOperation_Append, location, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
@@ -20,7 +20,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
         const ValuePtr &array,
         const ValuePtr &value)
 {
-    return std::make_shared<ArrayInstruction>(where, context, ArrayOperation_Prepend, location, array, value, ~0);
+    return Create(where, context, ArrayOperation_Prepend, location, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
@@ -31,7 +31,27 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
         const ValuePtr &value,
         const IndexT index)
 {
-    return std::make_shared<ArrayInstruction>(where, context, ArrayOperation_Insert, location, array, value, index);
+    return Create(where, context, ArrayOperation_Insert, location, array, value, index);
+}
+
+
+mcc::ArrayInstruction::SPtr mcc::ArrayInstruction::Create(
+        const SourceLocation &where,
+        TypeContext &context,
+        E_ArrayOperation array_operation,
+        const ResourceLocation &location,
+        const ValuePtr &array,
+        const ValuePtr &value,
+        IndexT index)
+{
+    auto self = std::make_shared<ArrayInstruction>(where, context, array_operation, location, array, value, index);
+
+    self->Self = self;
+    self->Array->Use(self);
+    if (self->Value)
+        self->Value->Use(self);
+
+    return self;
 }
 
 mcc::ArrayInstruction::ArrayInstruction(
@@ -52,16 +72,13 @@ mcc::ArrayInstruction::ArrayInstruction(
       Value(std::move(value)),
       Index(index)
 {
-    Array->Use();
-    if (Value)
-        Value->Use();
 }
 
 mcc::ArrayInstruction::~ArrayInstruction()
 {
-    Array->Drop();
+    Array->Drop(Self);
     if (Value)
-        Value->Drop();
+        Value->Drop(Self);
 }
 
 void mcc::ArrayInstruction::Generate(

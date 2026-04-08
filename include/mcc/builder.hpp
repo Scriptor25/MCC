@@ -105,10 +105,7 @@ namespace mcc
                 const SourceLocation &where,
                 const ValuePtr &condition,
                 const BlockPtr &default_target,
-                const std::vector<std::pair<
-                        ConstantPtr,
-                        BlockPtr
-                >> &case_targets) const;
+                const CaseTargetMap &case_targets) const;
 
         [[nodiscard]] InstructionPtr CreateThrow(
                 const SourceLocation &where,

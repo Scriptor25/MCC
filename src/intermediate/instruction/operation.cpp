@@ -10,7 +10,13 @@ mcc::InstructionPtr mcc::OperationInstruction::Create(
         const ResourceLocation &location,
         const std::vector<ValuePtr> &operands)
 {
-    return std::make_shared<OperationInstruction>(where, context, operator_, location, operands);
+    auto self = std::make_shared<OperationInstruction>(where, context, operator_, location, operands);
+
+    self->Self = self;
+    for (const auto &operand : self->Operands)
+        operand->Use(self);
+
+    return self;
 }
 
 mcc::OperationInstruction::OperationInstruction(
@@ -27,14 +33,12 @@ mcc::OperationInstruction::OperationInstruction(
       Location(std::move(location)),
       Operands(operands)
 {
-    for (const auto &operand : Operands)
-        operand->Use();
 }
 
 mcc::OperationInstruction::~OperationInstruction()
 {
     for (const auto &operand : Operands)
-        operand->Drop();
+        operand->Drop(Self);
 }
 
 void mcc::OperationInstruction::Generate(

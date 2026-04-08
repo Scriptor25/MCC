@@ -60,7 +60,8 @@ mcc::InstructionPtr mcc::Builder::Insert(
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!instruction, where, "instruction must not be null");
 
-    return m_InsertBlock->Instructions.emplace_back(instruction);
+    m_InsertBlock->Instructions.push_back(instruction);
+    return instruction;
 }
 
 void mcc::Builder::Generate() const

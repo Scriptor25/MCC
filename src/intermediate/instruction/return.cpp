@@ -9,7 +9,13 @@ mcc::InstructionPtr mcc::ReturnInstruction::Create(
         const ResourceLocation &location,
         const ValuePtr &value)
 {
-    return std::make_shared<ReturnInstruction>(where, context, location, value);
+    auto self = std::make_shared<ReturnInstruction>(where, context, location, value);
+
+    self->Self = self;
+    if (self->Value)
+        self->Value->Use(self);
+
+    return self;
 }
 
 mcc::ReturnInstruction::ReturnInstruction(
@@ -24,14 +30,12 @@ mcc::ReturnInstruction::ReturnInstruction(
       Location(std::move(location)),
       Value(std::move(value))
 {
-    if (Value)
-        Value->Use();
 }
 
 mcc::ReturnInstruction::~ReturnInstruction()
 {
     if (Value)
-        Value->Drop();
+        Value->Drop(Self);
 }
 
 void mcc::ReturnInstruction::Generate(

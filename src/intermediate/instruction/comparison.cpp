@@ -11,7 +11,13 @@ mcc::InstructionPtr mcc::ComparisonInstruction::Create(
         const ValuePtr &left,
         const ValuePtr &right)
 {
-    return std::make_shared<ComparisonInstruction>(where, context, comparator, location, left, right);
+    auto self = std::make_shared<ComparisonInstruction>(where, context, comparator, location, left, right);
+
+    self->Self = self;
+    self->Left->Use(self);
+    self->Right->Use(self);
+
+    return self;
 }
 
 mcc::ComparisonInstruction::ComparisonInstruction(
@@ -30,14 +36,12 @@ mcc::ComparisonInstruction::ComparisonInstruction(
       Left(std::move(left)),
       Right(std::move(right))
 {
-    Left->Use();
-    Right->Use();
 }
 
 mcc::ComparisonInstruction::~ComparisonInstruction()
 {
-    Left->Drop();
-    Right->Drop();
+    Left->Drop(Self);
+    Right->Drop(Self);
 }
 
 void mcc::ComparisonInstruction::Generate(

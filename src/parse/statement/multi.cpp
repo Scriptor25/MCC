@@ -7,7 +7,7 @@ mcc::StatementPtr mcc::Parser::ParseMultiStatement()
 
     auto where = Expect(TokenType::Other, "{").Where;
     while (!At(TokenType::Other, "}") && !At(TokenType::EoF))
-        statements.emplace_back(ParseStatement());
+        statements.push_back(ParseStatement());
     Expect(TokenType::Other, "}");
 
     return std::make_unique<MultiStatement>(where, std::move(statements));

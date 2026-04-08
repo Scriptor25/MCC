@@ -8,7 +8,9 @@ mcc::InstructionPtr mcc::CommandInstruction::Create(
         const ResourceLocation &location,
         const CommandT &command)
 {
-    return std::make_shared<CommandInstruction>(where, type, location, command);
+    auto self  = std::make_shared<CommandInstruction>(where, type, location, command);
+    self->Self = self;
+    return self;
 }
 
 mcc::CommandInstruction::CommandInstruction(
@@ -29,7 +31,7 @@ void mcc::CommandInstruction::Generate(
         CommandVector &commands,
         const bool stack) const
 {
-    if (!UseCount)
+    if (Uses.empty())
     {
         commands.Append(Command);
         return;
@@ -51,7 +53,7 @@ void mcc::CommandInstruction::Generate(
 
 bool mcc::CommandInstruction::RequireStack() const
 {
-    return UseCount;
+    return !Uses.empty();
 }
 
 mcc::Result mcc::CommandInstruction::GenerateResult() const

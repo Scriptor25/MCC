@@ -11,7 +11,7 @@ mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
         const ResourceLocation &location,
         const BlockPtr &target)
 {
-    return std::make_shared<DirectBranchInstruction>(where, context, location, target, nullptr, nullptr);
+    return Create(where, context, location, target, {}, {});
 }
 
 mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
@@ -22,7 +22,16 @@ mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
         const ValuePtr &result,
         const ValuePtr &branch_result)
 {
-    return std::make_shared<DirectBranchInstruction>(where, context, location, target, result, branch_result);
+    auto self = std::make_shared<DirectBranchInstruction>(where, context, location, target, result, branch_result);
+
+    self->Self = self;
+    self->Target->Use(self);
+    if (self->Result)
+        self->Result->Use(self);
+    if (self->BranchResult)
+        self->BranchResult->Use(self);
+
+    return self;
 }
 
 mcc::DirectBranchInstruction::DirectBranchInstruction(
@@ -41,20 +50,15 @@ mcc::DirectBranchInstruction::DirectBranchInstruction(
       Result(std::move(result)),
       BranchResult(std::move(branch_result))
 {
-    Target->Use();
-    if (Result)
-        Result->Use();
-    if (BranchResult)
-        BranchResult->Use();
 }
 
 mcc::DirectBranchInstruction::~DirectBranchInstruction()
 {
-    Target->Drop();
+    Target->Drop(Self);
     if (Result)
-        Result->Drop();
+        Result->Drop(Self);
     if (BranchResult)
-        BranchResult->Drop();
+        BranchResult->Drop(Self);
 }
 
 void mcc::DirectBranchInstruction::Generate(

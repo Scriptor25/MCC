@@ -11,7 +11,13 @@ mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
         const ValuePtr &value,
         const std::string &key)
 {
-    return std::make_shared<ObjectInstruction>(where, context, location, object, value, key);
+    auto self = std::make_shared<ObjectInstruction>(where, context, location, object, value, key);
+
+    self->Self = self;
+    self->Object->Use(self);
+    self->Value->Use(self);
+
+    return self;
 }
 
 mcc::ObjectInstruction::ObjectInstruction(
@@ -30,14 +36,12 @@ mcc::ObjectInstruction::ObjectInstruction(
       Value(std::move(value)),
       Key(std::move(key))
 {
-    Object->Use();
-    Value->Use();
 }
 
 mcc::ObjectInstruction::~ObjectInstruction()
 {
-    Object->Drop();
-    Value->Drop();
+    Object->Drop(Self);
+    Value->Drop(Self);
 }
 
 void mcc::ObjectInstruction::Generate(

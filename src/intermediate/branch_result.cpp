@@ -5,7 +5,9 @@ mcc::ValuePtr mcc::BranchResult::Create(
         const TypePtr &type,
         const ResourceLocation &location)
 {
-    return std::make_shared<BranchResult>(where, type, location);
+    auto self  = std::make_shared<BranchResult>(where, type, location);
+    self->Self = self;
+    return self;
 }
 
 mcc::BranchResult::BranchResult(

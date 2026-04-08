@@ -14,7 +14,7 @@ mcc::ExpressionPtr mcc::Parser::ParseOperandExpression()
             std::vector<ExpressionPtr> arguments;
             while (!At(TokenType::Other, ")") && !At(TokenType::EoF))
             {
-                arguments.emplace_back(ParseExpression());
+                arguments.push_back(ParseExpression());
 
                 if (!At(TokenType::Other, ")"))
                     Expect(TokenType::Other, ",");

@@ -11,7 +11,13 @@ mcc::ConstantPtr mcc::ConstantObject::Create(
                 ConstantPtr
         > &values)
 {
-    return std::make_shared<ConstantObject>(where, type, values);
+    auto self = std::make_shared<ConstantObject>(where, type, values);
+
+    self->Self = self;
+    for (const auto &value : self->Values | std::views::values)
+        value->Use(self);
+
+    return self;
 }
 
 mcc::ConstantPtr mcc::ConstantObject::Create(
@@ -26,7 +32,7 @@ mcc::ConstantPtr mcc::ConstantObject::Create(
     for (const auto &[name_, value_] : values)
         elements[name_] = value_->Type;
 
-    return std::make_shared<ConstantObject>(where, context.GetObject(elements), values);
+    return Create(where, context.GetObject(elements), values);
 }
 
 mcc::ConstantObject::ConstantObject(
@@ -41,14 +47,12 @@ mcc::ConstantObject::ConstantObject(
               type),
       Values(values)
 {
-    for (const auto &value : Values | std::views::values)
-        value->Use();
 }
 
 mcc::ConstantObject::~ConstantObject()
 {
     for (const auto &value : Values | std::views::values)
-        value->Drop();
+        value->Drop(Self);
 }
 
 mcc::Result mcc::ConstantObject::GenerateResult() const

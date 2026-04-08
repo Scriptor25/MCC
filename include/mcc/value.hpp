@@ -6,12 +6,17 @@
 
 namespace mcc
 {
-    struct Value
+    auto operator<=>(
+            const WeakValuePtr &lhs,
+            const WeakValuePtr &rhs);
+
+    struct ValueBase
     {
-        Value(SourceLocation where,
-              TypePtr type,
-              E_FieldType field_type);
-        virtual ~Value() = default;
+        ValueBase(
+                SourceLocation where,
+                TypePtr type,
+                E_FieldType field_type);
+        virtual ~ValueBase() = default;
 
         virtual void Generate(
                 CommandVector &commands,
@@ -21,8 +26,8 @@ namespace mcc
         [[nodiscard]] virtual Result GenerateResult() const;
         [[nodiscard]] virtual Result GenerateResultUnwrap() const;
 
-        void Use();
-        void Drop();
+        void Use(WeakValuePtr user);
+        void Drop(WeakValuePtr user);
 
         bool IsMutable() const;
 
@@ -30,12 +35,23 @@ namespace mcc
         TypePtr Type;
         E_FieldType FieldType;
 
-        IndexT UseCount = 0;
+        std::set<WeakValuePtr> Uses;
 
         const uint32_t StackId;
     };
 
-    struct ArgumentValue final : Value
+    template<typename T>
+    struct Value : ValueBase
+    {
+        using ValueBase::ValueBase;
+
+        using SPtr = std::shared_ptr<T>;
+        using WPtr = std::weak_ptr<T>;
+
+        WPtr Self;
+    };
+
+    struct ArgumentValue final : Value<ArgumentValue>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
@@ -54,7 +70,7 @@ namespace mcc
         std::string Name;
     };
 
-    struct BranchResult final : Value
+    struct BranchResult final : Value<BranchResult>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
@@ -72,9 +88,9 @@ namespace mcc
         ResourceLocation Location;
     };
 
-    struct ElementReference final : Value
+    struct ElementReference final : Value<ElementReference>
     {
-        static ValuePtr Create(
+        static SPtr Create(
                 const SourceLocation &where,
                 const ValuePtr &base,
                 const ValuePtr &index);
@@ -93,7 +109,7 @@ namespace mcc
         ValuePtr Index;
     };
 
-    struct FunctionResult final : Value
+    struct FunctionResult final : Value<FunctionResult>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
@@ -111,7 +127,7 @@ namespace mcc
         ResourceLocation Location;
     };
 
-    struct GenericBlockReference final : Value
+    struct GenericBlockReference final : Value<GenericBlockReference>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
@@ -136,7 +152,7 @@ namespace mcc
         ValuePtr PositionX, PositionY, PositionZ, Path;
     };
 
-    struct GenericEntityReference final : Value
+    struct GenericEntityReference final : Value<GenericEntityReference>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
@@ -157,7 +173,7 @@ namespace mcc
         ValuePtr Name, Path;
     };
 
-    struct GenericStorageReference final : Value
+    struct GenericStorageReference final : Value<GenericStorageReference>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
@@ -187,7 +203,7 @@ namespace mcc
         ValuePtr Location, Path;
     };
 
-    struct MemberReference final : Value
+    struct MemberReference final : Value<MemberReference>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
@@ -208,7 +224,7 @@ namespace mcc
         std::string Member;
     };
 
-    struct StringifyValue final : Value
+    struct StringifyValue final : Value<StringifyValue>
     {
         static ValuePtr Create(
                 const SourceLocation &where,

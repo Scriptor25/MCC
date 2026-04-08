@@ -7,7 +7,12 @@ mcc::ValuePtr mcc::GenericEntityReference::Create(
         const ValuePtr &name,
         const ValuePtr &path)
 {
-    return std::make_shared<GenericEntityReference>(where, type, name, path);
+    auto self = std::make_shared<GenericEntityReference>(where, type, name, path);
+
+    self->Self = self;
+    self->Name->Use(self);
+
+    return self;
 }
 
 mcc::GenericEntityReference::GenericEntityReference(
@@ -21,12 +26,11 @@ mcc::GenericEntityReference::GenericEntityReference(
       Name(name),
       Path(path)
 {
-    Name->Use();
 }
 
 mcc::GenericEntityReference::~GenericEntityReference()
 {
-    Name->Drop();
+    Name->Drop(Self);
 }
 
 bool mcc::GenericEntityReference::RequireStack() const

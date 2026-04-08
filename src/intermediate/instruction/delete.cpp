@@ -8,7 +8,12 @@ mcc::InstructionPtr mcc::DeleteInstruction::Create(
         TypeContext &context,
         const ValuePtr &value)
 {
-    return std::make_shared<DeleteInstruction>(where, context, value);
+    auto self = std::make_shared<DeleteInstruction>(where, context, value);
+
+    self->Self = self;
+    self->Value->Use(self);
+
+    return self;
 }
 
 mcc::DeleteInstruction::DeleteInstruction(
@@ -21,12 +26,11 @@ mcc::DeleteInstruction::DeleteInstruction(
               FieldType_Value),
       Value(value)
 {
-    value->Use();
 }
 
 mcc::DeleteInstruction::~DeleteInstruction()
 {
-    Value->Drop();
+    Value->Drop(Self);
 }
 
 void mcc::DeleteInstruction::Generate(

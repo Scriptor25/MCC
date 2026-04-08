@@ -12,7 +12,14 @@ mcc::InstructionPtr mcc::ThrowInstruction::Create(
         const ValuePtr &value,
         const BlockPtr &landing_pad)
 {
-    return std::make_shared<ThrowInstruction>(where, context, location, value, landing_pad);
+    auto self = std::make_shared<ThrowInstruction>(where, context, location, value, landing_pad);
+
+    self->Self = self;
+    self->Value->Use(self);
+    if (self->LandingPad)
+        self->LandingPad->Use(self);
+
+    return self;
 }
 
 mcc::ThrowInstruction::ThrowInstruction(
@@ -29,16 +36,13 @@ mcc::ThrowInstruction::ThrowInstruction(
       Value(std::move(value)),
       LandingPad(std::move(landing_pad))
 {
-    Value->Use();
-    if (LandingPad)
-        LandingPad->Use();
 }
 
 mcc::ThrowInstruction::~ThrowInstruction()
 {
-    Value->Drop();
+    Value->Drop(Self);
     if (LandingPad)
-        LandingPad->Drop();
+        LandingPad->Drop(Self);
 }
 
 void mcc::ThrowInstruction::Generate(

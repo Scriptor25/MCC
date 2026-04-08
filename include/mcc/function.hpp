@@ -4,7 +4,7 @@
 
 namespace mcc
 {
-    struct Function final : Value
+    struct Function final : Value<Function>
     {
         static FunctionPtr Create(
                 const SourceLocation &where,
@@ -49,7 +49,7 @@ namespace mcc
         TypePtr ResultType;
         bool Throws;
 
-        IndexT StackIndex = 0;
+        IndexT StackIndex{};
         std::vector<BlockPtr> Blocks;
     };
 }

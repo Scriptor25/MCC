@@ -33,10 +33,10 @@ mcc::ValuePtr mcc::FormatExpression::GenerateValue(
     for (auto &node : Nodes)
     {
         auto value = node->Generate(builder, frame);
-        values.emplace_back(value);
+        values.push_back(value);
         elements.insert(value->Type);
         if (auto constant = std::dynamic_pointer_cast<Constant>(value))
-            constants.emplace_back(constant);
+            constants.push_back(constant);
     }
 
     if (values.size() == constants.size())

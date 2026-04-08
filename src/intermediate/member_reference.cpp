@@ -11,7 +11,13 @@ mcc::ValuePtr mcc::MemberReference::Create(
     Assert(!!object_type, where, "object must be of type object");
 
     auto type = object_type->Elements.at(member);
-    return std::make_shared<MemberReference>(where, type, object, member);
+
+    auto self = std::make_shared<MemberReference>(where, type, object, member);
+
+    self->Self = self;
+    self->Object->Use(self);
+
+    return self;
 }
 
 mcc::MemberReference::MemberReference(
@@ -25,12 +31,11 @@ mcc::MemberReference::MemberReference(
       Object(object),
       Member(std::move(member))
 {
-    Object->Use();
 }
 
 mcc::MemberReference::~MemberReference()
 {
-    Object->Drop();
+    Object->Drop(Self);
 }
 
 bool mcc::MemberReference::RequireStack() const

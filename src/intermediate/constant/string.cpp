@@ -6,7 +6,9 @@ mcc::ConstantPtr mcc::ConstantString::Create(
         TypeContext &context,
         const std::string &value)
 {
-    return std::make_shared<ConstantString>(where, context, value);
+    auto self  = std::make_shared<ConstantString>(where, context, value);
+    self->Self = self;
+    return self;
 }
 
 mcc::ConstantString::ConstantString(

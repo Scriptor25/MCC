@@ -6,7 +6,7 @@
 
 namespace mcc
 {
-    struct Block final : Value
+    struct Block final : Value<Block>
     {
         static BlockPtr Create(
                 const SourceLocation &where,
@@ -26,8 +26,6 @@ namespace mcc
 
         ResourceLocation GetLocation() const;
         void Erase() const;
-
-        std::weak_ptr<Block> Self;
 
         FunctionPtr Parent;
 

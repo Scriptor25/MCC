@@ -18,7 +18,15 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
         >> &arguments,
         const BlockPtr &landing_pad)
 {
-    return std::make_shared<CallInstruction>(where, location, callee, arguments, landing_pad);
+    auto self = std::make_shared<CallInstruction>(where, location, callee, arguments, landing_pad);
+
+    self->Self = self;
+    for (const auto &argument : self->Arguments | std::views::values)
+        argument->Use(self);
+    if (self->LandingPad)
+        self->LandingPad->Use(self);
+
+    return self;
 }
 
 mcc::CallInstruction::CallInstruction(
@@ -39,18 +47,14 @@ mcc::CallInstruction::CallInstruction(
       Arguments(arguments),
       LandingPad(std::move(landing_pad))
 {
-    for (const auto &argument : Arguments | std::views::values)
-        argument->Use();
-    if (LandingPad)
-        LandingPad->Use();
 }
 
 mcc::CallInstruction::~CallInstruction()
 {
     for (const auto &argument : Arguments | std::views::values)
-        argument->Drop();
+        argument->Drop(Self);
     if (LandingPad)
-        LandingPad->Drop();
+        LandingPad->Drop(Self);
 }
 
 void mcc::CallInstruction::Generate(
@@ -218,7 +222,7 @@ void mcc::CallInstruction::Generate(
     else
         commands.Append("{}function {}{}", argument_prefix, Callee->Location, argument_object);
 
-    if (UseCount)
+    if (!Uses.empty())
     {
         Assert(stack, Where, "call instruction with result requires stack");
         commands.Append("data modify storage {} {} set from storage {} result", Location, stack_path, Callee->Location);
@@ -229,7 +233,7 @@ void mcc::CallInstruction::Generate(
 
 bool mcc::CallInstruction::RequireStack() const
 {
-    return UseCount
+    return !Uses.empty()
            || std::ranges::
                    any_of(Arguments | std::views::values, [](auto &argument) { return argument->RequireStack(); })
            || !std::ranges::
