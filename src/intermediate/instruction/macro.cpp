@@ -21,30 +21,30 @@ static void generate_macro_print(
 
     switch (message.Type)
     {
-    case mcc::ResultType_Value:
+    case mcc::ResultType_::Value:
         message_value = message.Value;
         break;
 
-    case mcc::ResultType_Reference:
-        message_value = std::
-                format("{{\"{}\":\"{}\",\"nbt\":\"{}\",\"interpret\":true}}",
-                       message.ReferenceType,
-                       message.Target,
-                       message.Path);
+    case mcc::ResultType_::Reference:
+        message_value = std::format(
+                "{{\"{}\":\"{}\",\"nbt\":\"{}\",\"interpret\":true}}",
+                message.ReferenceType,
+                message.Target,
+                message.Path);
         break;
 
-    case mcc::ResultType_Argument:
+    case mcc::ResultType_::Argument:
         message_value = message.Name;
         prefix        = "$";
         break;
 
     default:
-        mcc::
-                Error(self.Where,
-                      "message must be {} or {}, but is {}",
-                      mcc::ResultType_Value,
-                      mcc::ResultType_Reference,
-                      message.Type);
+        mcc::Error(
+                self.Where,
+                "message must be {} or {}, but is {}",
+                mcc::ResultType_::Value,
+                mcc::ResultType_::Reference,
+                message.Type);
     }
 
     commands.Append("{}tellraw {} {}", prefix, targets, message_value);
@@ -59,18 +59,18 @@ static void generate_macro_swap(
     auto value1 = self.Arguments[0]->GenerateResult();
     auto value2 = self.Arguments[1]->GenerateResult();
 
-    mcc::
-            Assert(value1.Type == mcc::ResultType_Reference,
-                   self.Where,
-                   "first value must be {}, but is {}",
-                   mcc::ResultType_Reference,
-                   value1.Type);
-    mcc::
-            Assert(value2.Type == mcc::ResultType_Reference,
-                   self.Where,
-                   "second value must be {}, but is {}",
-                   mcc::ResultType_Reference,
-                   value2.Type);
+    mcc::Assert(
+            value1.Type == mcc::ResultType_::Reference,
+            self.Where,
+            "first value must be {}, but is {}",
+            mcc::ResultType_::Reference,
+            value1.Type);
+    mcc::Assert(
+            value2.Type == mcc::ResultType_::Reference,
+            self.Where,
+            "second value must be {}, but is {}",
+            mcc::ResultType_::Reference,
+            value2.Type);
 
     auto tmp_name = self.GetTemp();
 
@@ -82,31 +82,31 @@ static void generate_macro_swap(
     if (value2.WithArgument)
         prefix3 = "$";
 
-    commands
-            .Append("{}data modify storage {} {} set from {} {} {}",
-                    prefix1,
-                    self.Location,
-                    tmp_name,
-                    value1.ReferenceType,
-                    value1.Target,
-                    value1.Path);
-    commands
-            .Append("{}data modify {} {} {} set from {} {} {}",
-                    prefix2,
-                    value1.ReferenceType,
-                    value1.Target,
-                    value1.Path,
-                    value2.ReferenceType,
-                    value2.Target,
-                    value2.Path);
-    commands
-            .Append("{}data modify {} {} {} set from storage {} {}",
-                    prefix3,
-                    value2.ReferenceType,
-                    value2.Target,
-                    value2.Path,
-                    self.Location,
-                    tmp_name);
+    commands.Append(
+            "{}data modify storage {} {} set from {} {} {}",
+            prefix1,
+            self.Location,
+            tmp_name,
+            value1.ReferenceType,
+            value1.Target,
+            value1.Path);
+    commands.Append(
+            "{}data modify {} {} {} set from {} {} {}",
+            prefix2,
+            value1.ReferenceType,
+            value1.Target,
+            value1.Path,
+            value2.ReferenceType,
+            value2.Target,
+            value2.Path);
+    commands.Append(
+            "{}data modify {} {} {} set from storage {} {}",
+            prefix3,
+            value2.ReferenceType,
+            value2.Target,
+            value2.Path,
+            self.Location,
+            tmp_name);
 
     commands.Append("data remove storage {} {}", self.Location, tmp_name);
 }
@@ -125,24 +125,24 @@ static void generate_macro_data(
     auto dst_value = dst->GenerateResult();
     auto src_value = src->GenerateResultUnwrap();
 
-    mcc::
-            Assert(dst_value.Type == mcc::ResultType_Reference,
-                   self.Where,
-                   "dst must be {}, but is {}",
-                   mcc::ResultType_Reference,
-                   dst_value.Type);
+    mcc::Assert(
+            dst_value.Type == mcc::ResultType_::Reference,
+            self.Where,
+            "dst must be {}, but is {}",
+            mcc::ResultType_::Reference,
+            dst_value.Type);
 
     std::string prefix;
     if (dst_value.WithArgument || src_value.WithArgument)
         prefix = "$";
 
-    commands
-            .Append("{}data modify {} {} {} set from {}",
-                    prefix,
-                    dst_value.ReferenceType,
-                    dst_value.Target,
-                    dst_value.Path,
-                    src_value.Value);
+    commands.Append(
+            "{}data modify {} {} {} set from {}",
+            prefix,
+            dst_value.ReferenceType,
+            dst_value.Target,
+            dst_value.Path,
+            src_value.Value);
 }
 
 static void generate_macro_store(
@@ -159,24 +159,24 @@ static void generate_macro_store(
     auto dst_value = dst->GenerateResult();
     auto src_value = src->GenerateResultUnwrap();
 
-    mcc::
-            Assert(dst_value.Type == mcc::ResultType_Reference,
-                   self.Where,
-                   "dst must be {}, but is {}",
-                   mcc::ResultType_Reference,
-                   dst_value.Type);
+    mcc::Assert(
+            dst_value.Type == mcc::ResultType_::Reference,
+            self.Where,
+            "dst must be {}, but is {}",
+            mcc::ResultType_::Reference,
+            dst_value.Type);
 
     std::string prefix;
     if (dst_value.WithArgument || src_value.WithArgument)
         prefix = "$";
 
-    commands
-            .Append("{}execute store result {} {} {} double 1 run {}",
-                    prefix,
-                    dst_value.ReferenceType,
-                    dst_value.Target,
-                    dst_value.Path,
-                    src_value.Value);
+    commands.Append(
+            "{}execute store result {} {} {} double 1 run {}",
+            prefix,
+            dst_value.ReferenceType,
+            dst_value.Target,
+            dst_value.Path,
+            src_value.Value);
 }
 
 using Generator = std::function<void(const mcc::MacroInstruction &, mcc::CommandVector &)>;
@@ -216,7 +216,7 @@ mcc::MacroInstruction::MacroInstruction(
               where,
               name,
               context.GetVoid(),
-              FieldType_Value),
+              FieldType_::Value),
       Location(std::move(location)),
       Macro(std::move(macro)),
       Arguments(arguments)

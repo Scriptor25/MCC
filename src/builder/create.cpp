@@ -23,25 +23,30 @@ mcc::InstructionPtr mcc::Builder::CreateStore(
 mcc::InstructionPtr mcc::Builder::CreateComparison(
         const SourceLocation &where,
         const std::string &name,
-        const E_Comparator comparator,
+        const Comparator_ comparator,
         const ValuePtr &left,
         const ValuePtr &right) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
-    Assert(!!comparator, where, "comparator must not be null");
     Assert(!!left, where, "left must not be null");
     Assert(!!right, where, "right must not be null");
 
     return Insert(
             where,
-            ComparisonInstruction::
-                    Create(where, name, m_Context, comparator, m_InsertBlock->Parent->Location, left, right));
+            ComparisonInstruction::Create(
+                    where,
+                    name,
+                    m_Context,
+                    comparator,
+                    m_InsertBlock->Parent->Location,
+                    left,
+                    right));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateOperation(
         const SourceLocation &where,
         const std::string &name,
-        const E_Operator operator_,
+        const Operator_ operator_,
         const std::vector<ValuePtr> &operands) const
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
@@ -108,14 +113,14 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(
 
     return Insert(
             where,
-            BranchInstruction::
-                    Create(where,
-                           name,
-                           m_Context,
-                           m_InsertBlock->Parent->Location,
-                           condition,
-                           then_target,
-                           else_target));
+            BranchInstruction::Create(
+                    where,
+                    name,
+                    m_Context,
+                    m_InsertBlock->Parent->Location,
+                    condition,
+                    then_target,
+                    else_target));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateDirect(
@@ -151,8 +156,14 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(
 
     return Insert(
             where,
-            DirectBranchInstruction::
-                    Create(where, name, m_Context, m_InsertBlock->Parent->Location, target, result, branch_result));
+            DirectBranchInstruction::Create(
+                    where,
+                    name,
+                    m_Context,
+                    m_InsertBlock->Parent->Location,
+                    target,
+                    result,
+                    branch_result));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateSwitch(
@@ -184,14 +195,14 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
 
     return Insert(
             where,
-            SwitchInstruction::
-                    Create(where,
-                           name,
-                           m_Context,
-                           m_InsertBlock->Parent->Location,
-                           condition,
-                           default_target,
-                           case_targets));
+            SwitchInstruction::Create(
+                    where,
+                    name,
+                    m_Context,
+                    m_InsertBlock->Parent->Location,
+                    condition,
+                    default_target,
+                    case_targets));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateThrow(
@@ -233,9 +244,9 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    std::vector<std::pair<std::string, ValuePtr>> argument_pairs;
+    std::vector<std::pair<std::string, ValuePtr>> argument_pairs(arguments.size());
     for (unsigned i = 0; i < arguments.size(); ++i)
-        argument_pairs.emplace_back(callee->Parameters[i].Name, arguments[i]);
+        argument_pairs[i] = { callee->Parameters[i].Name, arguments[i] };
 
     if (landing_pad)
     {
@@ -305,8 +316,14 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 
     return Insert(
             where,
-            ArrayInstruction::
-                    CreateInsert(where, name, m_Context, m_InsertBlock->Parent->Location, array, value, index));
+            ArrayInstruction::CreateInsert(
+                    where,
+                    name,
+                    m_Context,
+                    m_InsertBlock->Parent->Location,
+                    array,
+                    value,
+                    index));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(
@@ -324,8 +341,14 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
 
     return Insert(
             where,
-            ObjectInstruction::
-                    CreateInsert(where, name, m_Context, m_InsertBlock->Parent->Location, object, value, key));
+            ObjectInstruction::CreateInsert(
+                    where,
+                    name,
+                    m_Context,
+                    m_InsertBlock->Parent->Location,
+                    object,
+                    value,
+                    key));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateNotNull(

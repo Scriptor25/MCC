@@ -8,7 +8,7 @@
 
 mcc::VariableStatement::VariableStatement(
         const SourceLocation &where,
-        const E_Declarator declarator,
+        const Declarator_ declarator,
         const bool is_reference,
         std::vector<std::string> names,
         TypePtr type,
@@ -24,7 +24,7 @@ mcc::VariableStatement::VariableStatement(
 
 std::ostream &mcc::VariableStatement::Print(std::ostream &stream) const
 {
-    stream << Declarator << (IsReference ? "&" : "") << ' ';
+    stream << ToString(Declarator) << (IsReference ? "&" : "") << ' ';
     for (unsigned i = 0; i < Names.size(); ++i)
     {
         if (i)
@@ -62,13 +62,13 @@ void mcc::VariableStatement::Generate(
         else
             switch (Declarator)
             {
-            case Declarator_Let:
+            case Declarator_::Let:
                 (void) builder.CreateVariable(Where, type, name, true, value);
                 break;
-            case Declarator_Const:
+            case Declarator_::Const:
                 (void) builder.CreateVariable(Where, type, name, false, value);
                 break;
-            case Declarator_ConstExpr:
+            case Declarator_::ConstExpr:
                 Assert(!!constant, Where, "constant expression initializer must be a constant value");
                 builder.InsertVariable(Where, name, value);
                 break;

@@ -18,7 +18,7 @@ mcc::ArgumentValue::ArgumentValue(
     : Value(where,
             name,
             type,
-            FieldType_Value)
+            FieldType_::Value)
 {
 }
 
@@ -32,7 +32,7 @@ mcc::Result mcc::ArgumentValue::GenerateResult() const
     const auto stringify = Type->IsString() || Type->IsFunction();
 
     return {
-        .Type         = ResultType_Argument,
+        .Type         = ResultType_::Argument,
         .WithArgument = true,
         .Name         = std::format("{0}$({1}){0}", stringify ? "\"" : "", Name),
     };
@@ -41,7 +41,7 @@ mcc::Result mcc::ArgumentValue::GenerateResult() const
 mcc::Result mcc::ArgumentValue::GenerateResultUnwrap() const
 {
     return {
-        .Type         = ResultType_Argument,
+        .Type         = ResultType_::Argument,
         .WithArgument = true,
         .Name         = std::format("$({})", Name),
     };

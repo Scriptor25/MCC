@@ -11,9 +11,10 @@ mcc::SwitchStatement::SwitchStatement(
         const SourceLocation &where,
         ExpressionPtr condition,
         StatementPtr default_,
-        std::vector<std::
-                            pair<std::vector<ExpressionPtr>,
-                                 StatementPtr>> cases)
+        std::vector<std::pair<
+                std::vector<ExpressionPtr>,
+                StatementPtr
+        >> cases)
     : Statement(where),
       Condition(std::move(condition)),
       Default(std::move(default_)),

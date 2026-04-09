@@ -59,19 +59,19 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(
         for (unsigned i = 1; i < operand_constants.size(); ++i)
             switch (*operator_)
             {
-            case Operator_Add:
+            case Operator_::Add:
                 value += operand_constants[i]->Value;
                 break;
-            case Operator_Sub:
+            case Operator_::Sub:
                 value -= operand_constants[i]->Value;
                 break;
-            case Operator_Mul:
+            case Operator_::Mul:
                 value *= operand_constants[i]->Value;
                 break;
-            case Operator_Div:
+            case Operator_::Div:
                 value /= operand_constants[i]->Value;
                 break;
-            case Operator_Rem:
+            case Operator_::Rem:
                 value %= operand_constants[i]->Value;
                 break;
             }

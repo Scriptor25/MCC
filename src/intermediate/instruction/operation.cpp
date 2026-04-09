@@ -7,7 +7,7 @@ mcc::InstructionPtr mcc::OperationInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
         TypeContext &context,
-        const E_Operator operator_,
+        const Operator_ operator_,
         const ResourceLocation &location,
         const std::vector<ValuePtr> &operands)
 {
@@ -24,14 +24,14 @@ mcc::OperationInstruction::OperationInstruction(
         const SourceLocation &where,
         const std::string &name,
         TypeContext &context,
-        const E_Operator operator_,
+        const Operator_ operator_,
         ResourceLocation location,
         const std::vector<ValuePtr> &operands)
     : Instruction(
               where,
               name,
               context.GetNumber(),
-              FieldType_Value),
+              FieldType_::Value),
       Operator(operator_),
       Location(std::move(location)),
       Operands(operands)
@@ -55,23 +55,23 @@ void mcc::OperationInstruction::Generate(
     std::string operator_;
     switch (Operator)
     {
-    case Operator_Add:
+    case Operator_::Add:
         operator_ = "+=";
         break;
 
-    case Operator_Sub:
+    case Operator_::Sub:
         operator_ = "-=";
         break;
 
-    case Operator_Mul:
+    case Operator_::Mul:
         operator_ = "*=";
         break;
 
-    case Operator_Div:
+    case Operator_::Div:
         operator_ = "/=";
         break;
 
-    case Operator_Rem:
+    case Operator_::Rem:
         operator_ = "%=";
         break;
 
@@ -102,53 +102,53 @@ void mcc::OperationInstruction::Generate(
 
             switch (operand.Type)
             {
-            case ResultType_Value:
+            case ResultType_::Value:
                 commands.Append("{}scoreboard players set {} {} {}", prefix, player, objective, operand.Value);
                 break;
 
-            case ResultType_Reference:
-                commands
-                        .Append("{}execute store result score {} {} run data get {} {} {}",
-                                prefix,
-                                player,
-                                objective,
-                                operand.ReferenceType,
-                                operand.Target,
-                                operand.Path);
+            case ResultType_::Reference:
+                commands.Append(
+                        "{}execute store result score {} {} run data get {} {} {}",
+                        prefix,
+                        player,
+                        objective,
+                        operand.ReferenceType,
+                        operand.Target,
+                        operand.Path);
                 break;
 
-            case ResultType_Argument:
+            case ResultType_::Argument:
                 commands.Append("$scoreboard players set {} {} {}", player, objective, operand.Name);
                 break;
 
             default:
                 Error(Where,
                       "operand must be {}, {} or {}, but is {}",
-                      ResultType_Value,
-                      ResultType_Reference,
-                      ResultType_Argument,
+                      ResultType_::Value,
+                      ResultType_::Reference,
+                      ResultType_::Argument,
                       operand.Type);
             }
         }
 
         if (i)
         {
-            commands
-                    .Append("scoreboard players operation %a {0} {1} {2} {0}",
-                            objective,
-                            operator_,
-                            require_operand ? "%b"
-                            : i > 1         ? "%b"
-                                            : "%a");
+            commands.Append(
+                    "scoreboard players operation %a {0} {1} {2} {0}",
+                    objective,
+                    operator_,
+                    require_operand ? "%b"
+                    : i > 1         ? "%b"
+                                    : "%a");
         }
     }
 
     Assert(stack, Where, "operation instruction requires stack");
-    commands
-            .Append("execute store result storage {} {} long 1 run scoreboard players get %a {}",
-                    Location,
-                    GetStackPath(),
-                    objective);
+    commands.Append(
+            "execute store result storage {} {} long 1 run scoreboard players get %a {}",
+            Location,
+            GetStackPath(),
+            objective);
 
     commands.Append(RemoveScore());
 }
@@ -161,8 +161,8 @@ bool mcc::OperationInstruction::RequireStack() const
 mcc::Result mcc::OperationInstruction::GenerateResult() const
 {
     return {
-        .Type          = ResultType_Reference,
-        .ReferenceType = ReferenceType_Storage,
+        .Type          = ResultType_::Reference,
+        .ReferenceType = ReferenceType_::Storage,
         .Target        = Location.String(),
         .Path          = GetStackPath(),
     };

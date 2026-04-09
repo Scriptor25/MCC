@@ -44,7 +44,7 @@ mcc::CallInstruction::CallInstruction(
               where,
               name,
               callee->ResultType,
-              FieldType_ImmutableReference),
+              FieldType_::ImmutableReference),
       Location(std::move(location)),
       Callee(callee),
       Arguments(arguments),
@@ -72,13 +72,13 @@ void mcc::CallInstruction::Generate(
     auto require_cleanup = false;
     if (!Arguments.empty())
     {
-        const auto constant = std::ranges::
-                all_of(Arguments | std::views::values,
-                       [](auto &argument)
-                       {
-                           return std::dynamic_pointer_cast<Constant>(argument)
-                                  || std::dynamic_pointer_cast<ArgumentValue>(argument);
-                       });
+        const auto constant = std::ranges::all_of(
+                Arguments | std::views::values,
+                [](auto &argument)
+                {
+                    return std::dynamic_pointer_cast<Constant>(argument)
+                           || std::dynamic_pointer_cast<ArgumentValue>(argument);
+                });
 
         if (constant)
         {
@@ -91,7 +91,7 @@ void mcc::CallInstruction::Generate(
 
                 auto [key, argument] = Arguments[i];
 
-                if (auto value = argument->GenerateResult(); value.Type == ResultType_Argument)
+                if (auto value = argument->GenerateResult(); value.Type == ResultType_::Argument)
                 {
                     argument_prefix = "$";
                     argument_object += std::format("\"{}\":{}", key, value.Name);
@@ -115,61 +115,61 @@ void mcc::CallInstruction::Generate(
 
                 switch (value.Type)
                 {
-                case ResultType_Value:
-                    commands
-                            .Append("{}data modify storage {} {}.{} set value {}",
-                                    prefix,
-                                    Location,
-                                    stack_path,
-                                    key_,
-                                    value.Value);
+                case ResultType_::Value:
+                    commands.Append(
+                            "{}data modify storage {} {}.{} set value {}",
+                            prefix,
+                            Location,
+                            stack_path,
+                            key_,
+                            value.Value);
                     break;
 
-                case ResultType_Reference:
-                    if (Callee->Parameters[i].FieldType == FieldType_Value)
-                        commands
-                                .Append("{}data modify storage {} {}.{} set from {} {} {}",
-                                        prefix,
-                                        Location,
-                                        stack_path,
-                                        key_,
-                                        value.ReferenceType,
-                                        value.Target,
-                                        value.Path);
+                case ResultType_::Reference:
+                    if (Callee->Parameters[i].FieldType == FieldType_::Value)
+                        commands.Append(
+                                "{}data modify storage {} {}.{} set from {} {} {}",
+                                prefix,
+                                Location,
+                                stack_path,
+                                key_,
+                                value.ReferenceType,
+                                value.Target,
+                                value.Path);
                     else
                     {
-                        commands
-                                .Append("{}data modify storage {} {}.{}_target set value \"{}\"",
-                                        prefix,
-                                        Location,
-                                        stack_path,
-                                        key_,
-                                        value.Target);
-                        commands
-                                .Append("{}data modify storage {} {}.{}_path set value \"{}\"",
-                                        prefix,
-                                        Location,
-                                        stack_path,
-                                        key_,
-                                        value.Path);
+                        commands.Append(
+                                "{}data modify storage {} {}.{}_target set value \"{}\"",
+                                prefix,
+                                Location,
+                                stack_path,
+                                key_,
+                                value.Target);
+                        commands.Append(
+                                "{}data modify storage {} {}.{}_path set value \"{}\"",
+                                prefix,
+                                Location,
+                                stack_path,
+                                key_,
+                                value.Path);
                     }
                     break;
 
-                case ResultType_Argument:
-                    commands
-                            .Append("$data modify storage {} {}.{} set value {}",
-                                    Location,
-                                    stack_path,
-                                    key_,
-                                    value.Name);
+                case ResultType_::Argument:
+                    commands.Append(
+                            "$data modify storage {} {}.{} set value {}",
+                            Location,
+                            stack_path,
+                            key_,
+                            value.Name);
                     break;
 
                 default:
                     Error(Where,
                           "value must be {}, {} or {}, but is {}",
-                          ResultType_Value,
-                          ResultType_Reference,
-                          ResultType_Argument,
+                          ResultType_::Value,
+                          ResultType_::Reference,
+                          ResultType_::Argument,
                           value.Type);
                 }
             }
@@ -182,39 +182,39 @@ void mcc::CallInstruction::Generate(
     if (Callee->Throws)
     {
         commands.Append(CreateScore());
-        commands
-                .Append("{}execute store result score %c {} run function {}{}",
-                        argument_prefix,
-                        temp,
-                        Callee->Location,
-                        argument_object);
+        commands.Append(
+                "{}execute store result score %c {} run function {}{}",
+                argument_prefix,
+                temp,
+                Callee->Location,
+                argument_object);
         commands.Append("data remove storage {} {}", Location, stack_path);
-        commands
-                .Append("execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
-                        temp,
-                        Location,
-                        stack_path);
+        commands.Append(
+                "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
+                temp,
+                Location,
+                stack_path);
         commands.Append(RemoveScore());
 
         commands.Append("data remove storage {} result", Location);
-        commands
-                .Append("execute if data storage {0} {1} run data modify storage {0} result set from storage {2} "
-                        "result",
-                        Location,
-                        stack_path,
-                        Callee->Location);
+        commands.Append(
+                "execute if data storage {0} {1} run data modify storage {0} result set from storage {2} "
+                "result",
+                Location,
+                stack_path,
+                Callee->Location);
 
         if (LandingPad)
         {
             std::string prefix, arguments;
             LandingPad->Parent->ForwardArguments(prefix, arguments);
 
-            commands
-                    .Append("{}execute if data storage {} result run return run function {}{}",
-                            prefix,
-                            Location,
-                            LandingPad->GetLocation(),
-                            arguments);
+            commands.Append(
+                    "{}execute if data storage {} result run return run function {}{}",
+                    prefix,
+                    Location,
+                    LandingPad->GetLocation(),
+                    arguments);
         }
         else
         {
@@ -237,22 +237,23 @@ void mcc::CallInstruction::Generate(
 bool mcc::CallInstruction::RequireStack() const
 {
     return !Uses.empty()
-           || std::ranges::
-                   any_of(Arguments | std::views::values, [](auto &argument) { return argument->RequireStack(); })
-           || !std::ranges::
-                      all_of(Arguments | std::views::values,
-                             [](auto &argument)
-                             {
-                                 return std::dynamic_pointer_cast<Constant>(argument)
-                                        || std::dynamic_pointer_cast<ArgumentValue>(argument);
-                             });
+           || std::ranges::any_of(
+                   Arguments | std::views::values,
+                   [](auto &argument) { return argument->RequireStack(); })
+           || !std::ranges::all_of(
+                   Arguments | std::views::values,
+                   [](auto &argument)
+                   {
+                       return std::dynamic_pointer_cast<Constant>(argument)
+                              || std::dynamic_pointer_cast<ArgumentValue>(argument);
+                   });
 }
 
 mcc::Result mcc::CallInstruction::GenerateResult() const
 {
     return {
-        .Type          = ResultType_Reference,
-        .ReferenceType = ReferenceType_Storage,
+        .Type          = ResultType_::Reference,
+        .ReferenceType = ReferenceType_::Storage,
         .Target        = Location.String(),
         .Path          = GetStackPath(),
     };

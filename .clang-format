@@ -19,13 +19,13 @@ AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
 AllowShortCaseExpressionOnASingleLine: true
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLambdasOnASingleLine: Inline
-AlwaysBreakAfterDefinitionReturnType: false
+AlwaysBreakAfterDefinitionReturnType: None
 BinPackArguments: false
 BinPackParameters: AlwaysOnePerLine
 BracedInitializerIndentWidth: 4
@@ -95,15 +95,15 @@ MacroBlockEnd: ""
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
 PackConstructorInitializers: NextLineOnly
-# PenaltyBreakAssignment: 1000
-# PenaltyBreakBeforeFirstCallParameter: 1000
-# PenaltyBreakComment: 0
-# PenaltyBreakFirstLessLess: 0
-# PenaltyBreakScopeResolution: 1000
-# PenaltyBreakString: 0
-# PenaltyBreakTemplateDeclaration: 0
-# PenaltyExcessCharacter: 100000
-# PenaltyReturnTypeOnItsOwnLine: 10000
+PenaltyBreakAssignment: 0
+PenaltyBreakBeforeFirstCallParameter: 0
+PenaltyBreakComment: 0
+PenaltyBreakFirstLessLess: 0
+PenaltyBreakScopeResolution: 1000
+PenaltyBreakString: 0
+PenaltyBreakTemplateDeclaration: 0
+PenaltyExcessCharacter: 100000
+PenaltyReturnTypeOnItsOwnLine: 10000
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
 SkipMacroDefinitionBody: false

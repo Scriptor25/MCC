@@ -1,5 +1,6 @@
 #include <mcc/error.hpp>
 #include <mcc/value.hpp>
+#include <utility>
 
 mcc::ValuePtr mcc::GenericEntityReference::Create(
         const SourceLocation &where,
@@ -20,14 +21,14 @@ mcc::GenericEntityReference::GenericEntityReference(
         const SourceLocation &where,
         const std::string &name,
         const TypePtr &type,
-        const ValuePtr &name_val,
-        const ValuePtr &path)
+        ValuePtr name_val,
+        ValuePtr path)
     : Value(where,
             name,
             type,
-            FieldType_MutableReference),
-      NameVal(name_val),
-      Path(path)
+            FieldType_::MutableReference),
+      NameVal(std::move(name_val)),
+      Path(std::move(path))
 {
 }
 
@@ -51,38 +52,38 @@ mcc::Result mcc::GenericEntityReference::GenerateResult() const
 
     switch (name.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         name_value = name.Value;
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         with_argument = true;
         name_value    = name.Name;
         break;
 
     default:
-        Error(Where, "name must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, name.Type);
+        Error(Where, "name must be {} or {}, but is {}", ResultType_::Value, ResultType_::Argument, name.Type);
     }
 
     switch (path.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         path_value = path.Value;
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         with_argument = true;
         path_value    = path.Name;
         break;
 
     default:
-        Error(Where, "path must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, path.Type);
+        Error(Where, "path must be {} or {}, but is {}", ResultType_::Value, ResultType_::Argument, path.Type);
     }
 
     return {
-        .Type          = ResultType_Reference,
+        .Type          = ResultType_::Reference,
         .WithArgument  = with_argument,
-        .ReferenceType = ReferenceType_Entity,
+        .ReferenceType = ReferenceType_::Entity,
         .Target        = name_value,
         .Path          = path_value,
     };

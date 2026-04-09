@@ -150,7 +150,6 @@ define print(const &v: vec3) {
     !print("@s", format(v))
 }
 
-/*
 define test() {
 
     const a = [1, 2, 3]:vec3
@@ -183,4 +182,3 @@ define test() {
     print(cross(a, b))
     print(cross(b, a))
 }
-*/

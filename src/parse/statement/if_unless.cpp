@@ -15,7 +15,10 @@ mcc::StatementPtr mcc::Parser::ParseIfUnlessStatement()
     if (SkipIf(TokenType::Symbol, "else"))
         else_ = ParseStatement();
 
-    return std::make_unique<
-            IfUnlessStatement
-    >(token.Where, token.Value == "unless", std::move(condition), std::move(then), std::move(else_));
+    return std::make_unique<IfUnlessStatement>(
+            token.Where,
+            token.Value == "unless",
+            std::move(condition),
+            std::move(then),
+            std::move(else_));
 }

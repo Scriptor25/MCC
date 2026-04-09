@@ -17,17 +17,17 @@ mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
 
     switch (target_type)
     {
-    case ReferenceType_Block:
+    case ReferenceType_::Block:
         target_position_x = ParseExpression();
         Expect(TokenType::Other, ",");
         target_position_y = ParseExpression();
         Expect(TokenType::Other, ",");
         target_position_z = ParseExpression();
         break;
-    case ReferenceType_Entity:
+    case ReferenceType_::Entity:
         target_name = ParseExpression();
         break;
-    case ReferenceType_Storage:
+    case ReferenceType_::Storage:
         target_location = ParseExpression();
         break;
     }
@@ -36,15 +36,14 @@ mcc::ExpressionPtr mcc::Parser::ParseRefExpression()
     auto path = ParseExpression();
     Expect(TokenType::Other, ")");
 
-    return std::make_unique<
-            RefExpression
-    >(where,
-      type,
-      target_type,
-      std::move(target_position_x),
-      std::move(target_position_y),
-      std::move(target_position_z),
-      std::move(target_name),
-      std::move(target_location),
-      std::move(path));
+    return std::make_unique<RefExpression>(
+            where,
+            type,
+            target_type,
+            std::move(target_position_x),
+            std::move(target_position_y),
+            std::move(target_position_z),
+            std::move(target_name),
+            std::move(target_location),
+            std::move(path));
 }

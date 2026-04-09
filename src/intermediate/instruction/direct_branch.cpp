@@ -24,9 +24,8 @@ mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
         const ValuePtr &result,
         const ValuePtr &branch_result)
 {
-    auto self = std::make_shared<
-            DirectBranchInstruction
-    >(where, name, context, location, target, result, branch_result);
+    auto self =
+            std::make_shared<DirectBranchInstruction>(where, name, context, location, target, result, branch_result);
 
     self->Self = self;
     self->Target->Use(self);
@@ -50,7 +49,7 @@ mcc::DirectBranchInstruction::DirectBranchInstruction(
               where,
               name,
               context.GetVoid(),
-              FieldType_Value),
+              FieldType_::Value),
       Location(std::move(location)),
       Target(std::move(target)),
       Result(std::move(result)),
@@ -76,10 +75,10 @@ void mcc::DirectBranchInstruction::Generate(
         auto branch_result = BranchResult->GenerateResult();
         auto result        = Result->GenerateResult();
 
-        Assert(branch_result.Type == ResultType_Reference,
+        Assert(branch_result.Type == ResultType_::Reference,
                Where,
                "branch result must be {}, but is {}",
-               ResultType_Reference,
+               ResultType_::Reference,
                branch_result.Type);
 
         std::string prefix;
@@ -88,42 +87,42 @@ void mcc::DirectBranchInstruction::Generate(
 
         switch (result.Type)
         {
-        case ResultType_Value:
-            commands
-                    .Append("{}data modify {} {} {} set value {}",
-                            prefix,
-                            branch_result.ReferenceType,
-                            branch_result.Target,
-                            branch_result.Path,
-                            result.Value);
+        case ResultType_::Value:
+            commands.Append(
+                    "{}data modify {} {} {} set value {}",
+                    prefix,
+                    branch_result.ReferenceType,
+                    branch_result.Target,
+                    branch_result.Path,
+                    result.Value);
             break;
 
-        case ResultType_Reference:
-            commands
-                    .Append("{}data modify {} {} {} set from {} {} {}",
-                            prefix,
-                            branch_result.ReferenceType,
-                            branch_result.Target,
-                            branch_result.Path,
-                            result.ReferenceType,
-                            result.Target,
-                            result.Path);
+        case ResultType_::Reference:
+            commands.Append(
+                    "{}data modify {} {} {} set from {} {} {}",
+                    prefix,
+                    branch_result.ReferenceType,
+                    branch_result.Target,
+                    branch_result.Path,
+                    result.ReferenceType,
+                    result.Target,
+                    result.Path);
             break;
 
-        case ResultType_Argument:
-            commands
-                    .Append("$data modify {} {} {} set value {}",
-                            branch_result.ReferenceType,
-                            branch_result.Target,
-                            branch_result.Path,
-                            result.Name);
+        case ResultType_::Argument:
+            commands.Append(
+                    "$data modify {} {} {} set value {}",
+                    branch_result.ReferenceType,
+                    branch_result.Target,
+                    branch_result.Path,
+                    result.Name);
 
         default:
             Error(Where,
                   "result must be {}, {} or {}, but is {}",
-                  ResultType_Value,
-                  ResultType_Reference,
-                  ResultType_Argument,
+                  ResultType_::Value,
+                  ResultType_::Reference,
+                  ResultType_::Argument,
                   result.Type);
         }
     }

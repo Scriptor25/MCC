@@ -11,7 +11,7 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 const TypePtr &type,
-                E_FieldType field_type);
+                FieldType_ field_type);
 
         [[nodiscard]] virtual bool IsTerminator() const;
 
@@ -51,7 +51,7 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 TypeContext &context,
-                E_ArrayOperation array_operation,
+                ArrayOperation_ array_operation,
                 const ResourceLocation &location,
                 const ValuePtr &array,
                 const ValuePtr &value,
@@ -61,7 +61,7 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 TypeContext &context,
-                E_ArrayOperation array_operation,
+                ArrayOperation_ array_operation,
                 ResourceLocation location,
                 ValuePtr array,
                 ValuePtr value,
@@ -74,7 +74,7 @@ namespace mcc
 
         [[nodiscard]] bool RequireStack() const override;
 
-        E_ArrayOperation ArrayOperation;
+        ArrayOperation_ ArrayOperation;
         ResourceLocation Location;
         ValuePtr Array, Value;
         IndexT Index;
@@ -185,7 +185,7 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 TypeContext &context,
-                const E_Comparator &comparator,
+                const Comparator_ &comparator,
                 const ResourceLocation &location,
                 const ValuePtr &left,
                 const ValuePtr &right);
@@ -194,7 +194,7 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 TypeContext &context,
-                E_Comparator comparator,
+                Comparator_ comparator,
                 ResourceLocation location,
                 ValuePtr left,
                 ValuePtr right);
@@ -207,7 +207,7 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        E_Comparator Comparator;
+        Comparator_ Comparator;
         ResourceLocation Location;
         ValuePtr Left, Right;
     };
@@ -224,7 +224,7 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 TypeContext &context,
-                const ValuePtr &value);
+                ValuePtr value);
         ~DeleteInstruction() override;
 
         void Generate(
@@ -372,7 +372,7 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 TypeContext &context,
-                E_Operator operator_,
+                Operator_ operator_,
                 const ResourceLocation &location,
                 const std::vector<ValuePtr> &operands);
 
@@ -380,7 +380,7 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 TypeContext &context,
-                E_Operator operator_,
+                Operator_ operator_,
                 ResourceLocation location,
                 const std::vector<ValuePtr> &operands);
         ~OperationInstruction() override;
@@ -392,7 +392,7 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        E_Operator Operator;
+        Operator_ Operator;
         ResourceLocation Location;
         std::vector<ValuePtr> Operands;
     };
@@ -469,7 +469,7 @@ namespace mcc
                 ResourceLocation location,
                 ValuePtr condition,
                 BlockPtr default_target,
-                const CaseTargetMap &case_targets);
+                CaseTargetMap case_targets);
         ~SwitchInstruction() override;
 
         void Generate(

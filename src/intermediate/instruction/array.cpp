@@ -11,7 +11,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
         const ValuePtr &array,
         const ValuePtr &value)
 {
-    return Create(where, name, context, ArrayOperation_Append, location, array, value, ~0);
+    return Create(where, name, context, ArrayOperation_::Append, location, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
@@ -22,7 +22,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
         const ValuePtr &array,
         const ValuePtr &value)
 {
-    return Create(where, name, context, ArrayOperation_Prepend, location, array, value, ~0);
+    return Create(where, name, context, ArrayOperation_::Prepend, location, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
@@ -34,7 +34,7 @@ mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
         const ValuePtr &value,
         const IndexT index)
 {
-    return Create(where, name, context, ArrayOperation_Insert, location, array, value, index);
+    return Create(where, name, context, ArrayOperation_::Insert, location, array, value, index);
 }
 
 
@@ -42,7 +42,7 @@ mcc::ArrayInstruction::SPtr mcc::ArrayInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
         TypeContext &context,
-        E_ArrayOperation array_operation,
+        ArrayOperation_ array_operation,
         const ResourceLocation &location,
         const ValuePtr &array,
         const ValuePtr &value,
@@ -63,7 +63,7 @@ mcc::ArrayInstruction::ArrayInstruction(
         const SourceLocation &where,
         const std::string &name,
         TypeContext &context,
-        const E_ArrayOperation array_operation,
+        const ArrayOperation_ array_operation,
         ResourceLocation location,
         ValuePtr array,
         ValuePtr value,
@@ -72,7 +72,7 @@ mcc::ArrayInstruction::ArrayInstruction(
               where,
               name,
               context.GetVoid(),
-              FieldType_Value),
+              FieldType_::Value),
       ArrayOperation(array_operation),
       Location(std::move(location)),
       Array(std::move(array)),
@@ -95,20 +95,24 @@ void mcc::ArrayInstruction::Generate(
     auto array = Array->GenerateResult();
     auto value = Value->GenerateResult();
 
-    Assert(array.Type == ResultType_Reference, Where, "array must be {}, but is {}", ResultType_Reference, array.Type);
+    Assert(array.Type == ResultType_::Reference,
+           Where,
+           "array must be {}, but is {}",
+           ResultType_::Reference,
+           array.Type);
 
     std::string operation;
     switch (ArrayOperation)
     {
-    case ArrayOperation_Append:
+    case ArrayOperation_::Append:
         operation = "append";
         break;
 
-    case ArrayOperation_Prepend:
+    case ArrayOperation_::Prepend:
         operation = "prepend";
         break;
 
-    case ArrayOperation_Insert:
+    case ArrayOperation_::Insert:
         operation = std::format("insert {}", Index);
         break;
     }
@@ -119,7 +123,7 @@ void mcc::ArrayInstruction::Generate(
 
     switch (value.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         commands.Append(
                 "{}data modify {} {} {} {} value {}",
                 prefix,
@@ -130,7 +134,7 @@ void mcc::ArrayInstruction::Generate(
                 value.Value);
         break;
 
-    case ResultType_Reference:
+    case ResultType_::Reference:
         commands.Append(
                 "{}data modify {} {} {} {} from {} {} {}",
                 prefix,
@@ -143,7 +147,7 @@ void mcc::ArrayInstruction::Generate(
                 value.Path);
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         commands.Append(
                 "$data modify {} {} {} {} value {}",
                 array.ReferenceType,
@@ -156,9 +160,9 @@ void mcc::ArrayInstruction::Generate(
     default:
         Error(Where,
               "value must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
+              ResultType_::Value,
+              ResultType_::Reference,
+              ResultType_::Argument,
               value.Type);
     }
 }

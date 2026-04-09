@@ -27,9 +27,9 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
         parameters.emplace_back(
                 name,
                 type,
-                constant    ? FieldType_ImmutableReference
-                : reference ? FieldType_MutableReference
-                            : FieldType_Value);
+                constant    ? FieldType_::ImmutableReference
+                : reference ? FieldType_::MutableReference
+                            : FieldType_::Value);
 
         if (!At(TokenType::Other, ")"))
             Expect(TokenType::Other, ",");

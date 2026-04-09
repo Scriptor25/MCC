@@ -19,7 +19,7 @@ mcc::FunctionResult::FunctionResult(
     : Value(where,
             name,
             type,
-            FieldType_ImmutableReference),
+            FieldType_::ImmutableReference),
       Location(std::move(location))
 {
 }
@@ -32,8 +32,8 @@ bool mcc::FunctionResult::RequireStack() const
 mcc::Result mcc::FunctionResult::GenerateResult() const
 {
     return {
-        .Type          = ResultType_Reference,
-        .ReferenceType = ReferenceType_Storage,
+        .Type          = ResultType_::Reference,
+        .ReferenceType = ReferenceType_::Storage,
         .Target        = Location.String(),
         .Path          = "result",
     };

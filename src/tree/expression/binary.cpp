@@ -69,10 +69,12 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(
     auto left  = Left->GenerateValue(builder, frame);
     auto right = Right->GenerateValue(builder, frame);
 
-    const auto constant_left  = std::dynamic_pointer_cast<ConstantNumber>(left);
-    const auto constant_right = std::dynamic_pointer_cast<ConstantNumber>(right);
+    // TODO: find operator overload for type/field
+    // builder.FindFunction(Operator, left->Type, left->FieldType, right->Type, right->FieldType);
 
-    if (constant_left && constant_right)
+    if (const auto constant_left = std::dynamic_pointer_cast<ConstantNumber>(left),
+        constant_right           = std::dynamic_pointer_cast<ConstantNumber>(right);
+        constant_left && constant_right)
     {
         if (Operator == "<")
             return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value < constant_right->Value);
@@ -103,20 +105,20 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(
     Assert(left->Type->IsNumber(), Left->Where, "left must be of type number, but is {}", left->Type);
     Assert(right->Type->IsNumber(), Right->Where, "right must be of type number, but is {}", right->Type);
 
-    auto comparator = Comparator_None;
+    std::optional<Comparator_> comparator;
     if (Operator == "<")
-        comparator = Comparator_LT;
+        comparator = Comparator_::LT;
     if (Operator == ">")
-        comparator = Comparator_GT;
+        comparator = Comparator_::GT;
     if (Operator == "<=")
-        comparator = Comparator_LE;
+        comparator = Comparator_::LE;
     if (Operator == ">=")
-        comparator = Comparator_GE;
+        comparator = Comparator_::GE;
     if (Operator == "==")
-        comparator = Comparator_EQ;
+        comparator = Comparator_::EQ;
 
     if (comparator)
-        return builder.CreateComparison(Where, {}, comparator, left, right);
+        return builder.CreateComparison(Where, {}, *comparator, left, right);
 
     const auto store     = Operator.back() == '=';
     auto operator_string = Operator;

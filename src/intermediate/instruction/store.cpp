@@ -48,10 +48,10 @@ void mcc::StoreInstruction::Generate(
     auto dst = Dst->GenerateResult();
     auto src = Src->GenerateResult();
 
-    Assert(dst.Type == ResultType_Reference,
+    Assert(dst.Type == ResultType_::Reference,
            Where,
            "destination must be {}, but is {}",
-           ResultType_Reference,
+           ResultType_::Reference,
            dst.Type);
 
     std::string prefix;
@@ -60,43 +60,43 @@ void mcc::StoreInstruction::Generate(
 
     switch (src.Type)
     {
-    case ResultType_Value:
-        commands
-                .Append("{}data modify {} {} {} set value {}",
-                        prefix,
-                        dst.ReferenceType,
-                        dst.Target,
-                        dst.Path,
-                        src.Value);
+    case ResultType_::Value:
+        commands.Append(
+                "{}data modify {} {} {} set value {}",
+                prefix,
+                dst.ReferenceType,
+                dst.Target,
+                dst.Path,
+                src.Value);
         break;
 
-    case ResultType_Reference:
+    case ResultType_::Reference:
         if (dst.Target == src.Target && dst.Path == src.Path)
         {
             break;
         }
 
-        commands
-                .Append("{}data modify {} {} {} set from {} {} {}",
-                        prefix,
-                        dst.ReferenceType,
-                        dst.Target,
-                        dst.Path,
-                        src.ReferenceType,
-                        src.Target,
-                        src.Path);
+        commands.Append(
+                "{}data modify {} {} {} set from {} {} {}",
+                prefix,
+                dst.ReferenceType,
+                dst.Target,
+                dst.Path,
+                src.ReferenceType,
+                src.Target,
+                src.Path);
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         commands.Append("$data modify {} {} {} set value {}", dst.ReferenceType, dst.Target, dst.Path, src.Name);
         break;
 
     default:
         Error(Where,
               "src must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
+              ResultType_::Value,
+              ResultType_::Reference,
+              ResultType_::Argument,
               src.Type);
     }
 }

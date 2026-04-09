@@ -2,6 +2,7 @@
 #include <mcc/error.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
+#include <utility>
 
 mcc::InstructionPtr mcc::DeleteInstruction::Create(
         const SourceLocation &where,
@@ -21,13 +22,13 @@ mcc::DeleteInstruction::DeleteInstruction(
         const SourceLocation &where,
         const std::string &name,
         TypeContext &context,
-        const ValuePtr &value)
+        ValuePtr value)
     : Instruction(
               where,
               name,
               context.GetVoid(),
-              FieldType_Value),
-      Value(value)
+              FieldType_::Value),
+      Value(std::move(value))
 {
 }
 
@@ -41,7 +42,11 @@ void mcc::DeleteInstruction::Generate(
         bool stack) const
 {
     auto value = Value->GenerateResult();
-    Assert(value.Type == ResultType_Reference, Where, "value must be {}, but is {}", ResultType_Reference, value.Type);
+    Assert(value.Type == ResultType_::Reference,
+           Where,
+           "value must be {}, but is {}",
+           ResultType_::Reference,
+           value.Type);
 
     std::string prefix;
     if (value.WithArgument)

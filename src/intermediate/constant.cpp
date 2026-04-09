@@ -6,7 +6,7 @@ mcc::Constant::Constant(
     : Value(where,
             {},
             type,
-            FieldType_Value)
+            FieldType_::Value)
 {
 }
 

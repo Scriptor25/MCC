@@ -36,9 +36,9 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
             stream << ", ";
         switch (Parameters[i].FieldType)
         {
-        case FieldType_ImmutableReference:
+        case FieldType_::ImmutableReference:
             stream << "const ";
-        case FieldType_MutableReference:
+        case FieldType_::MutableReference:
             stream << "&";
         default:
             break;
@@ -96,10 +96,10 @@ void mcc::DefineNode::Generate(Builder &builder) const
         ValuePtr value;
         switch (field_type_)
         {
-        case FieldType_Value:
+        case FieldType_::Value:
             value = ArgumentValue::Create(Where, name_, type_);
             break;
-        case FieldType_MutableReference:
+        case FieldType_::MutableReference:
             value = GenericStorageReference::Create(
                     Where,
                     name_,
@@ -108,7 +108,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
                     ArgumentValue::Create(Where, name_ + "_path", {}),
                     true);
             break;
-        case FieldType_ImmutableReference:
+        case FieldType_::ImmutableReference:
             value = GenericStorageReference::Create(
                     Where,
                     name_,

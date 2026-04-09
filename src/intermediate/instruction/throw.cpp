@@ -34,7 +34,7 @@ mcc::ThrowInstruction::ThrowInstruction(
               where,
               name,
               context.GetVoid(),
-              FieldType_Value),
+              FieldType_::Value),
       Location(std::move(location)),
       Value(std::move(value)),
       LandingPad(std::move(landing_pad))
@@ -60,30 +60,30 @@ void mcc::ThrowInstruction::Generate(
 
     switch (value.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         commands.Append("{}data modify storage {} result set value {}", value_prefix, Location, value.Value);
         break;
 
-    case ResultType_Reference:
-        commands
-                .Append("{}data modify storage {} result set from {} {} {}",
-                        value_prefix,
-                        Location,
-                        value.ReferenceType,
-                        value.Target,
-                        value.Path);
+    case ResultType_::Reference:
+        commands.Append(
+                "{}data modify storage {} result set from {} {} {}",
+                value_prefix,
+                Location,
+                value.ReferenceType,
+                value.Target,
+                value.Path);
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         commands.Append("$data modify storage {} result set value {}", Location, value.Name);
         break;
 
     default:
         Error(Where,
               "value must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
+              ResultType_::Value,
+              ResultType_::Reference,
+              ResultType_::Argument,
               value.Type);
     }
 

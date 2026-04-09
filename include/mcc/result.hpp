@@ -8,7 +8,7 @@ namespace mcc
     {
         bool operator==(const Result &result) const;
 
-        E_ResultType Type;
+        ResultType_ Type;
 
         bool WithArgument = false;
 
@@ -17,7 +17,7 @@ namespace mcc
         bool NotNull;
 
         /* Reference */
-        E_ReferenceType ReferenceType;
+        ReferenceType_ ReferenceType;
         std::string Target;
         std::string Path;
 

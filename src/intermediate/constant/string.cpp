@@ -25,7 +25,7 @@ mcc::ConstantString::ConstantString(
 mcc::Result mcc::ConstantString::GenerateResult() const
 {
     return {
-        .Type    = ResultType_Value,
+        .Type    = ResultType_::Value,
         .Value   = '"' + Value + '"',
         .NotNull = true,
     };
@@ -34,7 +34,7 @@ mcc::Result mcc::ConstantString::GenerateResult() const
 mcc::Result mcc::ConstantString::GenerateResultUnwrap() const
 {
     return {
-        .Type    = ResultType_Value,
+        .Type    = ResultType_::Value,
         .Value   = Value,
         .NotNull = true,
     };

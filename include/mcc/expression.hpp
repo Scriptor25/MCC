@@ -196,7 +196,7 @@ namespace mcc
         RefExpression(
                 const SourceLocation &where,
                 TypePtr type,
-                E_ReferenceType target_type,
+                ReferenceType_ target_type,
                 ExpressionPtr target_position_x,
                 ExpressionPtr target_position_y,
                 ExpressionPtr target_position_z,
@@ -211,7 +211,7 @@ namespace mcc
                 const Frame &frame) const override;
 
         TypePtr Type;
-        E_ReferenceType TargetType;
+        ReferenceType_ TargetType;
         ExpressionPtr TargetPositionX;
         ExpressionPtr TargetPositionY;
         ExpressionPtr TargetPositionZ;

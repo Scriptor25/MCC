@@ -7,11 +7,11 @@ bool mcc::Result::operator==(const Result &result) const
 
     switch (Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         return Value == result.Value;
-    case ResultType_Reference:
+    case ResultType_::Reference:
         return ReferenceType == result.ReferenceType && Target == result.Target && Path == result.Path;
-    case ResultType_Argument:
+    case ResultType_::Argument:
         return Name == result.Name;
     default:
         return false;

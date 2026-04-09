@@ -20,7 +20,7 @@ mcc::ValueBase::ValueBase(
         SourceLocation where,
         std::string name,
         TypePtr type,
-        const E_FieldType field_type)
+        const FieldType_ field_type)
     : Where(std::move(where)),
       Name(std::move(name)),
       Type(std::move(type)),
@@ -70,5 +70,5 @@ void mcc::ValueBase::Drop(WeakValuePtr user)
 
 bool mcc::ValueBase::IsMutable() const
 {
-    return FieldType == FieldType_MutableReference;
+    return FieldType == FieldType_::MutableReference;
 }

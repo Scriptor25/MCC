@@ -24,7 +24,7 @@ mcc::CommandInstruction::CommandInstruction(
               where,
               name,
               type,
-              FieldType_Value),
+              FieldType_::Value),
       Location(std::move(location)),
       Command(std::move(command))
 {
@@ -46,12 +46,12 @@ void mcc::CommandInstruction::Generate(
         command.erase(command.begin());
 
     Assert(stack, Where, "command instruction with result requires stack");
-    commands
-            .Append("{}execute store result storage {} {} long 1 run {}",
-                    macro ? "$" : "",
-                    Location,
-                    GetStackPath(),
-                    command);
+    commands.Append(
+            "{}execute store result storage {} {} long 1 run {}",
+            macro ? "$" : "",
+            Location,
+            GetStackPath(),
+            command);
 }
 
 bool mcc::CommandInstruction::RequireStack() const
@@ -62,8 +62,8 @@ bool mcc::CommandInstruction::RequireStack() const
 mcc::Result mcc::CommandInstruction::GenerateResult() const
 {
     return {
-        .Type          = ResultType_Reference,
-        .ReferenceType = ReferenceType_Storage,
+        .Type          = ResultType_::Reference,
+        .ReferenceType = ReferenceType_::Storage,
         .Target        = Location.String(),
         .Path          = GetStackPath(),
     };

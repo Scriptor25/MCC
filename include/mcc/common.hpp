@@ -53,7 +53,7 @@ namespace mcc
     {
         std::string Name;
         TypePtr Type;
-        E_FieldType FieldType;
+        FieldType_ FieldType;
     };
 
     using ParameterList = std::vector<Parameter>;

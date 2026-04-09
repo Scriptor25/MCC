@@ -68,22 +68,22 @@ mcc::Result mcc::ElementReference::GenerateResult() const
     auto base  = Base->GenerateResult();
     auto index = Index->GenerateResult();
 
-    Assert(base.Type == ResultType_Reference, Where, "base must be {}, but is {}", ResultType_Reference, base.Type);
+    Assert(base.Type == ResultType_::Reference, Where, "base must be {}, but is {}", ResultType_::Reference, base.Type);
 
     switch (index.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         return {
-            .Type          = ResultType_Reference,
+            .Type          = ResultType_::Reference,
             .WithArgument  = base.WithArgument || index.WithArgument,
             .ReferenceType = base.ReferenceType,
             .Target        = base.Target,
             .Path          = std::format("{}[{}]", base.Path, index.Value),
         };
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         return {
-            .Type          = ResultType_Reference,
+            .Type          = ResultType_::Reference,
             .WithArgument  = true,
             .ReferenceType = base.ReferenceType,
             .Target        = base.Target,
@@ -91,6 +91,6 @@ mcc::Result mcc::ElementReference::GenerateResult() const
         };
 
     default:
-        Error(Where, "index must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, index.Type);
+        Error(Where, "index must be {} or {}, but is {}", ResultType_::Value, ResultType_::Argument, index.Type);
     }
 }

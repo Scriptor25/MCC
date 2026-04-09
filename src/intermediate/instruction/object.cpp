@@ -33,7 +33,7 @@ mcc::ObjectInstruction::ObjectInstruction(
               where,
               name,
               context.GetVoid(),
-              FieldType_Value),
+              FieldType_::Value),
       Location(std::move(location)),
       Object(std::move(object)),
       Value(std::move(value)),
@@ -60,46 +60,46 @@ void mcc::ObjectInstruction::Generate(
 
     switch (value.Type)
     {
-    case ResultType_Value:
-        commands
-                .Append("{}data modify {} {} {}.{} set value {}",
-                        prefix,
-                        object.ReferenceType,
-                        object.Target,
-                        object.Path,
-                        Key,
-                        value.Value);
+    case ResultType_::Value:
+        commands.Append(
+                "{}data modify {} {} {}.{} set value {}",
+                prefix,
+                object.ReferenceType,
+                object.Target,
+                object.Path,
+                Key,
+                value.Value);
         break;
 
-    case ResultType_Reference:
-        commands
-                .Append("{}data modify {} {} {}.{} set from {} {} {}",
-                        prefix,
-                        object.ReferenceType,
-                        object.Target,
-                        object.Path,
-                        Key,
-                        value.ReferenceType,
-                        value.Target,
-                        value.Path);
+    case ResultType_::Reference:
+        commands.Append(
+                "{}data modify {} {} {}.{} set from {} {} {}",
+                prefix,
+                object.ReferenceType,
+                object.Target,
+                object.Path,
+                Key,
+                value.ReferenceType,
+                value.Target,
+                value.Path);
         break;
 
-    case ResultType_Argument:
-        commands
-                .Append("$data modify {} {} {}.{} set value {}",
-                        object.ReferenceType,
-                        object.Target,
-                        object.Path,
-                        Key,
-                        value.Name);
+    case ResultType_::Argument:
+        commands.Append(
+                "$data modify {} {} {}.{} set value {}",
+                object.ReferenceType,
+                object.Target,
+                object.Path,
+                Key,
+                value.Name);
         break;
 
     default:
         Error(Where,
               "value must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
+              ResultType_::Value,
+              ResultType_::Reference,
+              ResultType_::Argument,
               value.Type);
     }
 }

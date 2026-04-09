@@ -196,7 +196,7 @@ namespace mcc
     {
         VariableStatement(
                 const SourceLocation &where,
-                E_Declarator declarator,
+                Declarator_ declarator,
                 bool is_reference,
                 std::vector<std::string> names,
                 TypePtr type,
@@ -207,7 +207,7 @@ namespace mcc
                 Builder &builder,
                 Frame &frame) const override;
 
-        E_Declarator Declarator;
+        Declarator_ Declarator;
         bool IsReference;
         std::vector<std::string> Names;
         TypePtr Type;

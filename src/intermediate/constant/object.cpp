@@ -73,7 +73,7 @@ mcc::Result mcc::ConstantObject::GenerateResult() const
     result += '}';
 
     return {
-        .Type    = ResultType_Value,
+        .Type    = ResultType_::Value,
         .Value   = std::move(result),
         .NotNull = true,
     };

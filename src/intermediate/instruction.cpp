@@ -4,7 +4,7 @@ mcc::Instruction::Instruction(
         const SourceLocation &where,
         const std::string &name,
         const TypePtr &type,
-        E_FieldType field_type)
+        FieldType_ field_type)
     : Value(where,
             name,
             type,

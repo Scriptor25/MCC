@@ -7,7 +7,7 @@ mcc::InstructionPtr mcc::ComparisonInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
         TypeContext &context,
-        const E_Comparator &comparator,
+        const Comparator_ &comparator,
         const ResourceLocation &location,
         const ValuePtr &left,
         const ValuePtr &right)
@@ -25,7 +25,7 @@ mcc::ComparisonInstruction::ComparisonInstruction(
         const SourceLocation &where,
         const std::string &name,
         TypeContext &context,
-        const E_Comparator comparator,
+        const Comparator_ comparator,
         ResourceLocation location,
         ValuePtr left,
         ValuePtr right)
@@ -33,7 +33,7 @@ mcc::ComparisonInstruction::ComparisonInstruction(
               where,
               name,
               context.GetNumber(),
-              FieldType_Value),
+              FieldType_::Value),
       Comparator(comparator),
       Location(std::move(location)),
       Left(std::move(left)),
@@ -66,30 +66,30 @@ void mcc::ComparisonInstruction::Generate(
 
     switch (left.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         commands.Append("{}scoreboard players set %a {} {}", prefix, objective, left.Value);
         break;
 
-    case ResultType_Reference:
-        commands
-                .Append("{}execute store result score %a {} run data get {} {} {}",
-                        prefix,
-                        objective,
-                        left.ReferenceType,
-                        left.Target,
-                        left.Path);
+    case ResultType_::Reference:
+        commands.Append(
+                "{}execute store result score %a {} run data get {} {} {}",
+                prefix,
+                objective,
+                left.ReferenceType,
+                left.Target,
+                left.Path);
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         commands.Append("$scoreboard players set %a {} {}", objective, left.Name);
         break;
 
     default:
         Error(Where,
               "left must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
+              ResultType_::Value,
+              ResultType_::Reference,
+              ResultType_::Argument,
               left.Type);
     }
 
@@ -101,30 +101,30 @@ void mcc::ComparisonInstruction::Generate(
 
         switch (right.Type)
         {
-        case ResultType_Value:
+        case ResultType_::Value:
             commands.Append("{}scoreboard players set %b {} {}", prefix, objective, right.Value);
             break;
 
-        case ResultType_Reference:
-            commands
-                    .Append("{}execute store result score %b {} run data get {} {} {}",
-                            prefix,
-                            objective,
-                            right.ReferenceType,
-                            right.Target,
-                            right.Path);
+        case ResultType_::Reference:
+            commands.Append(
+                    "{}execute store result score %b {} run data get {} {} {}",
+                    prefix,
+                    objective,
+                    right.ReferenceType,
+                    right.Target,
+                    right.Path);
             break;
 
-        case ResultType_Argument:
+        case ResultType_::Argument:
             commands.Append("$scoreboard players set %b {} {}", objective, right.Name);
             break;
 
         default:
             Error(Where,
                   "right must be {}, {} or {}, but is {}",
-                  ResultType_Value,
-                  ResultType_Reference,
-                  ResultType_Argument,
+                  ResultType_::Value,
+                  ResultType_::Reference,
+                  ResultType_::Argument,
                   right.Type);
         }
     }
@@ -132,23 +132,23 @@ void mcc::ComparisonInstruction::Generate(
     std::string operator_;
     switch (Comparator)
     {
-    case Comparator_LT:
+    case Comparator_::LT:
         operator_ = "<";
         break;
 
-    case Comparator_GT:
+    case Comparator_::GT:
         operator_ = ">";
         break;
 
-    case Comparator_LE:
+    case Comparator_::LE:
         operator_ = "<=";
         break;
 
-    case Comparator_GE:
+    case Comparator_::GE:
         operator_ = ">=";
         break;
 
-    case Comparator_EQ:
+    case Comparator_::EQ:
         operator_ = "=";
         break;
 
@@ -157,14 +157,14 @@ void mcc::ComparisonInstruction::Generate(
     }
 
     Assert(stack, Where, "comparison instruction requires stack");
-    commands
-            .Append("execute store result storage {} {} byte 1 if score %a {} {} {} {}",
-                    Location,
-                    GetStackPath(),
-                    objective,
-                    operator_,
-                    require_right ? "%b" : "%a",
-                    objective);
+    commands.Append(
+            "execute store result storage {} {} byte 1 if score %a {} {} {} {}",
+            Location,
+            GetStackPath(),
+            objective,
+            operator_,
+            require_right ? "%b" : "%a",
+            objective);
 
     commands.Append(RemoveScore());
 }
@@ -177,8 +177,8 @@ bool mcc::ComparisonInstruction::RequireStack() const
 mcc::Result mcc::ComparisonInstruction::GenerateResult() const
 {
     return {
-        .Type          = ResultType_Reference,
-        .ReferenceType = ReferenceType_Storage,
+        .Type          = ResultType_::Reference,
+        .ReferenceType = ReferenceType_::Storage,
         .Target        = Location.String(),
         .Path          = GetStackPath(),
     };

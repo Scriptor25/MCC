@@ -5,7 +5,7 @@
 mcc::RefExpression::RefExpression(
         const SourceLocation &where,
         TypePtr type,
-        const E_ReferenceType target_type,
+        const ReferenceType_ target_type,
         ExpressionPtr target_position_x,
         ExpressionPtr target_position_y,
         ExpressionPtr target_position_z,
@@ -29,13 +29,13 @@ std::ostream &mcc::RefExpression::Print(std::ostream &stream) const
     Type->Print(stream << "ref<") << ">(";
     switch (TargetType)
     {
-    case ReferenceType_Block:
+    case ReferenceType_::Block:
         TargetPositionZ->Print(TargetPositionY->Print(TargetPositionX->Print(stream << "block, ") << ", ") << ", ");
         break;
-    case ReferenceType_Entity:
+    case ReferenceType_::Entity:
         TargetName->Print(stream << "entity, ");
         break;
-    case ReferenceType_Storage:
+    case ReferenceType_::Storage:
         TargetLocation->Print(stream << "storage, ");
         break;
     }
@@ -51,24 +51,30 @@ mcc::ValuePtr mcc::RefExpression::GenerateValue(
     switch (TargetType)
     {
     // ... block <target x> <target y> <target z> <path>
-    case ReferenceType_Block:
+    case ReferenceType_::Block:
     {
         const auto target_position_x = TargetPositionX->GenerateValue(builder, frame);
         const auto target_position_y = TargetPositionY->GenerateValue(builder, frame);
         const auto target_position_z = TargetPositionZ->GenerateValue(builder, frame);
-        return GenericBlockReference::
-                Create(Where, {}, Type, target_position_x, target_position_y, target_position_z, path);
+        return GenericBlockReference::Create(
+                Where,
+                {},
+                Type,
+                target_position_x,
+                target_position_y,
+                target_position_z,
+                path);
     }
 
     // ... entity <target name> <path>
-    case ReferenceType_Entity:
+    case ReferenceType_::Entity:
     {
         const auto target_name = TargetName->GenerateValue(builder, frame);
         return GenericEntityReference::Create(Where, {}, Type, target_name, path);
     }
 
     // ... storage <target location> <path>
-    case ReferenceType_Storage:
+    case ReferenceType_::Storage:
     {
         const auto target_location = TargetLocation->GenerateValue(builder, frame);
         return GenericStorageReference::Create(Where, {}, Type, target_location, path, true);

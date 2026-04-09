@@ -16,7 +16,7 @@ namespace mcc
                 SourceLocation where,
                 std::string name,
                 TypePtr type,
-                E_FieldType field_type);
+                FieldType_ field_type);
         virtual ~ValueBase() = default;
 
         virtual void Generate(
@@ -34,12 +34,12 @@ namespace mcc
         void Use(WeakValuePtr user);
         void Drop(WeakValuePtr user);
 
-        bool IsMutable() const;
+        [[nodiscard]] bool IsMutable() const;
 
         SourceLocation Where;
         std::string Name;
         TypePtr Type;
-        E_FieldType FieldType;
+        FieldType_ FieldType;
 
         std::set<WeakValuePtr> Uses;
 
@@ -152,10 +152,10 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 const TypePtr &type,
-                const ValuePtr &position_x,
-                const ValuePtr &position_y,
-                const ValuePtr &position_z,
-                const ValuePtr &path);
+                ValuePtr position_x,
+                ValuePtr position_y,
+                ValuePtr position_z,
+                ValuePtr path);
         ~GenericBlockReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
@@ -177,8 +177,8 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 const TypePtr &type,
-                const ValuePtr &name_val,
-                const ValuePtr &path);
+                ValuePtr name_val,
+                ValuePtr path);
         ~GenericEntityReference() override;
 
         [[nodiscard]] bool RequireStack() const override;

@@ -25,8 +25,8 @@ mcc::ConstantNumber::ConstantNumber(
 mcc::Result mcc::ConstantNumber::GenerateResult() const
 {
     return {
-        .Type    = ResultType_Value,
+        .Type    = ResultType_::Value,
         .Value   = std::to_string(Value),
-        .NotNull = Value != 0.0,
+        .NotNull = !!Value,
     };
 }

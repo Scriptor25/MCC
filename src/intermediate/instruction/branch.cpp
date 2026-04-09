@@ -14,9 +14,8 @@ mcc::InstructionPtr mcc::BranchInstruction::Create(
         const BlockPtr &then_target,
         const BlockPtr &else_target)
 {
-    auto self = std::make_shared<
-            BranchInstruction
-    >(where, name, context, location, condition, then_target, else_target);
+    auto self =
+            std::make_shared<BranchInstruction>(where, name, context, location, condition, then_target, else_target);
 
     self->Self = self;
     self->Condition->Use(self);
@@ -38,7 +37,7 @@ mcc::BranchInstruction::BranchInstruction(
               where,
               name,
               context.GetVoid(),
-              FieldType_Value),
+              FieldType_::Value),
       Location(std::move(location)),
       Condition(std::move(condition)),
       ThenTarget(std::move(then_target)),
@@ -68,64 +67,64 @@ void mcc::BranchInstruction::Generate(
 
     switch (auto condition = Condition->GenerateResult(); condition.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         commands.Append("{}return run function {}{}", prefix, condition.NotNull ? then_target : else_target, arguments);
         break;
 
-    case ResultType_Reference:
+    case ResultType_::Reference:
         commands.Append(CreateScore());
-        commands
-                .Append("{}execute store result score %c {} run data get {} {} {}",
-                        condition.WithArgument ? "$" : "",
-                        temp,
-                        condition.ReferenceType,
-                        condition.Target,
-                        condition.Path);
+        commands.Append(
+                "{}execute store result score %c {} run data get {} {} {}",
+                condition.WithArgument ? "$" : "",
+                temp,
+                condition.ReferenceType,
+                condition.Target,
+                condition.Path);
         commands.Append("data remove storage {} {}", Location, stack_path);
-        commands
-                .Append("execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
-                        temp,
-                        Location,
-                        stack_path);
+        commands.Append(
+                "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
+                temp,
+                Location,
+                stack_path);
         commands.Append(RemoveScore());
 
-        commands
-                .Append("{}execute if data storage {} {} run return run function {}{}",
-                        prefix,
-                        Location,
-                        stack_path,
-                        then_target,
-                        arguments);
+        commands.Append(
+                "{}execute if data storage {} {} run return run function {}{}",
+                prefix,
+                Location,
+                stack_path,
+                then_target,
+                arguments);
         commands.Append("{}return run function {}{}", prefix, else_target, arguments);
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         commands.Append(CreateScore());
         commands.Append("$scoreboard players set %c {} {}", temp, condition.Name);
         commands.Append("data remove storage {} {}", Location, stack_path);
-        commands
-                .Append("execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
-                        temp,
-                        Location,
-                        stack_path);
+        commands.Append(
+                "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
+                temp,
+                Location,
+                stack_path);
         commands.Append(RemoveScore());
 
-        commands
-                .Append("{}execute if data storage {} {} run return run function {}{}",
-                        prefix,
-                        Location,
-                        stack_path,
-                        then_target,
-                        arguments);
+        commands.Append(
+                "{}execute if data storage {} {} run return run function {}{}",
+                prefix,
+                Location,
+                stack_path,
+                then_target,
+                arguments);
         commands.Append("{}return run function {}{}", prefix, else_target, arguments);
         break;
 
     default:
         Error(Where,
               "condition must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
+              ResultType_::Value,
+              ResultType_::Reference,
+              ResultType_::Argument,
               condition.Type);
     }
 }

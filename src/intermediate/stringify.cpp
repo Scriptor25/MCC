@@ -22,7 +22,7 @@ mcc::StringifyValue::StringifyValue(
     : Value(where,
             name,
             target->Type->Context.GetString(),
-            FieldType_Value),
+            FieldType_::Value),
       Target(target)
 {
 }
@@ -47,32 +47,32 @@ mcc::Result mcc::StringifyValue::GenerateResult() const
     std::string target_value;
     switch (target.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         target_value = std::format("\"{}\"", target.Value);
         break;
 
-    case ResultType_Reference:
-        target_value = std::
-                format("{{\"{}\":\"{}\",\"nbt\":\"{}\"}}", target.ReferenceType, target.Target, target.Path);
+    case ResultType_::Reference:
+        target_value =
+                std::format("{{\"{}\":\"{}\",\"nbt\":\"{}\"}}", target.ReferenceType, target.Target, target.Path);
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         return {
-            .Type = ResultType_Argument,
+            .Type = ResultType_::Argument,
             .Name = std::format("\"{}\"", target.Name),
         };
 
     default:
         Error(Where,
               "value must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
+              ResultType_::Value,
+              ResultType_::Reference,
+              ResultType_::Argument,
               target.Type);
     }
 
     return {
-        .Type         = ResultType_Value,
+        .Type         = ResultType_::Value,
         .WithArgument = target.WithArgument,
         .Value        = std::move(target_value),
         .NotNull      = true,

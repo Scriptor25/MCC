@@ -69,14 +69,14 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateComparison(
                 const SourceLocation &where,
                 const std::string &name,
-                E_Comparator comparator,
+                Comparator_ comparator,
                 const ValuePtr &left,
                 const ValuePtr &right) const;
 
         [[nodiscard]] InstructionPtr CreateOperation(
                 const SourceLocation &where,
                 const std::string &name,
-                E_Operator operator_,
+                Operator_ operator_,
                 const std::vector<ValuePtr> &operands) const;
 
         [[nodiscard]] InstructionPtr CreateCommand(
@@ -188,9 +188,9 @@ namespace mcc
                 const std::string &name,
                 const ValuePtr &value) const;
 
-        [[nodiscard]] InstructionPtr
-        Insert(const SourceLocation &where,
-               const InstructionPtr &instruction) const;
+        [[nodiscard]] InstructionPtr Insert(
+                const SourceLocation &where,
+                const InstructionPtr &instruction) const;
 
         void Generate() const;
 

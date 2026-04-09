@@ -15,17 +15,17 @@ mcc::Token &mcc::Parser::Next()
         { "%",           { '=' } },
     };
 
-    enum LexState
+    enum class LexState
     {
-        LexState_None,
-        LexState_Symbol,
-        LexState_Number,
-        LexState_String,
-        LexState_Operator,
-        LexState_Comment,
+        None,
+        Symbol,
+        Number,
+        String,
+        Operator,
+        Comment,
     };
 
-    auto state = LexState_None;
+    auto state = LexState::None;
     auto where = m_Where;
 
     std::string raw;
@@ -37,7 +37,7 @@ mcc::Token &mcc::Parser::Next()
     {
         switch (state)
         {
-        case LexState_None:
+        case LexState::None:
             switch (m_Buf)
             {
             case '(':
@@ -81,7 +81,7 @@ mcc::Token &mcc::Parser::Next()
                 where = m_Where;
                 raw += static_cast<char>(m_Buf);
                 value += static_cast<char>(m_Buf);
-                state = LexState_Operator;
+                state = LexState::Operator;
                 Get();
                 break;
 
@@ -90,7 +90,7 @@ mcc::Token &mcc::Parser::Next()
             case '"':
                 raw += static_cast<char>(m_Buf);
                 where = m_Where;
-                state = LexState_String;
+                state = LexState::String;
                 Get();
                 break;
 
@@ -105,14 +105,14 @@ mcc::Token &mcc::Parser::Next()
                 if (std::isdigit(m_Buf))
                 {
                     where = m_Where;
-                    state = LexState_Number;
+                    state = LexState::Number;
                     break;
                 }
 
                 if (std::isalpha(m_Buf) || m_Buf == '_')
                 {
                     where = m_Where;
-                    state = LexState_Symbol;
+                    state = LexState::Symbol;
                     break;
                 }
 
@@ -129,7 +129,7 @@ mcc::Token &mcc::Parser::Next()
             }
             break;
 
-        case LexState_Symbol:
+        case LexState::Symbol:
             if (!std::isalnum(m_Buf) && m_Buf != '_')
                 return m_Token = {
                     .Type  = TokenType::Symbol,
@@ -143,7 +143,7 @@ mcc::Token &mcc::Parser::Next()
             Get();
             break;
 
-        case LexState_Number:
+        case LexState::Number:
             if (!std::isdigit(m_Buf))
             {
                 return m_Token = {
@@ -160,7 +160,7 @@ mcc::Token &mcc::Parser::Next()
             Get();
             break;
 
-        case LexState_String:
+        case LexState::String:
             if (m_Buf == (formatted ? '`' : '"'))
             {
                 raw += static_cast<char>(m_Buf);
@@ -178,11 +178,11 @@ mcc::Token &mcc::Parser::Next()
             Get();
             break;
 
-        case LexState_Operator:
+        case LexState::Operator:
             if (value == "/" && m_Buf == '*')
             {
                 raw += static_cast<char>(m_Buf);
-                state = LexState_Comment;
+                state = LexState::Comment;
                 Get();
                 break;
             }
@@ -200,7 +200,7 @@ mcc::Token &mcc::Parser::Next()
             Get();
             break;
 
-        case LexState_Comment:
+        case LexState::Comment:
             if (m_Buf == '*')
             {
                 raw += static_cast<char>(m_Buf);
@@ -209,7 +209,7 @@ mcc::Token &mcc::Parser::Next()
                 {
                     raw += static_cast<char>(m_Buf);
                     value.clear();
-                    state = LexState_None;
+                    state = LexState::None;
                     Get();
                     break;
                 }

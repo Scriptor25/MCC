@@ -44,7 +44,7 @@ mcc::GenericStorageReference::GenericStorageReference(
     : Value(where,
             name,
             type,
-            is_mutable ? FieldType_MutableReference : FieldType_ImmutableReference),
+            is_mutable ? FieldType_::MutableReference : FieldType_::ImmutableReference),
       Location(std::move(location)),
       Path(std::move(path))
 {
@@ -71,38 +71,38 @@ mcc::Result mcc::GenericStorageReference::GenerateResult() const
 
     switch (location.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         location_value = location.Value;
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         with_argument  = true;
         location_value = location.Name;
         break;
 
     default:
-        Error(Where, "location must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, location.Type);
+        Error(Where, "location must be {} or {}, but is {}", ResultType_::Value, ResultType_::Argument, location.Type);
     }
 
     switch (path.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
         path_value = path.Value;
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         with_argument = true;
         path_value    = path.Name;
         break;
 
     default:
-        Error(Where, "path must be {} or {}, but is {}", ResultType_Value, ResultType_Argument, path.Type);
+        Error(Where, "path must be {} or {}, but is {}", ResultType_::Value, ResultType_::Argument, path.Type);
     }
 
     return {
-        .Type          = ResultType_Reference,
+        .Type          = ResultType_::Reference,
         .WithArgument  = with_argument,
-        .ReferenceType = ReferenceType_Storage,
+        .ReferenceType = ReferenceType_::Storage,
         .Target        = location_value,
         .Path          = path_value,
     };

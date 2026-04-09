@@ -35,7 +35,7 @@ mcc::Function::Function(
     : Value(where,
             location.String(),
             type,
-            FieldType_Value),
+            FieldType_::Value),
       Location(std::move(location)),
       Parameters(std::move(parameters)),
       ResultType(std::move(result_type)),
@@ -61,7 +61,7 @@ bool mcc::Function::RequireStack() const
 mcc::Result mcc::Function::GenerateResult() const
 {
     return {
-        .Type    = ResultType_Value,
+        .Type    = ResultType_::Value,
         .Value   = '"' + Location.String() + '"',
         .NotNull = true,
     };
@@ -70,7 +70,7 @@ mcc::Result mcc::Function::GenerateResult() const
 mcc::Result mcc::Function::GenerateResultUnwrap() const
 {
     return {
-        .Type    = ResultType_Value,
+        .Type    = ResultType_::Value,
         .Value   = Location.String(),
         .NotNull = true,
     };
@@ -105,10 +105,9 @@ bool mcc::Function::MergeConsecutiveBlocks()
                 block->Instructions.pop_back();
 
                 for (auto &instruction : successor->Instructions)
-                    block->Instructions.push_back(std::move(instruction));
+                    block->Instructions.push_back(instruction);
                 successor->Instructions.clear();
 
-                block->Successors.erase(successor);
                 for (auto &next : successor->Successors)
                 {
                     next->Predecessors.erase(successor);
@@ -119,12 +118,12 @@ bool mcc::Function::MergeConsecutiveBlocks()
                 successor->Predecessors.clear();
                 successor->Successors.clear();
 
-                blocks.insert(successor);
-
-                const auto uses = successor->Uses;
-                for (auto &use : uses)
+                for (const auto uses = successor->Uses; auto &use : uses)
                     if (!use.expired())
                         use.lock()->Replace(successor, block);
+
+                blocks.insert(successor);
+                block->Successors.erase(successor);
             }
     }
 
@@ -211,7 +210,7 @@ void mcc::Function::ForwardArguments(
             arguments += ',';
         if (i->Type->IsString())
             arguments += std::format("\"{0}\":\"$({0})\"", i->Name);
-        else if (i->FieldType != FieldType_Value)
+        else if (i->FieldType != FieldType_::Value)
             arguments += std::format("\"{0}_target\":\"$({0}_target)\",\"{0}_path\":\"$({0}_path)\"", i->Name);
         else
             arguments += std::format("\"{0}\":$({0})", i->Name);

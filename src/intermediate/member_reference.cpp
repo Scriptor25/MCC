@@ -49,14 +49,14 @@ bool mcc::MemberReference::RequireStack() const
 mcc::Result mcc::MemberReference::GenerateResult() const
 {
     auto object = Object->GenerateResult();
-    Assert(object.Type == ResultType_Reference,
+    Assert(object.Type == ResultType_::Reference,
            Where,
            "object must be {}, but is {}",
-           ResultType_Reference,
+           ResultType_::Reference,
            object.Type);
 
     return {
-        .Type          = ResultType_Reference,
+        .Type          = ResultType_::Reference,
         .WithArgument  = object.WithArgument,
         .ReferenceType = object.ReferenceType,
         .Target        = object.Target,

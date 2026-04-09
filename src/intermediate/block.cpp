@@ -27,7 +27,7 @@ mcc::Block::Block(
     : Value(where,
             name,
             context.GetVoid(),
-            FieldType_Value),
+            FieldType_::Value),
       Parent(std::move(parent))
 {
 }

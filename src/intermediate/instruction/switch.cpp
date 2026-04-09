@@ -7,6 +7,7 @@
 #include <mcc/type.hpp>
 
 #include <algorithm>
+#include <utility>
 
 mcc::InstructionPtr mcc::SwitchInstruction::Create(
         const SourceLocation &where,
@@ -17,9 +18,14 @@ mcc::InstructionPtr mcc::SwitchInstruction::Create(
         const BlockPtr &default_target,
         const CaseTargetMap &case_targets)
 {
-    auto self = std::make_shared<
-            SwitchInstruction
-    >(where, name, context, location, condition, default_target, case_targets);
+    auto self = std::make_shared<SwitchInstruction>(
+            where,
+            name,
+            context,
+            location,
+            condition,
+            default_target,
+            case_targets);
 
     self->Self = self;
     self->Condition->Use(self);
@@ -40,16 +46,16 @@ mcc::SwitchInstruction::SwitchInstruction(
         ResourceLocation location,
         ValuePtr condition,
         BlockPtr default_target,
-        const CaseTargetMap &case_targets)
+        CaseTargetMap case_targets)
     : Instruction(
               where,
               name,
               context.GetVoid(),
-              FieldType_Value),
+              FieldType_::Value),
       Location(std::move(location)),
       Condition(std::move(condition)),
       DefaultTarget(std::move(default_target)),
-      CaseTargets(case_targets)
+      CaseTargets(std::move(case_targets))
 {
 }
 
@@ -84,17 +90,17 @@ void mcc::SwitchInstruction::Generate(
     for (auto &[case_, target_] : CaseTargets)
     {
         auto case_value = case_->GenerateResult();
-        Assert(case_value.Type == ResultType_Value,
+        Assert(case_value.Type == ResultType_::Value,
                case_->Where,
                "case value must be {}, but is {}",
-               ResultType_Value,
+               ResultType_::Value,
                case_value.Type);
         case_targets[case_value.Value] = target_;
     }
 
     switch (condition.Type)
     {
-    case ResultType_Value:
+    case ResultType_::Value:
     {
         BlockPtr block;
         if (auto it = case_targets.find(condition.Value); it != case_targets.end())
@@ -105,58 +111,58 @@ void mcc::SwitchInstruction::Generate(
         break;
     }
 
-    case ResultType_Reference:
+    case ResultType_::Reference:
         for (auto &[case_, target_] : case_targets)
         {
             commands.Append(CreateScore());
-            commands
-                    .Append("{}execute store result score %c {} run data get {} {} {}",
-                            condition_prefix,
-                            tmp_name,
-                            condition.ReferenceType,
-                            condition.Target,
-                            condition.Path);
+            commands.Append(
+                    "{}execute store result score %c {} run data get {} {} {}",
+                    condition_prefix,
+                    tmp_name,
+                    condition.ReferenceType,
+                    condition.Target,
+                    condition.Path);
             commands.Append("data remove storage {} {}", Location, stack_path);
-            commands
-                    .Append("execute if score %c {} matches {} run data modify storage {} {} set value 1",
-                            tmp_name,
-                            case_,
-                            Location,
-                            stack_path);
+            commands.Append(
+                    "execute if score %c {} matches {} run data modify storage {} {} set value 1",
+                    tmp_name,
+                    case_,
+                    Location,
+                    stack_path);
             commands.Append(RemoveScore());
 
-            commands
-                    .Append("{}execute if data storage {} {} run return run function {}{}",
-                            prefix,
-                            Location,
-                            stack_path,
-                            target_->GetLocation(),
-                            arguments);
+            commands.Append(
+                    "{}execute if data storage {} {} run return run function {}{}",
+                    prefix,
+                    Location,
+                    stack_path,
+                    target_->GetLocation(),
+                    arguments);
         }
         commands.Append("{}return run function {}{}", prefix, DefaultTarget->GetLocation(), arguments);
         break;
 
-    case ResultType_Argument:
+    case ResultType_::Argument:
         for (auto &[case_, target_] : case_targets)
         {
             commands.Append(CreateScore());
             commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);
             commands.Append("data remove storage {} {}", Location, stack_path);
-            commands
-                    .Append("execute if score %c {} matches {} run data modify storage {} {} set value 1",
-                            tmp_name,
-                            case_,
-                            Location,
-                            stack_path);
+            commands.Append(
+                    "execute if score %c {} matches {} run data modify storage {} {} set value 1",
+                    tmp_name,
+                    case_,
+                    Location,
+                    stack_path);
             commands.Append(RemoveScore());
 
-            commands
-                    .Append("{}execute if data storage {} {} run return run function {}{}",
-                            prefix,
-                            Location,
-                            stack_path,
-                            target_->GetLocation(),
-                            arguments);
+            commands.Append(
+                    "{}execute if data storage {} {} run return run function {}{}",
+                    prefix,
+                    Location,
+                    stack_path,
+                    target_->GetLocation(),
+                    arguments);
         }
         commands.Append("{}return run function {}{}", prefix, DefaultTarget->GetLocation(), arguments);
         break;
@@ -164,9 +170,9 @@ void mcc::SwitchInstruction::Generate(
     default:
         Error(Where,
               "condition must be {}, {} or {}, but is {}",
-              ResultType_Value,
-              ResultType_Reference,
-              ResultType_Argument,
+              ResultType_::Value,
+              ResultType_::Reference,
+              ResultType_::Argument,
               condition.Type);
     }
 }
@@ -174,9 +180,9 @@ void mcc::SwitchInstruction::Generate(
 bool mcc::SwitchInstruction::RequireStack() const
 {
     return Condition->RequireStack() || DefaultTarget->RequireStack()
-           || std::ranges::
-                   any_of(CaseTargets,
-                          [](const CaseTarget &case_target) { return case_target.second->RequireStack(); });
+           || std::ranges::any_of(
+                   CaseTargets,
+                   [](const CaseTarget &case_target) { return case_target.second->RequireStack(); });
 }
 
 bool mcc::SwitchInstruction::IsTerminator() const
