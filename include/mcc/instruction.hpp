@@ -9,6 +9,7 @@ namespace mcc
     {
         Instruction(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 E_FieldType field_type);
 
@@ -25,18 +26,21 @@ namespace mcc
     {
         static InstructionPtr CreateAppend(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &array,
                 const ValuePtr &value);
         static InstructionPtr CreatePrepend(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &array,
                 const ValuePtr &value);
         static InstructionPtr CreateInsert(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &array,
@@ -45,6 +49,7 @@ namespace mcc
 
         static SPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 E_ArrayOperation array_operation,
                 const ResourceLocation &location,
@@ -54,6 +59,7 @@ namespace mcc
 
         ArrayInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 E_ArrayOperation array_operation,
                 ResourceLocation location,
@@ -78,6 +84,7 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &condition,
@@ -86,6 +93,7 @@ namespace mcc
 
         BranchInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 ResourceLocation location,
                 ValuePtr condition,
@@ -110,6 +118,7 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const ResourceLocation &location,
                 const FunctionPtr &callee,
                 const std::vector<std::pair<
@@ -120,6 +129,7 @@ namespace mcc
 
         CallInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 ResourceLocation location,
                 const FunctionPtr &callee,
                 const std::vector<std::pair<
@@ -146,12 +156,14 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ResourceLocation &location,
                 const CommandT &command);
 
         CommandInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 ResourceLocation location,
                 CommandT command);
@@ -171,6 +183,7 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const E_Comparator &comparator,
                 const ResourceLocation &location,
@@ -179,6 +192,7 @@ namespace mcc
 
         ComparisonInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 E_Comparator comparator,
                 ResourceLocation location,
@@ -202,11 +216,13 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ValuePtr &value);
 
         DeleteInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ValuePtr &value);
         ~DeleteInstruction() override;
@@ -224,11 +240,13 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const BlockPtr &target);
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const BlockPtr &target,
@@ -237,6 +255,7 @@ namespace mcc
 
         DirectBranchInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 ResourceLocation location,
                 BlockPtr target,
@@ -261,16 +280,18 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
-                const std::string &name,
+                const std::string &macro,
                 const std::vector<ValuePtr> &arguments);
 
         MacroInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 ResourceLocation location,
-                std::string name,
+                std::string macro,
                 const std::vector<ValuePtr> &arguments);
         ~MacroInstruction() override;
 
@@ -281,7 +302,7 @@ namespace mcc
         [[nodiscard]] bool RequireStack() const override;
 
         ResourceLocation Location;
-        std::string Name;
+        std::string Macro;
         std::vector<ValuePtr> Arguments;
     };
 
@@ -289,12 +310,14 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &value);
 
         NotNullInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 ResourceLocation location,
                 ValuePtr value);
@@ -315,6 +338,7 @@ namespace mcc
     {
         static InstructionPtr CreateInsert(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &object,
@@ -323,6 +347,7 @@ namespace mcc
 
         ObjectInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 ResourceLocation location,
                 ValuePtr object,
@@ -345,6 +370,7 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 E_Operator operator_,
                 const ResourceLocation &location,
@@ -352,6 +378,7 @@ namespace mcc
 
         OperationInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 E_Operator operator_,
                 ResourceLocation location,
@@ -374,12 +401,14 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &value);
 
         ReturnInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 ResourceLocation location,
                 ValuePtr value);
@@ -401,11 +430,13 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &dst,
                 const ValuePtr &src);
 
         StoreInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &dst,
                 ValuePtr src);
         ~StoreInstruction() override;
@@ -424,6 +455,7 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &condition,
@@ -432,6 +464,7 @@ namespace mcc
 
         SwitchInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 ResourceLocation location,
                 ValuePtr condition,
@@ -447,6 +480,10 @@ namespace mcc
 
         [[nodiscard]] bool IsTerminator() const override;
 
+        void Replace(
+                ValuePtr value,
+                ValuePtr replacement) override;
+
         ResourceLocation Location;
         ValuePtr Condition;
         BlockPtr DefaultTarget;
@@ -457,6 +494,7 @@ namespace mcc
     {
         static InstructionPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const ResourceLocation &location,
                 const ValuePtr &value,
@@ -464,6 +502,7 @@ namespace mcc
 
         ThrowInstruction(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 ResourceLocation location,
                 ValuePtr value,

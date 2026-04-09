@@ -10,6 +10,7 @@
 
 mcc::InstructionPtr mcc::CallInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         const ResourceLocation &location,
         const FunctionPtr &callee,
         const std::vector<std::pair<
@@ -18,7 +19,7 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
         >> &arguments,
         const BlockPtr &landing_pad)
 {
-    auto self = std::make_shared<CallInstruction>(where, location, callee, arguments, landing_pad);
+    auto self = std::make_shared<CallInstruction>(where, name, location, callee, arguments, landing_pad);
 
     self->Self = self;
     for (const auto &argument : self->Arguments | std::views::values)
@@ -31,6 +32,7 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
 
 mcc::CallInstruction::CallInstruction(
         const SourceLocation &where,
+        const std::string &name,
         ResourceLocation location,
         const FunctionPtr &callee,
         const std::vector<std::pair<
@@ -40,6 +42,7 @@ mcc::CallInstruction::CallInstruction(
         BlockPtr landing_pad)
     : Instruction(
               where,
+              name,
               callee->ResultType,
               FieldType_ImmutableReference),
       Location(std::move(location)),

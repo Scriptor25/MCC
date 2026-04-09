@@ -181,7 +181,7 @@ static void generate_macro_store(
 
 using Generator = std::function<void(const mcc::MacroInstruction &, mcc::CommandVector &)>;
 
-static const std::map<std::string_view, Generator> generators{
+static const std::map<std::string_view, Generator> generators = {
     { "print", generate_macro_print },
     {  "swap",  generate_macro_swap },
     {  "data",  generate_macro_data },
@@ -190,12 +190,13 @@ static const std::map<std::string_view, Generator> generators{
 
 mcc::InstructionPtr mcc::MacroInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
-        const std::string &name,
+        const std::string &macro,
         const std::vector<ValuePtr> &arguments)
 {
-    auto self = std::make_shared<MacroInstruction>(where, context, location, name, arguments);
+    auto self = std::make_shared<MacroInstruction>(where, name, context, location, macro, arguments);
 
     self->Self = self;
     for (const auto &argument : self->Arguments)
@@ -206,16 +207,18 @@ mcc::InstructionPtr mcc::MacroInstruction::Create(
 
 mcc::MacroInstruction::MacroInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         ResourceLocation location,
-        std::string name,
+        std::string macro,
         const std::vector<ValuePtr> &arguments)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       Location(std::move(location)),
-      Name(std::move(name)),
+      Macro(std::move(macro)),
       Arguments(arguments)
 {
 }
@@ -230,8 +233,8 @@ void mcc::MacroInstruction::Generate(
         CommandVector &commands,
         const bool stack) const
 {
-    Assert(generators.contains(Name), Where, "no generator for macro {}", Name);
-    generators.at(Name)(*this, commands);
+    Assert(generators.contains(Macro), Where, "no generator for macro {}", Macro);
+    generators.at(Macro)(*this, commands);
 }
 
 bool mcc::MacroInstruction::RequireStack() const

@@ -18,9 +18,11 @@ static uintptr_t global_stack = 0;
 
 mcc::ValueBase::ValueBase(
         SourceLocation where,
+        std::string name,
         TypePtr type,
         const E_FieldType field_type)
     : Where(std::move(where)),
+      Name(std::move(name)),
       Type(std::move(type)),
       FieldType(field_type),
       StackId(global_stack++)
@@ -47,6 +49,13 @@ mcc::Result mcc::ValueBase::GenerateResult() const
 mcc::Result mcc::ValueBase::GenerateResultUnwrap() const
 {
     return GenerateResult();
+}
+
+void mcc::ValueBase::Replace(
+        ValuePtr value,
+        ValuePtr replacement)
+{
+    Error(Where, "mcc::ValueBase::Replace");
 }
 
 void mcc::ValueBase::Use(WeakValuePtr user)

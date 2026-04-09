@@ -79,8 +79,8 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(
     const auto pre_target = builder.GetInsertBlock();
 
     const auto parent         = pre_target->Parent;
-    const auto tail_target    = Block::Create(Where, builder.GetContext(), parent);
-    const auto default_target = Block::Create(Default->Where, builder.GetContext(), parent);
+    const auto tail_target    = Block::Create(Where, "tail", builder.GetContext(), parent);
+    const auto default_target = Block::Create(Default->Where, "default", builder.GetContext(), parent);
 
     std::set<TypePtr> elements;
     std::vector<std::pair<BlockPtr, ValuePtr>> case_values;
@@ -93,7 +93,7 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(
     CaseTargetMap case_targets;
     for (auto &[case_conditions_, case_] : Cases)
     {
-        auto case_target = Block::Create(case_->Where, builder.GetContext(), parent);
+        auto case_target = Block::Create(case_->Where, "case", builder.GetContext(), parent);
 
         for (auto &case_condition : case_conditions_)
         {
@@ -116,16 +116,16 @@ mcc::ValuePtr mcc::SwitchExpression::GenerateValue(
     }
 
     builder.SetInsertBlock(pre_target);
-    (void) builder.CreateSwitch(Where, condition, default_target, case_targets);
+    (void) builder.CreateSwitch(Where, {}, condition, default_target, case_targets);
 
     builder.SetInsertBlock(tail_target);
     const auto type          = builder.GetContext().GetUnionOrSingle(elements);
-    const auto branch_result = builder.CreateBranchResult(Where, type);
+    const auto branch_result = builder.CreateBranchResult(Where, {}, type);
 
     for (auto &[target_, value_] : case_values)
     {
         builder.SetInsertBlock(target_);
-        (void) builder.CreateDirect(target_->Where, tail_target, value_, branch_result);
+        (void) builder.CreateDirect(target_->Where, {}, tail_target, value_, branch_result);
     }
 
     builder.SetInsertBlock(tail_target);

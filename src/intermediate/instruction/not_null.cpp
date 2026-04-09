@@ -5,11 +5,12 @@
 
 mcc::InstructionPtr mcc::NotNullInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &value)
 {
-    auto self = std::make_shared<NotNullInstruction>(where, context, location, value);
+    auto self = std::make_shared<NotNullInstruction>(where, name, context, location, value);
 
     self->Self = self;
     self->Value->Use(self);
@@ -19,11 +20,13 @@ mcc::InstructionPtr mcc::NotNullInstruction::Create(
 
 mcc::NotNullInstruction::NotNullInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         ResourceLocation location,
         ValuePtr value)
     : Instruction(
               where,
+              name,
               context.GetNumber(),
               FieldType_ImmutableReference),
       Location(std::move(location)),

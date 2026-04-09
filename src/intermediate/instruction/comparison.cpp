@@ -5,13 +5,14 @@
 
 mcc::InstructionPtr mcc::ComparisonInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const E_Comparator &comparator,
         const ResourceLocation &location,
         const ValuePtr &left,
         const ValuePtr &right)
 {
-    auto self = std::make_shared<ComparisonInstruction>(where, context, comparator, location, left, right);
+    auto self = std::make_shared<ComparisonInstruction>(where, name, context, comparator, location, left, right);
 
     self->Self = self;
     self->Left->Use(self);
@@ -22,6 +23,7 @@ mcc::InstructionPtr mcc::ComparisonInstruction::Create(
 
 mcc::ComparisonInstruction::ComparisonInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const E_Comparator comparator,
         ResourceLocation location,
@@ -29,6 +31,7 @@ mcc::ComparisonInstruction::ComparisonInstruction(
         ValuePtr right)
     : Instruction(
               where,
+              name,
               context.GetNumber(),
               FieldType_Value),
       Comparator(comparator),

@@ -2,19 +2,22 @@
 
 mcc::ValuePtr mcc::BranchResult::Create(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         const ResourceLocation &location)
 {
-    auto self  = std::make_shared<BranchResult>(where, type, location);
+    auto self  = std::make_shared<BranchResult>(where, name, type, location);
     self->Self = self;
     return self;
 }
 
 mcc::BranchResult::BranchResult(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         ResourceLocation location)
     : Value(where,
+            name,
             type,
             FieldType_ImmutableReference),
       Location(std::move(location))

@@ -20,5 +20,5 @@ void mcc::DeleteStatement::Generate(
         Frame &frame) const
 {
     const auto value = Value->GenerateValue(builder, frame);
-    (void) builder.CreateDelete(Where, value);
+    (void) builder.CreateDelete(Where, {}, value);
 }

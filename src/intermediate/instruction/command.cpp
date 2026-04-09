@@ -4,22 +4,25 @@
 
 mcc::InstructionPtr mcc::CommandInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         const ResourceLocation &location,
         const CommandT &command)
 {
-    auto self  = std::make_shared<CommandInstruction>(where, type, location, command);
+    auto self  = std::make_shared<CommandInstruction>(where, name, type, location, command);
     self->Self = self;
     return self;
 }
 
 mcc::CommandInstruction::CommandInstruction(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         ResourceLocation location,
         CommandT command)
     : Instruction(
               where,
+              name,
               type,
               FieldType_Value),
       Location(std::move(location)),

@@ -61,63 +61,77 @@ namespace mcc
 
         [[nodiscard]] InstructionPtr CreateStore(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &dst,
                 const ValuePtr &src,
                 bool ignore_mutability = false) const;
 
         [[nodiscard]] InstructionPtr CreateComparison(
                 const SourceLocation &where,
+                const std::string &name,
                 E_Comparator comparator,
                 const ValuePtr &left,
                 const ValuePtr &right) const;
 
         [[nodiscard]] InstructionPtr CreateOperation(
                 const SourceLocation &where,
+                const std::string &name,
                 E_Operator operator_,
                 const std::vector<ValuePtr> &operands) const;
 
         [[nodiscard]] InstructionPtr CreateCommand(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const CommandT &command) const;
 
-        [[nodiscard]] InstructionPtr CreateReturn(const SourceLocation &where) const;
         [[nodiscard]] InstructionPtr CreateReturn(
                 const SourceLocation &where,
+                const std::string &name) const;
+        [[nodiscard]] InstructionPtr CreateReturn(
+                const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &value) const;
 
         [[nodiscard]] InstructionPtr CreateBranch(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &condition,
                 const BlockPtr &then_target,
                 const BlockPtr &else_target) const;
 
         [[nodiscard]] InstructionPtr CreateDirect(
                 const SourceLocation &where,
+                const std::string &name,
                 const BlockPtr &target) const;
         [[nodiscard]] InstructionPtr CreateDirect(
                 const SourceLocation &where,
+                const std::string &name,
                 const BlockPtr &target,
                 const ValuePtr &result,
                 const ValuePtr &branch_result) const;
 
         [[nodiscard]] InstructionPtr CreateSwitch(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &condition,
                 const BlockPtr &default_target,
                 const CaseTargetMap &case_targets) const;
 
         [[nodiscard]] InstructionPtr CreateThrow(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &value,
                 const BlockPtr &landing_pad) const;
 
         [[nodiscard]] ValuePtr CreateBranchResult(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type) const;
 
         [[nodiscard]] InstructionPtr CreateCall(
                 const SourceLocation &where,
+                const std::string &name,
                 const FunctionPtr &callee,
                 const std::vector<ValuePtr> &arguments,
                 const BlockPtr &landing_pad) const;
@@ -125,30 +139,36 @@ namespace mcc
         [[nodiscard]] InstructionPtr CreateMacro(
                 const SourceLocation &where,
                 const std::string &name,
+                const std::string &macro,
                 const std::vector<ValuePtr> &arguments) const;
 
         [[nodiscard]] ValuePtr Allocate(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 bool is_mutable) const;
 
         [[nodiscard]] InstructionPtr CreateAppend(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &array,
                 const ValuePtr &value,
                 bool force = false) const;
         [[nodiscard]] InstructionPtr CreatePrepend(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &array,
                 const ValuePtr &value) const;
         [[nodiscard]] InstructionPtr CreateInsert(
-                const ValuePtr &array,
                 const SourceLocation &where,
+                const std::string &name,
+                const ValuePtr &array,
                 const ValuePtr &value,
                 IndexT index) const;
 
         [[nodiscard]] InstructionPtr CreateInsert(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &object,
                 const ValuePtr &value,
                 const std::string &key,
@@ -156,19 +176,21 @@ namespace mcc
 
         ValuePtr StoreResult(
                 const SourceLocation &where,
-                const TypePtr &type,
-                const std::string &name);
+                const std::string &name,
+                const TypePtr &type);
 
         [[nodiscard]] InstructionPtr CreateNotNull(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &value) const;
         [[nodiscard]] InstructionPtr CreateDelete(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &value) const;
 
-        [[nodiscard]] InstructionPtr Insert(
-                const SourceLocation &where,
-                const InstructionPtr &instruction) const;
+        [[nodiscard]] InstructionPtr
+        Insert(const SourceLocation &where,
+               const InstructionPtr &instruction) const;
 
         void Generate() const;
 

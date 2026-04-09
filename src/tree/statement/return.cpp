@@ -31,7 +31,7 @@ void mcc::ReturnStatement::Generate(
                void_type,
                frame.ResultType);
 
-        return (void) builder.CreateReturn(Where);
+        return (void) builder.CreateReturn(Where, {});
     }
 
     const auto value = Value->GenerateValue(builder, frame);
@@ -42,5 +42,5 @@ void mcc::ReturnStatement::Generate(
            value->Type,
            frame.ResultType);
 
-    (void) builder.CreateReturn(Where, value);
+    (void) builder.CreateReturn(Where, {}, value);
 }

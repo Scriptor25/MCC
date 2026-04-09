@@ -14,6 +14,7 @@ namespace mcc
     {
         ValueBase(
                 SourceLocation where,
+                std::string name,
                 TypePtr type,
                 E_FieldType field_type);
         virtual ~ValueBase() = default;
@@ -26,12 +27,17 @@ namespace mcc
         [[nodiscard]] virtual Result GenerateResult() const;
         [[nodiscard]] virtual Result GenerateResultUnwrap() const;
 
+        virtual void Replace(
+                ValuePtr value,
+                ValuePtr replacement);
+
         void Use(WeakValuePtr user);
         void Drop(WeakValuePtr user);
 
         bool IsMutable() const;
 
         SourceLocation Where;
+        std::string Name;
         TypePtr Type;
         E_FieldType FieldType;
 
@@ -55,30 +61,30 @@ namespace mcc
     {
         static ValuePtr Create(
                 const SourceLocation &where,
-                const TypePtr &type,
-                const std::string &name);
+                const std::string &name,
+                const TypePtr &type);
 
         ArgumentValue(
                 const SourceLocation &where,
-                const TypePtr &type,
-                std::string name);
+                const std::string &name,
+                const TypePtr &type);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
         [[nodiscard]] Result GenerateResultUnwrap() const override;
-
-        std::string Name;
     };
 
     struct BranchResult final : Value<BranchResult>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ResourceLocation &location);
 
         BranchResult(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 ResourceLocation location);
 
@@ -92,11 +98,13 @@ namespace mcc
     {
         static SPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &base,
                 const ValuePtr &index);
 
         ElementReference(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ValuePtr &base,
                 const ValuePtr &index);
@@ -113,11 +121,13 @@ namespace mcc
     {
         static ValuePtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ResourceLocation &location);
 
         FunctionResult(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 ResourceLocation location);
 
@@ -131,6 +141,7 @@ namespace mcc
     {
         static ValuePtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ValuePtr &position_x,
                 const ValuePtr &position_y,
@@ -139,6 +150,7 @@ namespace mcc
 
         GenericBlockReference(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ValuePtr &position_x,
                 const ValuePtr &position_y,
@@ -156,27 +168,30 @@ namespace mcc
     {
         static ValuePtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
-                const ValuePtr &name,
+                const ValuePtr &name_val,
                 const ValuePtr &path);
 
         GenericEntityReference(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
-                const ValuePtr &name,
+                const ValuePtr &name_val,
                 const ValuePtr &path);
         ~GenericEntityReference() override;
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        ValuePtr Name, Path;
+        ValuePtr NameVal, Path;
     };
 
     struct GenericStorageReference final : Value<GenericStorageReference>
     {
         static ValuePtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ValuePtr &location,
                 const ValuePtr &path,
@@ -184,6 +199,7 @@ namespace mcc
 
         static ValuePtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ResourceLocation &location,
                 const std::string &path,
@@ -191,6 +207,7 @@ namespace mcc
 
         GenericStorageReference(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 ValuePtr location,
                 ValuePtr path,
@@ -207,11 +224,13 @@ namespace mcc
     {
         static ValuePtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &object,
                 const std::string &member);
 
         MemberReference(
                 const SourceLocation &where,
+                const std::string &name,
                 const TypePtr &type,
                 const ValuePtr &object,
                 std::string member);
@@ -228,10 +247,12 @@ namespace mcc
     {
         static ValuePtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &target);
 
         StringifyValue(
                 const SourceLocation &where,
+                const std::string &name,
                 const ValuePtr &target);
         ~StringifyValue() override;
 

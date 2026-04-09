@@ -10,10 +10,12 @@ namespace mcc
     {
         static BlockPtr Create(
                 const SourceLocation &where,
+                const std::string &name,
                 TypeContext &context,
                 const FunctionPtr &parent);
 
         Block(const SourceLocation &where,
+              const std::string &name,
               TypeContext &context,
               FunctionPtr parent);
 

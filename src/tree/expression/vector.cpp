@@ -78,5 +78,5 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(
         return ConstantNumber::Create(Where, builder.GetContext(), value);
     }
 
-    return builder.CreateOperation(Where, *operator_, operand_values);
+    return builder.CreateOperation(Where, {}, *operator_, operand_values);
 }

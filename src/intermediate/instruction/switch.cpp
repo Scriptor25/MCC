@@ -10,13 +10,16 @@
 
 mcc::InstructionPtr mcc::SwitchInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &condition,
         const BlockPtr &default_target,
         const CaseTargetMap &case_targets)
 {
-    auto self = std::make_shared<SwitchInstruction>(where, context, location, condition, default_target, case_targets);
+    auto self = std::make_shared<
+            SwitchInstruction
+    >(where, name, context, location, condition, default_target, case_targets);
 
     self->Self = self;
     self->Condition->Use(self);
@@ -32,6 +35,7 @@ mcc::InstructionPtr mcc::SwitchInstruction::Create(
 
 mcc::SwitchInstruction::SwitchInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         ResourceLocation location,
         ValuePtr condition,
@@ -39,6 +43,7 @@ mcc::SwitchInstruction::SwitchInstruction(
         const CaseTargetMap &case_targets)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       Location(std::move(location)),
@@ -177,4 +182,41 @@ bool mcc::SwitchInstruction::RequireStack() const
 bool mcc::SwitchInstruction::IsTerminator() const
 {
     return true;
+}
+
+void mcc::SwitchInstruction::Replace(
+        ValuePtr value,
+        ValuePtr replacement)
+{
+    Assert(!!value, "value must not be null");
+    Assert(!!replacement, "replacement must not be null");
+
+    if (value == Condition)
+    {
+        Condition->Drop(Self);
+        Condition = replacement;
+        Condition->Use(Self);
+        return;
+    }
+
+    if (value == DefaultTarget)
+    {
+        DefaultTarget->Drop(Self);
+        DefaultTarget = std::dynamic_pointer_cast<Block>(replacement);
+        DefaultTarget->Use(Self);
+        return;
+    }
+
+    for (auto &[case_, target_] : CaseTargets)
+    {
+        if (value == target_)
+        {
+            target_->Drop(Self);
+            target_ = std::dynamic_pointer_cast<Block>(replacement);
+            target_->Use(Self);
+            return;
+        }
+    }
+
+    Error("value is not owned by this instruction");
 }

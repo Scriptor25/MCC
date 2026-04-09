@@ -7,12 +7,13 @@
 
 mcc::InstructionPtr mcc::ThrowInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &value,
         const BlockPtr &landing_pad)
 {
-    auto self = std::make_shared<ThrowInstruction>(where, context, location, value, landing_pad);
+    auto self = std::make_shared<ThrowInstruction>(where, name, context, location, value, landing_pad);
 
     self->Self = self;
     self->Value->Use(self);
@@ -24,12 +25,14 @@ mcc::InstructionPtr mcc::ThrowInstruction::Create(
 
 mcc::ThrowInstruction::ThrowInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         ResourceLocation location,
         ValuePtr value,
         BlockPtr landing_pad)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       Location(std::move(location)),

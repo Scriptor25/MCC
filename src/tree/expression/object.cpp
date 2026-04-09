@@ -52,11 +52,11 @@ mcc::ValuePtr mcc::ObjectExpression::GenerateValue(
     if (values.size() == constants.size())
         return ConstantObject::Create(Where, type, constants);
 
-    auto object = builder.Allocate(Where, type, false);
-    (void) builder.CreateStore(Where, object, type->GetNull(Where), true);
+    auto object = builder.Allocate(Where, {}, type, false);
+    (void) builder.CreateStore(Where, {}, object, type->GetNull(Where), true);
 
     for (auto &[key_, value_] : values)
-        (void) builder.CreateInsert(Where, object, value_, key_, true);
+        (void) builder.CreateInsert(Where, {}, object, value_, key_, true);
 
     return object;
 }

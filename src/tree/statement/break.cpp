@@ -18,5 +18,5 @@ void mcc::BreakStatement::Generate(
 {
     Assert(!!frame.Tail, Where, "no tail target in current frame");
     frame.Flags |= FrameFlag_RequireTail;
-    (void) builder.CreateDirect(Where, frame.Tail);
+    (void) builder.CreateDirect(Where, {}, frame.Tail);
 }

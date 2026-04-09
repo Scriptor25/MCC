@@ -1,18 +1,19 @@
 #include <mcc/block.hpp>
+#include <mcc/error.hpp>
 #include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
 #include <algorithm>
-#include "mcc/error.hpp"
 
 mcc::BlockPtr mcc::Block::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const FunctionPtr &parent)
 {
-    auto self  = std::make_shared<Block>(where, context, parent);
+    auto self  = std::make_shared<Block>(where, name, context, parent);
     self->Self = self;
     parent->Blocks.push_back(self);
     return self;
@@ -20,9 +21,11 @@ mcc::BlockPtr mcc::Block::Create(
 
 mcc::Block::Block(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         FunctionPtr parent)
     : Value(where,
+            name,
             context.GetVoid(),
             FieldType_Value),
       Parent(std::move(parent))
@@ -39,8 +42,9 @@ void mcc::Block::Generate(
 
 bool mcc::Block::RequireStack() const
 {
-    return std::ranges::
-            any_of(Instructions, [](const InstructionPtr &instruction) { return instruction->RequireStack(); });
+    return std::ranges::any_of(
+            Instructions,
+            [](const InstructionPtr &instruction) { return instruction->RequireStack(); });
 }
 
 mcc::InstructionPtr mcc::Block::GetTerminator() const

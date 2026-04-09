@@ -7,13 +7,16 @@
 
 mcc::InstructionPtr mcc::BranchInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &condition,
         const BlockPtr &then_target,
         const BlockPtr &else_target)
 {
-    auto self = std::make_shared<BranchInstruction>(where, context, location, condition, then_target, else_target);
+    auto self = std::make_shared<
+            BranchInstruction
+    >(where, name, context, location, condition, then_target, else_target);
 
     self->Self = self;
     self->Condition->Use(self);
@@ -25,6 +28,7 @@ mcc::InstructionPtr mcc::BranchInstruction::Create(
 
 mcc::BranchInstruction::BranchInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         ResourceLocation location,
         ValuePtr condition,
@@ -32,6 +36,7 @@ mcc::BranchInstruction::BranchInstruction(
         BlockPtr else_target)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       Location(std::move(location)),

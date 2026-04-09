@@ -5,13 +5,14 @@
 
 mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &object,
         const ValuePtr &value,
         const std::string &key)
 {
-    auto self = std::make_shared<ObjectInstruction>(where, context, location, object, value, key);
+    auto self = std::make_shared<ObjectInstruction>(where, name, context, location, object, value, key);
 
     self->Self = self;
     self->Object->Use(self);
@@ -22,6 +23,7 @@ mcc::InstructionPtr mcc::ObjectInstruction::CreateInsert(
 
 mcc::ObjectInstruction::ObjectInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         ResourceLocation location,
         ValuePtr object,
@@ -29,6 +31,7 @@ mcc::ObjectInstruction::ObjectInstruction(
         std::string key)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       Location(std::move(location)),

@@ -32,9 +32,9 @@ mcc::ValuePtr mcc::MemberExpression::GenerateValue(
 
     if (const auto argument_object = std::dynamic_pointer_cast<ArgumentValue>(object))
     {
-        object = builder.Allocate(Object->Where, object->Type, false);
-        (void) builder.CreateStore(Object->Where, object, argument_object, true);
+        object = builder.Allocate(Object->Where, {}, object->Type, false);
+        (void) builder.CreateStore(Object->Where, {}, object, argument_object, true);
     }
 
-    return MemberReference::Create(Where, object, Member);
+    return MemberReference::Create(Where, {}, object, Member);
 }

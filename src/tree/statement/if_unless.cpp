@@ -35,10 +35,10 @@ void mcc::IfUnlessStatement::Generate(
 {
     auto condition = Condition->GenerateValue(builder, frame);
     if (!condition->Type->IsNumber())
-        condition = builder.CreateNotNull(Condition->Where, condition);
+        condition = builder.CreateNotNull(Condition->Where, {}, condition);
 
     const auto parent      = builder.GetInsertBlock()->Parent;
-    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto tail_target = Block::Create(Where, "tail", builder.GetContext(), parent);
 
     auto require_tail = !Else;
 
@@ -50,7 +50,7 @@ void mcc::IfUnlessStatement::Generate(
             if (!builder.GetInsertBlock()->GetTerminator())
             {
                 require_tail = true;
-                (void) builder.CreateDirect(Where, tail_target);
+                (void) builder.CreateDirect(Where, {}, tail_target);
             }
         }
         else if (Else)
@@ -59,7 +59,7 @@ void mcc::IfUnlessStatement::Generate(
             if (!builder.GetInsertBlock()->GetTerminator())
             {
                 require_tail = true;
-                (void) builder.CreateDirect(Where, tail_target);
+                (void) builder.CreateDirect(Where, {}, tail_target);
             }
         }
 
@@ -73,18 +73,18 @@ void mcc::IfUnlessStatement::Generate(
         return;
     }
 
-    const auto then_target = Block::Create(Where, builder.GetContext(), parent);
-    const auto else_target = Else ? Block::Create(Where, builder.GetContext(), parent) : tail_target;
+    const auto then_target = Block::Create(Then->Where, "then", builder.GetContext(), parent);
+    const auto else_target = Else ? Block::Create(Else->Where, "else", builder.GetContext(), parent) : tail_target;
 
     (void) builder
-            .CreateBranch(Where, condition, Unless ? else_target : then_target, Unless ? then_target : else_target);
+            .CreateBranch(Where, {}, condition, Unless ? else_target : then_target, Unless ? then_target : else_target);
 
     builder.SetInsertBlock(then_target);
     Then->Generate(builder, frame);
     if (!builder.GetInsertBlock()->GetTerminator())
     {
         require_tail = true;
-        (void) builder.CreateDirect(Where, tail_target);
+        (void) builder.CreateDirect(Where, {}, tail_target);
     }
 
     if (Else)
@@ -94,7 +94,7 @@ void mcc::IfUnlessStatement::Generate(
         if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_tail = true;
-            (void) builder.CreateDirect(Where, tail_target);
+            (void) builder.CreateDirect(Where, {}, tail_target);
         }
     }
 

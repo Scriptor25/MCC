@@ -5,10 +5,11 @@
 
 mcc::InstructionPtr mcc::DeleteInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ValuePtr &value)
 {
-    auto self = std::make_shared<DeleteInstruction>(where, context, value);
+    auto self = std::make_shared<DeleteInstruction>(where, name, context, value);
 
     self->Self = self;
     self->Value->Use(self);
@@ -18,10 +19,12 @@ mcc::InstructionPtr mcc::DeleteInstruction::Create(
 
 mcc::DeleteInstruction::DeleteInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ValuePtr &value)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       Value(value)

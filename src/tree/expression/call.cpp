@@ -41,7 +41,7 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(
         arguments.push_back(argument->GenerateValue(builder, frame));
 
     if (const auto macro = dynamic_cast<MacroExpression *>(Callee.get()))
-        return builder.CreateMacro(Where, macro->Name, arguments);
+        return builder.CreateMacro(Where, {}, macro->Name, arguments);
 
     const auto default_namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
 
@@ -84,5 +84,5 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(
                parameter.FieldType);
     }
 
-    return builder.CreateCall(Where, function, arguments, frame.LandingPad);
+    return builder.CreateCall(Where, {}, function, arguments, frame.LandingPad);
 }

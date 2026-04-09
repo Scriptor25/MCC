@@ -3,34 +3,37 @@
 
 mcc::ValuePtr mcc::GenericEntityReference::Create(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
-        const ValuePtr &name,
+        const ValuePtr &name_val,
         const ValuePtr &path)
 {
-    auto self = std::make_shared<GenericEntityReference>(where, type, name, path);
+    auto self = std::make_shared<GenericEntityReference>(where, name, type, name_val, path);
 
     self->Self = self;
-    self->Name->Use(self);
+    self->NameVal->Use(self);
 
     return self;
 }
 
 mcc::GenericEntityReference::GenericEntityReference(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
-        const ValuePtr &name,
+        const ValuePtr &name_val,
         const ValuePtr &path)
     : Value(where,
+            name,
             type,
             FieldType_MutableReference),
-      Name(name),
+      NameVal(name_val),
       Path(path)
 {
 }
 
 mcc::GenericEntityReference::~GenericEntityReference()
 {
-    Name->Drop(Self);
+    NameVal->Drop(Self);
 }
 
 bool mcc::GenericEntityReference::RequireStack() const
@@ -40,7 +43,7 @@ bool mcc::GenericEntityReference::RequireStack() const
 
 mcc::Result mcc::GenericEntityReference::GenerateResult() const
 {
-    auto name = Name->GenerateResultUnwrap();
+    auto name = NameVal->GenerateResultUnwrap();
     auto path = Path->GenerateResultUnwrap();
 
     auto with_argument = name.WithArgument || path.WithArgument;

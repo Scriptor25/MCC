@@ -39,7 +39,7 @@ static mcc::ValuePtr inc(
         const mcc::ValuePtr &operand)
 {
     const auto one = mcc::ConstantNumber::Create(where, builder.GetContext(), 1);
-    return builder.CreateOperation(where, mcc::Operator_Add, { operand, one });
+    return builder.CreateOperation(where, {}, mcc::Operator_Add, { operand, one });
 };
 
 static mcc::ValuePtr dec(
@@ -48,7 +48,7 @@ static mcc::ValuePtr dec(
         const mcc::ValuePtr &operand)
 {
     const auto one = mcc::ConstantNumber::Create(where, builder.GetContext(), 1);
-    return builder.CreateOperation(where, mcc::Operator_Sub, { operand, one });
+    return builder.CreateOperation(where, {}, mcc::Operator_Sub, { operand, one });
 };
 
 static mcc::ValuePtr neg(
@@ -60,7 +60,7 @@ static mcc::ValuePtr neg(
         return mcc::ConstantNumber::Create(where, builder.GetContext(), -constant_operand->Value);
 
     const auto zero = mcc::ConstantNumber::Create(where, builder.GetContext(), 0);
-    return builder.CreateOperation(where, mcc::Operator_Sub, { zero, operand });
+    return builder.CreateOperation(where, {}, mcc::Operator_Sub, { zero, operand });
 };
 
 mcc::ValuePtr mcc::UnaryExpression::GenerateValue(
@@ -82,7 +82,7 @@ mcc::ValuePtr mcc::UnaryExpression::GenerateValue(
     auto result = operation_(Where, builder, operand);
 
     if (store_)
-        return builder.CreateStore(Where, operand, result);
+        return builder.CreateStore(Where, {}, operand, result);
 
     return result;
 }

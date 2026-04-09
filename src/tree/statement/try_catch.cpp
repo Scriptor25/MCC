@@ -34,8 +34,8 @@ void mcc::TryCatchStatement::Generate(
         Frame &frame) const
 {
     const auto parent       = builder.GetInsertBlock()->Parent;
-    const auto tail_target  = Block::Create(Where, builder.GetContext(), parent);
-    const auto catch_target = Catch ? Block::Create(Catch->Where, builder.GetContext(), parent) : tail_target;
+    const auto tail_target  = Block::Create(Where, "tail", builder.GetContext(), parent);
+    const auto catch_target = Catch ? Block::Create(Catch->Where, "catch", builder.GetContext(), parent) : tail_target;
 
     auto require_tail = !Catch;
 
@@ -47,7 +47,7 @@ void mcc::TryCatchStatement::Generate(
     if (!builder.GetInsertBlock()->GetTerminator())
     {
         require_tail = true;
-        (void) builder.CreateDirect(Try->Where, tail_target);
+        (void) builder.CreateDirect(Try->Where, {}, tail_target);
     }
 
     if (Catch)
@@ -57,7 +57,7 @@ void mcc::TryCatchStatement::Generate(
         builder.PushVariables();
 
         if (!Variable.empty())
-            (void) builder.StoreResult(Catch->Where, ErrorType, Variable);
+            (void) builder.StoreResult(Catch->Where, Variable, ErrorType);
 
         Catch->Generate(builder, frame);
 
@@ -66,7 +66,7 @@ void mcc::TryCatchStatement::Generate(
         if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_tail = true;
-            (void) builder.CreateDirect(Catch->Where, tail_target);
+            (void) builder.CreateDirect(Catch->Where, {}, tail_target);
         }
     }
 

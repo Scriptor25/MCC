@@ -12,8 +12,13 @@ mcc::ValuePtr mcc::Builder::CreateGlobal(
 
     auto &global = m_Globals[location.Namespace][location.Path];
     Assert(!global, where, "already defined global {}", location);
-    return global = GenericStorageReference::
-                   Create(where, type, { location.Namespace, { "__storage__" } }, location.Path.front(), true);
+    return global = GenericStorageReference::Create(
+                   where,
+                   location.String(),
+                   type,
+                   { location.Namespace, { "__storage__" } },
+                   location.Path.front(),
+                   true);
 }
 
 bool mcc::Builder::HasGlobal(ResourceLocation location) const

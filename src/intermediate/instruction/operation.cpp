@@ -5,12 +5,13 @@
 
 mcc::InstructionPtr mcc::OperationInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const E_Operator operator_,
         const ResourceLocation &location,
         const std::vector<ValuePtr> &operands)
 {
-    auto self = std::make_shared<OperationInstruction>(where, context, operator_, location, operands);
+    auto self = std::make_shared<OperationInstruction>(where, name, context, operator_, location, operands);
 
     self->Self = self;
     for (const auto &operand : self->Operands)
@@ -21,12 +22,14 @@ mcc::InstructionPtr mcc::OperationInstruction::Create(
 
 mcc::OperationInstruction::OperationInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const E_Operator operator_,
         ResourceLocation location,
         const std::vector<ValuePtr> &operands)
     : Instruction(
               where,
+              name,
               context.GetNumber(),
               FieldType_Value),
       Operator(operator_),

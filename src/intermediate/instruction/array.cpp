@@ -5,38 +5,42 @@
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &array,
         const ValuePtr &value)
 {
-    return Create(where, context, ArrayOperation_Append, location, array, value, ~0);
+    return Create(where, name, context, ArrayOperation_Append, location, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &array,
         const ValuePtr &value)
 {
-    return Create(where, context, ArrayOperation_Prepend, location, array, value, ~0);
+    return Create(where, name, context, ArrayOperation_Prepend, location, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &array,
         const ValuePtr &value,
         const IndexT index)
 {
-    return Create(where, context, ArrayOperation_Insert, location, array, value, index);
+    return Create(where, name, context, ArrayOperation_Insert, location, array, value, index);
 }
 
 
 mcc::ArrayInstruction::SPtr mcc::ArrayInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         E_ArrayOperation array_operation,
         const ResourceLocation &location,
@@ -44,7 +48,8 @@ mcc::ArrayInstruction::SPtr mcc::ArrayInstruction::Create(
         const ValuePtr &value,
         IndexT index)
 {
-    auto self = std::make_shared<ArrayInstruction>(where, context, array_operation, location, array, value, index);
+    auto self =
+            std::make_shared<ArrayInstruction>(where, name, context, array_operation, location, array, value, index);
 
     self->Self = self;
     self->Array->Use(self);
@@ -56,6 +61,7 @@ mcc::ArrayInstruction::SPtr mcc::ArrayInstruction::Create(
 
 mcc::ArrayInstruction::ArrayInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const E_ArrayOperation array_operation,
         ResourceLocation location,
@@ -64,6 +70,7 @@ mcc::ArrayInstruction::ArrayInstruction(
         const IndexT index)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       ArrayOperation(array_operation),
@@ -113,37 +120,37 @@ void mcc::ArrayInstruction::Generate(
     switch (value.Type)
     {
     case ResultType_Value:
-        commands
-                .Append("{}data modify {} {} {} {} value {}",
-                        prefix,
-                        array.ReferenceType,
-                        array.Target,
-                        array.Path,
-                        operation,
-                        value.Value);
+        commands.Append(
+                "{}data modify {} {} {} {} value {}",
+                prefix,
+                array.ReferenceType,
+                array.Target,
+                array.Path,
+                operation,
+                value.Value);
         break;
 
     case ResultType_Reference:
-        commands
-                .Append("{}data modify {} {} {} {} from {} {} {}",
-                        prefix,
-                        array.ReferenceType,
-                        array.Target,
-                        array.Path,
-                        operation,
-                        value.ReferenceType,
-                        value.Target,
-                        value.Path);
+        commands.Append(
+                "{}data modify {} {} {} {} from {} {} {}",
+                prefix,
+                array.ReferenceType,
+                array.Target,
+                array.Path,
+                operation,
+                value.ReferenceType,
+                value.Target,
+                value.Path);
         break;
 
     case ResultType_Argument:
-        commands
-                .Append("$data modify {} {} {} {} value {}",
-                        array.ReferenceType,
-                        array.Target,
-                        array.Path,
-                        operation,
-                        value.Name);
+        commands.Append(
+                "$data modify {} {} {} {} value {}",
+                array.ReferenceType,
+                array.Target,
+                array.Path,
+                operation,
+                value.Name);
         break;
 
     default:

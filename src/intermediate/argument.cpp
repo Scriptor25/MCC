@@ -3,22 +3,22 @@
 
 mcc::ValuePtr mcc::ArgumentValue::Create(
         const SourceLocation &where,
-        const TypePtr &type,
-        const std::string &name)
+        const std::string &name,
+        const TypePtr &type)
 {
-    auto self  = std::make_shared<ArgumentValue>(where, type, name);
+    auto self  = std::make_shared<ArgumentValue>(where, name, type);
     self->Self = self;
     return self;
 }
 
 mcc::ArgumentValue::ArgumentValue(
         const SourceLocation &where,
-        const TypePtr &type,
-        std::string name)
+        const std::string &name,
+        const TypePtr &type)
     : Value(where,
+            name,
             type,
-            FieldType_Value),
-      Name(std::move(name))
+            FieldType_Value)
 {
 }
 

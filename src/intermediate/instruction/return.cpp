@@ -5,11 +5,12 @@
 
 mcc::InstructionPtr mcc::ReturnInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const ValuePtr &value)
 {
-    auto self = std::make_shared<ReturnInstruction>(where, context, location, value);
+    auto self = std::make_shared<ReturnInstruction>(where, name, context, location, value);
 
     self->Self = self;
     if (self->Value)
@@ -20,11 +21,13 @@ mcc::InstructionPtr mcc::ReturnInstruction::Create(
 
 mcc::ReturnInstruction::ReturnInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         ResourceLocation location,
         ValuePtr value)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       Location(std::move(location)),

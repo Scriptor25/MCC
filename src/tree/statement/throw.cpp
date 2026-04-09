@@ -20,5 +20,5 @@ void mcc::ThrowStatement::Generate(
         Frame &frame) const
 {
     const auto value = Value->GenerateValue(builder, frame);
-    (void) builder.CreateThrow(Where, value, frame.LandingPad);
+    (void) builder.CreateThrow(Where, {}, value, frame.LandingPad);
 }

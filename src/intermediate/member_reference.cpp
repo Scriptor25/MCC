@@ -4,6 +4,7 @@
 
 mcc::ValuePtr mcc::MemberReference::Create(
         const SourceLocation &where,
+        const std::string &name,
         const ValuePtr &object,
         const std::string &member)
 {
@@ -12,7 +13,7 @@ mcc::ValuePtr mcc::MemberReference::Create(
 
     auto type = object_type->Elements.at(member);
 
-    auto self = std::make_shared<MemberReference>(where, type, object, member);
+    auto self = std::make_shared<MemberReference>(where, name, type, object, member);
 
     self->Self = self;
     self->Object->Use(self);
@@ -22,10 +23,12 @@ mcc::ValuePtr mcc::MemberReference::Create(
 
 mcc::MemberReference::MemberReference(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         const ValuePtr &object,
         std::string member)
     : Value(where,
+            name,
             type,
             object->FieldType),
       Object(object),

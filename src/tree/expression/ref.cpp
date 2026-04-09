@@ -57,21 +57,21 @@ mcc::ValuePtr mcc::RefExpression::GenerateValue(
         const auto target_position_y = TargetPositionY->GenerateValue(builder, frame);
         const auto target_position_z = TargetPositionZ->GenerateValue(builder, frame);
         return GenericBlockReference::
-                Create(Where, Type, target_position_x, target_position_y, target_position_z, path);
+                Create(Where, {}, Type, target_position_x, target_position_y, target_position_z, path);
     }
 
     // ... entity <target name> <path>
     case ReferenceType_Entity:
     {
         const auto target_name = TargetName->GenerateValue(builder, frame);
-        return GenericEntityReference::Create(Where, Type, target_name, path);
+        return GenericEntityReference::Create(Where, {}, Type, target_name, path);
     }
 
     // ... storage <target location> <path>
     case ReferenceType_Storage:
     {
         const auto target_location = TargetLocation->GenerateValue(builder, frame);
-        return GenericStorageReference::Create(Where, Type, target_location, path, true);
+        return GenericStorageReference::Create(Where, {}, Type, target_location, path, true);
     }
     }
 

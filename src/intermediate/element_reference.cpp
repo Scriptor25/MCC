@@ -5,6 +5,7 @@
 
 mcc::ElementReference::SPtr mcc::ElementReference::Create(
         const SourceLocation &where,
+        const std::string &name,
         const ValuePtr &base,
         const ValuePtr &index)
 {
@@ -27,7 +28,7 @@ mcc::ElementReference::SPtr mcc::ElementReference::Create(
     else
         Error(where, "base must be of type array or tuple");
 
-    auto self = std::make_shared<ElementReference>(where, type, base, index);
+    auto self = std::make_shared<ElementReference>(where, name, type, base, index);
 
     self->Self = self;
     self->Base->Use(self);
@@ -38,10 +39,12 @@ mcc::ElementReference::SPtr mcc::ElementReference::Create(
 
 mcc::ElementReference::ElementReference(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         const ValuePtr &base,
         const ValuePtr &index)
     : Value(where,
+            name,
             type,
             base->FieldType),
       Base(base),

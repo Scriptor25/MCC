@@ -30,9 +30,9 @@ void mcc::ForStatement::Generate(
         Frame &frame) const
 {
     const auto parent      = builder.GetInsertBlock()->Parent;
-    const auto head_target = Block::Create(Where, builder.GetContext(), parent);
-    const auto loop_target = Block::Create(Do->Where, builder.GetContext(), parent);
-    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto head_target = Block::Create(Condition ? Condition->Where : Where, "head", builder.GetContext(), parent);
+    const auto loop_target = Block::Create(Do->Where, "loop", builder.GetContext(), parent);
+    const auto tail_target = Block::Create(Where, "tail", builder.GetContext(), parent);
 
     auto target_frame = frame;
     target_frame.Head = head_target;
@@ -42,22 +42,22 @@ void mcc::ForStatement::Generate(
 
     if (Prefix)
         Prefix->Generate(builder, frame);
-    (void) builder.CreateDirect(Where, head_target);
+    (void) builder.CreateDirect(Where, {}, head_target);
 
     builder.SetInsertBlock(head_target);
     if (Condition)
     {
         auto condition = Condition->GenerateValue(builder, frame);
         if (!condition->Type->IsNumber())
-            condition = builder.CreateNotNull(Condition->Where, condition);
+            condition = builder.CreateNotNull(Condition->Where, {}, condition);
 
         if (const auto constant_condition = std::dynamic_pointer_cast<ConstantNumber>(condition))
-            (void) builder.CreateDirect(Condition->Where, constant_condition->Value ? loop_target : tail_target);
+            (void) builder.CreateDirect(Condition->Where, {}, constant_condition->Value ? loop_target : tail_target);
         else
-            (void) builder.CreateBranch(Condition->Where, condition, loop_target, tail_target);
+            (void) builder.CreateBranch(Condition->Where, {}, condition, loop_target, tail_target);
     }
     else
-        (void) builder.CreateDirect(Where, loop_target);
+        (void) builder.CreateDirect(Where, {}, loop_target);
 
     builder.SetInsertBlock(loop_target);
     Do->Generate(builder, target_frame);
@@ -65,7 +65,7 @@ void mcc::ForStatement::Generate(
     {
         if (Suffix)
             Suffix->Generate(builder, frame);
-        (void) builder.CreateDirect(Do->Where, head_target);
+        (void) builder.CreateDirect(Do->Where, {}, head_target);
     }
 
     builder.PopVariables();

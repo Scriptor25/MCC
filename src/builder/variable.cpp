@@ -25,8 +25,8 @@ mcc::ValuePtr mcc::Builder::CreateVariable(
     if (!initializer)
         initializer = type->GetNull(where);
 
-    variable = Allocate(where, type, is_mutable);
-    (void) CreateStore(where, variable, initializer, true);
+    variable = Allocate(where, name, type, is_mutable);
+    (void) CreateStore(where, name + ".store", variable, initializer, true);
 
     return variable;
 }

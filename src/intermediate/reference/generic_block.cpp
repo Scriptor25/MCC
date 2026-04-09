@@ -3,13 +3,14 @@
 
 mcc::ValuePtr mcc::GenericBlockReference::Create(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         const ValuePtr &position_x,
         const ValuePtr &position_y,
         const ValuePtr &position_z,
         const ValuePtr &path)
 {
-    auto self = std::make_shared<GenericBlockReference>(where, type, position_x, position_y, position_z, path);
+    auto self = std::make_shared<GenericBlockReference>(where, name, type, position_x, position_y, position_z, path);
 
     self->Self = self;
     self->PositionX->Use(self);
@@ -21,12 +22,14 @@ mcc::ValuePtr mcc::GenericBlockReference::Create(
 
 mcc::GenericBlockReference::GenericBlockReference(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         const ValuePtr &position_x,
         const ValuePtr &position_y,
         const ValuePtr &position_z,
         const ValuePtr &path)
     : Value(where,
+            name,
             type,
             FieldType_ImmutableReference),
       PositionX(position_x),

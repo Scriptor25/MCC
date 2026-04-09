@@ -44,11 +44,11 @@ mcc::ValuePtr mcc::FormatExpression::GenerateValue(
 
     const auto type = builder.GetContext().GetArray(builder.GetContext().GetUnionOrSingle(elements));
 
-    auto array = builder.Allocate(Where, type, false);
-    (void) builder.CreateStore(Where, array, type->GetNull(Where), true);
+    auto array = builder.Allocate(Where, {}, type, false);
+    (void) builder.CreateStore(Where, {}, array, type->GetNull(Where), true);
 
     for (const auto &value : values)
-        (void) builder.CreateAppend(Where, array, StringifyValue::Create(Where, value), true);
+        (void) builder.CreateAppend(Where, {}, array, StringifyValue::Create(Where, {}, value), true);
 
     return array;
 }

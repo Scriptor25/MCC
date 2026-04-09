@@ -33,6 +33,7 @@ mcc::Function::Function(
         TypePtr result_type,
         const bool throws)
     : Value(where,
+            location.String(),
             type,
             FieldType_Value),
       Location(std::move(location)),
@@ -99,7 +100,7 @@ bool mcc::Function::MergeConsecutiveBlocks()
         if (block->Successors.size() == 1)
             if (auto &successor = *block->Successors.begin(); successor->Predecessors.size() == 1)
             {
-                Assert(!block->Instructions.empty(), "instructions must not be empty");
+                Assert(!block->Instructions.empty(), block->Where, "block instructions must not be empty");
 
                 block->Instructions.pop_back();
 
@@ -119,6 +120,11 @@ bool mcc::Function::MergeConsecutiveBlocks()
                 successor->Successors.clear();
 
                 blocks.insert(successor);
+
+                const auto uses = successor->Uses;
+                for (auto &use : uses)
+                    if (!use.expired())
+                        use.lock()->Replace(successor, block);
             }
     }
 
@@ -144,15 +150,26 @@ void mcc::Function::GenerateFunction(Package &package) const
 {
     const auto require_stack = RequireStack();
 
-    for (unsigned i = 0; i < Blocks.size(); ++i)
+    std::set<std::string> names;
+    for (auto it = Blocks.begin(); it != Blocks.end(); ++it)
     {
+        auto first = it == Blocks.begin();
+
+        auto &block = *it;
+
         auto [namespace_, path_] = Location;
-        if (i)
-            path_.push_back(std::to_string(i));
+        if (!first)
+        {
+            auto name = block->Name;
+            for (unsigned i = 0; names.contains(name);)
+                name = block->Name + std::to_string(++i);
+            names.insert(name);
+            path_.push_back(name);
+        }
 
         CommandVector commands(package.Functions[namespace_][path_]);
 
-        if (!i && require_stack)
+        if (first && require_stack)
         {
             commands.Append("data modify storage {} stack prepend value {{}}", Location);
 
@@ -170,7 +187,12 @@ void mcc::Function::GenerateFunction(Package &package) const
             }
         }
 
-        Blocks[i]->Generate(commands, require_stack);
+        Assert(!block->Instructions.empty(),
+               block->Where,
+               "block '{}' instructions must not be empty",
+               block->GetLocation());
+
+        block->Generate(commands, require_stack);
     }
 }
 
@@ -199,19 +221,28 @@ void mcc::Function::ForwardArguments(
 
 mcc::ResourceLocation mcc::Function::GetLocation(const BlockPtr &target_block) const
 {
-    Assert(!!target_block, "target block must not be null");
+    Assert(!!target_block, Where, "target block must not be null");
 
-    for (unsigned i = 0; i < Blocks.size(); ++i)
-        if (Blocks[i] == target_block)
-            return Location.Child(std::to_string(i));
+    std::set<std::string> names;
+    for (auto &block : Blocks)
+    {
+        auto name = block->Name;
+        for (unsigned i = 0; names.contains(name);)
+            name = block->Name + std::to_string(++i);
+        names.insert(name);
+
+        if (block == target_block)
+            return Location.Child(name);
+    }
 
     Error(target_block->Where, "target block is not owned by the function");
 }
 
 mcc::BlockPtr mcc::Function::Erase(const BlockPtr &target_block)
 {
-    Assert(!!target_block, "target block must not be null");
+    Assert(!!target_block, Where, "target block must not be null");
     Assert(target_block->Predecessors.empty(), target_block->Where, "target block must not have any predecessors");
+    Assert(target_block->Uses.empty(), target_block->Where, "target block must not have any uses");
 
     for (auto i = Blocks.begin(); i != Blocks.end(); ++i)
         if (*i == target_block)

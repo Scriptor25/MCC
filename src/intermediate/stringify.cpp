@@ -4,9 +4,10 @@
 
 mcc::ValuePtr mcc::StringifyValue::Create(
         const SourceLocation &where,
+        const std::string &name,
         const ValuePtr &target)
 {
-    auto self = std::make_shared<StringifyValue>(where, target);
+    auto self = std::make_shared<StringifyValue>(where, name, target);
 
     self->Self = self;
     self->Target->Use(self);
@@ -16,8 +17,10 @@ mcc::ValuePtr mcc::StringifyValue::Create(
 
 mcc::StringifyValue::StringifyValue(
         const SourceLocation &where,
+        const std::string &name,
         const ValuePtr &target)
     : Value(where,
+            name,
             target->Type->Context.GetString(),
             FieldType_Value),
       Target(target)

@@ -5,12 +5,13 @@
 
 mcc::ValuePtr mcc::GenericStorageReference::Create(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         const ValuePtr &location,
         const ValuePtr &path,
         bool is_mutable)
 {
-    auto self = std::make_shared<GenericStorageReference>(where, type, location, path, is_mutable);
+    auto self = std::make_shared<GenericStorageReference>(where, name, type, location, path, is_mutable);
 
     self->Self = self;
     self->Location->Use(self);
@@ -21,6 +22,7 @@ mcc::ValuePtr mcc::GenericStorageReference::Create(
 
 mcc::ValuePtr mcc::GenericStorageReference::Create(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         const ResourceLocation &location,
         const std::string &path,
@@ -29,16 +31,18 @@ mcc::ValuePtr mcc::GenericStorageReference::Create(
     auto location_ = ConstantResource::Create(where, type->Context.GetVoid(), location);
     auto path_     = ConstantString::Create(where, type->Context, path);
 
-    return Create(where, type, location_, path_, is_mutable);
+    return Create(where, name, type, location_, path_, is_mutable);
 }
 
 mcc::GenericStorageReference::GenericStorageReference(
         const SourceLocation &where,
+        const std::string &name,
         const TypePtr &type,
         ValuePtr location,
         ValuePtr path,
         const bool is_mutable)
     : Value(where,
+            name,
             type,
             is_mutable ? FieldType_MutableReference : FieldType_ImmutableReference),
       Location(std::move(location)),

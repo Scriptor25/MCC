@@ -7,22 +7,26 @@
 
 mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const BlockPtr &target)
 {
-    return Create(where, context, location, target, {}, {});
+    return Create(where, name, context, location, target, {}, {});
 }
 
 mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         const ResourceLocation &location,
         const BlockPtr &target,
         const ValuePtr &result,
         const ValuePtr &branch_result)
 {
-    auto self = std::make_shared<DirectBranchInstruction>(where, context, location, target, result, branch_result);
+    auto self = std::make_shared<
+            DirectBranchInstruction
+    >(where, name, context, location, target, result, branch_result);
 
     self->Self = self;
     self->Target->Use(self);
@@ -36,6 +40,7 @@ mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
 
 mcc::DirectBranchInstruction::DirectBranchInstruction(
         const SourceLocation &where,
+        const std::string &name,
         TypeContext &context,
         ResourceLocation location,
         BlockPtr target,
@@ -43,6 +48,7 @@ mcc::DirectBranchInstruction::DirectBranchInstruction(
         ValuePtr branch_result)
     : Instruction(
               where,
+              name,
               context.GetVoid(),
               FieldType_Value),
       Location(std::move(location)),

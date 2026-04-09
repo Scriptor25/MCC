@@ -86,7 +86,8 @@ void mcc::DefineNode::Generate(Builder &builder) const
     if (!Body)
         return;
 
-    builder.SetInsertBlock(Block::Create(Where, builder.GetContext(), function));
+    auto entry_target = Block::Create(Body->Where, "entry", builder.GetContext(), function);
+    builder.SetInsertBlock(entry_target);
 
     builder.PushVariables();
 
@@ -96,23 +97,25 @@ void mcc::DefineNode::Generate(Builder &builder) const
         switch (field_type_)
         {
         case FieldType_Value:
-            value = ArgumentValue::Create(Where, type_, name_);
+            value = ArgumentValue::Create(Where, name_, type_);
             break;
         case FieldType_MutableReference:
-            value = GenericStorageReference::
-                    Create(Where,
-                           type_,
-                           ArgumentValue::Create(Where, nullptr, name_ + "_target"),
-                           ArgumentValue::Create(Where, nullptr, name_ + "_path"),
-                           true);
+            value = GenericStorageReference::Create(
+                    Where,
+                    name_,
+                    type_,
+                    ArgumentValue::Create(Where, name_ + "_target", {}),
+                    ArgumentValue::Create(Where, name_ + "_path", {}),
+                    true);
             break;
         case FieldType_ImmutableReference:
-            value = GenericStorageReference::
-                    Create(Where,
-                           type_,
-                           ArgumentValue::Create(Where, nullptr, name_ + "_target"),
-                           ArgumentValue::Create(Where, nullptr, name_ + "_path"),
-                           false);
+            value = GenericStorageReference::Create(
+                    Where,
+                    name_,
+                    type_,
+                    ArgumentValue::Create(Where, name_ + "_target", {}),
+                    ArgumentValue::Create(Where, name_ + "_path", {}),
+                    false);
             break;
         }
         builder.InsertVariable(Where, name_, value);
@@ -140,7 +143,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
         else if (ResultType->IsVoid())
         {
             builder.SetInsertBlock(block);
-            (void) builder.CreateReturn(Where);
+            (void) builder.CreateReturn(Where, {});
         }
         else
             Error(Where, "not all paths return a value");

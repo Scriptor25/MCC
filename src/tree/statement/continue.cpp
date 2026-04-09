@@ -18,5 +18,5 @@ void mcc::ContinueStatement::Generate(
 {
     Assert(!!frame.Head, Where, "no head target in current frame");
     frame.Flags |= FrameFlag_RequireHead;
-    (void) builder.CreateDirect(Where, frame.Head);
+    (void) builder.CreateDirect(Where, {}, frame.Head);
 }

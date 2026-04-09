@@ -11,10 +11,9 @@ mcc::SwitchStatement::SwitchStatement(
         const SourceLocation &where,
         ExpressionPtr condition,
         StatementPtr default_,
-        std::vector<std::pair<
-                std::vector<ExpressionPtr>,
-                StatementPtr
-        >> cases)
+        std::vector<std::
+                            pair<std::vector<ExpressionPtr>,
+                                 StatementPtr>> cases)
     : Statement(where),
       Condition(std::move(condition)),
       Default(std::move(default_)),
@@ -59,7 +58,7 @@ void mcc::SwitchStatement::Generate(
 
     const auto pre_target  = builder.GetInsertBlock();
     const auto parent      = pre_target->Parent;
-    const auto tail_target = Block::Create(Where, builder.GetContext(), parent);
+    const auto tail_target = Block::Create(Where, "tail", builder.GetContext(), parent);
 
     auto require_tail = !Default;
 
@@ -93,7 +92,7 @@ void mcc::SwitchStatement::Generate(
                     if (!builder.GetInsertBlock()->GetTerminator())
                     {
                         require_tail = true;
-                        (void) builder.CreateDirect(case_->Where, tail_target);
+                        (void) builder.CreateDirect(case_->Where, {}, tail_target);
                         break;
                     }
                 }
@@ -106,7 +105,7 @@ void mcc::SwitchStatement::Generate(
             if (!builder.GetInsertBlock()->GetTerminator())
             {
                 require_tail = true;
-                (void) builder.CreateDirect(Default->Where, tail_target);
+                (void) builder.CreateDirect(Default->Where, {}, tail_target);
             }
         }
 
@@ -120,7 +119,8 @@ void mcc::SwitchStatement::Generate(
         return;
     }
 
-    const auto default_target = Default ? Block::Create(Default->Where, builder.GetContext(), parent) : tail_target;
+    const auto default_target =
+            Default ? Block::Create(Default->Where, "default", builder.GetContext(), parent) : tail_target;
 
     if (Default)
     {
@@ -129,7 +129,7 @@ void mcc::SwitchStatement::Generate(
         if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_tail = true;
-            (void) builder.CreateDirect(Default->Where, tail_target);
+            (void) builder.CreateDirect(Default->Where, {}, tail_target);
         }
     }
 
@@ -137,7 +137,7 @@ void mcc::SwitchStatement::Generate(
 
     for (auto &[case_conditions_, case_] : Cases)
     {
-        auto case_target = Block::Create(case_->Where, builder.GetContext(), parent);
+        auto case_target = Block::Create(case_->Where, "case", builder.GetContext(), parent);
 
         for (auto &case_condition : case_conditions_)
         {
@@ -159,12 +159,12 @@ void mcc::SwitchStatement::Generate(
         if (!builder.GetInsertBlock()->GetTerminator())
         {
             require_tail = true;
-            (void) builder.CreateDirect(case_->Where, tail_target);
+            (void) builder.CreateDirect(case_->Where, {}, tail_target);
         }
     }
 
     builder.SetInsertBlock(pre_target);
-    (void) builder.CreateSwitch(Condition->Where, condition, default_target, case_targets);
+    (void) builder.CreateSwitch(Condition->Where, {}, condition, default_target, case_targets);
 
     if (!require_tail && !(target_frame.Flags & FrameFlag_RequireTail))
     {

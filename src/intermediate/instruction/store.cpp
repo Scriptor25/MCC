@@ -4,10 +4,11 @@
 
 mcc::InstructionPtr mcc::StoreInstruction::Create(
         const SourceLocation &where,
+        const std::string &name,
         const ValuePtr &dst,
         const ValuePtr &src)
 {
-    auto self = std::make_shared<StoreInstruction>(where, dst, src);
+    auto self = std::make_shared<StoreInstruction>(where, name, dst, src);
 
     self->Self = self;
     self->Dst->Use(self);
@@ -18,10 +19,12 @@ mcc::InstructionPtr mcc::StoreInstruction::Create(
 
 mcc::StoreInstruction::StoreInstruction(
         const SourceLocation &where,
+        const std::string &name,
         const ValuePtr &dst,
         ValuePtr src)
     : Instruction(
               where,
+              name,
               dst->Type,
               dst->FieldType),
       Dst(dst),
