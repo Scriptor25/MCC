@@ -11,6 +11,7 @@
 
 mcc::DefineNode::DefineNode(
         const SourceLocation &where,
+        bool is_operator,
         ResourceLocation location,
         ParameterList parameters,
         TypePtr result_type,
@@ -19,6 +20,7 @@ mcc::DefineNode::DefineNode(
         StatementPtr body)
     : TreeNode(where),
       Location(std::move(location)),
+      IsOperator(is_operator),
       Parameters(std::move(parameters)),
       ResultType(std::move(result_type)),
       Throws(throws),
@@ -29,7 +31,7 @@ mcc::DefineNode::DefineNode(
 
 std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
 {
-    stream << "define " << Location << '(';
+    stream << "define " << (IsOperator ? "operator" : "") << Location << '(';
     for (unsigned i = 0; i < Parameters.size(); ++i)
     {
         if (i)
@@ -64,15 +66,11 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
 
 void mcc::DefineNode::Generate(Builder &builder) const
 {
-    FunctionPtr function;
-
-    if (!builder.HasFunction(Location))
+    auto function = builder.FindFunction(Location, Parameters);
+    if (!function)
         function = builder.CreateFunction(Where, Location, Parameters, ResultType, Throws);
     else
-    {
-        function = builder.GetFunction(Where, Location);
         Check(function);
-    }
 
     for (auto [tag_namespace_, tag_path_] : Tags)
     {
@@ -155,13 +153,13 @@ void mcc::DefineNode::GenerateInclude(
         Builder &builder,
         std::set<std::filesystem::path> &include_chain) const
 {
-    if (!builder.HasFunction(Location))
+    auto function = builder.FindFunction(Location, Parameters);
+    if (!function)
     {
         builder.CreateFunction(Where, Location, Parameters, ResultType, Throws);
         return;
     }
 
-    const auto function = builder.GetFunction(Where, Location);
     Check(function);
 }
 
@@ -169,18 +167,4 @@ void mcc::DefineNode::Check(const FunctionPtr &function) const
 {
     Assert(function->ResultType == ResultType, Where, "cannot implement function with different result type");
     Assert(function->Throws == Throws, Where, "cannot implement function with different throw policy");
-    Assert(function->Parameters.size() == Parameters.size(),
-           Where,
-           "cannot implement function with different parameter count");
-    for (unsigned i = 0; i < Parameters.size(); ++i)
-    {
-        Assert(function->Parameters[i].Type == Parameters[i].Type,
-               Where,
-               "cannot implement function with different parameter type for offset {}",
-               i);
-        Assert(function->Parameters[i].FieldType == Parameters[i].FieldType,
-               Where,
-               "cannot implement function with different field type for offset {}",
-               i);
-    }
 }

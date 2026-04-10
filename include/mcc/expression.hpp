@@ -16,6 +16,9 @@ namespace mcc
         [[nodiscard]] virtual ValuePtr GenerateValue(
                 Builder &builder,
                 const Frame &frame) const = 0;
+        [[nodiscard]] virtual FunctionPtr GenerateCallee(
+                Builder &builder,
+                const ParameterRefList &parameters) const;
     };
 
     struct ArrayExpression final : Expression
@@ -231,6 +234,9 @@ namespace mcc
         [[nodiscard]] ValuePtr GenerateValue(
                 Builder &builder,
                 const Frame &frame) const override;
+        [[nodiscard]] FunctionPtr GenerateCallee(
+                Builder &builder,
+                const ParameterRefList &parameters) const override;
 
         ResourceLocation Location;
     };
@@ -283,6 +289,9 @@ namespace mcc
         [[nodiscard]] ValuePtr GenerateValue(
                 Builder &builder,
                 const Frame &frame) const override;
+        [[nodiscard]] FunctionPtr GenerateCallee(
+                Builder &builder,
+                const ParameterRefList &parameters) const override;
 
         std::string Name;
     };

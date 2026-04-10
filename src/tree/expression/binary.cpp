@@ -1,4 +1,5 @@
 #include <mcc/builder.hpp>
+#include <mcc/common.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
@@ -69,8 +70,19 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(
     auto left  = Left->GenerateValue(builder, frame);
     auto right = Right->GenerateValue(builder, frame);
 
-    // TODO: find operator overload for type/field
-    // builder.FindFunction(Operator, left->Type, left->FieldType, right->Type, right->FieldType);
+    const ParameterRefList parameters = {
+        {  left->Type,  left->FieldType },
+        { right->Type, right->FieldType },
+    };
+
+    auto candidates = builder.FindCandidates(Operator, parameters);
+
+    if (!candidates.empty())
+    {
+        auto callee = builder.FindUnambiguousCandidate(Where, candidates, parameters);
+
+        return builder.CreateCall(Where, {}, callee, { left, right }, frame.LandingPad);
+    }
 
     if (const auto constant_left = std::dynamic_pointer_cast<ConstantNumber>(left),
         constant_right           = std::dynamic_pointer_cast<ConstantNumber>(right);

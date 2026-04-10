@@ -23,10 +23,22 @@ namespace mcc
                 const ParameterList &parameters,
                 const TypePtr &result_type,
                 bool throws);
-        [[nodiscard]] bool HasFunction(ResourceLocation location) const;
-        [[nodiscard]] FunctionPtr GetFunction(
+
+        [[nodiscard]] FunctionPtr FindFunction(
+                ResourceLocation location,
+                const ParameterList &parameters) const;
+
+        [[nodiscard]] std::vector<FunctionPtr> FindCandidates(
+                ResourceLocation location,
+                const ParameterRefList &parameters) const;
+        [[nodiscard]] std::vector<FunctionPtr> FindCandidates(
+                const std::string &name,
+                const ParameterRefList &parameters) const;
+
+        [[nodiscard]] FunctionPtr FindUnambiguousCandidate(
                 const SourceLocation &where,
-                ResourceLocation location) const;
+                const std::vector<FunctionPtr> &candidates,
+                const ParameterRefList &parameters) const;
 
         ValuePtr CreateGlobal(
                 const SourceLocation &where,
@@ -199,7 +211,7 @@ namespace mcc
         Package &m_Package;
 
         std::string m_Namespace;
-        std::map<std::string, std::map<std::vector<std::string>, FunctionPtr>> m_Functions;
+        std::map<std::string, std::map<std::vector<std::string>, std::vector<FunctionPtr>>> m_Functions;
         std::map<std::string, std::map<std::vector<std::string>, ValuePtr>> m_Globals;
 
         BlockPtr m_InsertBlock;

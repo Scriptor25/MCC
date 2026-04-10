@@ -54,9 +54,7 @@ bool mcc::Builder::HasVariable(const std::string &name) const
         if (variables.contains(name))
             return true;
 
-    const ResourceLocation location{ { name } };
-
-    return HasGlobal(location) || HasFunction(location);
+    return HasGlobal({ { name } });
 }
 
 mcc::ValuePtr mcc::Builder::GetVariable(
@@ -73,9 +71,6 @@ mcc::ValuePtr mcc::Builder::GetVariable(
 
     if (HasGlobal(location))
         return GetGlobal(where, location);
-
-    if (HasFunction(location))
-        return GetFunction(where, location);
 
     Error(where, "undefined variable {}", name);
 }

@@ -67,6 +67,13 @@ namespace mcc
         MutableReference,
     };
 
+    inline int operator-(
+            FieldType_ a,
+            FieldType_ b)
+    {
+        return static_cast<int>(a) - static_cast<int>(b);
+    }
+
     inline std::optional<Declarator_> ToDeclarator(const std::string_view &str)
     {
         static const std::map<std::string_view, Declarator_> map = {

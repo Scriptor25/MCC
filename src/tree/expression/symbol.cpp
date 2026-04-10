@@ -1,5 +1,7 @@
+#include <mcc/block.hpp>
 #include <mcc/builder.hpp>
 #include <mcc/expression.hpp>
+#include <mcc/function.hpp>
 #include <mcc/value.hpp>
 
 mcc::SymbolExpression::SymbolExpression(
@@ -20,4 +22,12 @@ mcc::ValuePtr mcc::SymbolExpression::GenerateValue(
         const Frame &frame) const
 {
     return builder.GetVariable(Where, Name);
+}
+
+mcc::FunctionPtr mcc::SymbolExpression::GenerateCallee(
+        Builder &builder,
+        const ParameterRefList &parameters) const
+{
+    auto candidates = builder.FindCandidates(Name, parameters);
+    return builder.FindUnambiguousCandidate(Where, candidates, parameters);
 }

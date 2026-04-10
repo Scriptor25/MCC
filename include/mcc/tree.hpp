@@ -26,6 +26,7 @@ namespace mcc
     {
         DefineNode(
                 const SourceLocation &where,
+                bool is_operator,
                 ResourceLocation location,
                 ParameterList parameters,
                 TypePtr result_type,
@@ -42,6 +43,7 @@ namespace mcc
         void Check(const FunctionPtr &function) const;
 
         ResourceLocation Location;
+        bool IsOperator;
         ParameterList Parameters;
         TypePtr ResultType;
         bool Throws;

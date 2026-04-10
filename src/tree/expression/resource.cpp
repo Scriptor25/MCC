@@ -1,4 +1,6 @@
+#include <mcc/block.hpp>
 #include <mcc/builder.hpp>
+#include <mcc/enums.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/function.hpp>
@@ -20,11 +22,17 @@ mcc::ValuePtr mcc::ResourceExpression::GenerateValue(
         Builder &builder,
         const Frame &frame) const
 {
-    if (builder.HasGlobal(Location))
-        return builder.GetGlobal(Where, Location);
+    return builder.GetGlobal(Where, Location);
+}
 
-    if (builder.HasFunction(Location))
-        return builder.GetFunction(Where, Location);
+mcc::FunctionPtr mcc::ResourceExpression::GenerateCallee(
+        Builder &builder,
+        const ParameterRefList &parameters) const
+{
+    auto location = Location;
+    if (location.Namespace.empty())
+        location.Namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
 
-    Error(Where, "no global symbol or function at resource location {}", Location);
+    auto candidates = builder.FindCandidates(location, parameters);
+    return builder.FindUnambiguousCandidate(Where, candidates, parameters);
 }

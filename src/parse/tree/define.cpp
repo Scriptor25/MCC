@@ -1,22 +1,30 @@
 #include <mcc/expression.hpp>
+#include <mcc/lex.hpp>
 #include <mcc/parse.hpp>
+#include <mcc/resource.hpp>
 #include <mcc/statement.hpp>
 #include <mcc/type.hpp>
 
 mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
 {
-    auto where    = Expect(TokenType::Symbol, "define").Where;
-    auto location = ParseResourceLocation();
+    auto where       = Expect(TokenType::Symbol, "define").Where;
+    auto is_operator = SkipIf(TokenType::Symbol, "operator");
+
+    ResourceLocation location;
+    if (is_operator)
+        location.Path = { Expect(TokenType::Operator).Value };
+    else
+        location = ParseResourceLocation();
 
     ParameterList parameters;
     std::vector<ResourceTag> tags;
-    std::vector<ExpressionPtr> expressions;
 
     Expect(TokenType::Other, "(");
     while (!At(TokenType::Other, ")") && !At(TokenType::EoF))
     {
-        const auto constant  = SkipIf(TokenType::Symbol, "const");
-        const auto reference = SkipIf(TokenType::Other, "&") || (constant && (Expect(TokenType::Other, "&"), true));
+        const auto is_constant = SkipIf(TokenType::Symbol, "const");
+        const auto is_reference =
+                SkipIf(TokenType::Other, "&") || (is_constant && (Expect(TokenType::Other, "&"), true));
 
         auto name = Expect(TokenType::Symbol).Value;
 
@@ -27,9 +35,9 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
         parameters.emplace_back(
                 name,
                 type,
-                constant    ? FieldType_::ImmutableReference
-                : reference ? FieldType_::MutableReference
-                            : FieldType_::Value);
+                is_constant    ? FieldType_::ImmutableReference
+                : is_reference ? FieldType_::MutableReference
+                               : FieldType_::Value);
 
         if (!At(TokenType::Other, ")"))
             Expect(TokenType::Other, ",");
@@ -54,5 +62,13 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
     if (At(TokenType::Other, "{"))
         body = ParseMultiStatement();
 
-    return std::make_unique<DefineNode>(where, location, parameters, result_type, throws, tags, std::move(body));
+    return std::make_unique<DefineNode>(
+            where,
+            is_operator,
+            location,
+            parameters,
+            result_type,
+            throws,
+            tags,
+            std::move(body));
 }

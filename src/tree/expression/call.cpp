@@ -1,5 +1,6 @@
 #include <mcc/block.hpp>
 #include <mcc/builder.hpp>
+#include <mcc/common.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/function.hpp>
@@ -36,53 +37,22 @@ mcc::ValuePtr mcc::CallExpression::GenerateValue(
         Builder &builder,
         const Frame &frame) const
 {
-    std::vector<ValuePtr> arguments;
-    for (auto &argument : Arguments)
-        arguments.push_back(argument->GenerateValue(builder, frame));
+    ParameterRefList parameters(Arguments.size());
+    std::vector<ValuePtr> arguments(Arguments.size());
+
+    for (unsigned i = 0; i < Arguments.size(); ++i)
+    {
+        auto &argument = Arguments[i];
+        auto value     = argument->GenerateValue(builder, frame);
+
+        parameters[i] = { value->Type, value->FieldType };
+        arguments[i]  = std::move(value);
+    }
 
     if (const auto macro = dynamic_cast<MacroExpression *>(Callee.get()))
         return builder.CreateMacro(Where, {}, macro->Name, arguments);
 
-    const auto default_namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
+    auto callee = Callee->GenerateCallee(builder, parameters);
 
-    ResourceLocation callee;
-    if (const auto symbol = dynamic_cast<SymbolExpression *>(Callee.get()))
-        callee = ResourceLocation(default_namespace, { symbol->Name });
-    else if (const auto resource = dynamic_cast<ResourceExpression *>(Callee.get()))
-    {
-        callee = resource->Location;
-        if (callee.Namespace.empty())
-            callee.Namespace = default_namespace;
-    }
-    else
-        Error(Callee->Where, "invalid callee, must be a symbol or resource");
-
-    Assert(builder.HasFunction(callee), Where, "undefined function {}", callee);
-    const auto function = builder.GetFunction(Where, callee);
-
-    auto argument_size  = arguments.size();
-    auto parameter_size = function->Parameters.size();
-    Assert(argument_size == parameter_size,
-           Where,
-           "invalid number of arguments, got {}, require {}",
-           argument_size,
-           parameter_size);
-    for (unsigned i = 0; i < argument_size; ++i)
-    {
-        const auto &argument  = arguments[i];
-        const auto &parameter = function->Parameters[i];
-
-        Assert(SameOrSpecial(argument->Type, parameter.Type),
-               Where,
-               "cannot assign value of type {} to argument of type {}",
-               argument->Type,
-               parameter.Type);
-        Assert(argument->FieldType >= parameter.FieldType,
-               Where,
-               "cannot assign value of field type {} to argument of field type {}",
-               argument->FieldType,
-               parameter.FieldType);
-    }
-
-    return builder.CreateCall(Where, {}, function, arguments, frame.LandingPad);
+    return builder.CreateCall(Where, {}, callee, arguments, frame.LandingPad);
 }

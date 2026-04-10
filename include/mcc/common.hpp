@@ -2,6 +2,7 @@
 
 #include <mcc/enums.hpp>
 
+#include <filesystem>
 #include <format>
 #include <memory>
 #include <string>
@@ -56,7 +57,14 @@ namespace mcc
         FieldType_ FieldType;
     };
 
-    using ParameterList = std::vector<Parameter>;
+    struct ParameterRef
+    {
+        TypePtr Type;
+        FieldType_ FieldType;
+    };
+
+    using ParameterList    = std::vector<Parameter>;
+    using ParameterRefList = std::vector<ParameterRef>;
 
     struct Frame
     {
@@ -80,25 +88,87 @@ namespace mcc
     using CaseTargetMap = std::map<ConstantPtr, BlockPtr>;
 }
 
-template<typename T>
-struct std::formatter<std::vector<T>> final : std::formatter<std::string>
+template<>
+struct std::formatter<mcc::Parameter>
 {
+    template<typename FormatContext>
+    constexpr auto parse(FormatContext &ctx)
+    {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(
+            const mcc::Parameter &parameter,
+            FormatContext &ctx) const
+    {
+        auto is_constant = false, is_reference = false;
+        switch (parameter.FieldType)
+        {
+        case mcc::FieldType_::ImmutableReference:
+            is_constant  = true;
+            is_reference = true;
+            break;
+        case mcc::FieldType_::MutableReference:
+            is_reference = true;
+            break;
+        case mcc::FieldType_::Value:
+            break;
+        }
+
+        return std::format_to(
+                ctx.out(),
+                "{}{}{}",
+                is_constant ? "const " : "",
+                is_reference ? "&" : "",
+                parameter.Name);
+    }
+};
+
+template<>
+struct std::formatter<mcc::SourceLocation>
+{
+    template<typename FormatContext>
+    constexpr auto parse(FormatContext &ctx)
+    {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(
+            const mcc::SourceLocation &where,
+            FormatContext &ctx) const
+    {
+        return std::format_to(
+                ctx.out(),
+                "{}:{}:{}",
+                std::filesystem::canonical(where.Filename).string(),
+                where.Row,
+                where.Col);
+    }
+};
+
+template<typename T>
+struct std::formatter<std::vector<T>>
+{
+    template<typename FormatContext>
+    constexpr auto parse(FormatContext &ctx)
+    {
+        return ctx.begin();
+    }
+
     template<typename FormatContext>
     auto format(
             const std::vector<T> &elements,
             FormatContext &ctx) const
     {
-        std::string s = "[ ";
-
+        std::format_to(ctx.out(), "[ ");
         for (unsigned i = 0; i < elements.size(); ++i)
         {
             if (i)
-                s += ", ";
-            s += std::format("{}", elements[i]);
+                std::format_to(ctx.out(), ", ");
+            std::format_to(ctx.out(), "{}", elements[i]);
         }
-
-        s += " ]";
-
-        return std::formatter<std::string>::format(s, ctx);
+        return std::format_to(ctx.out(), " ]");
     }
 };

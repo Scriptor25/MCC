@@ -2,7 +2,7 @@ namespace vec3
 
 type vec3 = [number, number, number]
 
-define add(const &a: vec3, const &b: vec3): vec3 {
+define operator+(const &a: vec3, const &b: vec3): vec3 {
     return [
         a[0] + b[0],
         a[1] + b[1],
@@ -10,8 +10,7 @@ define add(const &a: vec3, const &b: vec3): vec3 {
     ]:vec3
 }
 
-/*
-define add(const &a: vec3, b: number): vec3 {
+define operator+(const &a: vec3, b: number): vec3 {
     return [
         a[0] + b,
         a[1] + b,
@@ -19,30 +18,27 @@ define add(const &a: vec3, b: number): vec3 {
     ]:vec3
 }
 
-define add(a: number, const &b: vec3): vec3 {
+define operator+(a: number, const &b: vec3): vec3 {
     return [
         a + b[0],
         a + b[1],
         a + b[2],
     ]:vec3
 }
-*/
 
-define adde(&a: vec3, const &b: vec3) {
+define operator+=(&a: vec3, const &b: vec3) {
     a[0] += b[0]
     a[1] += b[1]
     a[2] += b[2]
 }
 
-/*
-define adde(&a: vec3, b: number) {
+define operator+=(&a: vec3, b: number) {
     a[0] += b
     a[1] += b
     a[2] += b
 }
-*/
 
-define sub(const &a: vec3, const &b: vec3): vec3 {
+define operator-(const &a: vec3, const &b: vec3): vec3 {
     return [
         a[0] - b[0],
         a[1] - b[1],
@@ -50,8 +46,7 @@ define sub(const &a: vec3, const &b: vec3): vec3 {
     ]:vec3
 }
 
-/*
-define sub(const &a: vec3, b: number): vec3 {
+define operator-(const &a: vec3, b: number): vec3 {
     return [
         a[0] - b,
         a[1] - b,
@@ -59,30 +54,27 @@ define sub(const &a: vec3, b: number): vec3 {
     ]:vec3
 }
 
-define sub(a: number, const &b: vec3): vec3 {
+define operator-(a: number, const &b: vec3): vec3 {
     return [
         a - b[0],
         a - b[1],
         a - b[2],
     ]:vec3
 }
-*/
 
-define sube(&a: vec3, const &b: vec3) {
+define operator-=(&a: vec3, const &b: vec3) {
     a[0] -= b[0]
     a[1] -= b[1]
     a[2] -= b[2]
 }
 
-/*
-define sube(&a: vec3, b: number) {
+define operator-=(&a: vec3, b: number) {
     a[0] -= b
     a[1] -= b
     a[2] -= b
 }
-*/
 
-define mul(const &a: vec3, b: number): vec3 {
+define operator*(const &a: vec3, b: number): vec3 {
     return [
         a[0] * b,
         a[1] * b,
@@ -90,23 +82,21 @@ define mul(const &a: vec3, b: number): vec3 {
     ]:vec3
 }
 
-/*
-define mul(a: number, const &b: vec3): vec3 {
+define operator*(a: number, const &b: vec3): vec3 {
     return [
         a * b[0],
         a * b[1],
         a * b[2],
     ]:vec3
 }
-*/
 
-define mule(&a: vec3, b: number) {
+define operator*=(&a: vec3, b: number) {
     a[0] *= b
     a[1] *= b
     a[2] *= b
 }
 
-define div(const &a: vec3, b: number): vec3 {
+define operator/(const &a: vec3, b: number): vec3 {
     return [
         a[0] / b,
         a[1] / b,
@@ -114,17 +104,15 @@ define div(const &a: vec3, b: number): vec3 {
     ]:vec3
 }
 
-/*
-define div(a: number, const &b: vec3): vec3 {
+define operator/(a: number, const &b: vec3): vec3 {
     return [
         a / b[0],
         a / b[1],
         a / b[2],
     ]:vec3
 }
-*/
 
-define dive(&a: vec3, b: number) {
+define operator/=(&a: vec3, b: number) {
     a[0] /= b
     a[1] /= b
     a[2] /= b

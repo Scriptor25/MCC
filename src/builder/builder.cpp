@@ -66,13 +66,14 @@ mcc::InstructionPtr mcc::Builder::Insert(
 
 void mcc::Builder::Generate() const
 {
-    for (auto &functions : m_Functions | std::views::values)
-        for (auto &function : functions | std::views::values)
-        {
-            if (function->Blocks.empty())
-                continue;
+    for (auto &namespace_ : m_Functions | std::views::values)
+        for (auto &functions : namespace_ | std::views::values)
+            for (auto &function : functions)
+            {
+                if (function->Blocks.empty())
+                    continue;
 
-            function->OptimizeBlocks();
-            function->GenerateFunction(m_Package);
-        }
+                function->OptimizeBlocks();
+                function->GenerateFunction(m_Package);
+            }
 }
