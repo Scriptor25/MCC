@@ -7,7 +7,7 @@
 mcc::InstructionPtr mcc::DeleteInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         const ValuePtr &value)
 {
     auto self = std::make_shared<DeleteInstruction>(where, name, context, value);
@@ -21,7 +21,7 @@ mcc::InstructionPtr mcc::DeleteInstruction::Create(
 mcc::DeleteInstruction::DeleteInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         ValuePtr value)
     : Instruction(
               where,

@@ -33,14 +33,7 @@ mcc::InstructionPtr mcc::Builder::CreateComparison(
 
     return Insert(
             where,
-            ComparisonInstruction::Create(
-                    where,
-                    name,
-                    m_Context,
-                    comparator,
-                    m_InsertBlock->Parent->Location,
-                    left,
-                    right));
+            ComparisonInstruction::Create(where, name, m_Context, comparator, m_InsertBlock->Parent, left, right));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateOperation(
@@ -57,7 +50,7 @@ mcc::InstructionPtr mcc::Builder::CreateOperation(
 
     return Insert(
             where,
-            OperationInstruction::Create(where, name, m_Context, operator_, m_InsertBlock->Parent->Location, operands));
+            OperationInstruction::Create(where, name, m_Context, operator_, m_InsertBlock->Parent, operands));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCommand(
@@ -70,7 +63,7 @@ mcc::InstructionPtr mcc::Builder::CreateCommand(
     Assert(!!type, where, "type must not be null");
     Assert(!command.empty(), where, "command must not be empty");
 
-    return Insert(where, CommandInstruction::Create(where, name, type, m_InsertBlock->Parent->Location, command));
+    return Insert(where, CommandInstruction::Create(where, name, type, m_InsertBlock->Parent, command));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(
@@ -79,7 +72,7 @@ mcc::InstructionPtr mcc::Builder::CreateReturn(
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    return Insert(where, ReturnInstruction::Create(where, name, m_Context, m_InsertBlock->Parent->Location, {}));
+    return Insert(where, ReturnInstruction::Create(where, name, m_Context, m_InsertBlock->Parent, {}));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateReturn(
@@ -90,7 +83,7 @@ mcc::InstructionPtr mcc::Builder::CreateReturn(
     Assert(!!m_InsertBlock, where, "insert block must not be null");
     Assert(!!value, where, "value must not be null");
 
-    return Insert(where, ReturnInstruction::Create(where, name, m_Context, m_InsertBlock->Parent->Location, value));
+    return Insert(where, ReturnInstruction::Create(where, name, m_Context, m_InsertBlock->Parent, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateBranch(
@@ -117,7 +110,7 @@ mcc::InstructionPtr mcc::Builder::CreateBranch(
                     where,
                     name,
                     m_Context,
-                    m_InsertBlock->Parent->Location,
+                    m_InsertBlock->Parent,
                     condition,
                     then_target,
                     else_target));
@@ -134,9 +127,7 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(
     m_InsertBlock->Successors.insert(target);
     target->Predecessors.insert(m_InsertBlock);
 
-    return Insert(
-            where,
-            DirectBranchInstruction::Create(where, name, m_Context, m_InsertBlock->Parent->Location, target));
+    return Insert(where, DirectBranchInstruction::Create(where, name, m_Context, m_InsertBlock->Parent, target));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateDirect(
@@ -160,7 +151,7 @@ mcc::InstructionPtr mcc::Builder::CreateDirect(
                     where,
                     name,
                     m_Context,
-                    m_InsertBlock->Parent->Location,
+                    m_InsertBlock->Parent,
                     target,
                     result,
                     branch_result));
@@ -199,7 +190,7 @@ mcc::InstructionPtr mcc::Builder::CreateSwitch(
                     where,
                     name,
                     m_Context,
-                    m_InsertBlock->Parent->Location,
+                    m_InsertBlock->Parent,
                     condition,
                     default_target,
                     case_targets));
@@ -220,9 +211,7 @@ mcc::InstructionPtr mcc::Builder::CreateThrow(
         landing_pad->Predecessors.insert(m_InsertBlock);
     }
 
-    return Insert(
-            where,
-            ThrowInstruction::Create(where, name, m_Context, m_InsertBlock->Parent->Location, value, landing_pad));
+    return Insert(where, ThrowInstruction::Create(where, name, m_Context, m_InsertBlock->Parent, value, landing_pad));
 }
 
 mcc::ValuePtr mcc::Builder::CreateBranchResult(
@@ -232,7 +221,7 @@ mcc::ValuePtr mcc::Builder::CreateBranchResult(
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    return BranchResult::Create(where, name, type, m_InsertBlock->Parent->Location);
+    return BranchResult::Create(where, name, type, m_InsertBlock->Parent);
 }
 
 mcc::InstructionPtr mcc::Builder::CreateCall(
@@ -256,7 +245,7 @@ mcc::InstructionPtr mcc::Builder::CreateCall(
 
     return Insert(
             where,
-            CallInstruction::Create(where, name, m_InsertBlock->Parent->Location, callee, argument_pairs, landing_pad));
+            CallInstruction::Create(where, name, m_InsertBlock->Parent, callee, argument_pairs, landing_pad));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateMacro(
@@ -267,9 +256,7 @@ mcc::InstructionPtr mcc::Builder::CreateMacro(
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    return Insert(
-            where,
-            MacroInstruction::Create(where, name, m_Context, m_InsertBlock->Parent->Location, macro, arguments));
+    return Insert(where, MacroInstruction::Create(where, name, m_Context, m_InsertBlock->Parent, macro, arguments));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateAppend(
@@ -283,9 +270,7 @@ mcc::InstructionPtr mcc::Builder::CreateAppend(
     Assert(!!value, where, "value must not be null");
     Assert(force || array->IsMutable(), where, "array must be mutable");
 
-    return Insert(
-            where,
-            ArrayInstruction::CreateAppend(where, name, m_Context, m_InsertBlock->Parent->Location, array, value));
+    return Insert(where, ArrayInstruction::CreateAppend(where, name, m_Context, array, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreatePrepend(
@@ -298,9 +283,7 @@ mcc::InstructionPtr mcc::Builder::CreatePrepend(
     Assert(!!value, where, "value must not be null");
     Assert(array->IsMutable(), where, "array must be mutable");
 
-    return Insert(
-            where,
-            ArrayInstruction::CreatePrepend(where, name, m_Context, m_InsertBlock->Parent->Location, array, value));
+    return Insert(where, ArrayInstruction::CreatePrepend(where, name, m_Context, array, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(
@@ -314,16 +297,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
     Assert(!!value, where, "value must not be null");
     Assert(array->IsMutable(), where, "array must be mutable");
 
-    return Insert(
-            where,
-            ArrayInstruction::CreateInsert(
-                    where,
-                    name,
-                    m_Context,
-                    m_InsertBlock->Parent->Location,
-                    array,
-                    value,
-                    index));
+    return Insert(where, ArrayInstruction::CreateInsert(where, name, m_Context, array, value, index));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateInsert(
@@ -339,16 +313,7 @@ mcc::InstructionPtr mcc::Builder::CreateInsert(
     Assert(!key.empty(), where, "key must not be empty");
     Assert(force || object->IsMutable(), where, "object must be mutable");
 
-    return Insert(
-            where,
-            ObjectInstruction::CreateInsert(
-                    where,
-                    name,
-                    m_Context,
-                    m_InsertBlock->Parent->Location,
-                    object,
-                    value,
-                    key));
+    return Insert(where, ObjectInstruction::CreateInsert(where, name, m_Context, object, value, key));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateNotNull(
@@ -358,7 +323,7 @@ mcc::InstructionPtr mcc::Builder::CreateNotNull(
 {
     Assert(!!value, where, "value must not be null");
 
-    return Insert(where, NotNullInstruction::Create(where, name, m_Context, m_InsertBlock->Parent->Location, value));
+    return Insert(where, NotNullInstruction::Create(where, name, m_Context, m_InsertBlock->Parent, value));
 }
 
 mcc::InstructionPtr mcc::Builder::CreateDelete(

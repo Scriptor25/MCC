@@ -1,7 +1,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::StringType::StringType(TypeContext &context)
+mcc::StringType::StringType(Context &context)
     : Type(context)
 {
 }
@@ -18,10 +18,10 @@ std::ostream &mcc::StringType::Print(std::ostream &stream) const
 
 mcc::ConstantPtr mcc::StringType::GetNull(const SourceLocation &where) const
 {
-    return ConstantString::Create(where, Context, "");
+    return ConstantString::Create(where, Types, {});
 }
 
-bool mcc::StringType::HasSpecial(const TypePtr &other) const
+bool mcc::StringType::HasSpecialization(const TypePtr &other) const
 {
     return false;
 }

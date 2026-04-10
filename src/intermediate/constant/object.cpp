@@ -22,7 +22,7 @@ mcc::ConstantPtr mcc::ConstantObject::Create(
 
 mcc::ConstantPtr mcc::ConstantObject::Create(
         const SourceLocation &where,
-        TypeContext &context,
+        Context &context,
         const std::map<
                 std::string,
                 ConstantPtr

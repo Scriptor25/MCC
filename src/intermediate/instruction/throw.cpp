@@ -8,12 +8,12 @@
 mcc::InstructionPtr mcc::ThrowInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
+        const FunctionPtr &parent,
         const ValuePtr &value,
         const BlockPtr &landing_pad)
 {
-    auto self = std::make_shared<ThrowInstruction>(where, name, context, location, value, landing_pad);
+    auto self = std::make_shared<ThrowInstruction>(where, name, context, parent, value, landing_pad);
 
     self->Self = self;
     self->Value->Use(self);
@@ -26,8 +26,8 @@ mcc::InstructionPtr mcc::ThrowInstruction::Create(
 mcc::ThrowInstruction::ThrowInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        ResourceLocation location,
+        Context &context,
+        FunctionPtr parent,
         ValuePtr value,
         BlockPtr landing_pad)
     : Instruction(
@@ -35,7 +35,7 @@ mcc::ThrowInstruction::ThrowInstruction(
               name,
               context.GetVoid(),
               FieldType_::Value),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Value(std::move(value)),
       LandingPad(std::move(landing_pad))
 {
@@ -52,6 +52,8 @@ void mcc::ThrowInstruction::Generate(
         CommandVector &commands,
         const bool stack) const
 {
+    auto location = Parent->Mangle();
+
     auto value = Value->GenerateResult();
 
     std::string value_prefix;
@@ -61,21 +63,21 @@ void mcc::ThrowInstruction::Generate(
     switch (value.Type)
     {
     case ResultType_::Value:
-        commands.Append("{}data modify storage {} result set value {}", value_prefix, Location, value.Value);
+        commands.Append("{}data modify storage {} result set value {}", value_prefix, location, value.Value);
         break;
 
     case ResultType_::Reference:
         commands.Append(
                 "{}data modify storage {} result set from {} {} {}",
                 value_prefix,
-                Location,
+                location,
                 value.ReferenceType,
                 value.Target,
                 value.Path);
         break;
 
     case ResultType_::Argument:
-        commands.Append("$data modify storage {} result set value {}", Location, value.Name);
+        commands.Append("$data modify storage {} result set value {}", location, value.Name);
         break;
 
     default:
@@ -90,14 +92,14 @@ void mcc::ThrowInstruction::Generate(
     if (LandingPad)
     {
         std::string prefix, arguments;
-        LandingPad->Parent->ForwardArguments(prefix, arguments);
+        Parent->ForwardArguments(prefix, arguments);
 
         commands.Append("{}return run function {}{}", prefix, LandingPad->GetLocation(), arguments);
         return;
     }
 
     if (stack)
-        commands.Append("data remove storage {} stack[0]", Location);
+        commands.Append("data remove storage {} stack[0]", location);
 
     commands.Append("return 1");
 }

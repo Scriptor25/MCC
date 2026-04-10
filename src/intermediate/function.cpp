@@ -2,6 +2,7 @@
 #include <mcc/command.hpp>
 #include <mcc/error.hpp>
 #include <mcc/function.hpp>
+#include <mcc/module.hpp>
 #include <mcc/type.hpp>
 #include <mcc/value.hpp>
 
@@ -9,7 +10,7 @@
 
 mcc::FunctionPtr mcc::Function::Create(
         const SourceLocation &where,
-        TypeContext &context,
+        Module &module,
         const ResourceLocation &location,
         const ParameterList &parameters,
         const TypePtr &result_type,
@@ -19,8 +20,8 @@ mcc::FunctionPtr mcc::Function::Create(
     for (const auto &[_0, type_, _1] : parameters)
         parameter_types.push_back(type_);
 
-    auto type  = context.GetFunction(parameter_types, result_type, throws);
-    auto self  = std::make_shared<Function>(where, type, location, parameters, result_type, throws);
+    auto type  = module.GetContext().GetFunction(parameter_types, result_type, throws);
+    auto self  = std::make_shared<Function>(where, type, module, location, parameters, result_type, throws);
     self->Self = self;
     return self;
 }
@@ -28,6 +29,7 @@ mcc::FunctionPtr mcc::Function::Create(
 mcc::Function::Function(
         const SourceLocation &where,
         const TypePtr &type,
+        Module &module,
         ResourceLocation location,
         ParameterList parameters,
         TypePtr result_type,
@@ -36,6 +38,7 @@ mcc::Function::Function(
             location.String(),
             type,
             FieldType_::Value),
+      ModuleRef(module),
       Location(std::move(location)),
       Parameters(std::move(parameters)),
       ResultType(std::move(result_type)),
@@ -62,7 +65,7 @@ mcc::Result mcc::Function::GenerateResult() const
 {
     return {
         .Type    = ResultType_::Value,
-        .Value   = '"' + Location.String() + '"',
+        .Value   = '"' + Mangle().String() + '"',
         .NotNull = true,
     };
 }
@@ -71,7 +74,7 @@ mcc::Result mcc::Function::GenerateResultUnwrap() const
 {
     return {
         .Type    = ResultType_::Value,
-        .Value   = Location.String(),
+        .Value   = Mangle().String(),
         .NotNull = true,
     };
 }
@@ -156,7 +159,8 @@ void mcc::Function::GenerateFunction(Package &package) const
 
         auto &block = *it;
 
-        auto [namespace_, path_] = Location;
+        auto location            = Mangle();
+        auto [namespace_, path_] = location;
         if (!first)
         {
             auto name = block->Name;
@@ -170,7 +174,7 @@ void mcc::Function::GenerateFunction(Package &package) const
 
         if (first && require_stack)
         {
-            commands.Append("data modify storage {} stack prepend value {{}}", Location);
+            commands.Append("data modify storage {} stack prepend value {{}}", location);
 
             if (StackIndex)
             {
@@ -182,7 +186,7 @@ void mcc::Function::GenerateFunction(Package &package) const
                     values += '0';
                 }
 
-                commands.Append("data modify storage {} stack[0].v set value [{}]", Location, values);
+                commands.Append("data modify storage {} stack[0].v set value [{}]", location, values);
             }
         }
 
@@ -218,6 +222,11 @@ void mcc::Function::ForwardArguments(
     arguments += '}';
 }
 
+mcc::ResourceLocation mcc::Function::Mangle() const
+{
+    return ModuleRef.Mangle(Self.lock());
+}
+
 mcc::ResourceLocation mcc::Function::GetLocation(const BlockPtr &target_block) const
 {
     Assert(!!target_block, Where, "target block must not be null");
@@ -231,7 +240,7 @@ mcc::ResourceLocation mcc::Function::GetLocation(const BlockPtr &target_block) c
         names.insert(name);
 
         if (block == target_block)
-            return Location.Child(name);
+            return Mangle().Child(name);
     }
 
     Error(target_block->Where, "target block is not owned by the function");

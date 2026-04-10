@@ -1,7 +1,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::AnyArrayType::AnyArrayType(TypeContext &context)
+mcc::AnyArrayType::AnyArrayType(Context &context)
     : Type(context)
 {
 }
@@ -21,7 +21,7 @@ mcc::ConstantPtr mcc::AnyArrayType::GetNull(const SourceLocation &where) const
     return ConstantArray::Create(where, Self.lock(), {}, false);
 }
 
-bool mcc::AnyArrayType::HasSpecial(const TypePtr &other) const
+bool mcc::AnyArrayType::HasSpecialization(const TypePtr &other) const
 {
     return other->IsArray();
 }

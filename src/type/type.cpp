@@ -1,7 +1,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-bool mcc::SameOrSpecial(
+bool mcc::SameOrSpecialization(
         const TypePtr &a,
         const TypePtr &b)
 {
@@ -11,11 +11,11 @@ bool mcc::SameOrSpecial(
     if (a == b)
         return true;
 
-    return b->HasSpecial(a);
+    return b->HasSpecialization(a);
 }
 
-mcc::Type::Type(TypeContext &context)
-    : Context(context)
+mcc::Type::Type(Context &context)
+    : Types(context)
 {
 }
 

@@ -10,7 +10,7 @@
 mcc::BlockPtr mcc::Block::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         const FunctionPtr &parent)
 {
     auto self  = std::make_shared<Block>(where, name, context, parent);
@@ -22,7 +22,7 @@ mcc::BlockPtr mcc::Block::Create(
 mcc::Block::Block(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         FunctionPtr parent)
     : Value(where,
             name,

@@ -24,7 +24,7 @@ namespace mcc
                 bool stringify);
         static ConstantPtr Create(
                 const SourceLocation &where,
-                TypeContext &context,
+                Context &context,
                 const std::vector<ConstantPtr> &values,
                 bool stringify);
 
@@ -45,12 +45,12 @@ namespace mcc
     {
         static ConstantPtr Create(
                 const SourceLocation &where,
-                TypeContext &context,
+                Context &context,
                 IntegerT value);
 
         ConstantNumber(
                 const SourceLocation &where,
-                TypeContext &context,
+                Context &context,
                 IntegerT value);
 
         [[nodiscard]] Result GenerateResult() const override;
@@ -69,7 +69,7 @@ namespace mcc
                 > &values);
         static ConstantPtr Create(
                 const SourceLocation &where,
-                TypeContext &context,
+                Context &context,
                 const std::map<
                         std::string,
                         ConstantPtr
@@ -111,12 +111,12 @@ namespace mcc
     {
         static ConstantPtr Create(
                 const SourceLocation &where,
-                TypeContext &context,
+                Context &context,
                 const std::string &value);
 
         ConstantString(
                 const SourceLocation &where,
-                TypeContext &context,
+                Context &context,
                 std::string value);
 
         [[nodiscard]] Result GenerateResult() const override;

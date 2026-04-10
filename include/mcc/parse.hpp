@@ -9,10 +9,10 @@ namespace mcc
     class Parser
     {
     public:
-        Parser(TypeContext &context,
+        Parser(Context &context,
                std::istream &stream,
                const std::string &filename);
-        Parser(TypeContext &context,
+        Parser(Context &context,
                std::istream &stream,
                SourceLocation location);
 
@@ -112,7 +112,7 @@ namespace mcc
         ExpressionPtr ParseSwitchExpression();
         ExpressionPtr ParseSymbolExpression();
 
-        TypeContext &m_Context;
+        Context &m_Context;
 
         std::istream &m_Stream;
 

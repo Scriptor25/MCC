@@ -1,7 +1,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::NumberType::NumberType(TypeContext &context)
+mcc::NumberType::NumberType(Context &context)
     : Type(context)
 {
 }
@@ -18,10 +18,10 @@ std::ostream &mcc::NumberType::Print(std::ostream &stream) const
 
 mcc::ConstantPtr mcc::NumberType::GetNull(const SourceLocation &where) const
 {
-    return ConstantNumber::Create(where, Context, 0);
+    return ConstantNumber::Create(where, Types, {});
 }
 
-bool mcc::NumberType::HasSpecial(const TypePtr &other) const
+bool mcc::NumberType::HasSpecialization(const TypePtr &other) const
 {
     return false;
 }

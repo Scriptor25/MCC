@@ -1,8 +1,7 @@
-#include <mcc/block.hpp>
 #include <mcc/builder.hpp>
+#include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/function.hpp>
-#include <mcc/value.hpp>
 
 mcc::SymbolExpression::SymbolExpression(
         const SourceLocation &where,
@@ -21,13 +20,20 @@ mcc::ValuePtr mcc::SymbolExpression::GenerateValue(
         Builder &builder,
         const Frame &frame) const
 {
-    return builder.GetVariable(Where, Name);
+    if (builder.HasVariable(Name))
+        return builder.GetVariable(Where, Name);
+
+    auto candidates = builder.FindFunctions({ Name }, true);
+    Assert(!candidates.empty(), Where, "candidates must not be empty");
+    Assert(candidates.size() == 1, Where, "ambiguous candidates");
+
+    return candidates.front();
 }
 
 mcc::FunctionPtr mcc::SymbolExpression::GenerateCallee(
         Builder &builder,
         const ParameterRefList &parameters) const
 {
-    auto candidates = builder.FindCandidates(Name, parameters);
+    const auto candidates = builder.FindFunctions({ Name }, parameters, true);
     return builder.FindUnambiguousCandidate(Where, candidates, parameters);
 }

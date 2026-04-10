@@ -1,6 +1,6 @@
 #include <mcc/type.hpp>
 
-mcc::TypePtr mcc::TypeContext::GetVoid()
+mcc::TypePtr mcc::Context::GetVoid()
 {
     if (!m_Void)
     {
@@ -10,7 +10,7 @@ mcc::TypePtr mcc::TypeContext::GetVoid()
     return m_Void;
 }
 
-mcc::TypePtr mcc::TypeContext::GetNumber()
+mcc::TypePtr mcc::Context::GetNumber()
 {
     if (!m_Number)
     {
@@ -20,7 +20,7 @@ mcc::TypePtr mcc::TypeContext::GetNumber()
     return m_Number;
 }
 
-mcc::TypePtr mcc::TypeContext::GetString()
+mcc::TypePtr mcc::Context::GetString()
 {
     if (!m_String)
     {
@@ -30,7 +30,7 @@ mcc::TypePtr mcc::TypeContext::GetString()
     return m_String;
 }
 
-mcc::TypePtr mcc::TypeContext::GetArray(const TypePtr &elements)
+mcc::TypePtr mcc::Context::GetArray(const TypePtr &elements)
 {
     auto &type = m_Array[elements];
     if (!type)
@@ -41,7 +41,7 @@ mcc::TypePtr mcc::TypeContext::GetArray(const TypePtr &elements)
     return type;
 }
 
-mcc::TypePtr mcc::TypeContext::GetObject(
+mcc::TypePtr mcc::Context::GetObject(
         const std::map<
                 std::string,
                 TypePtr
@@ -56,7 +56,7 @@ mcc::TypePtr mcc::TypeContext::GetObject(
     return type;
 }
 
-mcc::TypePtr mcc::TypeContext::GetTuple(const std::vector<TypePtr> &elements)
+mcc::TypePtr mcc::Context::GetTuple(const std::vector<TypePtr> &elements)
 {
     auto &type = m_Tuple[elements];
     if (!type)
@@ -67,7 +67,7 @@ mcc::TypePtr mcc::TypeContext::GetTuple(const std::vector<TypePtr> &elements)
     return type;
 }
 
-mcc::TypePtr mcc::TypeContext::GetUnion(const std::set<TypePtr> &elements)
+mcc::TypePtr mcc::Context::GetUnion(const std::set<TypePtr> &elements)
 {
     auto &type = m_Union[elements];
     if (!type)
@@ -78,7 +78,7 @@ mcc::TypePtr mcc::TypeContext::GetUnion(const std::set<TypePtr> &elements)
     return type;
 }
 
-mcc::TypePtr mcc::TypeContext::GetFunction(
+mcc::TypePtr mcc::Context::GetFunction(
         const std::vector<TypePtr> &parameters,
         const TypePtr &result,
         bool throws)
@@ -92,7 +92,7 @@ mcc::TypePtr mcc::TypeContext::GetFunction(
     return type;
 }
 
-mcc::TypePtr mcc::TypeContext::GetAnyArray()
+mcc::TypePtr mcc::Context::GetAnyArray()
 {
     if (!m_AnyArray)
     {
@@ -102,7 +102,7 @@ mcc::TypePtr mcc::TypeContext::GetAnyArray()
     return m_AnyArray;
 }
 
-mcc::TypePtr mcc::TypeContext::GetAnyObject()
+mcc::TypePtr mcc::Context::GetAnyObject()
 {
     if (!m_AnyObject)
     {
@@ -112,7 +112,7 @@ mcc::TypePtr mcc::TypeContext::GetAnyObject()
     return m_AnyObject;
 }
 
-mcc::TypePtr mcc::TypeContext::GetAnyFunction()
+mcc::TypePtr mcc::Context::GetAnyFunction()
 {
     if (!m_AnyFunction)
     {
@@ -122,12 +122,12 @@ mcc::TypePtr mcc::TypeContext::GetAnyFunction()
     return m_AnyFunction;
 }
 
-mcc::TypePtr mcc::TypeContext::GetUnionOrSingle(const std::set<TypePtr> &elements)
+mcc::TypePtr mcc::Context::GetUnionOrSingle(const std::set<TypePtr> &elements)
 {
     return elements.size() == 1 ? *elements.begin() : GetUnion(elements);
 }
 
-mcc::TypePtr mcc::TypeContext::SetNamed(
+mcc::TypePtr mcc::Context::SetNamed(
         const std::string &name,
         const TypePtr &type)
 {
@@ -136,7 +136,7 @@ mcc::TypePtr mcc::TypeContext::SetNamed(
     return pre;
 }
 
-mcc::TypePtr mcc::TypeContext::GetNamed(const std::string &name) const
+mcc::TypePtr mcc::Context::GetNamed(const std::string &name) const
 {
     if (m_Named.contains(name))
         return m_Named.at(name);

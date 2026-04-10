@@ -15,7 +15,7 @@ namespace mcc
     using IndexT   = unsigned long long;
     using CommandT = std::string;
 
-    class TypeContext;
+    class Context;
     class Parser;
     class Builder;
     class CommandVector;
@@ -35,6 +35,8 @@ namespace mcc
     struct Instruction;
     struct Block;
     struct Function;
+
+    class Module;
 
     template<typename T = ValueBase>
     struct Value;

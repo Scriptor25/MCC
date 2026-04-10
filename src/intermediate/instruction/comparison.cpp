@@ -1,18 +1,19 @@
 #include <mcc/command.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ComparisonInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         const Comparator_ &comparator,
-        const ResourceLocation &location,
+        const FunctionPtr &parent,
         const ValuePtr &left,
         const ValuePtr &right)
 {
-    auto self = std::make_shared<ComparisonInstruction>(where, name, context, comparator, location, left, right);
+    auto self = std::make_shared<ComparisonInstruction>(where, name, context, comparator, parent, left, right);
 
     self->Self = self;
     self->Left->Use(self);
@@ -24,9 +25,9 @@ mcc::InstructionPtr mcc::ComparisonInstruction::Create(
 mcc::ComparisonInstruction::ComparisonInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         const Comparator_ comparator,
-        ResourceLocation location,
+        FunctionPtr parent,
         ValuePtr left,
         ValuePtr right)
     : Instruction(
@@ -35,7 +36,7 @@ mcc::ComparisonInstruction::ComparisonInstruction(
               context.GetNumber(),
               FieldType_::Value),
       Comparator(comparator),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Left(std::move(left)),
       Right(std::move(right))
 {
@@ -159,7 +160,7 @@ void mcc::ComparisonInstruction::Generate(
     Assert(stack, Where, "comparison instruction requires stack");
     commands.Append(
             "execute store result storage {} {} byte 1 if score %a {} {} {} {}",
-            Location,
+            Parent->Mangle(),
             GetStackPath(),
             objective,
             operator_,
@@ -179,7 +180,7 @@ mcc::Result mcc::ComparisonInstruction::GenerateResult() const
     return {
         .Type          = ResultType_::Reference,
         .ReferenceType = ReferenceType_::Storage,
-        .Target        = Location.String(),
+        .Target        = Parent->Mangle().String(),
         .Path          = GetStackPath(),
     };
 }

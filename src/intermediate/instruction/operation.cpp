@@ -1,17 +1,18 @@
 #include <mcc/command.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::OperationInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         const Operator_ operator_,
-        const ResourceLocation &location,
+        const FunctionPtr &parent,
         const std::vector<ValuePtr> &operands)
 {
-    auto self = std::make_shared<OperationInstruction>(where, name, context, operator_, location, operands);
+    auto self = std::make_shared<OperationInstruction>(where, name, context, operator_, parent, operands);
 
     self->Self = self;
     for (const auto &operand : self->Operands)
@@ -23,9 +24,9 @@ mcc::InstructionPtr mcc::OperationInstruction::Create(
 mcc::OperationInstruction::OperationInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         const Operator_ operator_,
-        ResourceLocation location,
+        FunctionPtr parent,
         const std::vector<ValuePtr> &operands)
     : Instruction(
               where,
@@ -33,7 +34,7 @@ mcc::OperationInstruction::OperationInstruction(
               context.GetNumber(),
               FieldType_::Value),
       Operator(operator_),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Operands(operands)
 {
 }
@@ -146,7 +147,7 @@ void mcc::OperationInstruction::Generate(
     Assert(stack, Where, "operation instruction requires stack");
     commands.Append(
             "execute store result storage {} {} long 1 run scoreboard players get %a {}",
-            Location,
+            Parent->Mangle(),
             GetStackPath(),
             objective);
 
@@ -163,7 +164,7 @@ mcc::Result mcc::OperationInstruction::GenerateResult() const
     return {
         .Type          = ResultType_::Reference,
         .ReferenceType = ReferenceType_::Storage,
-        .Target        = Location.String(),
+        .Target        = Parent->Mangle().String(),
         .Path          = GetStackPath(),
     };
 }

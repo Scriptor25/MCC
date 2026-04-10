@@ -164,9 +164,11 @@ define test() {
     print(b / c)
     print(c / b)
 
-    print(dot(a, b))
-    print(dot(b, a))
+    !print("@s", dot(a, b))
+    !print("@s", dot(b, a))
     
     print(cross(a, b))
     print(cross(b, a))
+
+    const x = a + b + c
 }

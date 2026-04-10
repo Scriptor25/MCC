@@ -12,9 +12,12 @@ mcc::TreeNodePtr mcc::Parser::ParseDefineNode()
 
     ResourceLocation location;
     if (is_operator)
-        location.Path = { Expect(TokenType::Operator).Value };
+    {
+        const auto operator_ = Expect(TokenType::Operator).Value;
+        location.Path        = { "operator", BinaryExpression::MapOperator(operator_) };
+    }
     else
-        location = ParseResourceLocation();
+        location = ParseResourceLocation(true);
 
     ParameterList parameters;
     std::vector<ResourceTag> tags;

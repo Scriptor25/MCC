@@ -8,7 +8,7 @@ namespace mcc
     {
         static FunctionPtr Create(
                 const SourceLocation &where,
-                TypeContext &context,
+                Module &module,
                 const ResourceLocation &location,
                 const ParameterList &parameters,
                 const TypePtr &result_type,
@@ -17,6 +17,7 @@ namespace mcc
         Function(
                 const SourceLocation &where,
                 const TypePtr &type,
+                Module &module,
                 ResourceLocation location,
                 ParameterList parameters,
                 TypePtr result_type,
@@ -40,10 +41,13 @@ namespace mcc
                 std::string &prefix,
                 std::string &arguments) const;
 
+        [[nodiscard]] ResourceLocation Mangle() const;
+
         [[nodiscard]] ResourceLocation GetLocation(const BlockPtr &target_block) const;
 
         BlockPtr Erase(const BlockPtr &target_block);
 
+        Module &ModuleRef;
         ResourceLocation Location;
         ParameterList Parameters;
         TypePtr ResultType;

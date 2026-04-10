@@ -1,16 +1,17 @@
 #include <mcc/command.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::ReturnInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
+        const FunctionPtr &parent,
         const ValuePtr &value)
 {
-    auto self = std::make_shared<ReturnInstruction>(where, name, context, location, value);
+    auto self = std::make_shared<ReturnInstruction>(where, name, context, parent, value);
 
     self->Self = self;
     if (self->Value)
@@ -22,15 +23,15 @@ mcc::InstructionPtr mcc::ReturnInstruction::Create(
 mcc::ReturnInstruction::ReturnInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        ResourceLocation location,
+        Context &context,
+        FunctionPtr parent,
         ValuePtr value)
     : Instruction(
               where,
               name,
               context.GetVoid(),
               FieldType_::Value),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Value(std::move(value))
 {
 }
@@ -45,6 +46,8 @@ void mcc::ReturnInstruction::Generate(
         CommandVector &commands,
         const bool stack) const
 {
+    auto location = Parent->Mangle();
+
     if (Value)
     {
         auto value = Value->GenerateResult();
@@ -56,21 +59,21 @@ void mcc::ReturnInstruction::Generate(
         switch (value.Type)
         {
         case ResultType_::Value:
-            commands.Append("{}data modify storage {} result set value {}", prefix, Location, value.Value);
+            commands.Append("{}data modify storage {} result set value {}", prefix, location, value.Value);
             break;
 
         case ResultType_::Reference:
             commands.Append(
                     "{}data modify storage {} result set from {} {} {}",
                     prefix,
-                    Location,
+                    location,
                     value.ReferenceType,
                     value.Target,
                     value.Path);
             break;
 
         case ResultType_::Argument:
-            commands.Append("$data modify storage {} result set value {}", Location, value.Name);
+            commands.Append("$data modify storage {} result set value {}", location, value.Name);
             break;
 
         default:
@@ -83,10 +86,10 @@ void mcc::ReturnInstruction::Generate(
         }
     }
     else
-        commands.Append("data remove storage {} result", Location);
+        commands.Append("data remove storage {} result", location);
 
     if (stack)
-        commands.Append("data remove storage {} stack[0]", Location);
+        commands.Append("data remove storage {} stack[0]", location);
 
     commands.Append("return 0");
 }

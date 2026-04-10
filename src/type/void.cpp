@@ -1,7 +1,7 @@
 #include <mcc/error.hpp>
 #include <mcc/type.hpp>
 
-mcc::VoidType::VoidType(TypeContext &context)
+mcc::VoidType::VoidType(Context &context)
     : Type(context)
 {
 }
@@ -21,7 +21,7 @@ mcc::ConstantPtr mcc::VoidType::GetNull(const SourceLocation &where) const
     Error(where, "cannot get null value for type void");
 }
 
-bool mcc::VoidType::HasSpecial(const TypePtr &other) const
+bool mcc::VoidType::HasSpecialization(const TypePtr &other) const
 {
     return false;
 }

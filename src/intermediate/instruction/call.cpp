@@ -11,7 +11,7 @@
 mcc::InstructionPtr mcc::CallInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        const ResourceLocation &location,
+        const FunctionPtr &parent,
         const FunctionPtr &callee,
         const std::vector<std::pair<
                 std::string,
@@ -19,7 +19,7 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
         >> &arguments,
         const BlockPtr &landing_pad)
 {
-    auto self = std::make_shared<CallInstruction>(where, name, location, callee, arguments, landing_pad);
+    auto self = std::make_shared<CallInstruction>(where, name, parent, callee, arguments, landing_pad);
 
     self->Self = self;
     for (const auto &argument : self->Arguments | std::views::values)
@@ -33,7 +33,7 @@ mcc::InstructionPtr mcc::CallInstruction::Create(
 mcc::CallInstruction::CallInstruction(
         const SourceLocation &where,
         const std::string &name,
-        ResourceLocation location,
+        FunctionPtr parent,
         const FunctionPtr &callee,
         const std::vector<std::pair<
                 std::string,
@@ -45,7 +45,7 @@ mcc::CallInstruction::CallInstruction(
               name,
               callee->ResultType,
               FieldType_::ImmutableReference),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Callee(callee),
       Arguments(arguments),
       LandingPad(std::move(landing_pad))
@@ -64,6 +64,8 @@ void mcc::CallInstruction::Generate(
         CommandVector &commands,
         const bool stack) const
 {
+    auto location = Parent->Mangle();
+
     auto stack_path = GetStackPath();
     auto temp       = GetTemp();
 
@@ -104,7 +106,7 @@ void mcc::CallInstruction::Generate(
         }
         else
         {
-            commands.Append("data modify storage {} {} set value {{}}", Location, stack_path);
+            commands.Append("data modify storage {} {} set value {{}}", location, stack_path);
 
             for (unsigned i = 0; i < Arguments.size(); ++i)
             {
@@ -119,7 +121,7 @@ void mcc::CallInstruction::Generate(
                     commands.Append(
                             "{}data modify storage {} {}.{} set value {}",
                             prefix,
-                            Location,
+                            location,
                             stack_path,
                             key_,
                             value.Value);
@@ -130,7 +132,7 @@ void mcc::CallInstruction::Generate(
                         commands.Append(
                                 "{}data modify storage {} {}.{} set from {} {} {}",
                                 prefix,
-                                Location,
+                                location,
                                 stack_path,
                                 key_,
                                 value.ReferenceType,
@@ -141,14 +143,14 @@ void mcc::CallInstruction::Generate(
                         commands.Append(
                                 "{}data modify storage {} {}.{}_target set value \"{}\"",
                                 prefix,
-                                Location,
+                                location,
                                 stack_path,
                                 key_,
                                 value.Target);
                         commands.Append(
                                 "{}data modify storage {} {}.{}_path set value \"{}\"",
                                 prefix,
-                                Location,
+                                location,
                                 stack_path,
                                 key_,
                                 value.Path);
@@ -158,7 +160,7 @@ void mcc::CallInstruction::Generate(
                 case ResultType_::Argument:
                     commands.Append(
                             "$data modify storage {} {}.{} set value {}",
-                            Location,
+                            location,
                             stack_path,
                             key_,
                             value.Name);
@@ -174,10 +176,12 @@ void mcc::CallInstruction::Generate(
                 }
             }
 
-            argument_object = std::format(" with storage {} {}", Location, stack_path);
+            argument_object = std::format(" with storage {} {}", location, stack_path);
             require_cleanup = true;
         }
     }
+
+    auto callee = Callee->Mangle();
 
     if (Callee->Throws)
     {
@@ -186,23 +190,23 @@ void mcc::CallInstruction::Generate(
                 "{}execute store result score %c {} run function {}{}",
                 argument_prefix,
                 temp,
-                Callee->Location,
+                callee,
                 argument_object);
-        commands.Append("data remove storage {} {}", Location, stack_path);
+        commands.Append("data remove storage {} {}", location, stack_path);
         commands.Append(
                 "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
                 temp,
-                Location,
+                location,
                 stack_path);
         commands.Append(RemoveScore());
 
-        commands.Append("data remove storage {} result", Location);
+        commands.Append("data remove storage {} result", location);
         commands.Append(
                 "execute if data storage {0} {1} run data modify storage {0} result set from storage {2} "
                 "result",
-                Location,
+                location,
                 stack_path,
-                Callee->Location);
+                callee);
 
         if (LandingPad)
         {
@@ -212,26 +216,26 @@ void mcc::CallInstruction::Generate(
             commands.Append(
                     "{}execute if data storage {} result run return run function {}{}",
                     prefix,
-                    Location,
+                    location,
                     LandingPad->GetLocation(),
                     arguments);
         }
         else
         {
-            commands.Append("execute if data storage {0} result run data remove storage {0} stack[0]", Location);
-            commands.Append("execute if data storage {} result run return 1", Location);
+            commands.Append("execute if data storage {0} result run data remove storage {0} stack[0]", location);
+            commands.Append("execute if data storage {} result run return 1", location);
         }
     }
     else
-        commands.Append("{}function {}{}", argument_prefix, Callee->Location, argument_object);
+        commands.Append("{}function {}{}", argument_prefix, callee, argument_object);
 
     if (!Uses.empty())
     {
         Assert(stack, Where, "call instruction with result requires stack");
-        commands.Append("data modify storage {} {} set from storage {} result", Location, stack_path, Callee->Location);
+        commands.Append("data modify storage {} {} set from storage {} result", location, stack_path, callee);
     }
     else if (require_cleanup)
-        commands.Append("data remove storage {} {}", Location, stack_path);
+        commands.Append("data remove storage {} {}", location, stack_path);
 }
 
 bool mcc::CallInstruction::RequireStack() const
@@ -254,7 +258,7 @@ mcc::Result mcc::CallInstruction::GenerateResult() const
     return {
         .Type          = ResultType_::Reference,
         .ReferenceType = ReferenceType_::Storage,
-        .Target        = Location.String(),
+        .Target        = Parent->Mangle().String(),
         .Path          = GetStackPath(),
     };
 }

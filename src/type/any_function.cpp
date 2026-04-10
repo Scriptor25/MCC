@@ -1,7 +1,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::AnyFunctionType::AnyFunctionType(TypeContext &context)
+mcc::AnyFunctionType::AnyFunctionType(Context &context)
     : Type(context)
 {
 }
@@ -21,7 +21,7 @@ mcc::ConstantPtr mcc::AnyFunctionType::GetNull(const SourceLocation &where) cons
     return ConstantResource::Create(where, Self.lock(), {});
 }
 
-bool mcc::AnyFunctionType::HasSpecial(const TypePtr &other) const
+bool mcc::AnyFunctionType::HasSpecialization(const TypePtr &other) const
 {
     return other->IsFunction();
 }

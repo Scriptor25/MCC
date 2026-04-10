@@ -2,7 +2,7 @@
 #include <mcc/type.hpp>
 
 mcc::FunctionType::FunctionType(
-        TypeContext &context,
+        Context &context,
         const std::vector<TypePtr> &parameters,
         TypePtr result,
         const bool throws)
@@ -60,7 +60,7 @@ mcc::ConstantPtr mcc::FunctionType::GetNull(const SourceLocation &where) const
     return ConstantResource::Create(where, Self.lock(), {});
 }
 
-bool mcc::FunctionType::HasSpecial(const TypePtr &other) const
+bool mcc::FunctionType::HasSpecialization(const TypePtr &other) const
 {
     if (other->IsAny() || !other->IsFunction())
         return false;
@@ -77,7 +77,7 @@ bool mcc::FunctionType::HasSpecial(const TypePtr &other) const
         if (other_function->Parameters[i] != Parameters[i])
             return false;
 
-    return SameOrSpecial(other_function->Result, Result);
+    return SameOrSpecialization(other_function->Result, Result);
 }
 
 bool mcc::FunctionType::IsFunction() const

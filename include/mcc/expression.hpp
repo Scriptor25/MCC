@@ -40,6 +40,8 @@ namespace mcc
 
     struct BinaryExpression final : Expression
     {
+        static const std::string &MapOperator(const std::string &operator_);
+
         BinaryExpression(
                 const SourceLocation &where,
                 std::string operator_,

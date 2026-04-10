@@ -1,6 +1,5 @@
 #include <mcc/expression.hpp>
 #include <mcc/parse.hpp>
-#include <mcc/value.hpp>
 
 mcc::ExpressionPtr mcc::Parser::ParseCommandExpression()
 {

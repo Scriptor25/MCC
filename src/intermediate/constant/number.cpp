@@ -3,7 +3,7 @@
 
 mcc::ConstantPtr mcc::ConstantNumber::Create(
         const SourceLocation &where,
-        TypeContext &context,
+        Context &context,
         const IntegerT value)
 {
     auto self  = std::make_shared<ConstantNumber>(where, context, value);
@@ -13,7 +13,7 @@ mcc::ConstantPtr mcc::ConstantNumber::Create(
 
 mcc::ConstantNumber::ConstantNumber(
         const SourceLocation &where,
-        TypeContext &context,
+        Context &context,
         const IntegerT value)
     : Constant(
               where,

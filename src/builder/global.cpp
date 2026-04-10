@@ -11,7 +11,7 @@ mcc::ValuePtr mcc::Builder::CreateGlobal(
         location.Namespace = m_Namespace;
 
     auto &global = m_Globals[location.Namespace][location.Path];
-    Assert(!global, where, "already defined global {}", location);
+    Assert(!global, where, "global {} is already defined", location);
     return global = GenericStorageReference::Create(
                    where,
                    location.String(),

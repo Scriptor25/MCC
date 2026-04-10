@@ -1,12 +1,13 @@
+#include <mcc/function.hpp>
 #include <mcc/value.hpp>
 
 mcc::ValuePtr mcc::FunctionResult::Create(
         const SourceLocation &where,
         const std::string &name,
         const TypePtr &type,
-        const ResourceLocation &location)
+        const FunctionPtr &parent)
 {
-    auto self  = std::make_shared<FunctionResult>(where, name, type, location);
+    auto self  = std::make_shared<FunctionResult>(where, name, type, parent);
     self->Self = self;
     return self;
 }
@@ -15,12 +16,12 @@ mcc::FunctionResult::FunctionResult(
         const SourceLocation &where,
         const std::string &name,
         const TypePtr &type,
-        ResourceLocation location)
+        FunctionPtr parent)
     : Value(where,
             name,
             type,
             FieldType_::ImmutableReference),
-      Location(std::move(location))
+      Parent(std::move(parent))
 {
 }
 
@@ -34,7 +35,7 @@ mcc::Result mcc::FunctionResult::GenerateResult() const
     return {
         .Type          = ResultType_::Reference,
         .ReferenceType = ReferenceType_::Storage,
-        .Target        = Location.String(),
+        .Target        = Parent->Mangle().String(),
         .Path          = "result",
     };
 }

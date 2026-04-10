@@ -80,18 +80,18 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 const TypePtr &type,
-                const ResourceLocation &location);
+                const FunctionPtr &parent);
 
         BranchResult(
                 const SourceLocation &where,
                 const std::string &name,
                 const TypePtr &type,
-                ResourceLocation location);
+                FunctionPtr parent);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        ResourceLocation Location;
+        FunctionPtr Parent;
     };
 
     struct ElementReference final : Value<ElementReference>
@@ -123,18 +123,44 @@ namespace mcc
                 const SourceLocation &where,
                 const std::string &name,
                 const TypePtr &type,
-                const ResourceLocation &location);
+                const FunctionPtr &parent);
 
         FunctionResult(
                 const SourceLocation &where,
                 const std::string &name,
                 const TypePtr &type,
-                ResourceLocation location);
+                FunctionPtr parent);
 
         [[nodiscard]] bool RequireStack() const override;
         [[nodiscard]] Result GenerateResult() const override;
 
-        ResourceLocation Location;
+        FunctionPtr Parent;
+    };
+
+    struct FunctionStorageReference final : Value<FunctionStorageReference>
+    {
+        static SPtr Create(
+                const SourceLocation &where,
+                const std::string &name,
+                const TypePtr &type,
+                const FunctionPtr &parent,
+                const std::string &path,
+                bool is_mutable);
+
+        FunctionStorageReference(
+                const SourceLocation &where,
+                const std::string &name,
+                const TypePtr &type,
+                FunctionPtr parent,
+                std::string path,
+                bool is_mutable);
+        ~FunctionStorageReference() override;
+
+        [[nodiscard]] bool RequireStack() const override;
+        [[nodiscard]] Result GenerateResult() const override;
+
+        FunctionPtr Parent;
+        std::string Path;
     };
 
     struct GenericBlockReference final : Value<GenericBlockReference>

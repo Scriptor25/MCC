@@ -34,49 +34,69 @@ mcc::ValuePtr mcc::VectorExpression::GenerateValue(
         Builder &builder,
         const Frame &frame) const
 {
-    std::vector<ValuePtr> operand_values;
-    std::vector<std::shared_ptr<ConstantNumber>> operand_constants;
+    std::vector<ValuePtr> values(Operands.size());
+    std::vector<std::shared_ptr<ConstantNumber>> constants(Operands.size());
 
-    for (auto &operand : Operands)
+    auto all_constant = true, all_number = true;
+    for (unsigned i = 0; i < Operands.size(); ++i)
     {
-        auto operand_value = operand->GenerateValue(builder, frame);
-        Assert(operand_value->Type->IsNumber(),
-               operand->Where,
-               "operand must be of type number, but is {}",
-               operand_value->Type);
-        operand_values.push_back(operand_value);
-        if (auto constant = std::dynamic_pointer_cast<ConstantNumber>(operand_value))
-            operand_constants.push_back(constant);
+        auto value = Operands[i]->GenerateValue(builder, frame);
+
+        values[i] = value;
+
+        all_number &= value->Type->IsNumber();
+
+        if (auto c = std::dynamic_pointer_cast<ConstantNumber>(value))
+            constants[i] = std::move(c);
+        else
+            all_constant = false;
     }
 
     const auto operator_ = ToOperator(Operator);
-    if (!operator_)
-        Error(Where, "undefined binary operator {}", Operator);
+    Assert(!!operator_, Where, "undefined binary operator {}", Operator);
 
-    if (operand_values.size() == operand_constants.size())
+    if (all_constant)
     {
-        auto value = operand_constants.front()->Value;
-        for (unsigned i = 1; i < operand_constants.size(); ++i)
+        auto value = constants.front()->Value;
+        for (unsigned i = 1; i < constants.size(); ++i)
             switch (*operator_)
             {
             case Operator_::Add:
-                value += operand_constants[i]->Value;
+                value += constants[i]->Value;
                 break;
             case Operator_::Sub:
-                value -= operand_constants[i]->Value;
+                value -= constants[i]->Value;
                 break;
             case Operator_::Mul:
-                value *= operand_constants[i]->Value;
+                value *= constants[i]->Value;
                 break;
             case Operator_::Div:
-                value /= operand_constants[i]->Value;
+                value /= constants[i]->Value;
                 break;
             case Operator_::Rem:
-                value %= operand_constants[i]->Value;
+                value %= constants[i]->Value;
                 break;
             }
         return ConstantNumber::Create(Where, builder.GetContext(), value);
     }
 
-    return builder.CreateOperation(Where, {}, *operator_, operand_values);
+    if (all_number)
+        return builder.CreateOperation(Where, {}, *operator_, values);
+
+    auto accum = values.front();
+    for (unsigned i = 1; i < Operands.size(); ++i)
+    {
+        const ParameterRefList parameters = {
+            {     accum->Type,     accum->FieldType },
+            { values[i]->Type, values[i]->FieldType },
+        };
+
+        const auto candidates =
+                builder.FindFunctions({ "operator", BinaryExpression::MapOperator(Operator) }, parameters, false);
+        const auto callee = builder.FindUnambiguousCandidate(Where, candidates, parameters);
+
+        accum = builder.CreateCall(Where, {}, callee, { accum, values[i] }, frame.LandingPad);
+    }
+
+    return accum;
 }

@@ -2,7 +2,7 @@
 #include <mcc/type.hpp>
 
 mcc::TupleType::TupleType(
-        TypeContext &context,
+        Context &context,
         const std::vector<TypePtr> &elements)
     : Type(context),
       Elements(elements)
@@ -54,7 +54,7 @@ mcc::ConstantPtr mcc::TupleType::GetNull(const SourceLocation &where) const
     return ConstantArray::Create(where, Self.lock(), values, false);
 }
 
-bool mcc::TupleType::HasSpecial(const TypePtr &other) const
+bool mcc::TupleType::HasSpecialization(const TypePtr &other) const
 {
     if (other->IsAny() || !other->IsTuple())
         return false;
@@ -64,7 +64,7 @@ bool mcc::TupleType::HasSpecial(const TypePtr &other) const
         return false;
 
     for (unsigned i = 0; i < Elements.size(); ++i)
-        if (!SameOrSpecial(other_tuple->Elements[i], Elements[i]))
+        if (!SameOrSpecialization(other_tuple->Elements[i], Elements[i]))
             return false;
     return true;
 }

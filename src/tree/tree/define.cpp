@@ -1,6 +1,5 @@
 #include <mcc/block.hpp>
 #include <mcc/builder.hpp>
-#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
@@ -11,7 +10,7 @@
 
 mcc::DefineNode::DefineNode(
         const SourceLocation &where,
-        bool is_operator,
+        const bool is_operator,
         ResourceLocation location,
         ParameterList parameters,
         TypePtr result_type,
@@ -66,7 +65,7 @@ std::ostream &mcc::DefineNode::Print(std::ostream &stream) const
 
 void mcc::DefineNode::Generate(Builder &builder) const
 {
-    auto function = builder.FindFunction(Location, Parameters);
+    auto function = builder.GetFunction(Location, Parameters);
     if (!function)
         function = builder.CreateFunction(Where, Location, Parameters, ResultType, Throws);
     else
@@ -78,13 +77,13 @@ void mcc::DefineNode::Generate(Builder &builder) const
             tag_namespace_ = builder.GetNamespace();
 
         auto &[replace_, tags_] = builder.GetPackage().Tags[tag_namespace_][tag_path_];
-        tags_.emplace_back(function->Location);
+        tags_.emplace_back(function->Mangle());
     }
 
     if (!Body)
         return;
 
-    auto entry_target = Block::Create(Body->Where, "entry", builder.GetContext(), function);
+    const auto entry_target = Block::Create(Body->Where, "entry", builder.GetContext(), function);
     builder.SetInsertBlock(entry_target);
 
     builder.PushVariables();
@@ -131,7 +130,7 @@ void mcc::DefineNode::Generate(Builder &builder) const
             if (const auto instruction = std::dynamic_pointer_cast<ReturnInstruction>(terminator))
             {
                 auto type = instruction->Value ? instruction->Value->Type : builder.GetContext().GetVoid();
-                Assert(SameOrSpecial(type, ResultType),
+                Assert(SameOrSpecialization(type, ResultType),
                        Where,
                        "cannot return value of type {} for result type {}",
                        type,
@@ -153,7 +152,7 @@ void mcc::DefineNode::GenerateInclude(
         Builder &builder,
         std::set<std::filesystem::path> &include_chain) const
 {
-    auto function = builder.FindFunction(Location, Parameters);
+    auto function = builder.GetFunction(Location, Parameters);
     if (!function)
     {
         builder.CreateFunction(Where, Location, Parameters, ResultType, Throws);

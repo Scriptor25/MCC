@@ -6,6 +6,33 @@
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 
+const std::string &mcc::BinaryExpression::MapOperator(const std::string &operator_)
+{
+    static const std::map<std::string, std::string> operator_map = {
+        {  "+",                "__add" },
+        {  "-",                "__sub" },
+        {  "*",                "__mul" },
+        {  "/",                "__div" },
+        {  "%",                "__rem" },
+
+        {  "=",                "__set" },
+
+        { "+=",            "__add_set" },
+        { "-=",            "__sub_set" },
+        { "*=",            "__mul_set" },
+        { "/=",            "__div_set" },
+        { "%=",            "__rem_set" },
+
+        { "==",              "__equal" },
+        {  "<",          "__less_than" },
+        {  ">",       "__greater_than" },
+        { "<=",    "__less_than_equal" },
+        { ">=", "__greater_than_equal" },
+    };
+
+    return operator_map.at(operator_);
+}
+
 mcc::BinaryExpression::BinaryExpression(
         const SourceLocation &where,
         std::string operator_,
@@ -20,9 +47,7 @@ mcc::BinaryExpression::BinaryExpression(
 
 mcc::ExpressionPtr mcc::BinaryExpression::Merge()
 {
-    static const std::set<std::string_view> mergeable{
-        "+", "-", "*", "/", "%",
-    };
+    static const std::set<std::string_view> mergeable = { "+", "-", "*", "/", "%" };
 
     if (!mergeable.contains(Operator))
         return nullptr;
@@ -75,11 +100,10 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(
         { right->Type, right->FieldType },
     };
 
-    auto candidates = builder.FindCandidates(Operator, parameters);
-
-    if (!candidates.empty())
+    if (const auto candidates = builder.FindFunctions({ "operator", MapOperator(Operator) }, parameters, false);
+        !candidates.empty())
     {
-        auto callee = builder.FindUnambiguousCandidate(Where, candidates, parameters);
+        const auto callee = builder.FindUnambiguousCandidate(Where, candidates, parameters);
 
         return builder.CreateCall(Where, {}, callee, { left, right }, frame.LandingPad);
     }
@@ -88,27 +112,65 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(
         constant_right           = std::dynamic_pointer_cast<ConstantNumber>(right);
         constant_left && constant_right)
     {
-        if (Operator == "<")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value < constant_right->Value);
-        if (Operator == ">")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value > constant_right->Value);
-        if (Operator == "<=")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value <= constant_right->Value);
-        if (Operator == ">=")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value >= constant_right->Value);
-        if (Operator == "==")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value == constant_right->Value);
+        if (const auto operator_ = ToOperator(Operator))
+            switch (*operator_)
+            {
+            case Operator_::Add:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value + constant_right->Value);
+            case Operator_::Sub:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value - constant_right->Value);
+            case Operator_::Mul:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value * constant_right->Value);
+            case Operator_::Div:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value / constant_right->Value);
+            case Operator_::Rem:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value % constant_right->Value);
+            }
 
-        if (Operator == "+")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value + constant_right->Value);
-        if (Operator == "-")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value - constant_right->Value);
-        if (Operator == "*")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value * constant_right->Value);
-        if (Operator == "/")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value / constant_right->Value);
-        if (Operator == "%")
-            return ConstantNumber::Create(Where, builder.GetContext(), constant_left->Value % constant_right->Value);
+        if (const auto comparator = ToComparator(Operator))
+            switch (*comparator)
+            {
+            case Comparator_::EQ:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value == constant_right->Value);
+            case Comparator_::LT:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value < constant_right->Value);
+            case Comparator_::GT:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value > constant_right->Value);
+            case Comparator_::LE:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value <= constant_right->Value);
+            case Comparator_::GE:
+                return ConstantNumber::Create(
+                        Where,
+                        builder.GetContext(),
+                        constant_left->Value >= constant_right->Value);
+            }
     }
 
     if (Operator == "=")
@@ -117,19 +179,7 @@ mcc::ValuePtr mcc::BinaryExpression::GenerateValue(
     Assert(left->Type->IsNumber(), Left->Where, "left must be of type number, but is {}", left->Type);
     Assert(right->Type->IsNumber(), Right->Where, "right must be of type number, but is {}", right->Type);
 
-    std::optional<Comparator_> comparator;
-    if (Operator == "<")
-        comparator = Comparator_::LT;
-    if (Operator == ">")
-        comparator = Comparator_::GT;
-    if (Operator == "<=")
-        comparator = Comparator_::LE;
-    if (Operator == ">=")
-        comparator = Comparator_::GE;
-    if (Operator == "==")
-        comparator = Comparator_::EQ;
-
-    if (comparator)
+    if (const auto comparator = ToComparator(Operator))
         return builder.CreateComparison(Where, {}, *comparator, left, right);
 
     const auto store     = Operator.back() == '=';

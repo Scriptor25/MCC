@@ -3,7 +3,7 @@
 
 mcc::ConstantPtr mcc::ConstantString::Create(
         const SourceLocation &where,
-        TypeContext &context,
+        Context &context,
         const std::string &value)
 {
     auto self  = std::make_shared<ConstantString>(where, context, value);
@@ -13,7 +13,7 @@ mcc::ConstantPtr mcc::ConstantString::Create(
 
 mcc::ConstantString::ConstantString(
         const SourceLocation &where,
-        TypeContext &context,
+        Context &context,
         std::string value)
     : Constant(
               where,

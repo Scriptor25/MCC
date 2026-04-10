@@ -7,25 +7,20 @@
 #include <mcc/type.hpp>
 
 #include <algorithm>
+#include <ranges>
 #include <utility>
 
 mcc::InstructionPtr mcc::SwitchInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
+        const FunctionPtr &parent,
         const ValuePtr &condition,
         const BlockPtr &default_target,
         const CaseTargetMap &case_targets)
 {
-    auto self = std::make_shared<SwitchInstruction>(
-            where,
-            name,
-            context,
-            location,
-            condition,
-            default_target,
-            case_targets);
+    auto self =
+            std::make_shared<SwitchInstruction>(where, name, context, parent, condition, default_target, case_targets);
 
     self->Self = self;
     self->Condition->Use(self);
@@ -42,8 +37,8 @@ mcc::InstructionPtr mcc::SwitchInstruction::Create(
 mcc::SwitchInstruction::SwitchInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        ResourceLocation location,
+        Context &context,
+        FunctionPtr parent,
         ValuePtr condition,
         BlockPtr default_target,
         CaseTargetMap case_targets)
@@ -52,7 +47,7 @@ mcc::SwitchInstruction::SwitchInstruction(
               name,
               context.GetVoid(),
               FieldType_::Value),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Condition(std::move(condition)),
       DefaultTarget(std::move(default_target)),
       CaseTargets(std::move(case_targets))
@@ -74,8 +69,10 @@ void mcc::SwitchInstruction::Generate(
         CommandVector &commands,
         bool stack) const
 {
+    auto location = Parent->Mangle();
+
     std::string prefix, arguments;
-    DefaultTarget->Parent->ForwardArguments(prefix, arguments);
+    Parent->ForwardArguments(prefix, arguments);
 
     auto stack_path = GetStackPath();
     auto tmp_name   = GetTemp();
@@ -122,19 +119,19 @@ void mcc::SwitchInstruction::Generate(
                     condition.ReferenceType,
                     condition.Target,
                     condition.Path);
-            commands.Append("data remove storage {} {}", Location, stack_path);
+            commands.Append("data remove storage {} {}", location, stack_path);
             commands.Append(
                     "execute if score %c {} matches {} run data modify storage {} {} set value 1",
                     tmp_name,
                     case_,
-                    Location,
+                    location,
                     stack_path);
             commands.Append(RemoveScore());
 
             commands.Append(
                     "{}execute if data storage {} {} run return run function {}{}",
                     prefix,
-                    Location,
+                    location,
                     stack_path,
                     target_->GetLocation(),
                     arguments);
@@ -147,19 +144,19 @@ void mcc::SwitchInstruction::Generate(
         {
             commands.Append(CreateScore());
             commands.Append("$scoreboard players set %c {} {}", tmp_name, condition.Name);
-            commands.Append("data remove storage {} {}", Location, stack_path);
+            commands.Append("data remove storage {} {}", location, stack_path);
             commands.Append(
                     "execute if score %c {} matches {} run data modify storage {} {} set value 1",
                     tmp_name,
                     case_,
-                    Location,
+                    location,
                     stack_path);
             commands.Append(RemoveScore());
 
             commands.Append(
                     "{}execute if data storage {} {} run return run function {}{}",
                     prefix,
-                    Location,
+                    location,
                     stack_path,
                     target_->GetLocation(),
                     arguments);
@@ -191,8 +188,8 @@ bool mcc::SwitchInstruction::IsTerminator() const
 }
 
 void mcc::SwitchInstruction::Replace(
-        ValuePtr value,
-        ValuePtr replacement)
+        const ValuePtr value,
+        const ValuePtr replacement)
 {
     Assert(!!value, "value must not be null");
     Assert(!!replacement, "replacement must not be null");
@@ -213,13 +210,13 @@ void mcc::SwitchInstruction::Replace(
         return;
     }
 
-    for (auto &[case_, target_] : CaseTargets)
+    for (auto &target : CaseTargets | std::views::values)
     {
-        if (value == target_)
+        if (value == target)
         {
-            target_->Drop(Self);
-            target_ = std::dynamic_pointer_cast<Block>(replacement);
-            target_->Use(Self);
+            target->Drop(Self);
+            target = std::dynamic_pointer_cast<Block>(replacement);
+            target->Use(Self);
             return;
         }
     }

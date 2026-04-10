@@ -104,6 +104,22 @@ namespace mcc
         return std::nullopt;
     }
 
+    inline std::optional<Comparator_> ToComparator(const std::string_view &str)
+    {
+        static const std::map<std::string_view, Comparator_> map = {
+            { "==", Comparator_::EQ },
+            {  "<", Comparator_::LT },
+            {  ">", Comparator_::GT },
+            { "<=", Comparator_::LE },
+            { ">=", Comparator_::GE },
+        };
+
+        if (const auto it = map.find(str); it != map.end())
+            return it->second;
+
+        return std::nullopt;
+    }
+
     inline std::optional<ReferenceType_> ToReferenceType(const std::string_view &str)
     {
         static const std::map<std::string_view, ReferenceType_> map = {

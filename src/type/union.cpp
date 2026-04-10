@@ -2,7 +2,7 @@
 #include <mcc/type.hpp>
 
 mcc::UnionType::UnionType(
-        TypeContext &context,
+        Context &context,
         const std::set<TypePtr> &elements)
     : Type(context),
       Elements(elements)
@@ -51,10 +51,10 @@ mcc::ConstantPtr mcc::UnionType::GetNull(const SourceLocation &where) const
     Error(where, "cannot get null value for type {}", Self.lock());
 }
 
-bool mcc::UnionType::HasSpecial(const TypePtr &other) const
+bool mcc::UnionType::HasSpecialization(const TypePtr &other) const
 {
     for (auto &element : Elements)
-        if (SameOrSpecial(other, element))
+        if (SameOrSpecialization(other, element))
             return true;
 
     if (other->IsAny() || !other->IsUnion())
@@ -62,7 +62,7 @@ bool mcc::UnionType::HasSpecial(const TypePtr &other) const
 
     for (const auto other_union = std::dynamic_pointer_cast<UnionType>(other);
          auto &other_element : other_union->Elements)
-        if (!SameOrSpecial(other_element, Self.lock()))
+        if (!SameOrSpecialization(other_element, Self.lock()))
             return false;
 
     return true;

@@ -19,7 +19,7 @@ static void parse_file(
     std::ifstream stream(path);
     mcc::Assert(stream.is_open(), "failed to open file {}", path.string());
 
-    mcc::TypeContext context;
+    mcc::Context context;
     mcc::Parser parser(context, stream, path.string());
     mcc::Builder builder(context, package);
 

@@ -28,8 +28,8 @@ mcc::ValuePtr mcc::GenericStorageReference::Create(
         const std::string &path,
         const bool is_mutable)
 {
-    auto location_ = ConstantResource::Create(where, type->Context.GetVoid(), location);
-    auto path_     = ConstantString::Create(where, type->Context, path);
+    const auto location_ = ConstantResource::Create(where, type->Types.GetVoid(), location);
+    const auto path_     = ConstantString::Create(where, type->Types, path);
 
     return Create(where, name, type, location_, path_, is_mutable);
 }

@@ -1,4 +1,3 @@
-#include <mcc/constant.hpp>
 #include <mcc/error.hpp>
 #include <mcc/expression.hpp>
 #include <mcc/parse.hpp>

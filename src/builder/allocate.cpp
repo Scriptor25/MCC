@@ -11,14 +11,13 @@ mcc::ValuePtr mcc::Builder::Allocate(
 {
     Assert(!!m_InsertBlock, where, "insert block must not be null");
 
-    const auto location = m_InsertBlock->Parent->Location;
-    const auto index    = m_InsertBlock->Parent->StackIndex++;
+    const auto index = m_InsertBlock->Parent->StackIndex++;
 
-    return GenericStorageReference::Create(
+    return FunctionStorageReference::Create(
             where,
             name,
             type,
-            location,
+            m_InsertBlock->Parent,
             std::format("stack[0].v[{}]", index),
             is_mutable);
 }

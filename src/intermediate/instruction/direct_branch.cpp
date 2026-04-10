@@ -8,24 +8,23 @@
 mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
+        const FunctionPtr &parent,
         const BlockPtr &target)
 {
-    return Create(where, name, context, location, target, {}, {});
+    return Create(where, name, context, parent, target, {}, {});
 }
 
 mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
+        const FunctionPtr &parent,
         const BlockPtr &target,
         const ValuePtr &result,
         const ValuePtr &branch_result)
 {
-    auto self =
-            std::make_shared<DirectBranchInstruction>(where, name, context, location, target, result, branch_result);
+    auto self = std::make_shared<DirectBranchInstruction>(where, name, context, parent, target, result, branch_result);
 
     self->Self = self;
     self->Target->Use(self);
@@ -40,8 +39,8 @@ mcc::InstructionPtr mcc::DirectBranchInstruction::Create(
 mcc::DirectBranchInstruction::DirectBranchInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        ResourceLocation location,
+        Context &context,
+        FunctionPtr parent,
         BlockPtr target,
         ValuePtr result,
         ValuePtr branch_result)
@@ -50,7 +49,7 @@ mcc::DirectBranchInstruction::DirectBranchInstruction(
               name,
               context.GetVoid(),
               FieldType_::Value),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Target(std::move(target)),
       Result(std::move(result)),
       BranchResult(std::move(branch_result))
@@ -128,14 +127,14 @@ void mcc::DirectBranchInstruction::Generate(
     }
 
     std::string prefix, arguments;
-    Target->Parent->ForwardArguments(prefix, arguments);
+    Parent->ForwardArguments(prefix, arguments);
 
     commands.Append("{}return run function {}{}", prefix, Target->GetLocation(), arguments);
 }
 
 bool mcc::DirectBranchInstruction::RequireStack() const
 {
-    return Result ? Result->RequireStack() : (BranchResult ? BranchResult->RequireStack() : false);
+    return (Result && Result->RequireStack()) || (BranchResult && BranchResult->RequireStack());
 }
 
 bool mcc::DirectBranchInstruction::IsTerminator() const

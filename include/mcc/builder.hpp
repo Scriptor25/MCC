@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mcc/common.hpp>
+#include <mcc/module.hpp>
 #include <mcc/package.hpp>
 
 namespace mcc
@@ -8,10 +9,10 @@ namespace mcc
     class Builder
     {
     public:
-        Builder(TypeContext &context,
+        Builder(Context &context,
                 Package &package);
 
-        [[nodiscard]] TypeContext &GetContext() const;
+        [[nodiscard]] Context &GetContext() const;
         [[nodiscard]] Package &GetPackage() const;
 
         [[nodiscard]] std::string GetNamespace() const;
@@ -21,24 +22,29 @@ namespace mcc
                 const SourceLocation &where,
                 ResourceLocation location,
                 const ParameterList &parameters,
-                const TypePtr &result_type,
+                const TypePtr &result,
                 bool throws);
 
-        [[nodiscard]] FunctionPtr FindFunction(
+        [[nodiscard]] FunctionPtr GetFunction(
                 ResourceLocation location,
                 const ParameterList &parameters) const;
 
-        [[nodiscard]] std::vector<FunctionPtr> FindCandidates(
-                ResourceLocation location,
+        [[nodiscard]] std::vector<FunctionPtr> FindFunctions(
+                const ResourceLocation &location,
                 const ParameterRefList &parameters) const;
-        [[nodiscard]] std::vector<FunctionPtr> FindCandidates(
-                const std::string &name,
-                const ParameterRefList &parameters) const;
+        [[nodiscard]] std::vector<FunctionPtr> FindFunctions(
+                const std::vector<std::string> &path,
+                const ParameterRefList &parameters,
+                bool use_namespace) const;
+        [[nodiscard]] std::vector<FunctionPtr> FindFunctions(const ResourceLocation &location) const;
+        [[nodiscard]] std::vector<FunctionPtr> FindFunctions(
+                const std::vector<std::string> &path,
+                bool use_namespace) const;
 
-        [[nodiscard]] FunctionPtr FindUnambiguousCandidate(
+        [[nodiscard]] static FunctionPtr FindUnambiguousCandidate(
                 const SourceLocation &where,
                 const std::vector<FunctionPtr> &candidates,
-                const ParameterRefList &parameters) const;
+                const ParameterRefList &parameters);
 
         ValuePtr CreateGlobal(
                 const SourceLocation &where,
@@ -207,11 +213,12 @@ namespace mcc
         void Generate() const;
 
     private:
-        TypeContext &m_Context;
+        Context &m_Context;
         Package &m_Package;
 
+        Module m_Module;
+
         std::string m_Namespace;
-        std::map<std::string, std::map<std::vector<std::string>, std::vector<FunctionPtr>>> m_Functions;
         std::map<std::string, std::map<std::vector<std::string>, ValuePtr>> m_Globals;
 
         BlockPtr m_InsertBlock;

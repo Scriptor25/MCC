@@ -46,7 +46,7 @@ void mcc::VariableStatement::Generate(
     if (Value)
     {
         value = Value->GenerateValue(builder, frame);
-        Assert(!Type || SameOrSpecial(value->Type, Type),
+        Assert(!Type || SameOrSpecialization(value->Type, Type),
                Where,
                "cannot assign value of type {} to variable of type {}",
                value->Type,

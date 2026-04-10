@@ -2,7 +2,7 @@
 #include <mcc/type.hpp>
 
 mcc::ObjectType::ObjectType(
-        TypeContext &context,
+        Context &context,
         const std::map<
                 std::string,
                 TypePtr
@@ -59,7 +59,7 @@ mcc::ConstantPtr mcc::ObjectType::GetNull(const SourceLocation &where) const
     return ConstantObject::Create(where, Self.lock(), values);
 }
 
-bool mcc::ObjectType::HasSpecial(const TypePtr &other) const
+bool mcc::ObjectType::HasSpecialization(const TypePtr &other) const
 {
     if (other->IsAny() || !other->IsObject())
         return false;
@@ -70,7 +70,7 @@ bool mcc::ObjectType::HasSpecial(const TypePtr &other) const
         if (!other_object->Elements.contains(key_))
             return false;
 
-        if (!SameOrSpecial(other_object->Elements[key_], element_))
+        if (!SameOrSpecialization(other_object->Elements[key_], element_))
             return false;
     }
 

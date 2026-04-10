@@ -11,12 +11,12 @@ namespace mcc
         static BlockPtr Create(
                 const SourceLocation &where,
                 const std::string &name,
-                TypeContext &context,
+                Context &context,
                 const FunctionPtr &parent);
 
         Block(const SourceLocation &where,
               const std::string &name,
-              TypeContext &context,
+              Context &context,
               FunctionPtr parent);
 
         void Generate(
@@ -26,7 +26,7 @@ namespace mcc
 
         [[nodiscard]] InstructionPtr GetTerminator() const;
 
-        ResourceLocation GetLocation() const;
+        [[nodiscard]] ResourceLocation GetLocation() const;
         void Erase() const;
 
         FunctionPtr Parent;

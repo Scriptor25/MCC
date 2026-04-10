@@ -1,7 +1,7 @@
 #include <mcc/constant.hpp>
 #include <mcc/type.hpp>
 
-mcc::AnyObjectType::AnyObjectType(TypeContext &context)
+mcc::AnyObjectType::AnyObjectType(Context &context)
     : Type(context)
 {
 }
@@ -21,7 +21,7 @@ mcc::ConstantPtr mcc::AnyObjectType::GetNull(const SourceLocation &where) const
     return ConstantObject::Create(where, Self.lock(), {});
 }
 
-bool mcc::AnyObjectType::HasSpecial(const TypePtr &other) const
+bool mcc::AnyObjectType::HasSpecialization(const TypePtr &other) const
 {
     return other->IsObject();
 }

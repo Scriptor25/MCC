@@ -1,16 +1,17 @@
 #include <mcc/command.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 
 mcc::InstructionPtr mcc::NotNullInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
+        const FunctionPtr &parent,
         const ValuePtr &value)
 {
-    auto self = std::make_shared<NotNullInstruction>(where, name, context, location, value);
+    auto self = std::make_shared<NotNullInstruction>(where, name, context, parent, value);
 
     self->Self = self;
     self->Value->Use(self);
@@ -21,15 +22,15 @@ mcc::InstructionPtr mcc::NotNullInstruction::Create(
 mcc::NotNullInstruction::NotNullInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        ResourceLocation location,
+        Context &context,
+        FunctionPtr parent,
         ValuePtr value)
     : Instruction(
               where,
               name,
               context.GetNumber(),
               FieldType_::ImmutableReference),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Value(std::move(value))
 {
 }
@@ -43,6 +44,8 @@ void mcc::NotNullInstruction::Generate(
         CommandVector &commands,
         bool stack) const
 {
+    auto location = Parent->Mangle();
+
     auto value = Value->GenerateResult();
     Assert(value.Type == ResultType_::Reference,
            Where,
@@ -56,14 +59,14 @@ void mcc::NotNullInstruction::Generate(
     if (value.WithArgument)
         prefix = "$";
 
-    commands.Append("data modify storage {} {} set value 0", Location, stack_path);
+    commands.Append("data modify storage {} {} set value 0", location, stack_path);
     commands.Append(
             "{}execute if data {} {} {} run data modify storage {} {} set value 1",
             prefix,
             value.ReferenceType,
             value.Target,
             value.Path,
-            Location,
+            location,
             stack_path);
 }
 
@@ -77,7 +80,7 @@ mcc::Result mcc::NotNullInstruction::GenerateResult() const
     return {
         .Type          = ResultType_::Reference,
         .ReferenceType = ReferenceType_::Storage,
-        .Target        = Location.String(),
+        .Target        = Parent->Mangle().String(),
         .Path          = GetStackPath(),
     };
 }

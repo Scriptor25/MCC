@@ -21,7 +21,7 @@ mcc::StringifyValue::StringifyValue(
         const ValuePtr &target)
     : Value(where,
             name,
-            target->Type->Context.GetString(),
+            target->Type->Types.GetString(),
             FieldType_::Value),
       Target(target)
 {

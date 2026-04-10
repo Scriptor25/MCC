@@ -6,50 +6,45 @@
 mcc::InstructionPtr mcc::ArrayInstruction::CreateAppend(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
         const ValuePtr &array,
         const ValuePtr &value)
 {
-    return Create(where, name, context, ArrayOperation_::Append, location, array, value, ~0);
+    return Create(where, name, context, ArrayOperation_::Append, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreatePrepend(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
         const ValuePtr &array,
         const ValuePtr &value)
 {
-    return Create(where, name, context, ArrayOperation_::Prepend, location, array, value, ~0);
+    return Create(where, name, context, ArrayOperation_::Prepend, array, value, ~0);
 }
 
 mcc::InstructionPtr mcc::ArrayInstruction::CreateInsert(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
         const ValuePtr &array,
         const ValuePtr &value,
         const IndexT index)
 {
-    return Create(where, name, context, ArrayOperation_::Insert, location, array, value, index);
+    return Create(where, name, context, ArrayOperation_::Insert, array, value, index);
 }
 
 
 mcc::ArrayInstruction::SPtr mcc::ArrayInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         ArrayOperation_ array_operation,
-        const ResourceLocation &location,
         const ValuePtr &array,
         const ValuePtr &value,
         IndexT index)
 {
-    auto self =
-            std::make_shared<ArrayInstruction>(where, name, context, array_operation, location, array, value, index);
+    auto self = std::make_shared<ArrayInstruction>(where, name, context, array_operation, array, value, index);
 
     self->Self = self;
     self->Array->Use(self);
@@ -62,9 +57,8 @@ mcc::ArrayInstruction::SPtr mcc::ArrayInstruction::Create(
 mcc::ArrayInstruction::ArrayInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
+        Context &context,
         const ArrayOperation_ array_operation,
-        ResourceLocation location,
         ValuePtr array,
         ValuePtr value,
         const IndexT index)
@@ -74,7 +68,6 @@ mcc::ArrayInstruction::ArrayInstruction(
               context.GetVoid(),
               FieldType_::Value),
       ArrayOperation(array_operation),
-      Location(std::move(location)),
       Array(std::move(array)),
       Value(std::move(value)),
       Index(index)

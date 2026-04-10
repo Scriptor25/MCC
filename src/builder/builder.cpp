@@ -6,14 +6,15 @@
 #include <ranges>
 
 mcc::Builder::Builder(
-        TypeContext &context,
+        Context &context,
         Package &package)
     : m_Context(context),
-      m_Package(package)
+      m_Package(package),
+      m_Module(m_Context)
 {
 }
 
-mcc::TypeContext &mcc::Builder::GetContext() const
+mcc::Context &mcc::Builder::GetContext() const
 {
     return m_Context;
 }
@@ -66,14 +67,12 @@ mcc::InstructionPtr mcc::Builder::Insert(
 
 void mcc::Builder::Generate() const
 {
-    for (auto &namespace_ : m_Functions | std::views::values)
-        for (auto &functions : namespace_ | std::views::values)
-            for (auto &function : functions)
-            {
-                if (function->Blocks.empty())
-                    continue;
+    for (auto &function : m_Module)
+    {
+        if (function->Blocks.empty())
+            continue;
 
-                function->OptimizeBlocks();
-                function->GenerateFunction(m_Package);
-            }
+        function->OptimizeBlocks();
+        function->GenerateFunction(m_Package);
+    }
 }

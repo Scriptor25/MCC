@@ -31,8 +31,8 @@ mcc::FunctionPtr mcc::ResourceExpression::GenerateCallee(
 {
     auto location = Location;
     if (location.Namespace.empty())
-        location.Namespace = builder.GetInsertBlock()->Parent->Location.Namespace;
+        location.Namespace = builder.GetNamespace();
 
-    auto candidates = builder.FindCandidates(location, parameters);
-    return builder.FindUnambiguousCandidate(Where, candidates, parameters);
+    const auto candidates = builder.FindFunctions(location, parameters);
+    return Builder::FindUnambiguousCandidate(Where, candidates, parameters);
 }

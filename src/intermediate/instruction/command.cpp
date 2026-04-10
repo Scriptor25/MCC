@@ -1,15 +1,16 @@
 #include <mcc/command.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 
 mcc::InstructionPtr mcc::CommandInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
         const TypePtr &type,
-        const ResourceLocation &location,
+        const FunctionPtr &parent,
         const CommandT &command)
 {
-    auto self  = std::make_shared<CommandInstruction>(where, name, type, location, command);
+    auto self  = std::make_shared<CommandInstruction>(where, name, type, parent, command);
     self->Self = self;
     return self;
 }
@@ -18,14 +19,14 @@ mcc::CommandInstruction::CommandInstruction(
         const SourceLocation &where,
         const std::string &name,
         const TypePtr &type,
-        ResourceLocation location,
+        FunctionPtr parent,
         CommandT command)
     : Instruction(
               where,
               name,
               type,
               FieldType_::Value),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Command(std::move(command))
 {
 }
@@ -40,7 +41,8 @@ void mcc::CommandInstruction::Generate(
         return;
     }
 
-    auto command     = Command;
+    auto command = Command;
+
     const auto macro = command.front() == '$';
     if (macro)
         command.erase(command.begin());
@@ -49,7 +51,7 @@ void mcc::CommandInstruction::Generate(
     commands.Append(
             "{}execute store result storage {} {} long 1 run {}",
             macro ? "$" : "",
-            Location,
+            Parent->Mangle(),
             GetStackPath(),
             command);
 }
@@ -64,7 +66,7 @@ mcc::Result mcc::CommandInstruction::GenerateResult() const
     return {
         .Type          = ResultType_::Reference,
         .ReferenceType = ReferenceType_::Storage,
-        .Target        = Location.String(),
+        .Target        = Parent->Mangle().String(),
         .Path          = GetStackPath(),
     };
 }

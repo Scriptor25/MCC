@@ -8,11 +8,11 @@
 
 namespace mcc
 {
-    bool SameOrSpecial(
+    bool SameOrSpecialization(
             const TypePtr &a,
             const TypePtr &b);
 
-    class TypeContext
+    class Context
     {
     public:
         TypePtr GetVoid();
@@ -55,14 +55,14 @@ namespace mcc
 
     struct Type
     {
-        explicit Type(TypeContext &context);
+        explicit Type(Context &context);
         virtual ~Type() = default;
 
         [[nodiscard]] virtual std::string String() const        = 0;
         virtual std::ostream &Print(std::ostream &stream) const = 0;
 
         [[nodiscard]] virtual ConstantPtr GetNull(const SourceLocation &where) const = 0;
-        [[nodiscard]] virtual bool HasSpecial(const TypePtr &other) const            = 0;
+        [[nodiscard]] virtual bool HasSpecialization(const TypePtr &other) const            = 0;
 
         [[nodiscard]] virtual bool IsAny() const;
         [[nodiscard]] virtual bool IsVoid() const;
@@ -74,45 +74,45 @@ namespace mcc
         [[nodiscard]] virtual bool IsUnion() const;
         [[nodiscard]] virtual bool IsFunction() const;
 
-        TypeContext &Context;
+        Context &Types;
         std::weak_ptr<Type> Self;
     };
 
     struct VoidType final : Type
     {
-        explicit VoidType(TypeContext &context);
+        explicit VoidType(Context &context);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsVoid() const override;
     };
 
     struct NumberType final : Type
     {
-        explicit NumberType(TypeContext &context);
+        explicit NumberType(Context &context);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsNumber() const override;
     };
 
     struct StringType final : Type
     {
-        explicit StringType(TypeContext &context);
+        explicit StringType(Context &context);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsString() const override;
     };
@@ -121,14 +121,14 @@ namespace mcc
     struct ArrayType final : Type
     {
         ArrayType(
-                TypeContext &context,
+                Context &context,
                 TypePtr elements);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsArray() const override;
 
@@ -139,7 +139,7 @@ namespace mcc
     struct ObjectType final : Type
     {
         ObjectType(
-                TypeContext &context,
+                Context &context,
                 const std::map<
                         std::string,
                         TypePtr
@@ -149,7 +149,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsObject() const override;
 
@@ -160,14 +160,14 @@ namespace mcc
     struct TupleType final : Type
     {
         TupleType(
-                TypeContext &context,
+                Context &context,
                 const std::vector<TypePtr> &elements);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsTuple() const override;
 
@@ -178,14 +178,14 @@ namespace mcc
     struct UnionType final : Type
     {
         UnionType(
-                TypeContext &context,
+                Context &context,
                 const std::set<TypePtr> &elements);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsUnion() const override;
 
@@ -196,7 +196,7 @@ namespace mcc
     struct FunctionType final : Type
     {
         FunctionType(
-                TypeContext &context,
+                Context &context,
                 const std::vector<TypePtr> &parameters,
                 TypePtr result,
                 bool throws);
@@ -205,7 +205,7 @@ namespace mcc
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsFunction() const override;
 
@@ -216,13 +216,13 @@ namespace mcc
 
     struct AnyArrayType final : Type
     {
-        explicit AnyArrayType(TypeContext &context);
+        explicit AnyArrayType(Context &context);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsAny() const override;
         [[nodiscard]] bool IsArray() const override;
@@ -230,13 +230,13 @@ namespace mcc
 
     struct AnyObjectType final : Type
     {
-        explicit AnyObjectType(TypeContext &context);
+        explicit AnyObjectType(Context &context);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsAny() const override;
         [[nodiscard]] bool IsObject() const override;
@@ -244,13 +244,13 @@ namespace mcc
 
     struct AnyFunctionType final : Type
     {
-        explicit AnyFunctionType(TypeContext &context);
+        explicit AnyFunctionType(Context &context);
 
         [[nodiscard]] std::string String() const override;
         std::ostream &Print(std::ostream &stream) const override;
 
         [[nodiscard]] ConstantPtr GetNull(const SourceLocation &where) const override;
-        [[nodiscard]] bool HasSpecial(const TypePtr &other) const override;
+        [[nodiscard]] bool HasSpecialization(const TypePtr &other) const override;
 
         [[nodiscard]] bool IsAny() const override;
         [[nodiscard]] bool IsFunction() const override;

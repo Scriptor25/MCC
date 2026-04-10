@@ -8,14 +8,13 @@
 mcc::InstructionPtr mcc::BranchInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
+        const FunctionPtr &parent,
         const ValuePtr &condition,
         const BlockPtr &then_target,
         const BlockPtr &else_target)
 {
-    auto self =
-            std::make_shared<BranchInstruction>(where, name, context, location, condition, then_target, else_target);
+    auto self = std::make_shared<BranchInstruction>(where, name, context, parent, condition, then_target, else_target);
 
     self->Self = self;
     self->Condition->Use(self);
@@ -28,8 +27,8 @@ mcc::InstructionPtr mcc::BranchInstruction::Create(
 mcc::BranchInstruction::BranchInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        ResourceLocation location,
+        Context &context,
+        FunctionPtr parent,
         ValuePtr condition,
         BlockPtr then_target,
         BlockPtr else_target)
@@ -38,7 +37,7 @@ mcc::BranchInstruction::BranchInstruction(
               name,
               context.GetVoid(),
               FieldType_::Value),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Condition(std::move(condition)),
       ThenTarget(std::move(then_target)),
       ElseTarget(std::move(else_target))
@@ -56,8 +55,10 @@ void mcc::BranchInstruction::Generate(
         CommandVector &commands,
         bool stack) const
 {
+    auto location = Parent->Mangle();
+
     std::string prefix, arguments;
-    ThenTarget->Parent->ForwardArguments(prefix, arguments);
+    Parent->ForwardArguments(prefix, arguments);
 
     auto stack_path = GetStackPath();
     auto temp       = GetTemp();
@@ -80,18 +81,18 @@ void mcc::BranchInstruction::Generate(
                 condition.ReferenceType,
                 condition.Target,
                 condition.Path);
-        commands.Append("data remove storage {} {}", Location, stack_path);
+        commands.Append("data remove storage {} {}", location, stack_path);
         commands.Append(
                 "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
                 temp,
-                Location,
+                location,
                 stack_path);
         commands.Append(RemoveScore());
 
         commands.Append(
                 "{}execute if data storage {} {} run return run function {}{}",
                 prefix,
-                Location,
+                location,
                 stack_path,
                 then_target,
                 arguments);
@@ -101,18 +102,18 @@ void mcc::BranchInstruction::Generate(
     case ResultType_::Argument:
         commands.Append(CreateScore());
         commands.Append("$scoreboard players set %c {} {}", temp, condition.Name);
-        commands.Append("data remove storage {} {}", Location, stack_path);
+        commands.Append("data remove storage {} {}", location, stack_path);
         commands.Append(
                 "execute unless score %c {} matches 0 run data modify storage {} {} set value 1",
                 temp,
-                Location,
+                location,
                 stack_path);
         commands.Append(RemoveScore());
 
         commands.Append(
                 "{}execute if data storage {} {} run return run function {}{}",
                 prefix,
-                Location,
+                location,
                 stack_path,
                 then_target,
                 arguments);

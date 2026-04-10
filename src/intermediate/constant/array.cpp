@@ -18,7 +18,7 @@ mcc::ConstantPtr mcc::ConstantArray::Create(
 
 mcc::ConstantPtr mcc::ConstantArray::Create(
         const SourceLocation &where,
-        TypeContext &context,
+        Context &context,
         const std::vector<ConstantPtr> &values,
         const bool stringify)
 {

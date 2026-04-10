@@ -5,7 +5,7 @@
 #include <algorithm>
 
 mcc::Parser::Parser(
-        TypeContext &context,
+        Context &context,
         std::istream &stream,
         const std::string &filename)
     : Parser(context,
@@ -18,7 +18,7 @@ mcc::Parser::Parser(
 }
 
 mcc::Parser::Parser(
-        TypeContext &context,
+        Context &context,
         std::istream &stream,
         SourceLocation location)
     : m_Context(context),

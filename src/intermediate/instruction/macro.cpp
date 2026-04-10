@@ -1,6 +1,7 @@
 #include <mcc/command.hpp>
 #include <mcc/constant.hpp>
 #include <mcc/error.hpp>
+#include <mcc/function.hpp>
 #include <mcc/instruction.hpp>
 #include <mcc/type.hpp>
 
@@ -54,6 +55,8 @@ static void generate_macro_swap(
         const mcc::MacroInstruction &self,
         mcc::CommandVector &commands)
 {
+    auto location = self.Parent->Mangle();
+
     mcc::Assert(self.Arguments.size() == 2, self.Where, "argument count must be 2, but is {}", self.Arguments.size());
 
     auto value1 = self.Arguments[0]->GenerateResult();
@@ -85,7 +88,7 @@ static void generate_macro_swap(
     commands.Append(
             "{}data modify storage {} {} set from {} {} {}",
             prefix1,
-            self.Location,
+            location,
             tmp_name,
             value1.ReferenceType,
             value1.Target,
@@ -105,10 +108,10 @@ static void generate_macro_swap(
             value2.ReferenceType,
             value2.Target,
             value2.Path,
-            self.Location,
+            location,
             tmp_name);
 
-    commands.Append("data remove storage {} {}", self.Location, tmp_name);
+    commands.Append("data remove storage {} {}", location, tmp_name);
 }
 
 static void generate_macro_data(
@@ -191,12 +194,12 @@ static const std::map<std::string_view, Generator> generators = {
 mcc::InstructionPtr mcc::MacroInstruction::Create(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        const ResourceLocation &location,
+        Context &context,
+        const FunctionPtr &parent,
         const std::string &macro,
         const std::vector<ValuePtr> &arguments)
 {
-    auto self = std::make_shared<MacroInstruction>(where, name, context, location, macro, arguments);
+    auto self = std::make_shared<MacroInstruction>(where, name, context, parent, macro, arguments);
 
     self->Self = self;
     for (const auto &argument : self->Arguments)
@@ -208,8 +211,8 @@ mcc::InstructionPtr mcc::MacroInstruction::Create(
 mcc::MacroInstruction::MacroInstruction(
         const SourceLocation &where,
         const std::string &name,
-        TypeContext &context,
-        ResourceLocation location,
+        Context &context,
+        FunctionPtr parent,
         std::string macro,
         const std::vector<ValuePtr> &arguments)
     : Instruction(
@@ -217,7 +220,7 @@ mcc::MacroInstruction::MacroInstruction(
               name,
               context.GetVoid(),
               FieldType_::Value),
-      Location(std::move(location)),
+      Parent(std::move(parent)),
       Macro(std::move(macro)),
       Arguments(arguments)
 {

@@ -6,87 +6,46 @@
 
 #include <ranges>
 
-static bool check_function(
-        mcc::FunctionPtr function,
-        const mcc::ParameterList &parameters)
-{
-    if (parameters.size() != function->Parameters.size())
-        return false;
-
-    unsigned i;
-    for (i = 0; i < parameters.size(); ++i)
-    {
-        if (parameters[i].FieldType != function->Parameters[i].FieldType)
-            break;
-        if (parameters[i].Type != function->Parameters[i].Type)
-            break;
-    }
-    return i >= parameters.size();
-}
-
 mcc::FunctionPtr mcc::Builder::CreateFunction(
         const SourceLocation &where,
         ResourceLocation location,
         const ParameterList &parameters,
-        const TypePtr &result_type,
+        const TypePtr &result,
         const bool throws)
 {
     if (location.Namespace.empty())
         location.Namespace = m_Namespace;
 
-    auto &functions = m_Functions[location.Namespace][location.Path];
-    for (auto &function : functions)
-        if (check_function(function, parameters))
-            Error(where, "already defined function {} with parameters {}", location, parameters);
-
-    auto function = Function::Create(where, m_Context, location, parameters, result_type, throws);
-    functions.push_back(function);
-    return function;
+    return m_Module.CreateFunction(where, location, parameters, result, throws);
 }
 
-mcc::FunctionPtr mcc::Builder::FindFunction(
+mcc::FunctionPtr mcc::Builder::GetFunction(
         ResourceLocation location,
         const ParameterList &parameters) const
 {
     if (location.Namespace.empty())
         location.Namespace = m_Namespace;
 
-    if (!m_Functions.contains(location.Namespace))
-        return {};
-
-    if (!m_Functions.at(location.Namespace).contains(location.Path))
-        return {};
-
-    auto &functions = m_Functions.at(location.Namespace).at(location.Path);
-    for (auto &function : functions)
-        if (check_function(function, parameters))
-            return function;
-
-    return {};
+    return m_Module.GetFunction(location, parameters);
 }
 
-std::vector<mcc::FunctionPtr> mcc::Builder::FindCandidates(
-        ResourceLocation location,
+std::vector<mcc::FunctionPtr> mcc::Builder::FindFunctions(
+        const ResourceLocation &location,
         const ParameterRefList &parameters) const
 {
-    if (!m_Functions.contains(location.Namespace))
-        return {};
-
-    if (!m_Functions.at(location.Namespace).contains(location.Path))
-        return {};
-
     std::vector<FunctionPtr> collection;
-
-    auto &functions = m_Functions.at(location.Namespace).at(location.Path);
-    for (auto &function : functions)
+    for (auto &function : m_Module)
     {
+        if (function->Location != location)
+            continue;
+
         if (parameters.size() != function->Parameters.size())
             continue;
 
         unsigned i;
         for (i = 0; i < parameters.size(); ++i)
         {
-            if (!SameOrSpecial(parameters[i].Type, function->Parameters[i].Type))
+            if (!SameOrSpecialization(parameters[i].Type, function->Parameters[i].Type))
                 break;
             if (parameters[i].FieldType < function->Parameters[i].FieldType)
                 break;
@@ -96,49 +55,79 @@ std::vector<mcc::FunctionPtr> mcc::Builder::FindCandidates(
 
         collection.push_back(function);
     }
-
     return collection;
 }
 
-std::vector<mcc::FunctionPtr> mcc::Builder::FindCandidates(
-        const std::string &name,
-        const ParameterRefList &parameters) const
+std::vector<mcc::FunctionPtr> mcc::Builder::FindFunctions(
+        const std::vector<std::string> &path,
+        const ParameterRefList &parameters,
+        const bool use_namespace) const
+{
+    if (use_namespace)
+        return FindFunctions({ m_Namespace, { path } }, parameters);
+
+    std::vector<FunctionPtr> collection;
+    for (auto &function : m_Module)
+    {
+        if (function->Location.Path != path)
+            continue;
+
+        if (parameters.size() != function->Parameters.size())
+            continue;
+
+        unsigned i;
+        for (i = 0; i < parameters.size(); ++i)
+        {
+            if (!SameOrSpecialization(parameters[i].Type, function->Parameters[i].Type))
+                break;
+            if (parameters[i].FieldType < function->Parameters[i].FieldType)
+                break;
+        }
+        if (i < parameters.size())
+            continue;
+
+        collection.push_back(function);
+    }
+    return collection;
+}
+
+std::vector<mcc::FunctionPtr> mcc::Builder::FindFunctions(const ResourceLocation &location) const
 {
     std::vector<FunctionPtr> collection;
-    for (auto &namespace_ : m_Functions | std::views::values)
-        for (auto &[path_, functions_] : namespace_)
-        {
-            if (name != path_.back())
-                continue;
+    for (auto &function : m_Module)
+    {
+        if (function->Location != location)
+            continue;
 
-            for (auto &function : functions_)
-            {
-                if (parameters.size() != function->Parameters.size())
-                    continue;
+        collection.push_back(function);
+    }
+    return collection;
+}
 
-                unsigned i;
-                for (i = 0; i < parameters.size(); ++i)
-                {
-                    if (!SameOrSpecial(parameters[i].Type, function->Parameters[i].Type))
-                        break;
-                    if (parameters[i].FieldType < function->Parameters[i].FieldType)
-                        break;
-                }
-                if (i < parameters.size())
-                    continue;
+std::vector<mcc::FunctionPtr> mcc::Builder::FindFunctions(
+        const std::vector<std::string> &path,
+        const bool use_namespace) const
+{
+    if (use_namespace)
+        return FindFunctions({ m_Namespace, { path } });
 
-                collection.push_back(function);
-            }
-        }
+    std::vector<FunctionPtr> collection;
+    for (auto &function : m_Module)
+    {
+        if (function->Location.Path != path)
+            continue;
+
+        collection.push_back(function);
+    }
     return collection;
 }
 
 mcc::FunctionPtr mcc::Builder::FindUnambiguousCandidate(
         const SourceLocation &where,
         const std::vector<FunctionPtr> &candidates,
-        const ParameterRefList &parameters) const
+        const ParameterRefList &parameters)
 {
-    Assert(!candidates.empty(), "candidates must not be empty");
+    Assert(!candidates.empty(), where, "candidates must not be empty");
 
     std::vector<FunctionPtr> functions;
     auto error = ~0u;
@@ -147,8 +136,7 @@ mcc::FunctionPtr mcc::Builder::FindUnambiguousCandidate(
     {
         auto candidate_error = 0u;
 
-        unsigned i;
-        for (i = 0; i < parameters.size(); ++i)
+        for (unsigned i = 0; i < parameters.size(); ++i)
         {
             if (parameters[i].Type != candidate->Parameters[i].Type)
                 candidate_error += 5u;
