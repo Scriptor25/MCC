@@ -53,9 +53,9 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     std::ofstream stream(package);
     Assert(stream.is_open(), "failed to open file {}", package.string());
 
-    json::Node node = json::Object{
+    json::Node node = json::Node::Map{
         {
-         "pack", json::Object{
+         "pack", json::Node::Map{
                 { "description", Info.Description },
                 { "pack_format", Info.Version },
             }, },
@@ -87,38 +87,38 @@ void mcc::PackageInfo::Serialize(const std::filesystem::path &path) const
     stream << std::setw(2) << json::Node(*this);
 }
 
-void json::serializer<mcc::ResourceLocation>::to_json(
-        Node &node,
+void data::serializer<mcc::ResourceLocation>::to_data(
+        json::Node &node,
         const mcc::ResourceLocation &value)
 {
     node = value.String();
 }
 
-void json::serializer<mcc::Tag>::to_json(
-        Node &node,
+void data::serializer<mcc::Tag>::to_data(
+        json::Node &node,
         const mcc::Tag &value)
 {
-    node = Object{
+    node = json::Node::Map{
         {       "id", value.Location },
         { "required", value.Required },
     };
 }
 
-void json::serializer<mcc::TagInfo>::to_json(
-        Node &node,
+void data::serializer<mcc::TagInfo>::to_data(
+        json::Node &node,
         const mcc::TagInfo &value)
 {
-    node = Object{
+    node = json::Node::Map{
         { "replace", value.Replace },
         {  "values",  value.Values },
     };
 }
 
-bool json::serializer<mcc::PackageInfo>::from_json(
-        const Node &node,
+bool data::serializer<mcc::PackageInfo>::from_data(
+        const json::Node &node,
         mcc::PackageInfo &value)
 {
-    if (!node.Is<Object>())
+    if (!node.Is<json::Node::Map>())
         return false;
 
     auto ok = true;
@@ -130,11 +130,11 @@ bool json::serializer<mcc::PackageInfo>::from_json(
     return ok;
 }
 
-void json::serializer<mcc::PackageInfo>::to_json(
-        Node &node,
+void data::serializer<mcc::PackageInfo>::to_data(
+        json::Node &node,
         const mcc::PackageInfo &value)
 {
-    node = Object{
+    node = json::Node::Map{
         {        "name",        value.Name },
         { "description", value.Description },
         {     "version",     value.Version },
