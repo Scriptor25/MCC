@@ -28,7 +28,7 @@ namespace mcc
         void Serialize(const std::filesystem::path &path) const;
 
         std::string Name;
-        json::Node Description;
+        json::node Description;
         unsigned long Version;
     };
 
@@ -48,7 +48,7 @@ template<>
 struct data::serializer<mcc::ResourceLocation>
 {
     static void to_data(
-            json::Node &node,
+            json::node &node,
             const mcc::ResourceLocation &value);
 };
 
@@ -56,7 +56,7 @@ template<>
 struct data::serializer<mcc::Tag>
 {
     static void to_data(
-            json::Node &node,
+            json::node &node,
             const mcc::Tag &value);
 };
 
@@ -64,7 +64,7 @@ template<>
 struct data::serializer<mcc::TagInfo>
 {
     static void to_data(
-            json::Node &node,
+            json::node &node,
             const mcc::TagInfo &value);
 };
 
@@ -72,9 +72,9 @@ template<>
 struct data::serializer<mcc::PackageInfo>
 {
     static bool from_data(
-            const json::Node &node,
+            const json::node &node,
             mcc::PackageInfo &value);
     static void to_data(
-            json::Node &node,
+            json::node &node,
             const mcc::PackageInfo &value);
 };

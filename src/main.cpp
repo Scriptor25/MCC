@@ -97,7 +97,7 @@ int main(
 
         mcc::PackageInfo info{
             .Name        = std::move(name),
-            .Description = json::Node(std::move(description)),
+            .Description = std::move(description),
             .Version     = std::stoul(version),
         };
 

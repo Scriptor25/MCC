@@ -44,7 +44,7 @@ void mcc::Package::Write(const std::filesystem::path &path) const
             std::ofstream stream(file);
             Assert(stream.is_open(), "failed to open file {}", file.string());
 
-            stream << std::setw(2) << json::Node(tag_);
+            stream << std::setw(2) << json::node(tag_);
 
             stream.close();
         }
@@ -53,9 +53,9 @@ void mcc::Package::Write(const std::filesystem::path &path) const
     std::ofstream stream(package);
     Assert(stream.is_open(), "failed to open file {}", package.string());
 
-    json::Node node = json::Node::Map{
+    json::node node = json::object{
         {
-         "pack", json::Node::Map{
+         "pack", json::object{
                 { "description", Info.Description },
                 { "pack_format", Info.Version },
             }, },
@@ -70,7 +70,7 @@ mcc::PackageInfo mcc::PackageInfo::Deserialize(const std::filesystem::path &path
     std::ifstream stream(path);
     Assert(stream.is_open(), "failed to open file {}", path.string());
 
-    json::Node node;
+    json::node node;
     stream >> node;
 
     if (PackageInfo value; node >> value)
@@ -84,41 +84,41 @@ void mcc::PackageInfo::Serialize(const std::filesystem::path &path) const
     std::ofstream stream(path);
     Assert(stream.is_open(), "failed to open file {}", path.string());
 
-    stream << std::setw(2) << json::Node(*this);
+    stream << std::setw(2) << json::node(*this);
 }
 
 void data::serializer<mcc::ResourceLocation>::to_data(
-        json::Node &node,
+        json::node &node,
         const mcc::ResourceLocation &value)
 {
     node = value.String();
 }
 
 void data::serializer<mcc::Tag>::to_data(
-        json::Node &node,
+        json::node &node,
         const mcc::Tag &value)
 {
-    node = json::Node::Map{
+    node = json::object{
         {       "id", value.Location },
         { "required", value.Required },
     };
 }
 
 void data::serializer<mcc::TagInfo>::to_data(
-        json::Node &node,
+        json::node &node,
         const mcc::TagInfo &value)
 {
-    node = json::Node::Map{
+    node = json::object{
         { "replace", value.Replace },
         {  "values",  value.Values },
     };
 }
 
 bool data::serializer<mcc::PackageInfo>::from_data(
-        const json::Node &node,
+        const json::node &node,
         mcc::PackageInfo &value)
 {
-    if (!node.Is<json::Node::Map>())
+    if (!node.is<json::object>())
         return false;
 
     auto ok = true;
@@ -131,10 +131,10 @@ bool data::serializer<mcc::PackageInfo>::from_data(
 }
 
 void data::serializer<mcc::PackageInfo>::to_data(
-        json::Node &node,
+        json::node &node,
         const mcc::PackageInfo &value)
 {
-    node = json::Node::Map{
+    node = json::object{
         {        "name",        value.Name },
         { "description", value.Description },
         {     "version",     value.Version },
