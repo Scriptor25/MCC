@@ -11,3 +11,5 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(mcc ${SOURCES})
 target_include_directories(mcc PRIVATE "include")
 target_link_libraries(mcc PRIVATE toolkit::json)
+
+install(TARGETS mcc)

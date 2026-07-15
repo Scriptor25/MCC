@@ -119,9 +119,11 @@ int main(
         auto info = mcc::PackageInfo::Deserialize(pkg);
         mcc::Package package(info);
 
-        mcc::Assert(std::filesystem::exists("src"), "source directory does not exist");
+        auto src = std::filesystem::path(pkg).parent_path() / "src";
 
-        parse_directory(package, "src");
+        mcc::Assert(std::filesystem::exists(src), "source directory does not exist");
+
+        parse_directory(package, src);
 
         package.Write(target);
 
@@ -130,9 +132,27 @@ int main(
 
     case 3: // package
     {
-        // TODO: read 'info.json'
-        // TODO: compile files in 'src'
-        // TODO: write output to 'target'
+        std::string pkg    = "info.json";
+        std::string target = "target";
+
+        (void) actions.String(0, pkg);
+        (void) actions.String(1, target);
+
+        auto info = mcc::PackageInfo::Deserialize(pkg);
+        mcc::Package package(info);
+
+        auto src = std::filesystem::path(pkg).parent_path() / "src";
+
+        mcc::Assert(std::filesystem::exists(src), "source directory does not exist");
+
+        parse_directory(package, src);
+
+        package.Write(target);
+
+        std::string destination = info.Name;
+
+        (void) actions.String(2, destination);
+
         // TODO: compress 'target' into 'package.zip'
 
         break;
