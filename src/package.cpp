@@ -87,16 +87,22 @@ void mcc::PackageInfo::Serialize(const std::filesystem::path &path) const
     stream << std::setw(2) << json::node(*this);
 }
 
-void data::serializer<mcc::ResourceLocation>::to_data(
-        json::node &node,
-        const mcc::ResourceLocation &value)
+void data::serializer<
+        json::node,
+        mcc::ResourceLocation
+>::
+        to_data(json::node &node,
+                const mcc::ResourceLocation &value)
 {
     node = value.String();
 }
 
-void data::serializer<mcc::Tag>::to_data(
-        json::node &node,
-        const mcc::Tag &value)
+void data::serializer<
+        json::node,
+        mcc::Tag
+>::
+        to_data(json::node &node,
+                const mcc::Tag &value)
 {
     node = json::object{
         {       "id", value.Location },
@@ -104,9 +110,12 @@ void data::serializer<mcc::Tag>::to_data(
     };
 }
 
-void data::serializer<mcc::TagInfo>::to_data(
-        json::node &node,
-        const mcc::TagInfo &value)
+void data::serializer<
+        json::node,
+        mcc::TagInfo
+>::
+        to_data(json::node &node,
+                const mcc::TagInfo &value)
 {
     node = json::object{
         { "replace", value.Replace },
@@ -114,9 +123,13 @@ void data::serializer<mcc::TagInfo>::to_data(
     };
 }
 
-bool data::serializer<mcc::PackageInfo>::from_data(
-        const json::node &node,
-        mcc::PackageInfo &value)
+bool data::serializer<
+        json::node,
+        mcc::PackageInfo
+>::
+        from_data(
+                const json::node &node,
+                mcc::PackageInfo &value)
 {
     if (!node.is<json::object>())
         return false;
@@ -130,9 +143,12 @@ bool data::serializer<mcc::PackageInfo>::from_data(
     return ok;
 }
 
-void data::serializer<mcc::PackageInfo>::to_data(
-        json::node &node,
-        const mcc::PackageInfo &value)
+void data::serializer<
+        json::node,
+        mcc::PackageInfo
+>::
+        to_data(json::node &node,
+                const mcc::PackageInfo &value)
 {
     node = json::object{
         {        "name",        value.Name },

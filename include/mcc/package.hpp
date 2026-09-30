@@ -45,7 +45,7 @@ namespace mcc
 }
 
 template<>
-struct data::serializer<mcc::ResourceLocation>
+struct data::serializer<json::node, mcc::ResourceLocation>
 {
     static void to_data(
             json::node &node,
@@ -53,7 +53,7 @@ struct data::serializer<mcc::ResourceLocation>
 };
 
 template<>
-struct data::serializer<mcc::Tag>
+struct data::serializer<json::node, mcc::Tag>
 {
     static void to_data(
             json::node &node,
@@ -61,7 +61,7 @@ struct data::serializer<mcc::Tag>
 };
 
 template<>
-struct data::serializer<mcc::TagInfo>
+struct data::serializer<json::node, mcc::TagInfo>
 {
     static void to_data(
             json::node &node,
@@ -69,7 +69,7 @@ struct data::serializer<mcc::TagInfo>
 };
 
 template<>
-struct data::serializer<mcc::PackageInfo>
+struct data::serializer<json::node, mcc::PackageInfo>
 {
     static bool from_data(
             const json::node &node,
